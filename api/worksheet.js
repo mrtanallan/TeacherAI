@@ -11,27 +11,25 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
 
-  // GET /api/worksheet?id=xxx — fetch worksheet for student
   if (req.method === 'GET') {
     const { id } = req.query;
-    if (!id) { res.status(400).json({ error: 'Missing worksheet id' }); return; }
+    if (!id) { res.status(400).json({ error: 'Missing id' }); return; }
     const { data, error } = await supabase
       .from('worksheets')
-      .select('id, topic, grades, subject, content')
+      .select('id, topic, grades, subject, content, roster')
       .eq('id', id)
       .single();
-    if (error || !data) { res.status(404).json({ error: 'Worksheet not found' }); return; }
+    if (error || !data) { res.status(404).json({ error: 'Not found' }); return; }
     res.status(200).json(data);
     return;
   }
 
-  // POST /api/worksheet — save submission
   if (req.method === 'POST') {
-    const { worksheet_id, student_name, responses } = req.body;
+    const { worksheet_id, student_name, student_id, responses } = req.body;
     if (!worksheet_id) { res.status(400).json({ error: 'Missing worksheet_id' }); return; }
     const { error } = await supabase
       .from('worksheet_submissions')
-      .insert({ worksheet_id, student_name, responses });
+      .insert({ worksheet_id, student_name, student_id: student_id || null, responses });
     if (error) { res.status(500).json({ error: error.message }); return; }
     res.status(200).json({ success: true });
     return;
