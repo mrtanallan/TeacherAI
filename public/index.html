@@ -1228,14 +1228,14 @@ async function renderLessonsList(){
   if(!data||!data.length){c.innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Daily Workflow.</div>';return;}
   savedLessons = data;
   c.innerHTML=data.map((l,i)=>`
-    <div class="lesson-card" id="lc-${l.id}">
+    <div class="lesson-card" id="lc-${l.id}" style="cursor:default;">
       <div style="flex:1;min-width:0;cursor:pointer;" onclick="loadLesson(${i})">
         <div class="lesson-title">${l.topic}</div>
         <div class="lesson-meta">${(l.grades||[]).join(' / ')} · ${l.subject} · ${new Date(l.created_at).toLocaleDateString('en-CA')}</div>
       </div>
-      <div class="brow" style="flex-shrink:0;">
+      <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;z-index:1;position:relative;">
         <button class="btn b-out b-sm" onclick="loadLesson(${i})">View →</button>
-        <button class="btn b-out b-sm" style="color:var(--rust);border-color:var(--rust);" onclick="confirmDeleteLesson(${JSON.stringify(l.id)},${JSON.stringify(l.topic)})">🗑</button>
+        <button class="btn b-out b-sm" style="color:var(--rust);border-color:var(--rust);" onclick="confirmDeleteLesson(${JSON.stringify(l.id)},${JSON.stringify(l.topic)})">🗑 Delete</button>
       </div>
     </div>`).join('');
 }
