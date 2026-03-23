@@ -590,8 +590,8 @@ async function initApp() {
   // Listen for auth changes
   db.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_IN'&&session){
-      // Guard: if app is already visible (e.g. user tabbed back from PDF), do nothing
-      if(document.getElementById('appScreen').style.display==='block') return;
+      // Guard: if already logged in (e.g. user tabbed back from PDF), do nothing
+      if(currentUser && currentUser.id === session.user.id) return;
       currentUser=session.user;
       showLoading('Loading your data...');
       try { await loadUserData(); } catch(e){ console.error(e); }
