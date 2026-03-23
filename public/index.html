@@ -562,18 +562,28 @@ async function signOut() {
 // INIT — check session on load
 // ============================================================
 async function initApp() {
-  // Show auth screen immediately — don't wait
   document.getElementById('authScreen').style.display='flex';
+  document.getElementById('appScreen').style.display='none';
 
-  // Check session in background
+  let appLoaded = false;
+
+  async function loadAndShow(user) {
+    if (appLoaded) return;
+    appLoaded = true;
+    currentUser = user;
+    showLoading('Loading your data...');
+    try { await loadUserData(); } catch(e){ console.error(e); }
+    hideLoading();
+    showApp();
+  }
+
+  // Check existing session
   try {
     const {data:{session}}=await db.auth.getSession();
     if(session) {
-      currentUser=session.user;
-      showLoading('Loading your data...');
-      try { await loadUserData(); } catch(e){ console.error(e); }
-      hideLoading();
-      showApp();
+      await loadAndShow(session.user);
+    } else {
+      hideLoading(); // ensure overlay is hidden if no session
     }
   } catch(e) {
     hideLoading();
@@ -583,15 +593,11 @@ async function initApp() {
   // Listen for auth changes
   db.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_IN'&&session){
-      // Guard: if already logged in (e.g. user tabbed back from PDF), do nothing
-      if(currentUser && currentUser.id === session.user.id) return;
-      currentUser=session.user;
-      showLoading('Loading your data...');
-      try { await loadUserData(); } catch(e){ console.error(e); }
-      hideLoading();
-      showApp();
+      await loadAndShow(session.user);
     } else if(event==='SIGNED_OUT'){
-      students=[]; sessions=[];
+      appLoaded = false;
+      currentUser=null; students=[]; sessions=[];
+      hideLoading();
       document.getElementById('appScreen').style.display='none';
       document.getElementById('authScreen').style.display='flex';
     }
