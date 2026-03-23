@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worksheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #F8F4EE; color: #16120E; font-size: 15px; }
+.pg { max-width: 720px; margin: 0 auto; background: white; min-height: 100vh; padding: 32px 40px; }
+.hd { border-bottom: 3px solid #4A7C59; padding-bottom: 14px; margin-bottom: 22px; }
+.ti { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; }
+.me { font-size: .78rem; color: #7A726A; margin-top: 3px; }
+.nr { display: flex; gap: 18px; margin-bottom: 24px; flex-wrap: wrap; }
+.nf { flex: 1; min-width: 160px; }
+.nl { font-size: .68rem; text-transform: uppercase; letter-spacing: 1px; color: #7A726A; display: block; margin-bottom: 3px; }
+.ni { width: 100%; border: none; border-bottom: 2px solid #4A7C59; background: transparent; font-size: .92rem; padding: 4px 2px; outline: none; font-family: 'DM Sans', sans-serif; }
+.ni:focus { border-bottom-color: #C47B2A; }
+h2 { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; margin: 18px 0 7px; padding: 7px 13px; background: #EAF0EA; border-left: 3px solid #4A7C59; border-radius: 0 6px 6px 0; }
+h3 { font-size: .78rem; font-weight: 600; color: #4A7C59; text-transform: uppercase; letter-spacing: .5px; margin: 12px 0 5px; }
+p { margin: 4px 0; line-height: 1.7; }
+li { margin-bottom: 3px; line-height: 1.6; }
+ul { padding-left: 18px; margin: 5px 0; }
+.wsi { width: 100%; border: none; border-bottom: 2px solid #4A7C59; background: transparent; font-family: 'DM Sans', sans-serif; font-size: .92rem; padding: 5px 2px; outline: none; color: #16120E; display: block; margin: 3px 0 10px; }
+.wsi:focus { border-bottom-color: #C47B2A; background: #FDF4E3; border-radius: 3px 3px 0 0; padding: 5px 8px; }
+.wst { width: 100%; border: 2px solid #4A7C59; border-radius: 8px; background: #EAF0EA; font-family: 'DM Sans', sans-serif; font-size: .92rem; padding: 10px 12px; outline: none; color: #16120E; resize: vertical; min-height: 100px; margin: 5px 0 10px; display: block; }
+.wst:focus { border-color: #C47B2A; background: #FDF4E3; }
+.wsc { display: flex; flex-wrap: wrap; gap: 8px; margin: 7px 0 12px; }
+.wscho { display: flex; align-items: center; gap: 6px; padding: 7px 15px; border: 1.5px solid #E0D8CC; border-radius: 20px; cursor: pointer; font-size: .86rem; background: #F8F4EE; transition: all 0.15s; }
+.wscho:has(input:checked) { border-color: #4A7C59; background: #EAF0EA; }
+.wswb { background: #E8EFF9; border: 1px solid #B0C8E8; border-radius: 8px; padding: 12px 16px; margin: 10px 0; }
+.wswbt { font-size: .6rem; letter-spacing: 1px; text-transform: uppercase; color: #2A5FA5; margin-bottom: 8px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
+.wswbw { display: flex; flex-wrap: wrap; gap: 7px; }
+.wswbwd { background: white; border: 1px solid #2A5FA5; border-radius: 4px; padding: 2px 10px; font-size: .82rem; }
+.wsd { background: #FDF4E3; border: 1px dashed #C47B2A; border-radius: 8px; padding: 14px; margin: 10px 0; font-style: italic; text-align: center; color: #7A5020; }
+.submit-section { margin-top: 32px; padding-top: 20px; border-top: 1px solid #E0D8CC; }
+.submit-btn { width: 100%; padding: 14px; background: #4A7C59; color: white; border: none; border-radius: 8px; font-family: 'Fraunces', serif; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.submit-btn:hover { background: #3D6649; }
+.submit-btn:disabled { background: #9CA3AF; cursor: not-allowed; }
+.success-screen { display: none; text-align: center; padding: 60px 20px; }
+.success-icon { font-size: 3rem; margin-bottom: 16px; }
+.success-title { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 600; margin-bottom: 8px; }
+.success-sub { color: #7A726A; font-size: .9rem; }
+.error-screen { display: none; text-align: center; padding: 60px 20px; }
+.loading-screen { text-align: center; padding: 80px 20px; }
+.dots { display: inline-flex; gap: 5px; }
+.dots span { width: 8px; height: 8px; background: #4A7C59; border-radius: 50%; animation: dp 1.2s infinite; }
+.dots span:nth-child(2) { animation-delay: .2s; }
+.dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes dp { 0%,80%,100%{opacity:.2;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
+@media(max-width:600px) { .pg { padding: 20px 16px; } .nr { gap: 12px; } }
+@media print { body { background: white; } .pg { padding: 20px; } .submit-section { display: none; } }
+</style>
+</head>
+<body>
+<div class="pg">
+
+  <!-- Loading -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div style="margin-top:14px;color:#7A726A;font-size:.9rem;">Loading your worksheet...</div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-screen" id="errorScreen">
+    <div style="font-size:2.5rem;margin-bottom:14px;">🔍</div>
+    <div style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;margin-bottom:8px;">Worksheet Not Found</div>
+    <div style="color:#7A726A;font-size:.88rem;">This link may have expired or is incorrect. Ask your teacher for a new link.</div>
+  </div>
+
+  <!-- Worksheet -->
+  <div id="worksheetScreen" style="display:none;">
+    <div class="hd">
+      <div class="ti" id="wsTitle">Worksheet</div>
+      <div class="me" id="wsMeta"></div>
+    </div>
+    <div class="nr">
+      <div class="nf"><label class="nl">Your Name</label><input class="ni" type="text" id="studentName" placeholder="Type your name..."></div>
+      <div class="nf"><label class="nl">Date</label><input class="ni" type="text" id="wsDate"></div>
+    </div>
+    <div id="wsContent"></div>
+    <div class="submit-section">
+      <button class="submit-btn" id="submitBtn" onclick="submitWorksheet()">✅ Submit Worksheet</button>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Worksheet Submitted!</div>
+    <div class="success-sub">Your teacher will review your work. Great job completing it!</div>
+  </div>
+
+</div>
+
+<script>
+let worksheetId = null;
+let wsN = 0;
+
+// Get worksheet ID from URL
+function getWsId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('id');
+}
+
+// Load worksheet on page load
+async function loadWorksheet() {
+  worksheetId = getWsId();
+  if (!worksheetId) { showError(); return; }
+
+  try {
+    const res = await fetch(`/api/worksheet?id=${worksheetId}`);
+    if (!res.ok) { showError(); return; }
+    const data = await res.json();
+    if (!data || !data.content) { showError(); return; }
+
+    // Populate worksheet
+    document.getElementById('wsTitle').textContent = '📝 ' + data.topic;
+    document.getElementById('wsMeta').textContent = (data.grades || []).join(' / ') + (data.subject ? ' · ' + data.subject : '');
+    document.getElementById('wsDate').value = new Date().toLocaleDateString('en-CA');
+    document.getElementById('wsContent').innerHTML = renderWS(data.content);
+
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('worksheetScreen').style.display = 'block';
+  } catch(e) {
+    showError();
+  }
+}
+
+function showError() {
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('errorScreen').style.display = 'block';
+}
+
+// Collect all answers from the worksheet
+function collectResponses() {
+  const responses = {};
+  // Text inputs
+  document.querySelectorAll('.wsi[data-q]').forEach(el => {
+    responses[el.dataset.q] = el.value;
+  });
+  // Textareas
+  document.querySelectorAll('.wst[data-q]').forEach(el => {
+    responses[el.dataset.q] = el.value;
+  });
+  // Radio buttons
+  document.querySelectorAll('input[type="radio"]:checked').forEach(el => {
+    responses[el.name] = el.value;
+  });
+  // Checkboxes
+  document.querySelectorAll('input[type="checkbox"][data-q]').forEach(el => {
+    if (!responses[el.dataset.q]) responses[el.dataset.q] = [];
+    if (el.checked) responses[el.dataset.q].push(el.value);
+  });
+  return responses;
+}
+
+async function submitWorksheet() {
+  const studentName = document.getElementById('studentName').value.trim();
+  if (!studentName) { alert('Please enter your name before submitting.'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '⏳ Submitting...';
+
+  const responses = collectResponses();
+
+  try {
+    const res = await fetch('/api/worksheet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ worksheet_id: worksheetId, student_name: studentName, responses })
+    });
+    if (!res.ok) throw new Error('Submit failed');
+    document.getElementById('worksheetScreen').style.display = 'none';
+    document.getElementById('successScreen').style.display = 'block';
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '✅ Submit Worksheet';
+    alert('Error submitting. Please try again.');
+  }
+}
+
+// Worksheet renderer
+function renderWS(text) {
+  if (!text) return ''; wsN = 0;
+  let h = '';
+  let qCount = 0;
+  text.split('\n').forEach(line => {
+    if (line.startsWith('## ')) { h += `<h2>${line.slice(3)}</h2>`; return; }
+    if (line.startsWith('### ')) { h += `<h3>${line.slice(4)}</h3>`; return; }
+    if (line.includes('[TEXT BOX]')) {
+      const l = line.replace('[TEXT BOX]', '').replace(/^[-*\d.]+\s*/, '').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').trim();
+      qCount++;
+      h += `${l ? `<div style="font-size:.9rem;margin-bottom:3px;">${l}</div>` : ''}<input class="wsi" type="text" data-q="q${qCount}" placeholder="Write your answer here...">`;
+      return;
+    }
+    if (line.includes('[LARGE BOX]')) {
+      const l = line.replace('[LARGE BOX]', '').replace(/^[-*\d.]+\s*/, '').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').trim();
+      qCount++;
+      h += `${l ? `<div style="font-size:.9rem;margin-bottom:3px;">${l}</div>` : ''}<textarea class="wst" data-q="q${qCount}" placeholder="Write your answer here..."></textarea>`;
+      return;
+    }
+    if (line.includes('[CIRCLE ONE:')) {
+      const m = line.match(/\[CIRCLE ONE: (.+?)\]/);
+      const pre = line.split('[CIRCLE ONE:')[0].replace(/^[-*\d.]+\s*/, '').trim();
+      if (m) {
+        qCount++; const nm = 'q' + qCount;
+        h += `${pre ? `<div style="font-size:.9rem;margin-bottom:6px;">${pre}</div>` : ''}
+          <div class="wsc">${m[1].split('/').map(o => `<label class="wscho"><input type="radio" name="${nm}" value="${o.trim()}"> ${o.trim()}</label>`).join('')}</div>`;
+        return;
+      }
+    }
+    if (line.includes('[CHECK ALL THAT APPLY:')) {
+      const m = line.match(/\[CHECK ALL THAT APPLY: (.+?)\]/);
+      const pre = line.split('[CHECK ALL THAT APPLY:')[0].replace(/^[-*\d.]+\s*/, '').trim();
+      if (m) {
+        qCount++;
+        h += `${pre ? `<div style="font-size:.9rem;margin-bottom:6px;">${pre}</div>` : ''}
+          <div class="wsc">${m[1].split('/').map((o, oi) => `<label class="wscho"><input type="checkbox" data-q="q${qCount}" value="${o.trim()}"> ${o.trim()}</label>`).join('')}</div>`;
+        return;
+      }
+    }
+    if (line.includes('[WORD BANK:')) {
+      const m = line.match(/\[WORD BANK: (.+?)\]/);
+      if (m) {
+        h += `<div class="wswb"><div class="wswbt">📚 Word Bank</div><div class="wswbw">${m[1].split(',').map(w => `<span class="wswbwd">${w.trim()}</span>`).join('')}</div></div>`;
+        return;
+      }
+    }
+    if (line.includes('[DIAGRAM:')) {
+      const m = line.match(/\[DIAGRAM: (.+?)\]/);
+      if (m) { h += `<div class="wsd">📊 ${m[1]}</div>`; return; }
+    }
+    if (line.match(/^\d+\.\s/)) {
+      const cont = line.replace(/^\d+\.\s*/, '');
+      const num = line.match(/^(\d+)/)[1];
+      if (cont.includes('[LARGE BOX]')) {
+        qCount++;
+        h += `<div style="margin:9px 0;"><div style="font-size:.9rem;margin-bottom:3px;"><strong>${num}.</strong> ${cont.replace('[LARGE BOX]', '').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').trim()}</div><textarea class="wst" data-q="q${qCount}" placeholder="Write your answer here..."></textarea></div>`;
+        return;
+      }
+      if (cont.includes('[TEXT BOX]')) {
+        qCount++;
+        h += `<div style="margin:7px 0;display:flex;align-items:flex-start;gap:7px;"><span style="font-weight:600;flex-shrink:0;">${num}.</span><div style="flex:1;"><div style="font-size:.9rem;margin-bottom:3px;">${cont.replace('[TEXT BOX]', '').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').trim()}</div><input class="wsi" type="text" data-q="q${qCount}" placeholder="Your answer..."></div></div>`;
+        return;
+      }
+      h += `<div style="margin:5px 0;"><strong>${num}.</strong> ${cont.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</div>`;
+      return;
+    }
+    if (line.match(/^[-*] /)) { h += `<li style="margin-bottom:3px;">${line.slice(2).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</li>`; return; }
+    if (line.trim() === '') { h += '<div style="height:5px;"></div>'; return; }
+    h += `<p>${line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>`;
+  });
+  return h;
+}
+
+// Init
+loadWorksheet();
+</script>
+</body>
+</html>
