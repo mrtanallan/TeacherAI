@@ -282,6 +282,19 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   </div>
 </nav>
 
+<!-- Delete lesson modal -->
+<div class="mbg" id="deleteLessonModal">
+  <div class="modal">
+    <h3>🗑 Delete Lesson?</h3>
+    <p>You're about to delete <strong id="deleteLessonTopic"></strong>. This can't be undone.</p>
+    <div class="ban ban-s" style="margin-bottom:16px;font-size:.78rem;"><span>✅</span><span>Your <strong>assessment data and student marks</strong> for this topic will not be affected — they're stored separately.</span></div>
+    <div class="brow">
+      <button class="btn b-full" style="background:var(--rust);color:white;" onclick="doDeleteLesson()">🗑 Yes, Delete Lesson</button>
+      <button class="btn b-out" onclick="document.getElementById('deleteLessonModal').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- Share modal -->
 <div class="mbg" id="shareModal">
   <div class="modal">
@@ -576,6 +589,8 @@ async function initApp() {
   // Listen for auth changes
   db.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_IN'&&session){
+      // Guard: if app is already visible (e.g. user tabbed back from PDF), do nothing
+      if(document.getElementById('appScreen').style.display==='block') return;
       currentUser=session.user;
       showLoading('Loading your data...');
       try { await loadUserData(); } catch(e){ console.error(e); }
@@ -1013,16 +1028,16 @@ async function getStudentLink(k) {
 
     if (error) throw error;
 
-    // Generate the student link
-    const link = `${window.location.origin}/ws?id=${data.id}`;
+    // Fix URL — /worksheet.html is the correct Vercel route
+    const link = `${window.location.origin}/worksheet.html?id=${data.id}`;
 
-    // Replace the button with the link directly — no clipboard permission needed
+    // Insert link div immediately after the block header (cbh), not at the bottom
     const block = document.getElementById('cb-' + k);
     let linkDiv = document.getElementById('studentLinkDiv');
     if (linkDiv) linkDiv.remove();
     const div = document.createElement('div');
     div.id = 'studentLinkDiv';
-    div.style.cssText = 'padding:14px 16px;background:#EAF0EA;border-top:1px solid #A8C4AB;';
+    div.style.cssText = 'padding:13px 16px;background:#EAF0EA;border-bottom:1px solid #A8C4AB;';
     div.innerHTML = `
       <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:#4A7C59;margin-bottom:8px;">🔗 Student Link — paste into Google Classroom</div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
@@ -1045,9 +1060,11 @@ async function getStudentLink(k) {
         ">📋 Copy</button>
       </div>
       <div style="font-size:.75rem;color:#2D5C38;line-height:1.5;">Paste this into Google Classroom as an assignment link. Students click it, fill in their answers, and submit. You'll see their responses in the Assessment tab.</div>`;
-    block.appendChild(div);
+    // Insert right after the header row, not at the bottom
+    const cbh = block.querySelector('.cbh');
+    cbh.insertAdjacentElement('afterend', div);
 
-    // Hide the Get Student Link button — replace with "Regenerate Link"
+    // Update button to show success state
     btn.textContent = '✅ Link Ready';
     btn.style.background = '#4A7C59';
     btn.style.color = 'white';
@@ -1211,13 +1228,32 @@ async function renderLessonsList(){
   if(!data||!data.length){c.innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Daily Workflow.</div>';return;}
   savedLessons = data;
   c.innerHTML=data.map((l,i)=>`
-    <div class="lesson-card" onclick="loadLesson(${i})">
-      <div>
+    <div class="lesson-card" id="lc-${l.id}" onclick="loadLesson(${i})">
+      <div style="flex:1;min-width:0;">
         <div class="lesson-title">${l.topic}</div>
         <div class="lesson-meta">${(l.grades||[]).join(' / ')} · ${l.subject} · ${new Date(l.created_at).toLocaleDateString('en-CA')}</div>
       </div>
-      <button class="btn b-out b-sm" onclick="event.stopPropagation();loadLesson(${i})">View →</button>
+      <div class="brow" style="flex-shrink:0;">
+        <button class="btn b-out b-sm" onclick="event.stopPropagation();loadLesson(${i})">View →</button>
+        <button class="btn b-out b-sm" style="color:var(--rust);border-color:var(--rust);" onclick="event.stopPropagation();confirmDeleteLesson(${JSON.stringify(l.id)},${JSON.stringify(l.topic)})">🗑</button>
+      </div>
     </div>`).join('');
+}
+
+function confirmDeleteLesson(id, topic) {
+  document.getElementById('deleteLessonTopic').textContent = topic;
+  document.getElementById('deleteLessonModal').classList.add('open');
+  window._pendingDeleteId = id;
+}
+
+async function doDeleteLesson() {
+  const id = window._pendingDeleteId;
+  if (!id) return;
+  document.getElementById('deleteLessonModal').classList.remove('open');
+  const { error } = await db.from('lessons').delete().eq('id', id);
+  if (error) { alert('Error deleting lesson: ' + error.message); return; }
+  window._pendingDeleteId = null;
+  renderLessonsList();
 }
 
 function loadLesson(idx){
