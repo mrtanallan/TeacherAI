@@ -1087,50 +1087,44 @@ function exportCSV(){
 // ============================================================
 // LESSONS LIST
 // ============================================================
+let savedLessons = [];
+
 async function renderLessonsList(){
   const {data}=await db.from('lessons').select('*').order('created_at',{ascending:false}).limit(20);
   const c=document.getElementById('lessonsList');
-  if(!data||!data.length){c.innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet.</div>';return;}
-  c.innerHTML=data.map(l=>`
-    <div class="lesson-card" onclick="loadLesson(${JSON.stringify(l)})">
+  if(!data||!data.length){c.innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Daily Workflow.</div>';return;}
+  savedLessons = data;
+  c.innerHTML=data.map((l,i)=>`
+    <div class="lesson-card" onclick="loadLesson(${i})">
       <div>
         <div class="lesson-title">${l.topic}</div>
         <div class="lesson-meta">${(l.grades||[]).join(' / ')} · ${l.subject} · ${new Date(l.created_at).toLocaleDateString('en-CA')}</div>
       </div>
-      <button class="btn b-out b-sm">View →</button>
+      <button class="btn b-out b-sm" onclick="event.stopPropagation();loadLesson(${i})">View →</button>
     </div>`).join('');
 }
 
-function loadLesson(l){
+function loadLesson(idx){
+  const l = savedLessons[idx];
+  if(!l){alert('Lesson not found.');return;}
   if(!l.content||!Object.keys(l.content).length){
     alert('No content found for this lesson.');return;
   }
-  // Load saved lesson back into the workflow
   genC={};
   const keys=Object.keys(l.content);
   keys.forEach(k=>{genC[k]={orig:l.content[k],cur:l.content[k]};});
-
-  // Set up a fake current session
   curSess={id:null,date:new Date().toLocaleDateString('en-CA'),subject:l.subject,strand:'General',grades:l.grades||[],task:l.topic,marks:{}};
-
-  // Switch to plan tab first
   document.getElementById('tr-plan').checked=true;
-
-  // Show all steps, build content
   setTimeout(()=>{
-    // Reset all steps
     for(let i=1;i<=5;i++) document.getElementById('s'+i).style.display='none';
     unlock();
     buildEditBlocks(keys,(l.grades||[]).join(' / '),l.subject,l.topic);
     buildShareCards(keys);
-    // Show step 2
     document.getElementById('s2').style.display='block';
     for(let i=1;i<=5;i++) document.getElementById('ws'+i).classList.remove('on');
     document.getElementById('ws2').classList.add('on');
-    // Update topic field
     const tf=document.getElementById('topic');
     if(tf) tf.value=l.topic||'';
-    // Scroll to top
     window.scrollTo(0,0);
   },150);
 }
