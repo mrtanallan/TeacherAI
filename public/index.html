@@ -1105,10 +1105,11 @@ async function renderLessonsList(){
 }
 
 function loadLesson(idx){
+  console.log('loadLesson called with idx:', idx, 'savedLessons length:', savedLessons.length);
   const l = savedLessons[idx];
-  if(!l){alert('Lesson not found.');return;}
+  if(!l){alert('Lesson not found. savedLessons has '+savedLessons.length+' items.');return;}
   if(!l.content||!Object.keys(l.content).length){
-    alert('No content found for this lesson.');return;
+    alert('Lesson found but no content. Keys: '+JSON.stringify(Object.keys(l)));return;
   }
   genC={};
   const keys=Object.keys(l.content);
