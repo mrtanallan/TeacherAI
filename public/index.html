@@ -282,32 +282,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   </div>
 </nav>
 
-<!-- Delete lesson modal -->
-<div class="mbg" id="deleteLessonModal">
-  <div class="modal">
-    <h3>🗑 Delete Lesson?</h3>
-    <p>You're about to delete <strong id="deleteLessonTopic"></strong>. This can't be undone.</p>
-    <div class="ban ban-s" style="margin-bottom:16px;font-size:.78rem;"><span>✅</span><span>Your <strong>assessment data and student marks</strong> for this topic will not be affected — they're stored separately.</span></div>
-    <div class="brow">
-      <button class="btn b-full" style="background:var(--rust);color:white;" onclick="doDeleteLesson()">🗑 Yes, Delete Lesson</button>
-      <button class="btn b-out" onclick="document.getElementById('deleteLessonModal').classList.remove('open')">Cancel</button>
-    </div>
-  </div>
-</div>
 
-<!-- Share modal -->
-<div class="mbg" id="shareModal">
-  <div class="modal">
-    <h3>📤 Share to Google Classroom</h3>
-    <p>Opens Google Classroom pre-filled — you review and post from there.</p>
-    <div class="fi" style="margin-bottom:10px;"><label>Post title</label><input type="text" id="shareTitle"></div>
-    <div class="fi" style="margin-bottom:16px;"><label>Instructions for students</label><textarea id="shareInst" style="min-height:60px;">Please complete the activities below. Do your best work!</textarea></div>
-    <div class="brow">
-      <button class="btn b-blue b-full" onclick="doShare()">🎓 Open in Google Classroom</button>
-      <button class="btn b-out" onclick="closeModal()">Cancel</button>
-    </div>
-  </div>
-</div>
 
 <!-- ===== DAILY WORKFLOW ===== -->
 <div class="page" id="pg-plan">
@@ -491,6 +466,32 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 </div>
 
 </div><!-- end appScreen -->
+
+<!-- Modals — outside appScreen so they're never hidden by parent display:none -->
+<div class="mbg" id="deleteLessonModal">
+  <div class="modal">
+    <h3>🗑 Delete Lesson?</h3>
+    <p>You're about to delete <strong id="deleteLessonTopic"></strong>. This can't be undone.</p>
+    <div class="ban ban-s" style="margin-bottom:16px;font-size:.78rem;"><span>✅</span><span>Your <strong>assessment data and student marks</strong> for this topic will not be affected — they're stored separately.</span></div>
+    <div class="brow">
+      <button class="btn b-full" style="background:var(--rust);color:white;" onclick="doDeleteLesson()">🗑 Yes, Delete Lesson</button>
+      <button class="btn b-out" onclick="document.getElementById('deleteLessonModal').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="shareModal">
+  <div class="modal">
+    <h3>📤 Share to Google Classroom</h3>
+    <p>Opens Google Classroom pre-filled — you review and post from there.</p>
+    <div class="fi" style="margin-bottom:10px;"><label>Post title</label><input type="text" id="shareTitle"></div>
+    <div class="fi" style="margin-bottom:16px;"><label>Instructions for students</label><textarea id="shareInst" style="min-height:60px;">Please complete the activities below. Do your best work!</textarea></div>
+    <div class="brow">
+      <button class="btn b-blue b-full" onclick="doShare()">🎓 Open in Google Classroom</button>
+      <button class="btn b-out" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ============================================================
