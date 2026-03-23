@@ -791,15 +791,37 @@ function buildShareCards(outputs){
   const c=document.getElementById('shareCards');
   const sh=outputs.filter(k=>SHAREABLE.includes(k));
   if(!sh.length){c.innerHTML='<div style="color:var(--muted);font-style:italic;">No shareable content selected.</div>';return;}
-  c.innerHTML=sh.map(k=>`<div class="card" style="margin-bottom:10px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;">
-      <div><div style="font-weight:600;margin-bottom:2px;">${BLABELS[k]}</div><div style="font-size:.8rem;color:var(--muted);">Share to Google Classroom</div></div>
-      <div class="brow">
-        <button class="btn b-out b-sm" onclick="gs(2)">✏️ Edit first</button>
-        <button class="btn b-sage b-sm" onclick="getStudentLink('student_worksheet')">🔗 Get Student Link</button>
+  const hasReading=outputs.includes('reading_resource');
+  c.innerHTML=sh.map(k=>{
+    const isWS=k==='student_worksheet';
+    const isRubric=k==='assessment_rubric';
+    const isReading=k==='reading_resource';
+    let desc='';
+    let btns='';
+    if(isWS){
+      desc='Share directly to students via link';
+      btns=`<button class="btn b-out b-sm" onclick="gs(2)">✏️ Edit first</button>
+            <button class="btn b-sage b-sm" onclick="getStudentLink('student_worksheet')">🔗 Get Student Link</button>`;
+    } else if(isReading){
+      desc='Teacher resource — download as PDF${hasReading&&outputs.includes("student_worksheet")?" or attach to worksheet":""}';
+      btns=`<button class="btn b-out b-sm" onclick="gs(2)">✏️ Edit first</button>
+            <button class="btn b-out b-sm" onclick="downloadPDF('reading_resource')">📄 Download PDF</button>`;
+    } else if(isRubric){
+      desc='Teacher resource — download as PDF for your records';
+      btns=`<button class="btn b-out b-sm" onclick="gs(2)">✏️ Edit first</button>
+            <button class="btn b-out b-sm" onclick="downloadPDF('assessment_rubric')">📄 Download PDF</button>`;
+    }
+    return`<div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;">
+        <div><div style="font-weight:600;margin-bottom:2px;">${BLABELS[k]}</div><div style="font-size:.8rem;color:var(--muted);">${desc}</div></div>
+        <div class="brow">${btns}</div>
       </div>
-    </div>
-  </div>`).join('');
+    </div>`;
+  }).join('');
+  // If both worksheet and reading resource exist, add a tip
+  if(outputs.includes('student_worksheet')&&outputs.includes('reading_resource')){
+    c.innerHTML+=`<div class="ban ban-b" style="margin-top:4px;font-size:.78rem;"><span>💡</span><span>Tip: The <strong>Reading Resource</strong> pairs with the Student Worksheet. Print or PDF it and hand it out alongside the student link — or paste it into Google Classroom as an attachment.</span></div>`;
+  }
 }
 
 function openShare(k){shareKey=k;document.getElementById('shareTitle').value=BLABELS[k].replace(/^[^\s]+\s/,'');document.getElementById('shareModal').classList.add('open');}
@@ -822,7 +844,7 @@ function renderAssGrid(){
   const g=document.getElementById('assGrid');
   if(!students.length){g.innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;padding:14px;">Add students in Class Roster first.</div>';return;}
   g.innerHTML=students.map((s,i)=>`
-    <div class="ar" id="ar-${s.id}">
+    <div class="ar" id="ar-${s.id}" data-sid="${s.id}">
       <div class="art">
         <div class="an">
           <div class="av" style="background:${AVCOLORS[i%AVCOLORS.length]};width:26px;height:26px;font-size:.75rem;">${s.first[0]}${(s.last||' ')[0]}</div>
@@ -833,30 +855,41 @@ function renderAssGrid(){
       </div>
       <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap;">
         <div class="lbg">
-          <button class="lb L1" onclick="sl(${JSON.stringify(s.id)},'L1-',this)">1−</button>
-          <button class="lb L1" onclick="sl(${JSON.stringify(s.id)},'L1',this)">L1</button>
-          <button class="lb L1" onclick="sl(${JSON.stringify(s.id)},'L1+',this)">1+</button>
+          <button class="lb L1" data-sid="${s.id}" data-level="L1-">1−</button>
+          <button class="lb L1" data-sid="${s.id}" data-level="L1">L1</button>
+          <button class="lb L1" data-sid="${s.id}" data-level="L1+">1+</button>
         </div><div class="ld"></div>
         <div class="lbg">
-          <button class="lb L2" onclick="sl(${JSON.stringify(s.id)},'L2-',this)">2−</button>
-          <button class="lb L2" onclick="sl(${JSON.stringify(s.id)},'L2',this)">L2</button>
-          <button class="lb L2" onclick="sl(${JSON.stringify(s.id)},'L2+',this)">2+</button>
+          <button class="lb L2" data-sid="${s.id}" data-level="L2-">2−</button>
+          <button class="lb L2" data-sid="${s.id}" data-level="L2">L2</button>
+          <button class="lb L2" data-sid="${s.id}" data-level="L2+">2+</button>
         </div><div class="ld"></div>
         <div class="lbg">
-          <button class="lb L3" onclick="sl(${JSON.stringify(s.id)},'L3-',this)">3−</button>
-          <button class="lb L3" onclick="sl(${JSON.stringify(s.id)},'L3',this)">L3</button>
-          <button class="lb L3" onclick="sl(${JSON.stringify(s.id)},'L3+',this)">3+</button>
+          <button class="lb L3" data-sid="${s.id}" data-level="L3-">3−</button>
+          <button class="lb L3" data-sid="${s.id}" data-level="L3">L3</button>
+          <button class="lb L3" data-sid="${s.id}" data-level="L3+">3+</button>
         </div><div class="ld"></div>
         <div class="lbg">
-          <button class="lb L4" onclick="sl(${JSON.stringify(s.id)},'L4-',this)">4−</button>
-          <button class="lb L4" onclick="sl(${JSON.stringify(s.id)},'L4',this)">L4</button>
-          <button class="lb L4" onclick="sl(${JSON.stringify(s.id)},'L4+',this)">4+</button>
+          <button class="lb L4" data-sid="${s.id}" data-level="L4-">4−</button>
+          <button class="lb L4" data-sid="${s.id}" data-level="L4">L4</button>
+          <button class="lb L4" data-sid="${s.id}" data-level="L4+">4+</button>
         </div>
       </div>
       <div style="display:flex;gap:7px;margin-top:7px;">
-        <input class="ni" type="text" placeholder="Observation notes..." id="nt-${s.id}" oninput="sn(${JSON.stringify(s.id)})">
+        <input class="ni" type="text" placeholder="Observation notes..." id="nt-${s.id}" data-sid="${s.id}">
       </div>
     </div>`).join('');
+
+  // Attach level button listeners via JS — avoids quote-escaping issues with UUIDs in inline onclick
+  document.querySelectorAll('.lb[data-sid]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      sl(this.dataset.sid, this.dataset.level, this);
+    });
+  });
+  // Attach notes listeners
+  document.querySelectorAll('.ni[data-sid]').forEach(inp => {
+    inp.addEventListener('input', function() { sn(this.dataset.sid); });
+  });
 }
 
 function sl(sid,level,btn){
