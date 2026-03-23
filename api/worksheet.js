@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     if (!worksheet_id) { res.status(400).json({ error: 'Missing worksheet_id' }); return; }
     const { error } = await supabase
       .from('worksheet_submissions')
-      .insert({ worksheet_id, student_name, responses });
+      .insert({ worksheet_id, student_name, student_id: student_id || null, responses });
     if (error) {
       console.error('Supabase POST error:', JSON.stringify(error));
       res.status(500).json({ error: error.message, code: error.code });
