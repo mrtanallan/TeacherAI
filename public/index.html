@@ -546,27 +546,22 @@ async function signOut() {
 // INIT — check session on load
 // ============================================================
 async function initApp() {
-  // Safety timeout — never get permanently stuck loading
-  const loadTimeout = setTimeout(()=>{
-    hideLoading();
-    document.getElementById('authScreen').style.display='flex';
-  }, 5000);
+  // Show auth screen immediately — don't wait
+  document.getElementById('authScreen').style.display='flex';
 
+  // Check session in background
   try {
-    showLoading('Loading TeacherAI...');
     const {data:{session}}=await db.auth.getSession();
-    clearTimeout(loadTimeout);
     if(session) {
       currentUser=session.user;
-      await loadUserData();
-      showApp();
-    } else {
+      showLoading('Loading your data...');
+      try { await loadUserData(); } catch(e){ console.error(e); }
       hideLoading();
+      showApp();
     }
   } catch(e) {
-    clearTimeout(loadTimeout);
     hideLoading();
-    console.error('Init error:', e);
+    console.error('Session check failed:', e);
   }
 
   // Listen for auth changes
@@ -574,12 +569,11 @@ async function initApp() {
     if(event==='SIGNED_IN'&&session){
       currentUser=session.user;
       showLoading('Loading your data...');
-      try {
-        await loadUserData();
-      } catch(e) { console.error(e); }
+      try { await loadUserData(); } catch(e){ console.error(e); }
       hideLoading();
       showApp();
     } else if(event==='SIGNED_OUT'){
+      students=[]; sessions=[];
       document.getElementById('appScreen').style.display='none';
       document.getElementById('authScreen').style.display='flex';
     }
