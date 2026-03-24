@@ -56,7 +56,8 @@ nav {
 #tr-roster:checked ~ #appScreen nav .tab[for="tr-roster"],
 #tr-assess:checked ~ #appScreen nav .tab[for="tr-assess"],
 #tr-lessons:checked ~ #appScreen nav .tab[for="tr-lessons"],
-#tr-rc:checked ~ #appScreen nav .tab[for="tr-rc"] {
+#tr-rc:checked ~ #appScreen nav .tab[for="tr-rc"],
+#tr-exp:checked ~ #appScreen nav .tab[for="tr-exp"] {
   color: var(--cream); background: rgba(255,255,255,0.14);
 }
 .nav-user { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
@@ -71,6 +72,7 @@ nav {
 #tr-assess:checked ~ #appScreen #pg-assess { display: block; }
 #tr-lessons:checked ~ #appScreen #pg-lessons { display: block; }
 #tr-rc:checked ~ #appScreen #pg-rc { display: block; }
+#tr-exp:checked ~ #appScreen #pg-exp { display: block; }
 
 /* WORKFLOW */
 .wf { display: flex; align-items: center; background: var(--paper); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 16px; margin-bottom: 20px; overflow-x: auto; gap: 0; }
@@ -255,13 +257,13 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <div class="auth-msg" id="authMsg"></div>
     <div id="loginForm">
       <div class="fi" style="margin-bottom:12px;"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
-      <div class="fi" style="margin-bottom:20px;"><label>Password</label><input type="password" id="loginPass" placeholder="Your password"></div>
+      <div class="fi" style="margin-bottom:20px;"><label>Password</label><input type="password" id="loginPass" placeholder="Your password" onkeydown="if(event.key==='Enter')signIn()"></div>
       <button class="btn b-ink b-full" onclick="signIn()">Sign In →</button>
     </div>
     <div id="signupForm" style="display:none;">
       <div class="fi" style="margin-bottom:12px;"><label>Full Name</label><input type="text" id="signupName" placeholder="Your name"></div>
       <div class="fi" style="margin-bottom:12px;"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div>
-      <div class="fi" style="margin-bottom:20px;"><label>Password</label><input type="password" id="signupPass" placeholder="Min 6 characters"></div>
+      <div class="fi" style="margin-bottom:20px;"><label>Password</label><input type="password" id="signupPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')signUp()"></div>
       <button class="btn b-ink b-full" onclick="signUp()">Create Account →</button>
     </div>
     <div style="text-align:center;margin-top:16px;font-size:0.75rem;color:var(--muted);">🇨🇦 Data stored in Canada · No student data sent to AI · MFIPPA-conscious design<br><span style="margin-top:6px;display:block;"><a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> · <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a></span></div>
@@ -274,6 +276,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 <input type="radio" class="tab-r" name="tab" id="tr-assess">
 <input type="radio" class="tab-r" name="tab" id="tr-lessons">
 <input type="radio" class="tab-r" name="tab" id="tr-rc">
+<input type="radio" class="tab-r" name="tab" id="tr-exp">
 
 <div id="appScreen" style="display:none;">
 <textarea id="ctx" style="display:none;"></textarea>
@@ -285,6 +288,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <label class="tab" for="tr-assess"><span class="tab-full">📊 Assessment</span><span class="tab-short">📊 Assess</span></label>
     <label class="tab" for="tr-lessons"><span class="tab-full">📚 My Lessons</span><span class="tab-short">📚 Lessons</span></label>
     <label class="tab" for="tr-rc"><span class="tab-full">📝 Report Cards</span><span class="tab-short">📝 Reports</span></label>
+    <label class="tab" for="tr-exp"><span class="tab-full">🎯 Expectations</span><span class="tab-short">🎯 Exp.</span></label>
   </div>
   <div class="nav-user">
     <span class="nav-email" id="navEmail"></span>
@@ -396,6 +400,10 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         <label class="chip"><input type="checkbox" id="ck-rr" checked> 📄 Reading Resource</label>
         <label class="chip"><input type="checkbox" id="ck-rb" checked> 📏 Assessment Rubric</label>
         <label class="chip"><input type="checkbox" id="ck-dt"> ♿ Differentiation & Modified Expectations</label>
+      </div>
+      <div class="fi full" style="margin-bottom:13px;">
+        <label>🎯 Target Expectations <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+        <textarea id="targetExp" style="min-height:52px;" placeholder="Optional — type expectation codes or plain words, e.g. &quot;making inferences, C1.2, text features, writing paragraphs&quot;. Leave blank and AI will pick the most relevant ones."></textarea>
       </div>
       <button class="btn b-ink b-full" id="genBtn" onclick="generate()">✨ Generate Lesson</button>
       <div style="margin-top:13px;padding-top:11px;border-top:1px solid var(--border);font-size:.75rem;color:var(--muted);">🍁 Aligned to the <strong>Ontario Curriculum</strong> · Student names anonymized before AI processing · 🇨🇦 Data stored in Canada</div>
@@ -628,6 +636,12 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <div id="rcResults"></div>
 </div>
 
+<!-- ===== EXPECTATIONS TRACKER ===== -->
+<div class="page" id="pg-exp">
+  <div class="ph"><h1>Expectations <em>Tracker</em></h1><p>Ontario 2023 Language curriculum coverage across your lessons this term. Generated automatically when you create lessons.</p></div>
+  <div id="expTrackerContent"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">Generate lessons to start tracking expectations coverage.</div></div>
+</div>
+
 </div><!-- end appScreen -->
 
 <!-- Modals — outside appScreen so they're never hidden by parent display:none -->
@@ -664,6 +678,153 @@ const SUPABASE_URL = 'https://bbhhkyiyfybmlfkerfto.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJiaGhreWl5ZnlibWxma2VyZnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDgzODMsImV4cCI6MjA4OTc4NDM4M30.nLzOUCAa8XSD4BL0XIdPvwVNZy-5Rnp6NVLUTVjE-ZQ';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ============================================================
+// ONTARIO 2023 LANGUAGE EXPECTATIONS DATA
+// ============================================================
+const ONTARIO_EXPECTATIONS = [
+  {code:"A1.1",strand:"A",overall:"Transferable Skills",desc:"Identify and describe how transferable skills are used in various literacy contexts",band:"1-3"},
+  {code:"A1.1",strand:"A",overall:"Transferable Skills",desc:"Explain how transferable skills support communication and expression",band:"4-6"},
+  {code:"A1.1",strand:"A",overall:"Transferable Skills",desc:"Analyse how transferable skills enhance learning and communication in literacy contexts",band:"7-8"},
+  {code:"A1.2",strand:"A",overall:"Transferable Skills",desc:"Use transferable skills to support reading and communication tasks",band:"1-3"},
+  {code:"A1.2",strand:"A",overall:"Transferable Skills",desc:"Apply transferable skills independently in literacy tasks",band:"4-6"},
+  {code:"A1.2",strand:"A",overall:"Transferable Skills",desc:"Apply transferable skills with increasing independence and reflection",band:"7-8"},
+  {code:"A2.1",strand:"A",overall:"Digital Media Literacy",desc:"Demonstrate safe and responsible online behaviour",band:"1-3"},
+  {code:"A2.1",strand:"A",overall:"Digital Media Literacy",desc:"Explain rights and responsibilities when interacting online",band:"4-6"},
+  {code:"A2.1",strand:"A",overall:"Digital Media Literacy",desc:"Evaluate digital citizenship rights and responsibilities",band:"7-8"},
+  {code:"A2.2",strand:"A",overall:"Digital Media Literacy",desc:"Use digital tools to access and share information with guidance",band:"1-3"},
+  {code:"A2.2",strand:"A",overall:"Digital Media Literacy",desc:"Use digital tools to research, create, and share information",band:"4-6"},
+  {code:"A2.2",strand:"A",overall:"Digital Media Literacy",desc:"Critically evaluate and use digital tools for research and creation",band:"7-8"},
+  {code:"A2.3",strand:"A",overall:"Digital Media Literacy",desc:"Identify features of digital and media texts",band:"1-3"},
+  {code:"A2.3",strand:"A",overall:"Digital Media Literacy",desc:"Analyse how digital and media texts use features to influence audiences",band:"4-6"},
+  {code:"A2.3",strand:"A",overall:"Digital Media Literacy",desc:"Critically analyse purposes and perspectives in digital and media texts",band:"7-8"},
+  {code:"A3.1",strand:"A",overall:"Applications and Connections",desc:"Make connections between language learning and other subjects",band:"1-3"},
+  {code:"A3.1",strand:"A",overall:"Applications and Connections",desc:"Apply literacy skills across subject areas and real-world contexts",band:"4-6"},
+  {code:"A3.1",strand:"A",overall:"Applications and Connections",desc:"Analyse how literacy skills transfer across disciplines and contexts",band:"7-8"},
+  {code:"B1.1",strand:"B",overall:"Oral Communication",desc:"Use active listening strategies to understand oral messages",band:"1-3"},
+  {code:"B1.1",strand:"B",overall:"Oral Communication",desc:"Use a variety of active listening strategies to comprehend and respond",band:"4-6"},
+  {code:"B1.1",strand:"B",overall:"Oral Communication",desc:"Select and apply listening strategies to analyse and evaluate oral messages",band:"7-8"},
+  {code:"B1.2",strand:"B",overall:"Oral Communication",desc:"Identify and use listening strategies before, during, and after listening",band:"1-3"},
+  {code:"B1.2",strand:"B",overall:"Oral Communication",desc:"Identify and use a variety of listening strategies to comprehend oral information",band:"4-6"},
+  {code:"B1.2",strand:"B",overall:"Oral Communication",desc:"Select and use listening strategies to comprehend and critically respond",band:"7-8"},
+  {code:"B1.3",strand:"B",overall:"Oral Communication",desc:"Communicate ideas and information orally using simple structures",band:"1-3"},
+  {code:"B1.3",strand:"B",overall:"Oral Communication",desc:"Communicate ideas clearly and effectively in oral and non-verbal forms",band:"4-6"},
+  {code:"B1.3",strand:"B",overall:"Oral Communication",desc:"Communicate with clarity and confidence adapting language to context and audience",band:"7-8"},
+  {code:"B2.1",strand:"B",overall:"Foundational Reading Skills",desc:"Demonstrate phonological awareness and letter-sound knowledge",band:"1-3"},
+  {code:"B2.1",strand:"B",overall:"Foundational Reading Skills",desc:"Apply decoding strategies to read unfamiliar words accurately",band:"4-6"},
+  {code:"B2.2",strand:"B",overall:"Foundational Reading Skills",desc:"Apply decoding strategies to read words in context",band:"1-3"},
+  {code:"B2.2",strand:"B",overall:"Foundational Reading Skills",desc:"Apply word-solving strategies to read and understand complex words",band:"4-6"},
+  {code:"B2.3",strand:"B",overall:"Foundational Reading Skills",desc:"Read with increasing fluency and expression",band:"1-3"},
+  {code:"B2.3",strand:"B",overall:"Foundational Reading Skills",desc:"Read with fluency and expression to support comprehension",band:"4-6"},
+  {code:"B3.1",strand:"B",overall:"Language Conventions",desc:"Identify and use basic sentence structures and punctuation in writing",band:"1-3"},
+  {code:"B3.1",strand:"B",overall:"Language Conventions",desc:"Identify and use a variety of sentence structures and punctuation",band:"4-6"},
+  {code:"B3.1",strand:"B",overall:"Language Conventions",desc:"Analyse and apply complex sentence structures and punctuation conventions",band:"7-8"},
+  {code:"B3.2",strand:"B",overall:"Language Conventions",desc:"Identify and use basic grammar conventions in reading and writing",band:"1-3"},
+  {code:"B3.2",strand:"B",overall:"Language Conventions",desc:"Apply grammar conventions to strengthen clarity and style in writing",band:"4-6"},
+  {code:"B3.2",strand:"B",overall:"Language Conventions",desc:"Apply grammar conventions with sophistication to enhance writing style",band:"7-8"},
+  {code:"B3.3",strand:"B",overall:"Language Conventions",desc:"Identify and use basic spelling conventions and strategies",band:"1-3"},
+  {code:"B3.3",strand:"B",overall:"Language Conventions",desc:"Apply a range of spelling strategies and conventions",band:"4-6"},
+  {code:"B3.3",strand:"B",overall:"Language Conventions",desc:"Apply spelling strategies and edit writing for conventions",band:"7-8"},
+  {code:"C1.1",strand:"C",overall:"Knowledge About Texts",desc:"Identify and describe features and structures of familiar text forms",band:"1-3"},
+  {code:"C1.1",strand:"C",overall:"Knowledge About Texts",desc:"Identify and describe features, structures, and patterns of a variety of text forms",band:"4-6"},
+  {code:"C1.1",strand:"C",overall:"Knowledge About Texts",desc:"Analyse and evaluate features, structures, and patterns in a variety of text forms",band:"7-8"},
+  {code:"C1.2",strand:"C",overall:"Knowledge About Texts",desc:"Identify the purpose and audience of simple texts",band:"1-3"},
+  {code:"C1.2",strand:"C",overall:"Knowledge About Texts",desc:"Explain how text features and forms support the author's purpose",band:"4-6"},
+  {code:"C1.2",strand:"C",overall:"Knowledge About Texts",desc:"Analyse how authors use text features and forms to achieve purpose and effect",band:"7-8"},
+  {code:"C2.1",strand:"C",overall:"Reading Comprehension",desc:"Use comprehension strategies before, during, and after reading",band:"1-3"},
+  {code:"C2.1",strand:"C",overall:"Reading Comprehension",desc:"Use a variety of comprehension strategies to understand increasingly complex texts",band:"4-6"},
+  {code:"C2.1",strand:"C",overall:"Reading Comprehension",desc:"Select and apply comprehension strategies to interpret and analyse complex texts",band:"7-8"},
+  {code:"C2.2",strand:"C",overall:"Reading Comprehension",desc:"Identify the main idea and supporting details in simple texts",band:"1-3"},
+  {code:"C2.2",strand:"C",overall:"Reading Comprehension",desc:"Identify main idea, supporting details, and key information in a variety of texts",band:"4-6"},
+  {code:"C2.2",strand:"C",overall:"Reading Comprehension",desc:"Analyse main idea, supporting details, and implicit meaning across a variety of texts",band:"7-8"},
+  {code:"C2.3",strand:"C",overall:"Reading Comprehension",desc:"Make personal connections and simple inferences while reading",band:"1-3"},
+  {code:"C2.3",strand:"C",overall:"Reading Comprehension",desc:"Make inferences, connections, and interpretations while reading",band:"4-6"},
+  {code:"C2.3",strand:"C",overall:"Reading Comprehension",desc:"Make and justify complex inferences and interpretations using textual evidence",band:"7-8"},
+  {code:"C2.4",strand:"C",overall:"Reading Comprehension",desc:"Identify the sequence of events and cause-and-effect relationships in texts",band:"1-3"},
+  {code:"C2.4",strand:"C",overall:"Reading Comprehension",desc:"Analyse sequence, cause and effect, and relationships between ideas in texts",band:"4-6"},
+  {code:"C2.4",strand:"C",overall:"Reading Comprehension",desc:"Evaluate the logic, sequence, and relationships between ideas in complex texts",band:"7-8"},
+  {code:"C2.5",strand:"C",overall:"Reading Comprehension",desc:"Identify the vocabulary and language used by authors in texts",band:"1-3"},
+  {code:"C2.5",strand:"C",overall:"Reading Comprehension",desc:"Analyse vocabulary, figurative language, and author's craft in texts",band:"4-6"},
+  {code:"C2.5",strand:"C",overall:"Reading Comprehension",desc:"Critically analyse vocabulary choices, figurative language, and author's style",band:"7-8"},
+  {code:"C3.1",strand:"C",overall:"Critical Thinking",desc:"Identify the author's point of view in simple texts",band:"1-3"},
+  {code:"C3.1",strand:"C",overall:"Critical Thinking",desc:"Identify and explain the author's perspective and purpose in a variety of texts",band:"4-6"},
+  {code:"C3.1",strand:"C",overall:"Critical Thinking",desc:"Analyse and evaluate the author's perspective, purpose, and bias in complex texts",band:"7-8"},
+  {code:"C3.2",strand:"C",overall:"Critical Thinking",desc:"Identify information in texts and begin to question its accuracy",band:"1-3"},
+  {code:"C3.2",strand:"C",overall:"Critical Thinking",desc:"Evaluate the credibility and accuracy of information in texts",band:"4-6"},
+  {code:"C3.2",strand:"C",overall:"Critical Thinking",desc:"Critically evaluate the credibility, accuracy, and bias of information across texts",band:"7-8"},
+  {code:"C3.3",strand:"C",overall:"Critical Thinking",desc:"Share personal responses and reactions to texts read",band:"1-3"},
+  {code:"C3.3",strand:"C",overall:"Critical Thinking",desc:"Analyse how social and cultural contexts influence texts and responses",band:"4-6"},
+  {code:"C3.3",strand:"C",overall:"Critical Thinking",desc:"Evaluate how identity, culture, and power influence texts and reader response",band:"7-8"},
+  {code:"D1.1",strand:"D",overall:"Writing Process",desc:"Use the writing process (plan, draft, revise, edit, publish) with guidance",band:"1-3"},
+  {code:"D1.1",strand:"D",overall:"Writing Process",desc:"Apply the writing process independently to produce a variety of texts",band:"4-6"},
+  {code:"D1.1",strand:"D",overall:"Writing Process",desc:"Apply the writing process with increasing independence and sophistication",band:"7-8"},
+  {code:"D1.2",strand:"D",overall:"Writing Process",desc:"Generate and organise ideas for writing using simple strategies",band:"1-3"},
+  {code:"D1.2",strand:"D",overall:"Writing Process",desc:"Generate, select, and organise ideas for writing using a variety of strategies",band:"4-6"},
+  {code:"D1.2",strand:"D",overall:"Writing Process",desc:"Generate, analyse, and refine ideas using sophisticated planning strategies",band:"7-8"},
+  {code:"D1.3",strand:"D",overall:"Writing Process",desc:"Revise writing to improve clarity and add details with support",band:"1-3"},
+  {code:"D1.3",strand:"D",overall:"Writing Process",desc:"Revise and edit writing to improve content, organisation, style, and conventions",band:"4-6"},
+  {code:"D1.3",strand:"D",overall:"Writing Process",desc:"Revise and edit writing independently to strengthen voice, style, and precision",band:"7-8"},
+  {code:"D2.1",strand:"D",overall:"Writing Forms",desc:"Write a variety of simple text forms for different purposes and audiences",band:"1-3"},
+  {code:"D2.1",strand:"D",overall:"Writing Forms",desc:"Write a variety of text forms for different purposes and audiences",band:"4-6"},
+  {code:"D2.1",strand:"D",overall:"Writing Forms",desc:"Write sophisticated texts in a variety of forms for specific purposes and audiences",band:"7-8"},
+  {code:"D2.2",strand:"D",overall:"Writing Forms",desc:"Use basic text features and structures in writing",band:"1-3"},
+  {code:"D2.2",strand:"D",overall:"Writing Forms",desc:"Use appropriate text features, structures, and organisational patterns in writing",band:"4-6"},
+  {code:"D2.2",strand:"D",overall:"Writing Forms",desc:"Strategically apply text features, structures, and patterns to achieve effect",band:"7-8"},
+  {code:"D2.3",strand:"D",overall:"Writing Craft",desc:"Use descriptive words and simple sentences to develop ideas in writing",band:"1-3"},
+  {code:"D2.3",strand:"D",overall:"Writing Craft",desc:"Use descriptive language, voice, and variety in sentence structure",band:"4-6"},
+  {code:"D2.3",strand:"D",overall:"Writing Craft",desc:"Craft writing with precise language, distinctive voice, and varied style",band:"7-8"},
+  {code:"D2.4",strand:"D",overall:"Writing Craft",desc:"Use paragraphs to organise writing with support",band:"1-3"},
+  {code:"D2.4",strand:"D",overall:"Writing Craft",desc:"Organise writing into well-structured paragraphs with clear focus",band:"4-6"},
+  {code:"D2.4",strand:"D",overall:"Writing Craft",desc:"Construct cohesive multi-paragraph texts with sophisticated organisation",band:"7-8"},
+  {code:"D3.1",strand:"D",overall:"Publishing and Presenting",desc:"Share and present writing for a familiar audience with support",band:"1-3"},
+  {code:"D3.1",strand:"D",overall:"Publishing and Presenting",desc:"Publish and present writing in appropriate forms for intended audiences",band:"4-6"},
+  {code:"D3.1",strand:"D",overall:"Publishing and Presenting",desc:"Publish and present polished writing for a variety of audiences and purposes",band:"7-8"},
+];
+
+// Total: 96 expectations across Grades 1-8, Strands A-D
+
+// Fuzzy match teacher input to expectations
+// Handles codes (C1.2), partial codes (C1), or plain words (inferences, writing paragraphs)
+function matchExpectations(inputText, gradeBand) {
+  if (!inputText || !inputText.trim()) return [];
+  const terms = inputText.split(/[,;\n]+/).map(t => t.trim().toLowerCase()).filter(Boolean);
+  const results = [];
+
+  // Filter to grade band
+  const getBand = (grade) => {
+    const n = parseInt(grade);
+    if (n <= 3) return '1-3';
+    if (n <= 6) return '4-6';
+    return '7-8';
+  };
+  const bands = gradeBand ? [...new Set(gradeBand.map(g => getBand(g.replace('Grade ','').replace('Kindergarten','1'))))] : ['1-3','4-6','7-8'];
+
+  terms.forEach(term => {
+    // Try exact code match first (e.g. "C1.2" or "c1.2")
+    const codeMatch = ONTARIO_EXPECTATIONS.find(e =>
+      e.code.toLowerCase() === term && bands.includes(e.band)
+    );
+    if (codeMatch) { if (!results.find(r=>r.code===codeMatch.code)) results.push(codeMatch); return; }
+
+    // Try partial code match (e.g. "C1" matches all C1.x)
+    const partialCode = ONTARIO_EXPECTATIONS.filter(e =>
+      e.code.toLowerCase().startsWith(term + '.') && bands.includes(e.band)
+    );
+    if (partialCode.length) { partialCode.forEach(e => { if (!results.find(r=>r.code===e.code)) results.push(e); }); return; }
+
+    // Fuzzy text match against overall + desc
+    const textMatches = ONTARIO_EXPECTATIONS.filter(e => {
+      if (!bands.includes(e.band)) return false;
+      const haystack = (e.overall + ' ' + e.desc).toLowerCase();
+      // All words in term must appear somewhere in haystack
+      const words = term.split(/\s+/);
+      return words.every(w => w.length > 2 && haystack.includes(w));
+    });
+    textMatches.forEach(e => { if (!results.find(r=>r.code===e.code)) results.push(e); });
+  });
+
+  return results;
+}
 
 // ============================================================
 // STATE
@@ -811,6 +972,7 @@ function showApp() {
   renderR();
   renderTracker();
   renderLessonsList();
+  renderExpectationsTracker();
   loadSubmissions();
   updateWelcomeBanner();
 }
@@ -852,7 +1014,7 @@ async function loadUserData() {
   const stuQuery = db.from('students').select('*').order('created_at');
   if(activeClassId) stuQuery.eq('class_id', activeClassId);
   const {data:stuData} = await stuQuery;
-  if(stuData) students=stuData.map(s=>({id:s.id,first:s.first_name,last:s.last_name||'',grade:s.grade,notes:s.notes||'',iep:s.learning_profile||'',dbId:s.id,classId:s.class_id,createdAt:s.created_at}));
+  if(stuData) students=stuData.map(s=>({id:s.id,first:s.first_name,last:s.last_name||'',grade:s.grade,notes:s.notes||'',iep:s.learning_profile||'',dbId:s.id,classId:s.class_id,createdAt:s.created_at,prevClassName:s.previous_class_name||null}));
 
   // Load sessions — filtered by active class if one is set
   const sessQuery = db.from('assessment_sessions').select('*, student_marks(*)').order('created_at',{ascending:false});
@@ -955,8 +1117,14 @@ async function switchClass(classId) {
 
 async function deleteClass(classId) {
   const cls = classes.find(c => c.id === classId);
-  if (!confirm(`Delete class "${cls?.name}"? Students in this class will become unassigned. Assessment data will be removed.`)) return;
+  if (!confirm(`Delete class "${cls?.name}"? Students will become unassigned. Assessment data will be removed.`)) return;
   showLoading('Deleting class...');
+  const clsName = cls?.name || 'deleted class';
+  // Write previous_class_name to all students in this class before deleting
+  const affectedIds = students.filter(s => s.classId === classId).map(s => s.id);
+  if (affectedIds.length) {
+    await db.from('students').update({previous_class_name: clsName}).in('id', affectedIds);
+  }
   await db.from('classes').delete().eq('id', classId);
   classes = classes.filter(c => c.id !== classId);
   if (activeClassId === classId) activeClassId = classes.length > 0 ? classes[0].id : null;
@@ -1144,6 +1312,13 @@ async function generate() {
   const activeClass = classes.find(c=>c.id===activeClassId);
   const ctx = activeClass?.context?.trim() || document.getElementById('ctx')?.value?.trim() || '';
 
+  // Expectations — match teacher input or let AI decide
+  const targetExpInput = document.getElementById('targetExp')?.value?.trim() || '';
+  const preMatchedExp = targetExpInput ? matchExpectations(targetExpInput, grades) : [];
+  const expHint = preMatchedExp.length
+    ? 'TEACHER-REQUESTED EXPECTATIONS (must be covered):\n' + preMatchedExp.map(e=>`${e.code} — ${e.desc} [${e.overall}, Grades ${e.band}]`).join('\n')
+    : 'EXPECTATIONS: Identify the 2-4 most relevant Ontario 2023 Language expectations for this topic and grade.';
+
   const strands=[];
   if(document.getElementById('ck-r').checked)strands.push('Reading');
   if(document.getElementById('ck-w').checked)strands.push('Writing');
@@ -1210,16 +1385,18 @@ Context: ${ctx||'Standard Ontario classroom.'}
 ${splitNote}
 ${wsKeyNote}
 ${anonIEP}
-Align to Ontario Ministry of Education curriculum expectations.
-Return ONLY valid JSON with keys: ${outputKeys.map(k=>'"'+k+'"').join(', ')}.
-Each value is a markdown string:
+${expHint}
+Align to Ontario Ministry of Education 2023 curriculum expectations.
+Return ONLY valid JSON with keys: ${outputKeys.map(k=>'"'+k+'"').join(', ')}, "expectations".
+Each value is a markdown string except "expectations" which is a JSON array:
 - Use ## major sections, ### subsections, **bold**, - bullets
 - lesson_plan: timing (0:00-0:10), Minds On/Action/Consolidation, materials
 - student_worksheet${isSplit?'_[A/B/C/D] (one per grade)':''}: ${wsFormatNote}
 - reading_resource: original 200-300 word passage appropriate for the grade(s)
 - assessment_rubric: Ontario Achievement Chart. Use ## for each category (e.g. "## Knowledge & Understanding", "## Communication", "## Application"). Under each category use ### Level 1, ### Level 2, ### Level 3, ### Level 4 with one sentence describing achievement at that level. Keep descriptions specific to the task and grade-appropriate.${iepStudents.length?' Include a modified criteria category for IEP students.':''}
 - differentiation_tips: per-grade and per-student strategies
-For split classes: clearly separate by grade. IMPORTANT: Only include the exact keys: ${outputKeys.map(k=>'"'+k+'"').join(', ')}. No extra keys. No text outside the JSON.`;
+- expectations: array of objects, each with "code" (e.g. "C2.3"), "desc" (full description), "overall" (overall expectation name), "strand" (A/B/C/D). Return 2-5 most relevant expectations actually addressed in this lesson. ${preMatchedExp.length?'Use the teacher-requested expectations above as your primary set, add others if relevant.':'Pick based on topic and grade.'}
+For split classes: clearly separate by grade. IMPORTANT: Only include the exact keys listed. No text outside the JSON.`;
 
   try {
     const res=await authFetch('/api/generate',{method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2500,messages:[{role:'user',content:prompt}]})});
@@ -1233,7 +1410,12 @@ For split classes: clearly separate by grade. IMPORTANT: Only include the exact 
     catch(e2){parsed={};outputKeys.forEach(k=>{const m=raw.match(new RegExp('"'+k+'"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"','s'));if(m)parsed[k]=m[1].replace(/\\n/g,'\n').replace(/\\"/g,'"');else parsed[k]=raw;});}}
 
     genC={};outputKeys.forEach(k=>{genC[k]={orig:parsed[k]||'',cur:parsed[k]||''};});
-    buildEditBlocks(outputKeys,gradeDesc,subj,topic);
+
+    // Store expectations in genC for display
+    const lessonExpectations = parsed.expectations || preMatchedExp || [];
+    genC['_expectations'] = lessonExpectations;
+
+    buildEditBlocks(outputKeys,gradeDesc,subj,topic,lessonExpectations);
     buildShareCards(outputKeys);
     unlock(); gs(2);
 
@@ -1242,7 +1424,8 @@ For split classes: clearly separate by grade. IMPORTANT: Only include the exact 
       await db.from('lessons').insert({
         teacher_id:currentUser.id,
         topic,grades,subject:subj,
-        content:parsed
+        content:parsed,
+        expectations: lessonExpectations
       });
       renderLessonsList();
     }
@@ -1255,13 +1438,24 @@ For split classes: clearly separate by grade. IMPORTANT: Only include the exact 
 // ============================================================
 // EDIT BLOCKS
 // ============================================================
-function buildEditBlocks(outputs,gradeDesc,subj,topic){
+function buildEditBlocks(outputs,gradeDesc,subj,topic,expectations){
   const c=document.getElementById('editBlocks');
+  const expHtml = expectations && expectations.length ? `
+    <div style="background:var(--sage-l);border:1px solid #A8C4AB;border-radius:8px;padding:11px 14px;margin-bottom:14px;">
+      <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--sage);margin-bottom:8px;">🎯 Ontario 2023 Expectations Covered</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${expectations.map(e=>`
+          <div style="background:white;border:1px solid #A8C4AB;border-radius:6px;padding:5px 10px;">
+            <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:600;color:var(--sage);">${e.code}</span>
+            <span style="font-size:.75rem;color:#2A2520;margin-left:5px;">${e.desc}</span>
+          </div>`).join('')}
+      </div>
+    </div>` : '';
   c.innerHTML=`<div style="display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap;">
     <span style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;">Generated Lesson</span>
     <span style="background:var(--amber-l);border:1px solid #E8C98A;color:var(--amber);padding:2px 9px;border-radius:10px;font-family:'DM Mono',monospace;font-size:.62rem;">${gradeDesc}</span>
     <span style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);">${subj} · ${topic}</span>
-  </div>`;
+  </div>${expHtml}`;
   outputs.forEach(k=>{
     const isWS = k==='student_worksheet' || k.startsWith('student_worksheet_');
     const isRubric = k==='assessment_rubric';
@@ -2389,9 +2583,9 @@ async function removeStu(sid){
 
 async function assignStudentToClass(sid, classId) {
   const cid = classId || null;
-  await db.from('students').update({class_id: cid}).eq('id', sid);
+  await db.from('students').update({class_id: cid, previous_class_name: cid ? null : undefined}).eq('id', sid);
   const s = students.find(x => x.id === sid);
-  if (s) s.classId = cid;
+  if (s) { s.classId = cid; if (cid) s.prevClassName = null; }
   renderR();
 }
 
@@ -2424,6 +2618,7 @@ async function saveIEP(sid){
 function renderR(){
   document.getElementById('rCount').textContent=`(${students.length})`;
   const g=document.getElementById('rGrid');
+
   if(!students.length){
     // Count unassigned students across all classes
     const unassignedCount = activeClassId
@@ -2443,7 +2638,7 @@ function renderR(){
     const isUnassigned = hasClasses && !s.classId;
     const assignedClass = classes.find(c => c.id === s.classId);
     const classTag = isUnassigned
-      ? '<span style="font-family:\'DM Mono\',monospace;font-size:.52rem;background:#FEF9C3;color:#854D0E;padding:1px 5px;border-radius:3px;border:1px solid #E8C98A;">Unassigned</span>'
+      ? `<span style="font-family:'DM Mono',monospace;font-size:.52rem;background:#FEF9C3;color:#854D0E;padding:1px 5px;border-radius:3px;border:1px solid #E8C98A;" title="This student is not assigned to any class">${s.prevClassName ? 'Previously: '+s.prevClassName : 'Unassigned'}</span>`
       : (assignedClass && hasClasses ? `<span style="font-family:'DM Mono',monospace;font-size:.52rem;background:var(--sage-l);color:var(--sage);padding:1px 5px;border-radius:3px;border:1px solid #A8C4AB;">${assignedClass.name}</span>` : '');
     const assignSelect = hasClasses ? `
       <div style="margin-top:7px;">
@@ -2707,6 +2902,7 @@ async function renderLessonsList(){
   savedLessons = data;
   updateWelcomeBanner();
   sortLessons(currentSort, null);
+  renderExpectationsTracker();
 }
 
 function confirmDeleteLesson(id, topic) {
@@ -2770,14 +2966,15 @@ function loadLesson(idx){
     alert('No content found for this lesson.');return;
   }
   genC={};
-  const keys=Object.keys(l.content);
+  const keys=Object.keys(l.content).filter(k=>k!=='expectations');
   keys.forEach(k=>{genC[k]={orig:l.content[k],cur:l.content[k]};});
   curSess={id:null,date:new Date().toLocaleDateString('en-CA'),subject:l.subject,strand:'General',grades:l.grades||[],task:l.topic,marks:{}};
   document.getElementById('tr-plan').checked=true;
   setTimeout(()=>{
     for(let i=1;i<=5;i++) document.getElementById('s'+i).style.display='none';
     unlock();
-    buildEditBlocks(keys,(l.grades||[]).join(' / '),l.subject,l.topic);
+    genC['_expectations'] = l.expectations || [];
+    buildEditBlocks(keys,(l.grades||[]).join(' / '),l.subject,l.topic, l.expectations||[]);
     buildShareCards(keys);
     document.getElementById('s2').style.display='block';
     for(let i=1;i<=5;i++) document.getElementById('ws'+i).classList.remove('on');
@@ -3094,7 +3291,7 @@ async function generateOneComment(s, term, subj, charLimit, sessions, lvN, lvLab
   loadEl.innerHTML = '<div class="dots"><span></span><span></span><span></span></div> Generating...';
   commentEl.style.display = 'none';
 
-  // Build assessment summary for this student
+  // Build assessment summary for this student — include expectations from lessons
   const stuSessions = sessions.filter(sess => sess.marks[s.id]?.level);
   const avgNum = stuSessions.length
     ? stuSessions.reduce((acc, sess) => acc + (lvN[sess.marks[s.id].level] || 2), 0) / stuSessions.length
@@ -3103,8 +3300,24 @@ async function generateOneComment(s, term, subj, charLimit, sessions, lvN, lvLab
   const recentTasks = stuSessions.slice(0, 6).map(sess =>
     `${sess.task} (${sess.subject}): ${sess.marks[s.id].level}${sess.marks[s.id].notes ? ' — '+sess.marks[s.id].notes : ''}`
   ).join('\n');
+
+  // Gather all unique expectations from saved lessons matching this subject
+  const coveredExpectations = [];
+  if (savedLessons && savedLessons.length) {
+    savedLessons.filter(l => l.subject === subj || !subj).forEach(l => {
+      if (l.expectations && Array.isArray(l.expectations)) {
+        l.expectations.forEach(e => {
+          if (!coveredExpectations.find(x => x.code === e.code)) coveredExpectations.push(e);
+        });
+      }
+    });
+  }
+  const expSummary = coveredExpectations.length
+    ? 'Ontario 2023 expectations covered this term:\n' + coveredExpectations.map(e => `${e.code} — ${e.desc}`).join('\n')
+    : '';
+
   const termLabel = termLabels[term];
-  const charLimit2 = charLimit; // capture for closure
+  const charLimit2 = charLimit;
 
   const prompt = `You are an Ontario elementary teacher writing a report card comment for PowerSchool.
 
@@ -3113,12 +3326,14 @@ Subject: ${subj}
 Reporting period: ${termLabel}
 ${avgBase ? 'Overall achievement: ' + lvLabel[avgBase] + ' (avg ' + avgNum.toFixed(1) + '/4)' : 'No formal assessment data yet — write based on typical progress expectations.'}
 ${recentTasks ? 'Recent assessment tasks:\n' + recentTasks : ''}
+${expSummary ? expSummary : ''}
 ${s.notes ? 'Accommodations/notes: ' + s.notes : ''}
 ${s.iep ? 'Modified expectations: ' + s.iep : ''}
 
 Write a single report card comment for PowerSchool. Requirements:
 - EXACTLY under ${charLimit2} characters (count carefully — this is critical)
 - Ontario Growing Success language: specific strengths, evidence of learning, one next step
+- ${expSummary ? 'Reference 1-2 specific curriculum expectations by name (not code) in your comment.' : 'Reference curriculum expectations and achievement.'}
 - Third person, no name repetition after first use, no "always/never" language
 - Growth mindset framing — focus on progress and potential
 - Professional, warm, specific to this student
@@ -3192,6 +3407,77 @@ function updateCharCount(sid, charLimit) {
 // ============================================================
 // INIT
 // ============================================================
+// ============================================================
+// EXPECTATIONS TRACKER
+// ============================================================
+function renderExpectationsTracker() {
+  const el = document.getElementById('expTrackerContent');
+  if (!el) return;
+
+  // Collect all expectations from saved lessons
+  const allCovered = {}; // code → {exp, lessonCount, lessons:[]}
+  (savedLessons || []).forEach(l => {
+    if (!l.expectations || !Array.isArray(l.expectations)) return;
+    l.expectations.forEach(e => {
+      if (!allCovered[e.code]) allCovered[e.code] = {exp:e, count:0, lessons:[]};
+      allCovered[e.code].count++;
+      allCovered[e.code].lessons.push(l.topic);
+    });
+  });
+
+  if (!Object.keys(allCovered).length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No expectations tracked yet — generate lessons and they\'ll appear here automatically.</div>';
+    return;
+  }
+
+  // Stats
+  const total = Object.keys(allCovered).length;
+  const covered1 = Object.values(allCovered).filter(e => e.count >= 1).length;
+
+  // Group by strand
+  const strands = {A:'Literacy Connections',B:'Foundations of Language',C:'Comprehension',D:'Composition'};
+  const byStrand = {};
+  Object.values(allCovered).forEach(item => {
+    const s = item.exp.strand || item.exp.code[0];
+    if (!byStrand[s]) byStrand[s] = [];
+    byStrand[s].push(item);
+  });
+
+  const strandColors = {A:'var(--blue)',B:'var(--amber)',C:'var(--sage)',D:'var(--rust)'};
+  const strandBg = {A:'var(--blue-l)',B:'var(--amber-l)',C:'var(--sage-l)',D:'var(--rust-l)'};
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+      <div class="sc2"><div class="sn2" style="color:var(--sage);">${covered1}</div><div class="sl">Expectations covered</div></div>
+      <div class="sc2"><div class="sn2">${(savedLessons||[]).length}</div><div class="sl">Lessons generated</div></div>
+      <div class="sc2"><div class="sn2" style="color:var(--muted);">${Object.keys(strands).length}</div><div class="sl">Strands</div></div>
+    </div>
+    <div class="ban ban-b" style="margin-bottom:16px;font-size:.78rem;">
+      <span>💡</span><span>Coverage is tracked automatically when you generate lessons. The more lessons you generate, the more complete this picture becomes. All expectations feed directly into your report card comments.</span>
+    </div>
+    ${Object.entries(byStrand).sort(([a],[b])=>a.localeCompare(b)).map(([strand, items]) => `
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div style="background:${strandBg[strand]};border:1px solid;border-color:${strandColors[strand]};border-radius:6px;padding:3px 10px;font-family:'DM Mono',monospace;font-size:.62rem;font-weight:600;color:${strandColors[strand]};">Strand ${strand}</div>
+        <div style="font-weight:600;font-size:.9rem;">${strands[strand]||'Strand '+strand}</div>
+        <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);">${items.length} covered</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        ${items.sort((a,b)=>a.exp.code.localeCompare(b.exp.code)).map(item => `
+        <div style="display:grid;grid-template-columns:60px 1fr auto;gap:10px;align-items:center;padding:8px 10px;background:var(--cream);border-radius:7px;border:1px solid var(--border);">
+          <div style="font-family:'DM Mono',monospace;font-size:.7rem;font-weight:600;color:${strandColors[item.exp.strand||item.exp.code[0]]};">${item.exp.code}</div>
+          <div>
+            <div style="font-size:.82rem;color:var(--ink);">${item.exp.desc}</div>
+            <div style="font-size:.7rem;color:var(--muted);margin-top:1px;">${item.exp.overall} · ${item.lessons.slice(0,3).join(', ')}${item.lessons.length>3?'...':''}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="background:var(--sage-l);border:1px solid #A8C4AB;border-radius:5px;padding:2px 8px;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--sage);white-space:nowrap;">✓ Covered · ${item.count}×</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`).join('')}`;
+}
+
 initApp();
 </script>
 </body>
