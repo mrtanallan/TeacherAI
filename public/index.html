@@ -806,15 +806,18 @@ function matchExpectations(inputText, gradeBand) {
   const bands = gradeBand ? [...new Set(gradeBand.map(g => getBand(g.replace('Grade ','').replace('Kindergarten','1'))))] : ['1-3','4-6','7-8'];
 
   terms.forEach(term => {
+    // Strip grade prefix if present (e.g. "4.R1.2" → "R1.2", or map to 2023 format)
+    const stripped = term.replace(/^\d+\./, '');
+
     // Try exact code match first (e.g. "C1.2" or "c1.2")
     const codeMatch = ONTARIO_EXPECTATIONS.find(e =>
-      e.code.toLowerCase() === term && bands.includes(e.band)
+      (e.code.toLowerCase() === term || e.code.toLowerCase() === stripped) && bands.includes(e.band)
     );
     if (codeMatch) { if (!results.find(r=>r.code===codeMatch.code)) results.push(codeMatch); return; }
 
     // Try partial code match (e.g. "C1" matches all C1.x)
     const partialCode = ONTARIO_EXPECTATIONS.filter(e =>
-      e.code.toLowerCase().startsWith(term + '.') && bands.includes(e.band)
+      (e.code.toLowerCase().startsWith(term + '.') || e.code.toLowerCase().startsWith(stripped + '.')) && bands.includes(e.band)
     );
     if (partialCode.length) { partialCode.forEach(e => { if (!results.find(r=>r.code===e.code)) results.push(e); }); return; }
 
@@ -822,7 +825,6 @@ function matchExpectations(inputText, gradeBand) {
     const textMatches = ONTARIO_EXPECTATIONS.filter(e => {
       if (!bands.includes(e.band)) return false;
       const haystack = (e.overall + ' ' + e.desc).toLowerCase();
-      // All words in term must appear somewhere in haystack
       const words = term.split(/\s+/);
       return words.every(w => w.length > 2 && haystack.includes(w));
     });
@@ -1509,7 +1511,7 @@ ${isSplit ? wsOutputKeys.map((k,i)=>`- ${k}: worksheet for ${grades[i]} ONLY —
 - reading_resource: original 200-300 word passage appropriate for the grade(s)
 - assessment_rubric: Ontario Achievement Chart. Use ## for each category (e.g. "## Knowledge & Understanding", "## Communication", "## Application"). Under each category use ### Level 1, ### Level 2, ### Level 3, ### Level 4 with one sentence describing achievement at that level.${iepStudents.length?' Include a modified criteria category for IEP students.':''}
 - differentiation_tips: per-grade and per-student strategies
-- expectations: array of objects with "code", "desc", "overall", "strand". Return 2-5 most relevant expectations. ${preMatchedExp.length?'Use teacher-requested expectations as primary set.':'Pick based on topic and grade.'}
+- expectations: array of objects with "code", "desc", "overall", "strand". Use the Ontario 2023 Language curriculum strand format ONLY: Strand A (Literacy Connections), Strand B (Foundations), Strand C (Comprehension), Strand D (Composition). Codes must use the format like "C2.3", "D1.1", "B3.2" — NOT grade-prefixed formats like "4.R1.2". Return 2-5 most relevant expectations. ${preMatchedExp.length?'Use teacher-requested expectations as primary set.':'Pick based on topic and grade from these strands.'}
 CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksheet must be its own top-level key.`;
 
   try {
@@ -1728,9 +1730,9 @@ async function renderAssGrid(){
   g.innerHTML=students.map((s,i)=>{
     const sub = submissionsByStudent[s.id];
     // Check if student was added after this session's date
-    const sessionDate = curSess?.date ? new Date(curSess.date) : null;
-    const studentDate = s.createdAt ? new Date(s.createdAt) : null;
-    const joinedAfter = sessionDate && studentDate && studentDate > sessionDate;
+    const sessionDate = curSess?.date || null; // "2026-03-24" string
+    const studentDateStr = s.createdAt ? s.createdAt.slice(0, 10) : null; // "2026-03-24"
+    const joinedAfter = sessionDate && studentDateStr && studentDateStr > sessionDate;
     // Extract question labels from worksheet content for display alongside answers
     const wsKey = Object.keys(genC).find(k => k.startsWith('student_worksheet'));
     const wsQuestions = wsKey ? extractWSQuestions(genC[wsKey]?.cur || '') : {};
