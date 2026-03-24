@@ -644,7 +644,8 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   🇨🇦 Data stored in Canada &nbsp;·&nbsp;
   <a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
   <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a> &nbsp;·&nbsp;
-  <a href="mailto:teacheraicanada@gmail.com" style="color:var(--muted);text-decoration:underline;">Contact</a>
+  <a href="mailto:teacheraicanada@gmail.com" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
+  <span style="font-family:'DM Mono',monospace;font-size:.65rem;">v2.1 · Mar 24 2026</span>
 </div>
 
 </div><!-- end appScreen -->
@@ -1046,6 +1047,11 @@ async function loadUserData() {
       if(el && !el.value) el.value=profile.class_context;
     }
   } catch(e) { /* silent */ }
+
+  // Auto-fill grades from students now that students array is populated
+  if(activeClassId && students.length > 0) {
+    autoFillGradesFromClass();
+  }
 }
 
 // ============================================================
