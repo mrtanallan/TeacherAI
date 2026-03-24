@@ -1426,20 +1426,25 @@ async function getStudentLink(k) {
   const btn = event.target;
   btn.disabled = true; btn.textContent = '⏳ Saving...';
   try {
-    const content = genC[k]?.cur || '';
+    const wsContent = genC[k]?.cur || '';
+    const readingContent = genC['reading_resource']?.cur || '';
     const grades = curSess?.grades || [];
     const subject = curSess?.subject || '';
     const topic = curSess?.task || document.getElementById('topic').value || 'Worksheet';
 
-    // Save worksheet to Supabase — include roster names for fuzzy matching
+    // Store both worksheet and reading resource as JSON so student page can access both
+    const contentPayload = JSON.stringify({
+      worksheet: wsContent,
+      reading: readingContent
+    });
+
     const rosterNames = students.map(s => ({
-      id: s.id,
-      first: s.first,
-      last: s.last || ''
+      id: s.id, first: s.first, last: s.last || ''
     }));
     const { data, error } = await db.from('worksheets').insert({
       teacher_id: currentUser.id,
-      topic, grades, subject, content,
+      topic, grades, subject,
+      content: contentPayload,
       roster: rosterNames
     }).select().single();
 
