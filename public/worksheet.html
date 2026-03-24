@@ -183,6 +183,13 @@ function loadGradeWorksheet(grade){
   document.getElementById('wsMeta').textContent=grade+(data.subject?' · '+data.subject:'');
   document.getElementById('wsDate').value=new Date().toLocaleDateString('en-CA');
   document.getElementById('wsContent').innerHTML=renderWS(wsContent);
+  // Clear name and reset match when switching grades
+  document.getElementById('studentName').value='';
+  document.getElementById('studentName').classList.remove('matched');
+  document.getElementById('nameSuggestion').classList.remove('show');
+  matchedStudent=null;
+  // Filter roster to this grade only
+  roster = (data.roster||[]).filter(s => !s.grade || s.grade === grade);
   if(data.reading_resource && data.reading_resource.trim()){
     document.getElementById('readingPanel').style.display='block';
     document.getElementById('readingContent').innerHTML=renderPassage(data.reading_resource);
@@ -236,9 +243,26 @@ function checkName(){
     `${s.first} ${s.last||''}`.toLowerCase().trim()===typed.toLowerCase()
   );
   if(exact){matchedStudent=exact;document.getElementById('studentName').classList.add('matched');return;}
+  // Prefix match — "Ayaan" matches "Ayaan M"
+  const prefix=roster.find(s=>
+    s.first.toLowerCase().startsWith(typed.toLowerCase()) ||
+    typed.toLowerCase().startsWith(s.first.toLowerCase())
+  );
+  if(prefix){
+    const name=prefix.last?`${prefix.first} ${prefix.last}`:prefix.first;
+    if(name.toLowerCase()!==typed.toLowerCase()){
+      document.getElementById('suggestionText').textContent=`Did you mean "${name}"?`;
+      document.getElementById('nameSuggestion').classList.add('show');
+      window._pendingSuggestion=prefix;
+      return;
+    }
+    matchedStudent=prefix;
+    document.getElementById('studentName').classList.add('matched');
+    return;
+  }
   // Fuzzy match
   const best=findBestMatch(typed,roster);
-  if(best&&best.score>=0.6){
+  if(best&&best.score>=0.4){
     const name=best.student.last?`${best.student.first} ${best.student.last}`:best.student.first;
     document.getElementById('suggestionText').textContent=`Did you mean "${name}"?`;
     document.getElementById('nameSuggestion').classList.add('show');
