@@ -194,6 +194,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 .lesson-card:hover { border-color: var(--sage); }
 .lesson-title { font-weight: 600; font-size: 0.88rem; }
 .lesson-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); margin-top: 2px; }
+.active-sort { background: var(--sage-l) !important; border-color: var(--sage) !important; color: var(--sage) !important; }
 
 /* MODAL */
 .mbg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none; align-items: center; justify-content: center; }
@@ -357,6 +358,16 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         <label class="chip"><input type="checkbox" id="ck-rb" checked> 📏 Assessment Rubric</label>
         <label class="chip"><input type="checkbox" id="ck-dt"> ♿ Differentiation & Modified Expectations</label>
       </div>
+      <div id="wsTypeRow" style="margin-bottom:13px;">
+        <div class="ct" style="margin-bottom:7px;">📝 Worksheet Type</div>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="wsType" value="questions" checked> ❓ Questions & Activities</label>
+          <label class="chip"><input type="radio" name="wsType" value="writing"> ✍️ Writing Draft</label>
+          <label class="chip"><input type="radio" name="wsType" value="math"> 🔢 Math Practice</label>
+          <label class="chip"><input type="radio" name="wsType" value="research"> 🔍 Research Organizer</label>
+          <label class="chip"><input type="radio" name="wsType" value="experiment"> 🔬 Experiment Record</label>
+        </div>
+      </div>
       <button class="btn b-ink b-full" id="genBtn" onclick="generate()">✨ Generate Lesson</button>
       <div style="margin-top:13px;padding-top:11px;border-top:1px solid var(--border);font-size:.75rem;color:var(--muted);">🍁 Aligned to the <strong>Ontario Curriculum</strong> · Student names anonymized before AI processing · 🇨🇦 Data stored in Canada</div>
     </div>
@@ -457,10 +468,10 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
 <!-- ===== ASSESSMENT ===== -->
 <div class="page" id="pg-assess">
-  <div class="ph"><h1>Grade <em>Tracker</em></h1><p>All assessments are saved to your account automatically.</p></div>
+  <div class="ph"><h1>Grade <em>Tracker</em></h1><p>All assessment tasks are saved automatically.</p></div>
   <div class="st">
     <div class="sc2"><div class="sn2" id="tStu">0</div><div class="sl">Students</div></div>
-    <div class="sc2"><div class="sn2" id="tSess">0</div><div class="sl">Sessions</div></div>
+    <div class="sc2"><div class="sn2" id="tSess">0</div><div class="sl">Tasks</div></div>
     <div class="sc2"><div class="sn2" id="tAvg">—</div><div class="sl">Class Avg</div></div>
     <div class="sc2"><div class="sn2" id="tL4">0</div><div class="sl">At Level 4</div></div>
   </div>
@@ -472,8 +483,8 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <div id="gTable"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">No data yet.</div></div>
   </div>
   <div class="card">
-    <div class="ct">Recent Sessions</div>
-    <div id="sList"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">No sessions yet.</div></div>
+    <div class="ct">Recent Tasks</div>
+    <div id="sList"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">No tasks yet.</div></div>
   </div>
 
 </div>
@@ -481,6 +492,13 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 <!-- ===== MY LESSONS ===== -->
 <div class="page" id="pg-lessons">
   <div class="ph"><h1>My <em>Lessons</em></h1><p>All generated lessons are saved here. Click to view or reuse.</p></div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+    <span style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Sort by</span>
+    <button class="btn b-out b-sm sort-btn active-sort" data-sort="date" onclick="sortLessons('date',this)">📅 Date</button>
+    <button class="btn b-out b-sm sort-btn" data-sort="subject" onclick="sortLessons('subject',this)">📚 Subject</button>
+    <button class="btn b-out b-sm sort-btn" data-sort="grade" onclick="sortLessons('grade',this)">🎓 Grade</button>
+    <button class="btn b-out b-sm sort-btn" data-sort="topic" onclick="sortLessons('topic',this)">🔤 Topic A–Z</button>
+  </div>
   <div id="lessonsList"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Daily Workflow.</div></div>
 </div>
 
@@ -742,6 +760,17 @@ async function generate() {
   if(document.getElementById('ck-dt').checked)outputs.push('differentiation_tips');
   if(!outputs.length){alert('Select at least one output.');return;}
 
+  // Worksheet type
+  const wsTypeEl = document.querySelector('input[name="wsType"]:checked');
+  const wsType = wsTypeEl ? wsTypeEl.value : 'questions';
+  const wsTypeInstructions = {
+    questions: 'Use [TEXT BOX] short answer, [LARGE BOX] paragraph, [CIRCLE ONE: A / B / C] multiple choice, [CHECK ALL THAT APPLY: A / B / C] checkboxes, [WORD BANK: w1, w2, w3]. Use emoji headers. 4-6 varied activities covering comprehension, analysis, and application.',
+    writing: 'Format as a WRITING DRAFT worksheet. Include: a graphic organizer section (use [LARGE BOX] for each part: Topic Sentence, Supporting Details x2, Conclusion), a vocabulary/word bank [WORD BANK: w1,w2,w3], and a full draft section [LARGE BOX] with lined space. Emoji headers for each section. No multiple choice.',
+    math: 'Format as MATH PRACTICE. Include: 1-2 worked examples shown step by step, then 4-6 practice problems using [TEXT BOX] for numeric answers and [LARGE BOX] for show-your-work problems. Include a word problem section. Use [CIRCLE ONE: A / B / C] for multiple choice where appropriate.',
+    research: 'Format as a RESEARCH ORGANIZER. Include sections: My Question [TEXT BOX], What I Already Know [LARGE BOX], Key Facts I Found (3x [TEXT BOX]), Source/Evidence [TEXT BOX], Conclusion/Answer [LARGE BOX], New Questions I Have [TEXT BOX]. Emoji headers for each section.',
+    experiment: 'Format as an EXPERIMENT RECORD SHEET. Include sections: Question/Hypothesis [LARGE BOX], Materials (checklist with [CHECK ALL THAT APPLY]), Procedure (numbered steps with [TEXT BOX] for observations), Results/Data [LARGE BOX], Conclusion [LARGE BOX], What I Would Change [TEXT BOX]. Emoji headers.'
+  };
+
   const btn=document.getElementById('genBtn');
   btn.disabled=true; btn.textContent='⏳ Generating...';
 
@@ -769,7 +798,7 @@ Return ONLY valid JSON with keys: ${outputs.map(k=>'"'+k+'"').join(', ')}.
 Each value is a markdown string:
 - Use ## major sections, ### subsections, **bold**, - bullets
 - lesson_plan: timing (0:00-0:10), Minds On/Action/Consolidation, materials
-- student_worksheet: NEVER use underscores. Use [TEXT BOX] short answer, [LARGE BOX] paragraph, [CIRCLE ONE: A / B / C] multiple choice, [CHECK ALL THAT APPLY: A / B / C] checkboxes, [WORD BANK: w1, w2, w3]. Use emoji headers 📖 ✏️ 🤔 💬. 4-6 varied activities.
+- student_worksheet: NEVER use underscores. ${wsTypeInstructions[wsType] || wsTypeInstructions.questions}
 - reading_resource: original 200-300 word passage for the grade(s)
 - assessment_rubric: Ontario Level 1/2/3/4 with specific success criteria${iepStudents.length?' plus modified criteria for IEP students':''}
 - differentiation_tips: per-grade and per-student strategies
@@ -1604,7 +1633,7 @@ function renderTracker(){
   document.getElementById('tSess').textContent=sessions.length;
   if(!students.length||!sessions.length){
     document.getElementById('gTable').innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No data yet.</div>';
-    document.getElementById('sList').innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No sessions yet.</div>';
+    document.getElementById('sList').innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No tasks yet.</div>';
     document.getElementById('tAvg').textContent='—'; document.getElementById('tL4').textContent='0'; return;
   }
   const lvN={L1:1,'L1-':.7,'L1+':1.3,L2:2,'L2-':1.7,'L2+':2.3,L3:3,'L3-':2.7,'L3+':3.3,L4:4,'L4-':3.7,'L4+':4.3};
@@ -1620,7 +1649,7 @@ function renderTracker(){
   document.getElementById('tL4').textContent=wd.filter(r=>r.avg>=3.5).length;
 
   // Build student performance table safely (no nested template literals)
-  let tableHtml='<table class="dt"><thead><tr><th>Student</th><th>Grade</th><th>Sessions</th><th>Avg Level</th><th>Notes</th></tr></thead><tbody>';
+  let tableHtml='<table class="dt"><thead><tr><th>Student</th><th>Grade</th><th>Tasks</th><th>Avg Level</th><th>Notes</th></tr></thead><tbody>';
   rows.forEach(r=>{
     const stuSessions=sessions.filter(sess=>sess.marks[r.id]?.level).sort((a,b)=>new Date(b.date)-new Date(a.date));
     const hasHistory=stuSessions.length>0;
@@ -1741,7 +1770,7 @@ async function updateMark(sessId, stuId, newLevel, btn) {
 
 function exportCSV(){
   const lvN={L1:1,'L1-':.7,'L1+':1.3,L2:2,'L2-':1.7,'L2+':2.3,L3:3,'L3-':2.7,'L3+':3.3,L4:4,'L4-':3.7,'L4+':4.3};
-  const rows=[['Student','Grade','Notes','Sessions','Avg Level']];
+  const rows=[['Student','Grade','Notes','Tasks','Avg Level']];
   students.forEach(s=>{
     const marks=sessions.flatMap(sess=>sess.marks[s.id]?.level?[lvN[sess.marks[s.id].level]||2]:[]);
     const avg=marks.length?marks.reduce((a,b)=>a+b,0)/marks.length:null;
@@ -1759,28 +1788,13 @@ function exportCSV(){
 let savedLessons = [];
 
 async function renderLessonsList(){
-  const {data}=await db.from('lessons').select('*').order('created_at',{ascending:false}).limit(20);
-  const c=document.getElementById('lessonsList');
-  if(!data||!data.length){c.innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Daily Workflow.</div>';return;}
+  const {data}=await db.from('lessons').select('*').order('created_at',{ascending:false}).limit(50);
+  if(!data||!data.length){
+    document.getElementById('lessonsList').innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Daily Workflow.</div>';
+    return;
+  }
   savedLessons = data;
-  c.innerHTML=data.map((l,i)=>`
-    <div class="lesson-card" id="lc-${l.id}" style="cursor:default;">
-      <div style="flex:1;min-width:0;cursor:pointer;" onclick="loadLesson(${i})">
-        <div class="lesson-title">${l.topic}</div>
-        <div class="lesson-meta">${(l.grades||[]).join(' / ')} · ${l.subject} · ${new Date(l.created_at).toLocaleDateString('en-CA')}</div>
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;z-index:1;position:relative;">
-        <button class="btn b-out b-sm" onclick="loadLesson(${i})">View →</button>
-        <button class="btn b-out b-sm del-btn" style="color:var(--rust);border-color:var(--rust);" data-id="${l.id}" data-topic="${l.topic.replace(/"/g,'&quot;')}">🗑 Delete</button>
-      </div>
-    </div>`).join('');
-
-  // Attach delete listeners via JS — avoids quote-escaping issues with inline onclick
-  document.querySelectorAll('.del-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      confirmDeleteLesson(this.dataset.id, this.dataset.topic);
-    });
-  });
+  sortLessons(currentSort, null); // render with current sort
 }
 
 function confirmDeleteLesson(id, topic) {
@@ -1797,6 +1811,44 @@ async function doDeleteLesson() {
   if (error) { alert('Error deleting lesson: ' + error.message); return; }
   window._pendingDeleteId = null;
   renderLessonsList();
+}
+
+let currentSort = 'date';
+
+function sortLessons(sortBy, btn) {
+  currentSort = sortBy;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active-sort'));
+  if(btn) btn.classList.add('active-sort');
+  const sorted = [...savedLessons];
+  if(sortBy === 'date') sorted.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  else if(sortBy === 'subject') sorted.sort((a,b) => (a.subject||'').localeCompare(b.subject||''));
+  else if(sortBy === 'grade') sorted.sort((a,b) => {
+    const ga = (a.grades||[])[0]||''; const gb = (b.grades||[])[0]||'';
+    return ga.localeCompare(gb);
+  });
+  else if(sortBy === 'topic') sorted.sort((a,b) => (a.topic||'').localeCompare(b.topic||''));
+  renderLessonsCards(sorted);
+}
+
+function renderLessonsCards(data) {
+  const c = document.getElementById('lessonsList');
+  if(!data||!data.length){ c.innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet.</div>'; return; }
+  c.innerHTML = data.map((l,i) => {
+    const origIdx = savedLessons.indexOf(l);
+    return `<div class="lesson-card" id="lc-${l.id}" style="cursor:default;">
+      <div style="flex:1;min-width:0;cursor:pointer;" onclick="loadLesson(${origIdx})">
+        <div class="lesson-title">${l.topic}</div>
+        <div class="lesson-meta">${(l.grades||[]).join(' / ')} · ${l.subject} · ${new Date(l.created_at).toLocaleDateString('en-CA')}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;z-index:1;position:relative;">
+        <button class="btn b-out b-sm" onclick="loadLesson(${origIdx})">View →</button>
+        <button class="btn b-out b-sm del-btn" style="color:var(--rust);border-color:var(--rust);" data-id="${l.id}" data-topic="${l.topic.replace(/"/g,'&quot;')}">🗑 Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', function() { confirmDeleteLesson(this.dataset.id, this.dataset.topic); });
+  });
 }
 
 function loadLesson(idx){
