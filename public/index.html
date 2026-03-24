@@ -326,6 +326,13 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <div id="s1">
     <div class="card">
       <div class="ct">📚 Class Setup</div>
+      <!-- Class selector — shown when teacher has classes set up -->
+      <div id="classSelectorRow" style="display:none;margin-bottom:13px;">
+        <div class="fi">
+          <label>Class</label>
+          <select id="classSelector" onchange="onClassSelect()"></select>
+        </div>
+      </div>
       <div class="fg">
         <div class="fi">
           <label>Grade A ✱</label>
@@ -440,7 +447,26 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
 <!-- ===== CLASS ROSTER ===== -->
 <div class="page" id="pg-roster">
-  <div class="ph"><h1>Class <em>Roster</em></h1><p>Students are saved to your account and persist between sessions. Add Learning Profiles to differentiate AI-generated lessons.</p></div>
+  <div class="ph"><h1>Class <em>Roster</em></h1><p>Manage your classes and students. Each class has its own roster, assessment data, and report cards.</p></div>
+
+  <!-- Class Manager -->
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div class="ct" style="margin-bottom:0;">🏫 My Classes</div>
+      <button class="btn b-sage b-sm" onclick="document.getElementById('newClassForm').style.display=document.getElementById('newClassForm').style.display==='none'?'block':'none'">+ New Class</button>
+    </div>
+    <div id="classTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;"></div>
+    <div id="newClassForm" style="display:none;border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+      <div class="fg" style="margin-bottom:10px;">
+        <div class="fi s2"><label>Class Name</label><input type="text" id="newClassName" placeholder="e.g. Grade 6/7 Morning, French Period 2..."></div>
+        <div class="fi"><label>Subject Focus (optional)</label><input type="text" id="newClassSubject" placeholder="e.g. Language, Math, French..."></div>
+      </div>
+      <div class="brow">
+        <button class="btn b-sage b-sm" onclick="createClass()">Create Class</button>
+        <button class="btn b-out b-sm" onclick="document.getElementById('newClassForm').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
   <div class="card">
     <div class="ct">📝 Class Context</div>
     <div class="fi" style="margin-bottom:8px;">
@@ -601,6 +627,7 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ============================================================
 let currentUser = null;
 let students = [], sessions = [], genC = {}, curSess = null, shareKey = '';
+let classes = [], activeClassId = null;
 const AVCOLORS = ['#4A7C59','#2A5FA5','#C47B2A','#B54B2A','#6B46C1','#0F766E','#7C4A6E','#4A6E7C'];
 const BLABELS = {lesson_plan:'📅 Lesson Plan',student_worksheet:'📝 Student Worksheet',reading_resource:'📄 Reading Resource',assessment_rubric:'📏 Assessment Rubric',differentiation_tips:'♿ Differentiation & Modified Expectations'};
 // Per-grade worksheet labels added dynamically
@@ -670,7 +697,7 @@ async function signUp() {
 
 async function signOut() {
   await db.auth.signOut();
-  currentUser=null; students=[]; sessions=[];
+  currentUser=null; students=[]; sessions=[]; classes=[]; activeClassId=null;
   document.getElementById('appScreen').style.display='none';
   document.getElementById('authScreen').style.display='flex';
 }
@@ -713,7 +740,7 @@ async function initApp() {
       await loadAndShow(session.user);
     } else if(event==='SIGNED_OUT'){
       appLoaded = false;
-      currentUser=null; students=[]; sessions=[];
+      currentUser=null; students=[]; sessions=[]; classes=[]; activeClassId=null;
       hideLoading();
       document.getElementById('appScreen').style.display='none';
       document.getElementById('authScreen').style.display='flex';
@@ -725,6 +752,8 @@ function showApp() {
   document.getElementById('authScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
   document.getElementById('navEmail').textContent=currentUser.email;
+  renderClassTabs();
+  renderClassSelector();
   renderR();
   renderTracker();
   renderLessonsList();
@@ -745,12 +774,24 @@ function updateWelcomeBanner() {
 // LOAD USER DATA FROM SUPABASE
 // ============================================================
 async function loadUserData() {
-  // Load students
-  const {data:stuData}=await db.from('students').select('*').order('created_at');
-  if(stuData) students=stuData.map(s=>({id:s.id,first:s.first_name,last:s.last_name||'',grade:s.grade,notes:s.notes||'',iep:s.learning_profile||'',dbId:s.id}));
+  // Load classes first
+  const {data:classData} = await db.from('classes').select('*').order('created_at');
+  if(classData) {
+    classes = classData;
+    // Set active class to first class if none selected yet
+    if(!activeClassId && classes.length > 0) activeClassId = classes[0].id;
+  }
 
-  // Load sessions
-  const {data:sessData}=await db.from('assessment_sessions').select('*, student_marks(*)').order('created_at',{ascending:false});
+  // Load students — filtered by active class if one is set
+  const stuQuery = db.from('students').select('*').order('created_at');
+  if(activeClassId) stuQuery.eq('class_id', activeClassId);
+  const {data:stuData} = await stuQuery;
+  if(stuData) students=stuData.map(s=>({id:s.id,first:s.first_name,last:s.last_name||'',grade:s.grade,notes:s.notes||'',iep:s.learning_profile||'',dbId:s.id,classId:s.class_id}));
+
+  // Load sessions — filtered by active class if one is set
+  const sessQuery = db.from('assessment_sessions').select('*, student_marks(*)').order('created_at',{ascending:false});
+  if(activeClassId) sessQuery.eq('class_id', activeClassId);
+  const {data:sessData} = await sessQuery;
   if(sessData) sessions=sessData.map(sess=>({
     id:sess.id, date:sess.date, subject:sess.subject, strand:sess.strand,
     grades:sess.grades, task:sess.task,
@@ -765,6 +806,100 @@ async function loadUserData() {
       if(el) el.value=profile.class_context;
     }
   } catch(e) { /* profiles may not have class_context column yet — silent fail */ }
+}
+
+// ============================================================
+// CLASS MANAGEMENT
+// ============================================================
+async function createClass() {
+  const name = document.getElementById('newClassName').value.trim();
+  if (!name) { alert('Enter a class name.'); return; }
+  const subject = document.getElementById('newClassSubject').value.trim();
+  showLoading('Creating class...');
+  const {data, error} = await db.from('classes').insert({
+    teacher_id: currentUser.id,
+    name,
+    subject_focus: subject || null
+  }).select().single();
+  hideLoading();
+  if (error) { alert('Error: ' + error.message); return; }
+  classes.push(data);
+  activeClassId = data.id;
+  document.getElementById('newClassName').value = '';
+  document.getElementById('newClassSubject').value = '';
+  document.getElementById('newClassForm').style.display = 'none';
+  await loadUserData();
+  renderClassTabs();
+  renderClassSelector();
+  renderR();
+  renderTracker();
+}
+
+async function switchClass(classId) {
+  activeClassId = classId;
+  showLoading('Switching class...');
+  await loadUserData();
+  hideLoading();
+  renderClassTabs();
+  renderClassSelector();
+  renderR();
+  renderTracker();
+  updateWelcomeBanner();
+}
+
+async function deleteClass(classId) {
+  const cls = classes.find(c => c.id === classId);
+  if (!confirm(`Delete class "${cls?.name}"? Students in this class will become unassigned. Assessment data will be removed.`)) return;
+  showLoading('Deleting class...');
+  await db.from('classes').delete().eq('id', classId);
+  classes = classes.filter(c => c.id !== classId);
+  if (activeClassId === classId) activeClassId = classes.length > 0 ? classes[0].id : null;
+  await loadUserData();
+  hideLoading();
+  renderClassTabs();
+  renderClassSelector();
+  renderR();
+  renderTracker();
+}
+
+function renderClassTabs() {
+  const el = document.getElementById('classTabs');
+  if (!el) return;
+  if (!classes.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No classes yet — create one above to organize your students.</div>';
+    return;
+  }
+  el.innerHTML = classes.map(c => {
+    const active = c.id === activeClassId;
+    return `<div style="display:flex;align-items:center;gap:4px;">
+      <button class="btn b-sm ${active?'b-sage':'b-out'} class-tab-btn" data-cid="${c.id}" style="font-size:.78rem;">
+        🏫 ${c.name}${c.subject_focus?' · '+c.subject_focus:''} ${active?'✓':''}
+      </button>
+      ${active?`<button class="btn b-out b-sm class-del-btn" data-cid="${c.id}" style="padding:3px 7px;color:var(--rust);border-color:var(--rust);font-size:.7rem;">✕</button>`:''}
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.class-tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() { switchClass(this.dataset.cid); });
+  });
+  document.querySelectorAll('.class-del-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) { e.stopPropagation(); deleteClass(this.dataset.cid); });
+  });
+}
+
+function renderClassSelector() {
+  const sel = document.getElementById('classSelector');
+  const row = document.getElementById('classSelectorRow');
+  if (!sel || !row) return;
+  if (!classes.length) { row.style.display = 'none'; return; }
+  row.style.display = 'block';
+  sel.innerHTML = classes.map(c =>
+    `<option value="${c.id}" ${c.id===activeClassId?'selected':''}>${c.name}${c.subject_focus?' · '+c.subject_focus:''}</option>`
+  ).join('');
+}
+
+function onClassSelect() {
+  const sel = document.getElementById('classSelector');
+  if (sel) switchClass(sel.value);
 }
 
 // ============================================================
@@ -1246,7 +1381,8 @@ async function saveAss(){
         const {data:sessData,error:sessErr}=await db.from('assessment_sessions').insert({
           teacher_id:currentUser.id,
           task:curSess.task, subject:curSess.subject,
-          strand:curSess.strand, grades:curSess.grades, date:curSess.date
+          strand:curSess.strand, grades:curSess.grades, date:curSess.date,
+          class_id: activeClassId || null
         }).select().single();
         if(sessErr) throw sessErr;
         sessId=sessData.id;
@@ -1957,7 +2093,8 @@ async function addStu(){
     first_name:f, last_name:l||null,
     grade:document.getElementById('sG').value,
     notes:document.getElementById('sN').value.trim()||null,
-    learning_profile:document.getElementById('sI').value.trim()||null
+    learning_profile:document.getElementById('sI').value.trim()||null,
+    class_id: activeClassId || null
   }).select().single();
   hideLoading();
   if(error){alert('Error: '+error.message);return;}
