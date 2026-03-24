@@ -283,7 +283,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 <nav>
   <div class="logo">Teacher<span>AI</span></div>
   <div class="nav-tabs">
-    <label class="tab" for="tr-plan"><span class="tab-full">📅 Daily Workflow</span><span class="tab-short">📅 Plan</span></label>
+    <label class="tab" for="tr-plan"><span class="tab-full">📅 Plan & Teach</span><span class="tab-short">📅 Plan</span></label>
     <label class="tab" for="tr-roster"><span class="tab-full">👥 Class Roster</span><span class="tab-short">👥 Roster</span></label>
     <label class="tab" for="tr-assess"><span class="tab-full">📊 Assessment</span><span class="tab-short">📊 Assess</span></label>
     <label class="tab" for="tr-lessons"><span class="tab-full">📚 My Lessons</span><span class="tab-short">📚 Lessons</span></label>
@@ -590,7 +590,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <button class="btn b-out b-sm sort-btn" data-sort="grade" onclick="sortLessons('grade',this)">🎓 Grade</button>
     <button class="btn b-out b-sm sort-btn" data-sort="topic" onclick="sortLessons('topic',this)">🔤 Topic A–Z</button>
   </div>
-  <div id="lessonsList"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Daily Workflow.</div></div>
+  <div id="lessonsList"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Plan & Teach.</div></div>
 </div>
 
 <!-- ===== REPORT CARDS ===== -->
@@ -615,8 +615,9 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         </select>
       </div>
       <div class="fi">
-        <label>Character limit <span style="font-weight:400;color:var(--muted);">(YRDSB PowerSchool default)</span></label>
+        <label>Character limit <span style="font-weight:400;color:var(--muted);">— adjust to match your board's PowerSchool setting (typically 500–750; varies by board and reporting period)</span></label>
         <input type="number" id="rc-charlimit" value="500" min="100" max="2000" style="width:100%;">
+        <div style="font-size:.72rem;color:var(--muted);margin-top:4px;">Check your board's PowerSchool setup to confirm the limit for each reporting period before submitting.</div>
       </div>
     </div>
     <div class="ban ban-b" style="margin-bottom:12px;font-size:.78rem;">
@@ -2901,7 +2902,7 @@ let savedLessons = [];
 async function renderLessonsList(){
   const {data}=await db.from('lessons').select('*').order('created_at',{ascending:false}).limit(50);
   if(!data||!data.length){
-    document.getElementById('lessonsList').innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Daily Workflow.</div>';
+    document.getElementById('lessonsList').innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Plan & Teach.</div>';
     savedLessons = [];
     updateWelcomeBanner();
     return;
