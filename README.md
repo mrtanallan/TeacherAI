@@ -1,2 +1,2 @@
-# planit-ontario
-Planit Generator Tool
+# TeacherAI
+TeacherAI Generator Tool
