@@ -1,8 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Use anon key — RLS policies handle access control
-// GET: worksheets table is readable (needed for student worksheet page)
-// POST: worksheet_submissions has "Anyone can submit" RLS policy
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
@@ -23,7 +20,25 @@ export default async function handler(req, res) {
       .eq('id', id)
       .single();
     if (error || !data) { res.status(404).json({ error: 'Not found' }); return; }
-    res.status(200).json(data);
+
+    // Parse content — may be JSON {worksheet, reading} or legacy plain text
+    let worksheetContent = data.content;
+    let readingContent = '';
+    try {
+      const parsed = JSON.parse(data.content);
+      if (parsed && typeof parsed === 'object' && parsed.worksheet) {
+        worksheetContent = parsed.worksheet;
+        readingContent = parsed.reading || '';
+      }
+    } catch(e) {
+      // Legacy plain text content — use as-is
+    }
+
+    res.status(200).json({
+      ...data,
+      content: worksheetContent,
+      reading_resource: readingContent
+    });
     return;
   }
 
