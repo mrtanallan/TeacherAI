@@ -295,18 +295,24 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 <!-- ===== DAILY WORKFLOW ===== -->
 <div class="page" id="pg-plan">
 
-  <!-- First-run welcome — only shown when teacher has no lessons yet -->
+  <!-- First-run welcome — only shown once, until teacher dismisses or adds first student -->
   <div id="welcomeBanner" style="display:none;background:linear-gradient(135deg,#1C3A2B,#2D5C38);border-radius:12px;padding:22px 24px;margin-bottom:20px;color:white;">
-    <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin-bottom:6px;">👋 Welcome to TeacherAI</div>
-    <div style="font-size:.86rem;opacity:.9;line-height:1.6;margin-bottom:14px;">Your Ontario SSC teaching assistant. Generate a complete lesson — plan, worksheet, rubric, and slides — in under a minute.</div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:.8rem;opacity:.8;">
-      <span>① Set your grade &amp; topic below</span>
-      <span>② Generate your lesson</span>
-      <span>③ Share worksheet link with students</span>
-      <span>④ Assess &amp; give feedback</span>
-    </div>
-    <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.15);font-size:.75rem;opacity:.65;">
-      💡 Tip: Add your students in <strong>Class Roster</strong> first so worksheets can be linked to their names.
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+      <div style="flex:1;">
+        <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin-bottom:6px;">👋 Welcome to TeacherAI</div>
+        <div style="font-size:.86rem;opacity:.9;line-height:1.6;margin-bottom:14px;">Your Ontario SSC teaching assistant. Generate a complete lesson — plan, worksheet, rubric, and slides — in under a minute.</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:.8rem;opacity:.8;margin-bottom:16px;">
+          <span>① Set your grade &amp; topic below</span>
+          <span>② Generate your lesson</span>
+          <span>③ Share worksheet link with students</span>
+          <span>④ Assess &amp; give feedback</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div style="font-size:.84rem;"><strong>Start here:</strong> Add your students to Class Roster so worksheets link to their names automatically.</div>
+          <label class="tab" for="tr-roster" style="background:rgba(255,255,255,0.2);color:white;border-radius:6px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="dismissWelcomeBanner()">👥 Go to Class Roster →</label>
+        </div>
+      </div>
+      <button onclick="dismissWelcomeBanner()" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:1.2rem;flex-shrink:0;padding:0;line-height:1;" title="Dismiss">✕</button>
     </div>
   </div>
 
@@ -766,8 +772,22 @@ function showApp() {
 function updateWelcomeBanner() {
   const banner = document.getElementById('welcomeBanner');
   if (!banner) return;
-  const done = savedLessons.length > 0 || students.length > 0;
-  banner.style.display = done ? 'none' : 'block';
+  // Once dismissed or teacher has ever had students/lessons across any class, never show again
+  if (localStorage.getItem('teacherai_welcomed')) { banner.style.display = 'none'; return; }
+  // Check across ALL students and lessons (not filtered by class)
+  const hasAnyData = savedLessons.length > 0;
+  if (hasAnyData) { dismissWelcomeBanner(); return; }
+  // Also check if teacher has students in any class
+  db.from('students').select('id').eq('teacher_id', currentUser.id).limit(1).then(({data}) => {
+    if (data && data.length > 0) { dismissWelcomeBanner(); return; }
+    banner.style.display = 'block';
+  });
+}
+
+function dismissWelcomeBanner() {
+  localStorage.setItem('teacherai_welcomed', '1');
+  const banner = document.getElementById('welcomeBanner');
+  if (banner) banner.style.display = 'none';
 }
 
 // ============================================================
