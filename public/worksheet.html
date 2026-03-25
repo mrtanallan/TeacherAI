@@ -158,6 +158,7 @@ async function loadWorksheet(){
 function showGradePicker(data, gradesContent){
   const grades = Object.keys(gradesContent);
   const picker = document.createElement('div');
+  picker.id = 'gradePicker';
   picker.style.cssText='text-align:center;padding:60px 24px;';
   picker.innerHTML=`
     <div style="font-family:\'Fraunces\',serif;font-size:1.4rem;font-weight:600;margin-bottom:8px;">📝 ${data.topic}</div>
@@ -178,7 +179,7 @@ function loadGradeWorksheet(grade){
   const data = window._wsData;
   const gradesContent = window._wsGradesContent;
   const wsContent = gradesContent[grade];
-  document.querySelector('.pg').querySelector('div[style*="text-align:center"]')?.remove();
+  document.getElementById('gradePicker')?.remove();
   document.getElementById('wsTitle').textContent='📝 '+data.topic;
   document.getElementById('wsMeta').textContent=grade+(data.subject?' · '+data.subject:'');
   document.getElementById('wsDate').value=new Date().toLocaleDateString('en-CA');
@@ -374,7 +375,7 @@ async function submitWorksheet(){
     });
     if(!res.ok)throw new Error('Submit failed');
     // Hide grade picker if visible (split-grade link) and clear global state
-    document.querySelector('.pg > div[style*="text-align:center"]')?.remove();
+    document.getElementById('gradePicker')?.remove();
     window._wsGradesContent = null;
     window._wsData = null;
     document.getElementById('worksheetScreen').style.display='none';
