@@ -411,14 +411,14 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         <label class="chip"><input type="checkbox" id="ck-ws" checked> 📝 Student Worksheet</label>
         <label class="chip"><input type="checkbox" id="ck-rr" checked> 📄 Reading Resource</label>
         <label class="chip"><input type="checkbox" id="ck-rb" checked> 📏 Assessment Rubric</label>
-        <label class="chip"><input type="checkbox" id="ck-dt"> ♿ Differentiation & Modified Expectations</label>
+        <label class="chip"><input type="checkbox" id="ck-dt"> 🔀 Differentiation & Modified Expectations</label>
       </div>
       <div class="fi full" style="margin-bottom:13px;">
-        <div onclick="const b=document.getElementById('expBody');const arr=document.getElementById('expArrow');const open=b.style.display!=='none';b.style.display=open?'none':'block';arr.textContent=open?'▸':'▾';"
+        <div onclick="const b=document.getElementById('expBody');const arr=document.getElementById('expArrow');const open=b.style.display!=='none';b.style.display=open?'none':'block';arr.textContent=open?'▸ expand':'▾ collapse';"
           style="display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;padding:6px 0;">
           <span style="font-size:.78rem;font-weight:600;color:var(--muted);">🎯 Target Expectations</span>
-          <span style="font-size:.72rem;color:var(--muted);font-weight:400;">(optional)</span>
-          <span id="expArrow" style="margin-left:auto;font-size:.75rem;color:var(--muted);">▸</span>
+          <span style="font-size:.72rem;color:var(--muted);font-weight:400;">(optional — click to expand)</span>
+          <span id="expArrow" style="font-size:.75rem;color:var(--sage);font-weight:600;margin-left:6px;">▸ expand</span>
         </div>
         <div id="expBody" style="display:none;">
           <textarea id="targetExp" style="min-height:52px;" placeholder="Optional — type expectation codes or plain words, e.g. &quot;making inferences, C1.2, text features, writing paragraphs&quot;. Leave blank and AI will pick the most relevant ones."></textarea>
@@ -568,14 +568,19 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
 <!-- ===== ASSESSMENT ===== -->
 <div class="page" id="pg-assess">
-  <div class="ph"><h1>Grade <em>Tracker</em></h1><p>All assessment tasks are saved automatically.</p></div>
-  <!-- Class selector for assessment -->
-  <div id="assessClassSelector" style="display:none;margin-bottom:16px;">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <div style="font-family:DM Mono,monospace;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Viewing class:</div>
-      <div id="assessClassTabs" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-    </div>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+    <div class="ph" style="margin-bottom:0;"><h1>Grade <em>Tracker</em></h1><p>All assessment tasks are saved automatically.</p></div>
   </div>
+  <!-- Class tabs for assessment — prominent tab bar -->
+  <div id="assessClassSelector" style="display:none;margin-bottom:18px;">
+    <div id="assessClassTabs" style="display:flex;gap:0;flex-wrap:wrap;border-bottom:2px solid var(--border);"></div>
+  </div>
+  <!-- Active class label when only 1 class -->
+  <div id="assessSingleClass" style="display:none;margin-bottom:14px;">
+    <span style="font-family:DM Mono,monospace;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Class: </span>
+    <span id="assessSingleClassName" style="font-size:.82rem;font-weight:600;color:var(--ink);"></span>
+  </div>
+  <div id="trackerClassLabel" style="display:none;font-family:DM Mono,monospace;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding:4px 10px;background:var(--sage-l);border-radius:5px;border:1px solid #A8C4AB;width:fit-content;"></div>
   <div class="st">
     <div class="sc2"><div class="sn2" id="tStu">0</div><div class="sl">Students</div></div>
     <div class="sc2"><div class="sn2" id="tSess">0</div><div class="sl">Tasks</div></div>
@@ -658,11 +663,10 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 </div>
 
 <div style="text-align:center;padding:24px 16px 32px;border-top:1px solid var(--border);margin-top:20px;font-size:.75rem;color:var(--muted);">
-  🇨🇦 Data stored in Canada &nbsp;·&nbsp;
   <a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
   <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a> &nbsp;·&nbsp;
   <a href="mailto:teacheraicanada@gmail.com" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
-  <span style="font-family:DM Mono,monospace;font-size:.65rem;">v2.4 · Mar 25 2026</span>
+  <span style="font-family:DM Mono,monospace;font-size:.65rem;">v2.5 · Mar 25 2026</span>
 </div>
 
 </div><!-- end appScreen -->
@@ -858,14 +862,20 @@ let currentUser = null;
 let students = [], sessions = [], genC = {}, curSess = null, shareKey = '';
 let classes = [], activeClassId = null;
 const AVCOLORS = ['#4A7C59','#2A5FA5','#C47B2A','#B54B2A','#6B46C1','#0F766E','#7C4A6E','#4A6E7C'];
-const BLABELS = {lesson_plan:'📅 Lesson Plan',student_worksheet:'📝 Student Worksheet',reading_resource:'📄 Reading Resource',assessment_rubric:'📏 Assessment Rubric',differentiation_tips:'♿ Differentiation & Modified Expectations'};
-// Per-grade worksheet labels added dynamically
+const BLABELS = {lesson_plan:'📅 Lesson Plan',student_worksheet:'📝 Student Worksheet',reading_resource:'📄 Reading Resource',assessment_rubric:'📏 Assessment Rubric',differentiation_tips:'🔀 Differentiation & Modified Expectations',answer_key:'📋 Answer Key'};
+// Per-grade worksheet + answer key labels added dynamically
 ['A','B','C','D','E','F'].forEach((g,i)=>{
   Object.defineProperty(BLABELS, 'student_worksheet_'+g, {
     get() {
       const grade = (window._curSessGrades||[])[i] || ('Grade '+g);
       const short = grade.replace('Kindergarten','KG').replace('Grade ','Gr. ');
       return '📝 Student Worksheet — ' + short;
+    }, configurable:true
+  });
+  Object.defineProperty(BLABELS, 'answer_key_'+g, {
+    get() {
+      const grade = (window._curSessGrades||[])[i] || ('Grade '+g);
+      return '📋 ' + grade + ' Answer Sheet';
     }, configurable:true
   });
 });
@@ -1360,17 +1370,50 @@ function switchToAssess() { document.getElementById('tr-assess').checked=true; r
 function renderAssessClassTabs() {
   const wrap = document.getElementById('assessClassSelector');
   const tabs = document.getElementById('assessClassTabs');
+  const singleWrap = document.getElementById('assessSingleClass');
+  const singleName = document.getElementById('assessSingleClassName');
   if (!wrap || !tabs) return;
-  if (classes.length < 2) { wrap.style.display = 'none'; return; }
+
+  // No classes or only 1 class — show simple label
+  if (classes.length <= 1) {
+    wrap.style.display = 'none';
+    if (singleWrap && classes.length === 1) {
+      singleWrap.style.display = 'block';
+      if (singleName) singleName.textContent = classes[0].name + (classes[0].subject_focus ? ' · ' + classes[0].subject_focus : '');
+    } else if (singleWrap) {
+      singleWrap.style.display = 'none';
+    }
+    return;
+  }
+
+  // Multiple classes — show tab bar
+  if (singleWrap) singleWrap.style.display = 'none';
   wrap.style.display = 'block';
-  tabs.innerHTML = classes.map(c =>
-    `<button class="btn b-sm ${c.id===activeClassId?'b-sage':'b-out'} assess-class-btn" data-cid="${c.id}" style="font-size:.75rem;">
-      ${c.name}${c.subject_focus?' · '+c.subject_focus:''} ${c.id===activeClassId?'✓':''}
-    </button>`
-  ).join('');
-  document.querySelectorAll('.assess-class-btn').forEach(btn => {
+
+  // Build tabs: All + each class
+  const allActive = !activeClassId;
+  let tabHtml = '<button class="assess-class-tab" data-cid="" style="' +
+    'padding:9px 16px;border:none;border-bottom:3px solid ' + (allActive ? 'var(--sage)' : 'transparent') + ';' +
+    'background:none;font-size:.83rem;font-weight:' + (allActive ? '600' : '400') + ';' +
+    'color:' + (allActive ? 'var(--sage)' : 'var(--muted)') + ';cursor:pointer;white-space:nowrap;transition:all .15s;">All Classes</button>';
+
+  classes.forEach(c => {
+    const active = c.id === activeClassId;
+    tabHtml += '<button class="assess-class-tab" data-cid="' + c.id + '" style="' +
+      'padding:9px 16px;border:none;border-bottom:3px solid ' + (active ? 'var(--sage)' : 'transparent') + ';' +
+      'background:none;font-size:.83rem;font-weight:' + (active ? '600' : '400') + ';' +
+      'color:' + (active ? 'var(--sage)' : 'var(--muted)') + ';cursor:pointer;white-space:nowrap;transition:all .15s;">' +
+      c.name + (c.subject_focus ? ' <span style="font-size:.72rem;opacity:.7;">· ' + c.subject_focus + '</span>' : '') +
+      '</button>';
+  });
+
+  tabs.innerHTML = tabHtml;
+
+  document.querySelectorAll('.assess-class-tab').forEach(btn => {
     btn.addEventListener('click', async function() {
-      activeClassId = this.dataset.cid;
+      const cid = this.dataset.cid;
+      if (cid === activeClassId || (!cid && !activeClassId)) return; // no change
+      activeClassId = cid || null;
       showLoading('Switching class...');
       await loadUserData();
       hideLoading();
@@ -1531,7 +1574,7 @@ async function generate() {
     ...wsOutputKeys
   ];
   // Re-sort so worksheets appear after lesson plan but before rubric/reading
-  const EDIT_ORDER = ['lesson_plan','student_worksheet','reading_resource','assessment_rubric','differentiation_tips'];
+  const EDIT_ORDER = ['lesson_plan','student_worksheet','answer_key','reading_resource','differentiation_tips','assessment_rubric'];
   outputKeys.sort((a,b) => {
     const ai = EDIT_ORDER.findIndex(o => a===o || a.startsWith(o+'_'));
     const bi = EDIT_ORDER.findIndex(o => b===o || b.startsWith(o+'_'));
@@ -1646,8 +1689,10 @@ CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksh
     genC['_expectations'] = lessonExpectations;
 
     resetLinkCache();
-    buildEditBlocks(outputKeys,gradeDesc,subj,topic,lessonExpectations);
+    buildEditBlocks([...outputKeys,...answerKeyKeys],gradeDesc,subj,topic,lessonExpectations);
     buildShareCards(outputKeys);
+    setProgress(100, 'Done!');
+    setTimeout(hideLoading, 400);
     unlock(); gs(2);
 
     // Save lesson to Supabase
@@ -1818,14 +1863,32 @@ async function renderAssGrid(){
     }
   }
 
-  // Fetch submissions for this lesson's worksheets
+  // Fetch submissions for this lesson's worksheets (also grab content for question extraction)
   let submissionsByStudent = {};
+  let wsContentByGrade = {}; // grade -> worksheet text, for question label extraction
   try {
     const { data: worksheets } = await db.from('worksheets')
-      .select('id')
+      .select('id, content, grades')
       .eq('teacher_id', currentUser.id)
       .eq('topic', curSess.task);
     if (worksheets && worksheets.length) {
+      // Parse worksheet content to extract question text per grade
+      worksheets.forEach(ws => {
+        try {
+          const parsed = JSON.parse(ws.content || '{}');
+          // grades_content: { "Grade 6": "...", "Grade 7": "..." }
+          if (parsed.grades_content) {
+            Object.entries(parsed.grades_content).forEach(([grade, wsText]) => {
+              if (!wsContentByGrade[grade]) wsContentByGrade[grade] = wsText;
+            });
+          } else if (parsed.worksheet) {
+            // Single-grade worksheet — map to each grade in this session
+            (ws.grades || curSess.grades || []).forEach(g => {
+              if (!wsContentByGrade[g]) wsContentByGrade[g] = parsed.worksheet;
+            });
+          }
+        } catch(e) { /* silent */ }
+      });
       const wsIds = worksheets.map(w => w.id);
       const { data: subs } = await db.from('worksheet_submissions')
         .select('*')
@@ -1860,12 +1923,15 @@ async function renderAssGrid(){
     const sessionDate = curSess?.date || null; // "2026-03-24" string
     const studentDateStr = s.createdAt ? s.createdAt.slice(0, 10) : null; // "2026-03-24"
     const joinedAfter = sessionDate && studentDateStr && studentDateStr > sessionDate;
-    // Extract question labels from the worksheet matching this student's grade
+    // Extract question labels — prefer genC (just generated), fall back to DB-fetched content
     const gradeLetters = ['A','B','C','D','E','F'];
     const gradeIndex = (curSess?.grades||[]).indexOf(s.grade);
     const wsKey = gradeIndex >= 0 ? ('student_worksheet_'+gradeLetters[gradeIndex])
       : (Object.keys(genC).find(k => k.startsWith('student_worksheet')) || '');
-    const wsQuestions = wsKey && genC[wsKey] ? extractWSQuestions(genC[wsKey]?.cur || '') : {};
+    const wsTextFromGenC = wsKey && genC[wsKey] ? genC[wsKey]?.cur : null;
+    const wsTextFromDB = wsContentByGrade[s.grade] || null;
+    const wsText = wsTextFromGenC || wsTextFromDB || '';
+    const wsQuestions = wsText ? extractWSQuestions(wsText) : {};
     const rubricText = genC['assessment_rubric']?.cur || '';
     // Find answer key for this student's grade
     const akKey = gradeIndex >= 0 ? ('answer_key_'+gradeLetters[gradeIndex]) : 'answer_key';
@@ -2419,12 +2485,30 @@ async function exportSlides() {
 }
 
 async function fetchSlideImage(topic) {
-  // Unsplash Source — free, no API key, CORS-friendly, returns relevant images
-  // Use 800x600 for good slide quality without being too large
-  const keywords = topic.split(' ').slice(0, 3).join(',');
-  const url = 'https://source.unsplash.com/800x600/?' + encodeURIComponent(keywords);
+  // Wikimedia Commons — free, no API key, CORS-friendly, educational content
+  const q = encodeURIComponent(topic.split(' ').slice(0, 3).join(' '));
   try {
-    const imgRes = await fetch(url);
+    // Search for images on Wikimedia Commons
+    const searchRes = await fetch(
+      'https://commons.wikimedia.org/w/api.php?action=query&generator=search' +
+      '&gsrnamespace=6&gsrsearch=' + q + '&gsrlimit=5' +
+      '&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=800' +
+      '&format=json&origin=*'
+    );
+    if (!searchRes.ok) return null;
+    const searchData = await searchRes.json();
+    const pages = Object.values(searchData?.query?.pages || {});
+    // Find a suitable JPEG or PNG
+    const page = pages.find(p => {
+      const mime = p.imageinfo?.[0]?.mime || '';
+      const w = p.imageinfo?.[0]?.thumbwidth || 0;
+      return (mime === 'image/jpeg' || mime === 'image/png') && w >= 300;
+    });
+    if (!page) return null;
+    const imgUrl = page.imageinfo[0].thumburl || page.imageinfo[0].url;
+    if (!imgUrl) return null;
+    // Fetch as arraybuffer → base64
+    const imgRes = await fetch(imgUrl);
     if (!imgRes.ok) return null;
     const buf = await imgRes.arrayBuffer();
     const bytes = new Uint8Array(buf);
@@ -3253,6 +3337,17 @@ function renderR(){
 // GRADE TRACKER
 // ============================================================
 function renderTracker(){
+  // Show active class name above stats
+  const activeClass = classes.find(c => c.id === activeClassId);
+  const classLabel = activeClass
+    ? activeClass.name + (activeClass.subject_focus ? ' · ' + activeClass.subject_focus : '')
+    : (classes.length > 1 ? 'All Classes' : '');
+  const classLabelEl = document.getElementById('trackerClassLabel');
+  if (classLabelEl) {
+    classLabelEl.textContent = classLabel;
+    classLabelEl.style.display = classLabel ? 'inline-block' : 'none';
+  }
+
   const studentIds = new Set(students.map(s => s.id));
   document.getElementById('tStu').textContent=students.length;
   document.getElementById('tSess').textContent=sessions.length;
@@ -3280,13 +3375,16 @@ function renderTracker(){
   document.getElementById('tL4').textContent=wd.filter(r=>r.avg>=3.5).length;
 
   // Build student performance table safely (no nested template literals)
-  let tableHtml='<table class="dt"><thead><tr><th>Student</th><th>Grade</th><th>Tasks</th><th>Avg Level</th><th>Notes</th></tr></thead><tbody>';
+  const showClassCol = !activeClassId && classes.length > 1;
+  let tableHtml='<table class="dt"><thead><tr><th>Student</th>' + (showClassCol ? '<th>Class</th>' : '') + '<th>Grade</th><th>Tasks</th><th>Avg Level</th><th>Notes</th></tr></thead><tbody>';
   rows.forEach(r=>{
+    const rClass = classes.find(c => c.id === r.classId);
     const stuSessions=sessions.filter(sess=>sess.marks[r.id]?.level).sort((a,b)=>new Date(b.date)-new Date(a.date));
     const hasHistory=stuSessions.length>0;
     const avgLabel=r.avg!==null?'<span class="gp '+lvL(r.avg).c+'">'+lvL(r.avg).l+'</span>':'<span style="color:var(--muted)">—</span>';
     tableHtml+='<tr class="stu-row" data-sid="'+r.id+'" style="cursor:'+(hasHistory?'pointer':'default')+';">';
     tableHtml+='<td><strong>'+r.first+' '+(r.last||'')+'</strong>'+(hasHistory?' <span class="hist-arrow" style="font-size:.65rem;color:var(--muted);margin-left:4px;">▶</span>':'')+'</td>';
+    if (showClassCol) tableHtml+='<td style="font-size:.78rem;color:var(--muted);">'+(rClass?rClass.name:'—')+'</td>';
     tableHtml+='<td>'+r.grade+'</td>';
     tableHtml+='<td style="font-family:\'DM Mono\',monospace;">'+r.count+'</td>';
     tableHtml+='<td>'+avgLabel+'</td>';
