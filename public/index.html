@@ -843,7 +843,15 @@ let classes = [], activeClassId = null;
 const AVCOLORS = ['#4A7C59','#2A5FA5','#C47B2A','#B54B2A','#6B46C1','#0F766E','#7C4A6E','#4A6E7C'];
 const BLABELS = {lesson_plan:'📅 Lesson Plan',student_worksheet:'📝 Student Worksheet',reading_resource:'📄 Reading Resource',assessment_rubric:'📏 Assessment Rubric',differentiation_tips:'♿ Differentiation & Modified Expectations'};
 // Per-grade worksheet labels added dynamically
-['A','B','C','D'].forEach(g=>{ BLABELS['student_worksheet_'+g]='📝 Student Worksheet — Grade '+g; });
+['A','B','C','D','E','F'].forEach((g,i)=>{
+  Object.defineProperty(BLABELS, 'student_worksheet_'+g, {
+    get() {
+      const grade = (window._curSessGrades||[])[i] || ('Grade '+g);
+      const short = grade.replace('Kindergarten','KG').replace('Grade ','Gr. ');
+      return '📝 Student Worksheet — ' + short;
+    }, configurable:true
+  });
+});
 const SHAREABLE = ['student_worksheet','reading_resource','assessment_rubric','student_worksheet_A','student_worksheet_B','student_worksheet_C','student_worksheet_D'];
 const LINKABLE = ['student_worksheet','student_worksheet_A','student_worksheet_B','student_worksheet_C','student_worksheet_D'];
 let wsN = 0;
@@ -1461,6 +1469,7 @@ async function generate() {
   btn.disabled=true; btn.textContent='⏳ Generating...';
 
   curSess={id:null,date:new Date().toLocaleDateString('en-CA'),subject:subj,strand:strands[0]||'General',grades,task:topic,marks:{}};
+  window._curSessGrades = grades;
 
   // ANONYMIZE — never send real student names to Anthropic
   const iepStudents=students.filter(s=>s.iep&&s.iep.trim());
@@ -1568,7 +1577,7 @@ CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksh
 // ============================================================
 function buildEditBlocks(outputs,gradeDesc,subj,topic,expectations){
   const c=document.getElementById('editBlocks');
-  const strandNames = {A:'Literacy Connections',B:'Foundations',C:'Comprehension',D:'Composition'};
+  const strandNames = {A:'Literacy Connections',B:'Foundations of Language',C:'Comprehension',D:'Composition'};
   const strandColors = {A:'var(--blue)',B:'var(--amber)',C:'var(--sage)',D:'var(--rust)'};
   const strandBgs = {A:'var(--blue-l)',B:'var(--amber-l)',C:'var(--sage-l)',D:'var(--rust-l)'};
   const expHtml = expectations && expectations.length ? `
@@ -1577,13 +1586,13 @@ function buildEditBlocks(outputs,gradeDesc,subj,topic,expectations){
       <div style="display:flex;flex-wrap:wrap;gap:7px;">
         ${expectations.map(e=>{
           const s = e.strand || (e.code && e.code[0]) || '';
-          const sName = strandNames[s] || ('Strand '+s);
           const sColor = strandColors[s] || 'var(--sage)';
           const sBg = strandBgs[s] || 'var(--sage-l)';
+          const strandLabel = s ? `Strand ${s} · ${strandNames[s]||''} · ${e.overall||''}` : (e.overall||'');
           return `<div style="background:white;border:1px solid #A8C4AB;border-radius:6px;padding:6px 10px;max-width:100%;">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
               <span style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:600;color:${sColor};background:${sBg};padding:1px 6px;border-radius:3px;">${e.code}</span>
-              <span style="font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);">Strand ${s} · ${sName} · ${e.overall||''}</span>
+              <span style="font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);">${strandLabel}</span>
             </div>
             <div style="font-size:.78rem;color:#2A2520;">${e.desc}</div>
           </div>`;
@@ -1744,9 +1753,12 @@ async function renderAssGrid(){
     const sessionDate = curSess?.date || null; // "2026-03-24" string
     const studentDateStr = s.createdAt ? s.createdAt.slice(0, 10) : null; // "2026-03-24"
     const joinedAfter = sessionDate && studentDateStr && studentDateStr > sessionDate;
-    // Extract question labels from worksheet content for display alongside answers
-    const wsKey = Object.keys(genC).find(k => k.startsWith('student_worksheet'));
-    const wsQuestions = wsKey ? extractWSQuestions(genC[wsKey]?.cur || '') : {};
+    // Extract question labels from the worksheet matching this student's grade
+    const gradeLetters = ['A','B','C','D','E','F'];
+    const gradeIndex = (curSess?.grades||[]).indexOf(s.grade);
+    const wsKey = gradeIndex >= 0 ? ('student_worksheet_'+gradeLetters[gradeIndex])
+      : (Object.keys(genC).find(k => k.startsWith('student_worksheet')) || '');
+    const wsQuestions = wsKey && genC[wsKey] ? extractWSQuestions(genC[wsKey]?.cur || '') : {};
     const rubricText = genC['assessment_rubric']?.cur || '';
 
     const subHtml = sub ? `
@@ -1757,8 +1769,9 @@ async function renderAssGrid(){
             <div style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">📥 Submitted ${new Date(sub.submitted_at).toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'})} · ${new Date(sub.submitted_at).toLocaleDateString('en-CA')}</div>
             ${sub.responses ? Object.entries(sub.responses).filter(([,v])=>v&&(Array.isArray(v)?v.length>0:v!=='—'&&v!=='')).map(([q,a])=>`
               <div style="margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid #B0C8E8;">
-                ${wsQuestions[q] ? `<div style="font-size:.8rem;font-weight:600;color:#1E3A6E;margin-bottom:3px;">${wsQuestions[q]}</div>` : ''}
-                <div style="font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">${q}</div>
+                ${wsQuestions[q]
+                  ? `<div style="font-size:.8rem;font-weight:600;color:#1E3A6E;margin-bottom:3px;">${wsQuestions[q]}</div>`
+                  : `<div style="font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">${q}</div>`}
                 <div style="padding:5px 8px;background:white;border-radius:4px;line-height:1.5;">${Array.isArray(a)?a.join(', '):a}</div>
               </div>`).join('') : '<div style="color:var(--muted);">No responses recorded.</div>'}
           </div>
@@ -2797,10 +2810,21 @@ function renderR(){
     const classTag = isUnassigned
       ? `<span style="font-family:'DM Mono',monospace;font-size:.52rem;background:#FEF9C3;color:#854D0E;padding:1px 5px;border-radius:3px;border:1px solid #E8C98A;" title="This student is not assigned to any class">${s.prevClassName ? 'Previously: '+s.prevClassName : 'Unassigned'}</span>`
       : (assignedClass && hasClasses ? `<span style="font-family:'DM Mono',monospace;font-size:.52rem;background:var(--sage-l);color:var(--sage);padding:1px 5px;border-radius:3px;border:1px solid #A8C4AB;">${assignedClass.name}</span>` : '');
-    const assignSelect = hasClasses ? `
+    // Only show assign dropdown inline for unassigned students
+    // Assigned students can be moved via the pencil edit panel
+    const assignSelect = hasClasses && isUnassigned ? `
       <div style="margin-top:7px;">
+        <select class="roster-assign-sel" data-sid="${s.id}" style="font-family:'DM Sans',sans-serif;font-size:.78rem;padding:4px 8px;border:1.5px solid #E8C98A;border-radius:6px;background:var(--cream);width:100%;">
+          <option value="">— Assign to class —</option>
+          ${classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
+        </select>
+      </div>` : '';
+    // Move class selector inside edit panel for assigned students
+    const assignInEdit = hasClasses ? `
+      <div style="margin-top:7px;">
+        <label style="font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;">Move to class</label>
         <select class="roster-assign-sel" data-sid="${s.id}" style="font-family:'DM Sans',sans-serif;font-size:.78rem;padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;background:var(--cream);width:100%;">
-          <option value="">— Move to class —</option>
+          <option value="">— No class —</option>
           ${classes.map(c=>`<option value="${c.id}" ${c.id===s.classId?'selected':''}>${c.name}</option>`).join('')}
         </select>
       </div>` : '';
@@ -2821,6 +2845,7 @@ function renderR(){
       <div class="sie" id="iep-${s.id}">
         <label style="font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin:7px 0 3px;">Learning Profile & Modified Expectations</label>
         <textarea class="sit" id="iept-${s.id}" placeholder="Paste modified expectations...">${s.iep||''}</textarea>
+        ${assignInEdit}
         <div class="brow" style="margin-top:5px;">
           <button class="btn b-amber b-sm roster-save-btn" data-sid="${s.id}">💾 Save</button>
           <button class="btn b-out b-sm roster-cancel-btn" data-sid="${s.id}">Cancel</button>
