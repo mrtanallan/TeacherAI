@@ -414,14 +414,13 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         <label class="chip"><input type="checkbox" id="ck-dt"> 🔀 Differentiation & Modified Expectations</label>
       </div>
       <div class="fi full" style="margin-bottom:13px;">
-        <div onclick="const b=document.getElementById('expBody');const arr=document.getElementById('expArrow');const open=b.style.display!=='none';b.style.display=open?'none':'block';arr.textContent=open?'▸ expand':'▾ collapse';"
-          style="display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;padding:6px 0;">
-          <span style="font-size:.78rem;font-weight:600;color:var(--muted);">🎯 Target Expectations</span>
-          <span style="font-size:.72rem;color:var(--muted);font-weight:400;">(optional — click to expand)</span>
-          <span id="expArrow" style="font-size:.75rem;color:var(--sage);font-weight:600;margin-left:6px;">▸ expand</span>
+        <div onclick="const b=document.getElementById('expBody');const arr=document.getElementById('expArrow');const open=b.style.display!=='none';b.style.display=open?'none':'block';arr.style.transform=open?'rotate(0deg)':'rotate(90deg)';"
+          style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--cream);">
+          <span style="font-size:.78rem;font-weight:500;color:var(--muted);">🎯 Target Expectations <span style="font-weight:400;font-size:.72rem;">(optional)</span></span>
+          <span id="expArrow" style="font-size:.65rem;color:var(--muted);transition:transform .2s;display:inline-block;">▶</span>
         </div>
-        <div id="expBody" style="display:none;">
-          <textarea id="targetExp" style="min-height:52px;" placeholder="Optional — type expectation codes or plain words, e.g. &quot;making inferences, C1.2, text features, writing paragraphs&quot;. Leave blank and AI will pick the most relevant ones."></textarea>
+        <div id="expBody" style="display:none;margin-top:6px;">
+          <textarea id="targetExp" style="min-height:52px;" placeholder='Type expectation codes or plain words — e.g. "making inferences, C1.2, writing paragraphs". Leave blank and AI picks the best ones.'></textarea>
         </div>
       </div>
       <button class="btn b-ink b-full" id="genBtn" onclick="generate()">✨ Generate Lesson</button>
@@ -666,7 +665,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
   <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a> &nbsp;·&nbsp;
   <a href="mailto:teacheraicanada@gmail.com" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
-  <span style="font-family:DM Mono,monospace;font-size:.65rem;">v2.5 · Mar 25 2026</span>
+  <span style="font-family:DM Mono,monospace;font-size:.65rem;">v2.6 · Mar 25 2026</span>
 </div>
 
 </div><!-- end appScreen -->
@@ -900,7 +899,7 @@ function showLoading(text='Loading...', showProgress=false) {
   }
 }
 function setProgress(pct, stageText) {
-  document.getElementById('loadingProgressBar').style.width = pct + '%';
+  if (pct !== null && pct !== undefined) document.getElementById('loadingProgressBar').style.width = pct + '%';
   if (stageText) document.getElementById('loadingStage').textContent = stageText;
 }
 function hideLoading() {
@@ -1502,6 +1501,24 @@ function gs(n) {
 function unlock(){for(let i=2;i<=5;i++){const e=document.getElementById('ws'+i);e.classList.remove('locked');e.classList.add('done');}}
 
 // ============================================================
+// RETRY FETCH — handles 529 overload with exponential backoff
+// ============================================================
+async function retryAuthFetch(url, options, maxRetries=3) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await authFetch(url, options);
+    if (res.status !== 529 && res.status !== 529) return res;
+    // 529 = Anthropic overloaded. Also retry on 529.
+    const data = await res.clone().json().catch(() => ({}));
+    const isOverloaded = res.status === 529 || (data?.error?.type === 'overloaded_error');
+    if (!isOverloaded || attempt === maxRetries) return res;
+    const wait = [5000, 12000, 25000][attempt] || 25000;
+    setProgress(null, 'AI service is busy — trying again in ' + Math.round(wait/1000) + ' seconds...');
+    await new Promise(r => setTimeout(r, wait));
+    setProgress(null, 'Retrying...');
+  }
+}
+
+// ============================================================
 // GENERATE
 // ============================================================
 async function generate() {
@@ -1653,10 +1670,15 @@ CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksh
         setProgress(Math.min(progVal, 85), stage ? stage[1] : null);
       }
     }, 600);
-    const res=await authFetch('/api/generate',{method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTok,messages:[{role:'user',content:prompt}]})});
+    const res=await retryAuthFetch('/api/generate',{method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTok,messages:[{role:'user',content:prompt}]})});
     clearInterval(progInterval);
     setProgress(90, 'Processing response...');
-    if(!res.ok) throw new Error(`Server error ${res.status}`);
+    if(!res.ok){
+      const errData=await res.json().catch(()=>({}));
+      const msg=errData?.error?.message||('Server error '+res.status);
+      if(res.status===529) throw new Error('The AI service is temporarily busy. Please wait a moment and try again — this usually resolves in under a minute.');
+      throw new Error(msg);
+    }
     const data=await res.json();
     if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
     setProgress(95, 'Building lesson blocks...');
@@ -3484,9 +3506,12 @@ async function deleteSession(sessId) {
   showLoading('Deleting session...');
   await db.from('student_marks').delete().eq('session_id', sessId);
   await db.from('assessment_sessions').delete().eq('id', sessId);
-  await loadUserData();
+  // Remove from local state immediately so re-render is instant
+  sessions = sessions.filter(s => s.id !== sessId);
   renderTracker();
   hideLoading();
+  // Reload in background to confirm sync
+  loadUserData().then(() => renderTracker());
 }
 
 async function updateMark(sessId, stuId, newLevel, btn) {
