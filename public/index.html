@@ -2083,8 +2083,9 @@ async function renderAssGrid(){
           <button class="lb L4" data-sid="${s.id}" data-level="L4+">4+</button>
         </div>
       </div>
-      <div style="display:flex;gap:7px;margin-top:7px;">
-        <input class="ni" type="text" placeholder="Observation notes..." id="nt-${s.id}" data-sid="${s.id}">
+      <div style="display:flex;gap:7px;margin-top:7px;align-items:center;">
+        <input class="ni" type="text" placeholder="Observation notes..." id="nt-${s.id}" data-sid="${s.id}" style="flex:1;">
+        <button class="save-one-btn btn b-out b-sm" data-sid="${s.id}" style="font-size:.7rem;flex-shrink:0;white-space:nowrap;">💾 Save</button>
       </div>
     </div>`;
   }).join('');
@@ -2138,6 +2139,12 @@ async function renderAssGrid(){
       this.textContent = open ? '📏 View Rubric' : '📏 Hide Rubric';
     });
   });
+  // Attach per-student save listeners
+  document.querySelectorAll('.save-one-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      await saveOneStu(this.dataset.sid, this);
+    });
+  });
   // Attach auto-mark button listeners
   document.querySelectorAll('.automark-btn').forEach(btn => {
     btn.addEventListener('click', async function() {
@@ -2152,7 +2159,11 @@ async function renderAssGrid(){
       // Find the submission for this student from the in-memory map
       const sub = submissionsByStudent[sid];
       if (!sub) return;
-      await autoMarkStudent(sid, studentObj, sub.responses, answerKey, rubric, this);
+      // Get total question count from worksheet so AI knows how many were skipped
+      const wsKeyForQ = gradeIndex >= 0 ? ('student_worksheet_'+gradeLetters[gradeIndex]) : 'student_worksheet';
+      const wsTextForQ = genC[wsKeyForQ]?.cur || '';
+      const totalQuestions = wsTextForQ ? Object.keys(extractWSQuestions(wsTextForQ)).length : 0;
+      await autoMarkStudent(sid, studentObj, sub.responses, answerKey, rubric, this, totalQuestions);
     });
   });
 }
@@ -2182,7 +2193,7 @@ function sn(sid){if(!curSess.marks[sid])curSess.marks[sid]={};curSess.marks[sid]
 // ============================================================
 // AUTO-MARK — AI-suggested level from student responses
 // ============================================================
-async function autoMarkStudent(sid, studentObj, responses, answerKey, rubric, btn) {
+async function autoMarkStudent(sid, studentObj, responses, answerKey, rubric, btn, totalQuestions) {
   const resultDiv = document.getElementById('am-result-'+sid);
   if (!resultDiv) return;
 
@@ -2193,10 +2204,15 @@ async function autoMarkStudent(sid, studentObj, responses, answerKey, rubric, bt
   const grade = studentObj.grade || '';
 
   // Build readable responses string
-  const responsesText = Object.entries(responses)
-    .filter(([,v]) => v && (Array.isArray(v) ? v.length > 0 : v !== '—' && v !== ''))
+  const answeredEntries = Object.entries(responses)
+    .filter(([,v]) => v && (Array.isArray(v) ? v.length > 0 : v !== '—' && v !== ''));
+  const answeredCount = answeredEntries.length;
+  const responsesText = answeredEntries
     .map(([q,a]) => q + ': ' + (Array.isArray(a) ? a.join(', ') : a))
     .join('\n');
+  const completionNote = totalQuestions > 0
+    ? 'Student answered ' + answeredCount + ' of ' + totalQuestions + ' questions. ' + (totalQuestions - answeredCount) + ' question(s) were left blank.'
+    : '';
 
   const rubricSection = rubric ? 'RUBRIC:\n' + rubric + '\n' : '';
 
@@ -2204,7 +2220,7 @@ async function autoMarkStudent(sid, studentObj, responses, answerKey, rubric, bt
     '\n\nSTUDENT: ' + studentName + ' (' + grade + ')' +
     '\n\nANSWER KEY:\n' + answerKey +
     '\n\n' + rubricSection +
-    '\nSTUDENT RESPONSES:\n' + responsesText +
+    '\n' + completionNote + '\nSTUDENT RESPONSES:\n' + responsesText +
     '\n\nRespond ONLY with valid JSON in this exact format (no markdown fences):' +
     '\n{' +
     '\n  "suggested_level": "L3",' +
@@ -2342,6 +2358,41 @@ async function autoMarkStudent(sid, studentObj, responses, answerKey, rubric, bt
     btn.textContent = '🤖 Auto-mark';
   }
   btn.disabled = false;
+}
+
+async function saveOneStu(sid, btn) {
+  if (!curSess.marks[sid]?.level) { alert('Select a level for this student first.'); return; }
+  const origText = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳';
+  try {
+    let sessId = curSess.id;
+    if (!sessId) {
+      // Create session first if it doesn't exist
+      const {data:existing} = await db.from('assessment_sessions')
+        .select('id').eq('teacher_id', currentUser.id)
+        .eq('task', curSess.task).eq('date', curSess.date).maybeSingle();
+      if (existing) { sessId = existing.id; curSess.id = sessId; }
+      else {
+        const {data:s} = await db.from('assessment_sessions').insert({
+          teacher_id:currentUser.id, task:curSess.task, subject:curSess.subject,
+          strand:curSess.strand, grades:curSess.grades, date:curSess.date,
+          class_id: activeClassId || null, expectations: genC['_expectations'] || []
+        }).select().single();
+        if (s) { sessId = s.id; curSess.id = sessId; }
+      }
+    }
+    if (!sessId) throw new Error('Could not create session');
+    const m = curSess.marks[sid];
+    // Upsert this student's mark
+    await db.from('student_marks').upsert({
+      session_id: sessId, student_id: sid, level: m.level, notes: m.notes || ''
+    }, { onConflict: 'session_id,student_id' });
+    btn.textContent = '✅';
+    setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 1500);
+  } catch(e) {
+    alert('Error saving: ' + e.message);
+    btn.textContent = origText; btn.disabled = false;
+  }
 }
 
 async function saveAss(){
@@ -4328,18 +4379,33 @@ function renderExpectationsTracker() {
       </div>
       <div style="display:flex;flex-direction:column;gap:7px;">
         ${items.sort((a,b)=>a.exp.code.localeCompare(b.exp.code)).map(item => `
-        <div style="display:grid;grid-template-columns:60px 1fr auto;gap:10px;align-items:center;padding:8px 10px;background:var(--cream);border-radius:7px;border:1px solid var(--border);">
-          <div style="font-family:DM Mono,monospace;font-size:.7rem;font-weight:600;color:${strandColors[item.exp.strand||item.exp.code[0]]};">${item.exp.code}</div>
+        <div style="display:grid;grid-template-columns:60px 1fr auto;gap:10px;align-items:start;padding:8px 10px;background:var(--cream);border-radius:7px;border:1px solid var(--border);" id="exprow-${item.exp.code.replace('.','_')}">
+          <div style="font-family:DM Mono,monospace;font-size:.7rem;font-weight:600;color:${strandColors[item.exp.strand||item.exp.code[0]]};padding-top:1px;">${item.exp.code}</div>
           <div>
             <div style="font-size:.82rem;color:var(--ink);">${item.exp.desc}</div>
-            <div style="font-size:.7rem;color:var(--muted);margin-top:1px;">${item.exp.overall} · ${item.lessons.slice(0,3).join(', ')}${item.lessons.length>3?'...':''}</div>
+            <div style="font-size:.7rem;color:var(--muted);margin-top:2px;">
+              ${item.exp.band ? 'Grades ' + item.exp.band : ''}${item.exp.band && item.exp.grade ? ' · ' : ''}${item.exp.grade || ''}
+            </div>
           </div>
-          <div style="text-align:right;">
-            <div style="background:var(--sage-l);border:1px solid #A8C4AB;border-radius:5px;padding:2px 8px;font-family:DM Mono,monospace;font-size:.62rem;color:var(--sage);white-space:nowrap;">✓ Covered · ${item.count}×</div>
+          <div style="text-align:right;flex-shrink:0;">
+            <button onclick="toggleExpLessons('${item.exp.code.replace('.','_')}')"
+              style="background:var(--sage-l);border:1px solid #A8C4AB;border-radius:5px;padding:3px 8px;font-family:DM Mono,monospace;font-size:.62rem;color:var(--sage);white-space:nowrap;cursor:pointer;">
+              ✓ Covered · ${item.count}× ▾
+            </button>
+            <div id="explessons-${item.exp.code.replace('.','_')}" style="display:none;margin-top:5px;text-align:left;background:white;border:1px solid #A8C4AB;border-radius:5px;padding:6px 9px;">
+              <div style="font-family:DM Mono,monospace;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--sage);margin-bottom:5px;">Lessons</div>
+              ${item.lessons.map(l => '<div style="font-size:.75rem;color:var(--ink);padding:2px 0;border-bottom:1px solid var(--border);">' + l + '</div>').join('')}
+            </div>
           </div>
         </div>`).join('')}
       </div>
     </div>`).join('')}`;
+}
+
+function toggleExpLessons(codeKey) {
+  const el = document.getElementById('explessons-' + codeKey);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 initApp();
