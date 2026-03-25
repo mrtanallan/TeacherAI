@@ -483,8 +483,15 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
           <span style="font-size:.78rem;font-weight:500;color:var(--muted);">🎯 Target Expectations <span style="font-weight:400;font-size:.72rem;">(optional)</span></span>
           <span id="expArrow" style="font-size:.65rem;color:var(--muted);transition:transform .2s;display:inline-block;">▶</span>
         </div>
-        <div id="expBody" style="display:none;margin-top:6px;">
-          <textarea id="targetExp" style="min-height:52px;" placeholder='Type expectation codes or plain words — e.g. "making inferences, C1.2, writing paragraphs". Leave blank and AI picks the best ones.'></textarea>
+        <div id="expBody" style="display:none;margin-top:8px;">
+          <textarea id="targetExp" style="min-height:52px;" placeholder='e.g. C1.3, D2.1 or "making inferences, writing paragraphs"'></textarea>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:7px;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--ink);">
+              <input type="checkbox" id="expPinOnly" style="accent-color:var(--sage);width:13px;height:13px;">
+              <span><strong>Pin only these</strong> — lesson is built around exactly these expectations, no others added</span>
+            </label>
+          </div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:5px;">Leave blank and AI picks the best fit. Specify codes to guarantee coverage — useful when finishing report card expectations.</div>
         </div>
       </div>
       <button class="btn b-ink b-full" id="genBtn" onclick="generate()">✨ Generate Lesson</button>
@@ -1870,9 +1877,12 @@ async function generate() {
 
   // Expectations — match teacher input or let AI decide
   const targetExpInput = document.getElementById('targetExp')?.value?.trim() || '';
+  const pinOnly = document.getElementById('expPinOnly')?.checked || false;
   const preMatchedExp = targetExpInput ? matchExpectations(targetExpInput, grades) : [];
   const expHint = preMatchedExp.length
-    ? 'TEACHER-REQUESTED EXPECTATIONS (must be covered):\n' + preMatchedExp.map(e=>`${e.code} — ${e.desc} [${e.overall}, Grades ${e.band}]`).join('\n')
+    ? (pinOnly
+        ? 'CRITICAL — PINNED EXPECTATIONS: The teacher has pinned specific expectations. Return ONLY these in your expectations array — do not add any others. Build the entire lesson around these:\n' + preMatchedExp.map(e=>`${e.code} — ${e.desc} [${e.overall}, Grades ${e.band}]`).join('\n')
+        : 'CRITICAL — REQUIRED EXPECTATIONS: You MUST include ALL of these expectations in your response. Do not omit any of them. You may add 1-2 closely related ones if needed:\n' + preMatchedExp.map(e=>`${e.code} — ${e.desc} [${e.overall}, Grades ${e.band}]`).join('\n'))
     : 'EXPECTATIONS: Identify the 2-4 most relevant Ontario 2023 Language expectations for this topic and grade.';
 
   const strands=[];
@@ -1982,7 +1992,7 @@ ${wsLines}
 - assessment_rubric: Ontario Achievement Chart. Use ## for each category (e.g. "## Knowledge & Understanding", "## Communication", "## Application"). Under each category use ### Level 1, ### Level 2, ### Level 3, ### Level 4 with one sentence describing achievement at that level.${iepStudents.length?' Include a modified criteria category for IEP students.':''}
 - differentiation_tips: per-grade and per-student strategies
 ${akLines}
-- expectations: JSON array of expectation objects. Use Ontario 2023 Language curriculum ONLY. Codes use strand-letter format: C2.3, D1.1, B3.2 — NEVER grade-prefixed (not 4.R1.2). Each object must have: "code" (e.g. "C2.3"), "desc" (specific expectation text for the grade), "strand" (single letter A/B/C/D), "band" (grade band: "1-3", "4-6", or "7-8"). IMPORTANT: The teacher has selected these literacy strands for this lesson: [${strands.join(', ')}]. You MUST include at least one expectation from each selected strand where a meaningful connection to the topic exists. Primary strand should reflect the topic focus (writing topic → Strand D, reading/inference → Strand C, oral/media → Strand A). For secondary strands: if Reading is selected with a writing topic, include a Strand C expectation about how reading supports writing (e.g. understanding text models). If Media Literacy is selected, include a Strand A expectation connecting media to the topic (e.g. using media texts as mentor texts, or composing for a media audience). Only use Strand B when grammar/language foundations are genuinely central. Return 2-5 expectations total. ${splitExpNote} ${preMatchedExp.length?'Prioritise teacher-requested expectations.':''}
+- expectations: JSON array of expectation objects. Use Ontario 2023 Language curriculum ONLY. Codes use strand-letter format: C2.3, D1.1, B3.2 — NEVER grade-prefixed (not 4.R1.2). Each object must have: "code" (e.g. "C2.3"), "desc" (specific expectation text for the grade), "strand" (single letter A/B/C/D), "band" (grade band: "1-3", "4-6", or "7-8"). ${pinOnly && preMatchedExp.length ? 'CRITICAL: The teacher has PINNED specific expectations. Return ONLY these exact expectations — do not add any others: ' + preMatchedExp.map(e=>e.code).join(', ') + '. Build the lesson around these.' : preMatchedExp.length ? 'CRITICAL: The teacher has specified these expectations and you MUST include ALL of them in your response — ' + preMatchedExp.map(e=>e.code).join(', ') + '. You may add 1-2 additional closely related expectations if needed.' : 'Consider ALL four strands (A: Literacy Connections, B: Foundations of Language, C: Comprehension, D: Composition) and pick whichever 2-5 expectations are MOST RELEVANT. The teacher has selected these literacy strands: [' + strands.join(', ') + ']. Include at least one expectation per selected strand where a genuine connection exists. For writing topics pick Strand D, reading/inference pick Strand C, oral/media pick A.'} ${splitExpNote}
 CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksheet must be its own top-level key.`;
 
   let progInterval = null;
