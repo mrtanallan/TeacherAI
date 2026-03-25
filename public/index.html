@@ -73,6 +73,7 @@ nav {
 #tr-lessons:checked ~ #appScreen #pg-lessons { display: block; }
 #tr-rc:checked ~ #appScreen #pg-rc { display: block; }
 #tr-exp:checked ~ #appScreen #pg-exp { display: block; }
+#tr-account:checked ~ #appScreen #pg-account { display: block; }
 
 /* WORKFLOW */
 .wf { display: flex; align-items: center; background: var(--paper); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 16px; margin-bottom: 20px; overflow-x: auto; gap: 0; }
@@ -294,8 +295,15 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <div class="auth-msg" id="authMsg"></div>
     <div id="loginForm">
       <div class="fi" style="margin-bottom:12px;"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
-      <div class="fi" style="margin-bottom:20px;"><label>Password</label><input type="password" id="loginPass" placeholder="Your password" onkeydown="if(event.key==='Enter')signIn()"></div>
+      <div class="fi" style="margin-bottom:6px;"><label>Password</label><input type="password" id="loginPass" placeholder="Your password" onkeydown="if(event.key==='Enter')signIn()"></div>
+      <div style="text-align:right;margin-bottom:18px;"><button onclick="switchAuth('reset',this)" style="background:none;border:none;font-size:.78rem;color:var(--muted);cursor:pointer;text-decoration:underline;padding:0;">Forgot password?</button></div>
       <button class="btn b-ink b-full" onclick="signIn()">Sign In →</button>
+    </div>
+    <div id="resetForm" style="display:none;">
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px;">Enter your email and we'll send you a reset link.</div>
+      <div class="fi" style="margin-bottom:18px;"><label>Email</label><input type="email" id="resetEmail" placeholder="your@email.com" onkeydown="if(event.key==='Enter')sendReset()"></div>
+      <button class="btn b-ink b-full" onclick="sendReset()">Send Reset Link →</button>
+      <div style="text-align:center;margin-top:12px;"><button onclick="switchAuth('login',document.querySelector('.auth-tab.on'))" style="background:none;border:none;font-size:.78rem;color:var(--muted);cursor:pointer;text-decoration:underline;">← Back to Sign In</button></div>
     </div>
     <div id="signupForm" style="display:none;">
       <div class="fi" style="margin-bottom:12px;"><label>Full Name</label><input type="text" id="signupName" placeholder="Your name"></div>
@@ -303,7 +311,14 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       <div class="fi" style="margin-bottom:20px;"><label>Password</label><input type="password" id="signupPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')signUp()"></div>
       <button class="btn b-ink b-full" onclick="signUp()">Create Account →</button>
     </div>
-    <div style="text-align:center;margin-top:16px;font-size:0.75rem;color:var(--muted);">🇨🇦 Data stored in Canada · No student data sent to AI · MFIPPA-conscious design<br><span style="margin-top:6px;display:block;"><a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> · <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a></span></div>
+    <div style="margin-top:20px;margin-bottom:4px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="flex:1;height:1px;background:var(--border);"></div><span style="font-size:.72rem;color:var(--muted);white-space:nowrap;">or</span><div style="flex:1;height:1px;background:var(--border);"></div></div>
+      <button onclick="signInWithGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;border:1.5px solid var(--border);border-radius:8px;background:white;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;color:var(--ink);">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+    <div style="text-align:center;margin-top:14px;font-size:0.75rem;color:var(--muted);">🇨🇦 Data stored in Canada · No student data sent to AI · MFIPPA-conscious design<br><span style="margin-top:6px;display:block;"><a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> · <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a></span></div>
   </div>
 </div>
 
@@ -314,6 +329,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 <input type="radio" class="tab-r" name="tab" id="tr-lessons">
 <input type="radio" class="tab-r" name="tab" id="tr-rc">
 <input type="radio" class="tab-r" name="tab" id="tr-exp">
+<input type="radio" class="tab-r" name="tab" id="tr-account">
 
 <div id="appScreen" style="display:none;">
 <textarea id="ctx" style="display:none;"></textarea>
@@ -328,7 +344,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <label class="tab" for="tr-exp"><span class="tab-full">🎯 Expectations</span><span class="tab-short">🎯 Exp.</span></label>
   </div>
   <div class="nav-user">
-    <span class="nav-email" id="navEmail"></span>
+    <label class="tab" for="tr-account" style="padding:5px 10px;font-size:.75rem;color:#9CA3AF;" title="Account">👤</label>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
   </div>
 </nav>
@@ -338,24 +354,36 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 <!-- ===== DAILY WORKFLOW ===== -->
 <div class="page" id="pg-plan">
 
-  <!-- First-run welcome — only shown once, until teacher dismisses or adds first student -->
-  <div id="welcomeBanner" style="display:none;background:linear-gradient(135deg,#1C3A2B,#2D5C38);border-radius:12px;padding:22px 24px;margin-bottom:20px;color:white;">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-      <div style="flex:1;">
-        <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin-bottom:6px;">👋 Welcome to TeacherAI</div>
-        <div style="font-size:.86rem;opacity:.9;line-height:1.6;margin-bottom:14px;">Your Ontario SSC teaching assistant. Generate a complete lesson — plan, worksheet, rubric, and slides — in under a minute.</div>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:.8rem;opacity:.8;margin-bottom:16px;">
-          <span>① Set your grade &amp; topic below</span>
-          <span>② Generate your lesson</span>
-          <span>③ Share worksheet link with students</span>
-          <span>④ Assess &amp; give feedback</span>
+  <!-- Onboarding banner — shown to new teachers until they complete setup -->
+  <div id="welcomeBanner" style="display:none;margin-bottom:20px;">
+    <div style="background:linear-gradient(135deg,#1C3A2B,#2D5C38);border-radius:12px;padding:22px 24px;color:white;margin-bottom:12px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div style="flex:1;">
+          <div style="font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;margin-bottom:4px;">👋 Welcome to TeacherAI</div>
+          <div style="font-size:.86rem;opacity:.85;line-height:1.6;">Ontario's AI teaching platform for SSC &amp; split-grade classrooms. Let's get you set up in 3 quick steps.</div>
         </div>
-        <div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-          <div style="font-size:.84rem;"><strong>Start here:</strong> Add your students to Class Roster so worksheets link to their names automatically.</div>
-          <label class="tab" for="tr-roster" style="background:rgba(255,255,255,0.2);color:white;border-radius:6px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="dismissWelcomeBanner()">👥 Go to Class Roster →</label>
-        </div>
+        <button onclick="dismissWelcomeBanner()" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:1.1rem;flex-shrink:0;padding:0;" title="Dismiss">✕</button>
       </div>
-      <button onclick="dismissWelcomeBanner()" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:1.2rem;flex-shrink:0;padding:0;line-height:1;" title="Dismiss">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px;" id="onboardingSteps">
+      <div class="card onboard-step" id="ostep1" style="border-left:3px solid var(--sage);cursor:pointer;" onclick="document.getElementById('tr-roster').checked=true;dismissWelcomeBanner();">
+        <div style="font-size:1.4rem;margin-bottom:6px;">👥</div>
+        <div style="font-weight:600;font-size:.88rem;margin-bottom:3px;">Step 1 — Add Students</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">Go to Class Roster and add your students. Worksheets will link to their names automatically.</div>
+        <div style="margin-top:10px;font-size:.75rem;color:var(--sage);font-weight:600;">Go to Class Roster →</div>
+      </div>
+      <div class="card onboard-step" id="ostep2" style="border-left:3px solid var(--amber);">
+        <div style="font-size:1.4rem;margin-bottom:6px;">✨</div>
+        <div style="font-weight:600;font-size:.88rem;margin-bottom:3px;">Step 2 — Generate a Lesson</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">Pick a topic below, select your grade(s), and hit Generate. You'll get a lesson plan, worksheet, reading resource, and rubric.</div>
+        <div style="margin-top:10px;font-size:.75rem;color:var(--amber);font-weight:600;">Complete Step 1 first</div>
+      </div>
+      <div class="card onboard-step" id="ostep3" style="border-left:3px solid var(--blue);">
+        <div style="font-size:1.4rem;margin-bottom:6px;">🔗</div>
+        <div style="font-weight:600;font-size:.88rem;margin-bottom:3px;">Step 3 — Share with Students</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">After generating, share the student worksheet link in Google Classroom. Students submit online — you see responses instantly.</div>
+        <div style="margin-top:10px;font-size:.75rem;color:var(--blue);font-weight:600;">Complete Steps 1 & 2 first</div>
+      </div>
     </div>
   </div>
 
@@ -449,6 +477,16 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         <div id="expBody" style="display:none;margin-top:6px;">
           <textarea id="targetExp" style="min-height:52px;" placeholder='Type expectation codes or plain words — e.g. "making inferences, C1.2, writing paragraphs". Leave blank and AI picks the best ones.'></textarea>
         </div>
+      </div>
+      <div id="usageMeter" style="display:none;margin-bottom:10px;padding:9px 13px;background:var(--cream);border:1px solid var(--border);border-radius:7px;font-size:.78rem;color:var(--muted);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+          <span>📊 Lessons this month</span>
+          <span id="usageCount" style="font-family:DM Mono,monospace;font-weight:600;color:var(--ink);">—</span>
+        </div>
+        <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+          <div id="usageBar" style="height:100%;background:var(--sage);border-radius:2px;width:0%;transition:width .4s;"></div>
+        </div>
+        <div id="usageNote" style="margin-top:4px;font-size:.72rem;"></div>
       </div>
       <button class="btn b-ink b-full" id="genBtn" onclick="generate()">✨ Generate Lesson</button>
       <div style="margin-top:13px;padding-top:11px;border-top:1px solid var(--border);font-size:.75rem;color:var(--muted);">🍁 Aligned to the <strong>Ontario Curriculum</strong> · Student names anonymized before AI processing · 🇨🇦 Data stored in Canada</div>
@@ -732,7 +770,54 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
   <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a> &nbsp;·&nbsp;
   <a href="mailto:teacheraicanada@gmail.com" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
-  <span style="font-family:DM Mono,monospace;font-size:.65rem;">v3.2 · Mar 25 2026</span>
+  <span style="font-family:DM Mono,monospace;font-size:.65rem;">v3.3 · Mar 25 2026</span>
+</div>
+
+<!-- ===== ACCOUNT ===== -->
+<div class="page" id="pg-account">
+  <div class="ph"><h1>My <em>Account</em></h1><p>Manage your profile and account settings.</p></div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="ct">👤 Profile</div>
+    <div class="fg" style="margin-bottom:14px;">
+      <div class="fi s2">
+        <label>Full Name</label>
+        <input type="text" id="acct-name" placeholder="Your name">
+      </div>
+      <div class="fi s2">
+        <label>Email</label>
+        <input type="email" id="acct-email" placeholder="your@email.com" disabled style="opacity:.6;background:var(--cream);">
+      </div>
+    </div>
+    <button class="btn b-sage b-sm" onclick="saveProfile()">💾 Save Name</button>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="ct">🔑 Change Password</div>
+    <div class="fg" style="margin-bottom:14px;">
+      <div class="fi">
+        <label>New Password</label>
+        <input type="password" id="acct-newpass" placeholder="Min 6 characters">
+      </div>
+      <div class="fi">
+        <label>Confirm Password</label>
+        <input type="password" id="acct-confirmpass" placeholder="Repeat new password">
+      </div>
+    </div>
+    <button class="btn b-sage b-sm" onclick="changePassword()">🔑 Update Password</button>
+    <div id="acct-pass-msg" style="margin-top:8px;font-size:.78rem;display:none;"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="ct">📊 Usage</div>
+    <div id="acct-usage" style="color:var(--muted);font-size:.83rem;">Loading...</div>
+  </div>
+
+  <div class="card" style="border:1.5px solid var(--rust);">
+    <div class="ct" style="color:var(--rust);">⚠️ Danger Zone</div>
+    <div style="font-size:.83rem;color:var(--muted);margin-bottom:12px;">Permanently delete your account and all data. This cannot be undone. Student data will be removed within 30 days as per our Privacy Policy.</div>
+    <button class="btn b-sm" onclick="requestAccountDeletion()" style="background:var(--rust);color:white;border:none;">Delete My Account</button>
+  </div>
 </div>
 
 </div><!-- end appScreen -->
@@ -994,15 +1079,34 @@ async function authFetch(url, options={}) {
 // ============================================================
 function switchAuth(mode, el) {
   document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');
+  if (el && el.classList && el.classList.contains('auth-tab')) el.classList.add('on');
   document.getElementById('loginForm').style.display = mode==='login'?'block':'none';
   document.getElementById('signupForm').style.display = mode==='signup'?'block':'none';
+  document.getElementById('resetForm').style.display = mode==='reset'?'block':'none';
   document.getElementById('authErr').style.display='none';
   document.getElementById('authMsg').style.display='none';
 }
 
+async function sendReset() {
+  const email = document.getElementById('resetEmail').value.trim();
+  if (!email) { showAuthErr('Enter your email address.'); return; }
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/?reset=1'
+  });
+  if (error) { showAuthErr(error.message); return; }
+  showAuthMsg('Reset link sent! Check your email — it may take a minute to arrive.');
+}
+
 function showAuthErr(msg) { const e=document.getElementById('authErr'); e.textContent=msg; e.style.display='block'; }
 function showAuthMsg(msg) { const e=document.getElementById('authMsg'); e.textContent=msg; e.style.display='block'; }
+
+async function signInWithGoogle() {
+  const { error } = await db.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
+  if (error) showAuthErr('Google sign in failed: ' + error.message);
+}
 
 async function signIn() {
   const email=document.getElementById('loginEmail').value.trim();
@@ -1050,6 +1154,7 @@ async function initApp() {
     currentUser = user;
     showLoading('Loading your data...');
     try { await loadUserData(); } catch(e){ console.error(e); }
+    loadUsageMeter();
     hideLoading();
     showApp();
   }
@@ -1097,6 +1202,7 @@ function showApp() {
       // Refresh relevant data when switching to each tab
       if (this.id === 'tr-assess') { renderTracker(); loadSubmissions(); renderAssessClassTabs(); }
       if (this.id === 'tr-rc') { populateRCFilters(); }
+      if (this.id === 'tr-account') { loadAccountPage(); }
       if (this.id === 'tr-roster') { renderClassTabs(); renderR(); }
       if (this.id === 'tr-lessons') { renderLessonsList(); }
       if (this.id === 'tr-rc') { /* report cards — no refresh needed */ }
@@ -1574,6 +1680,67 @@ function gs(n) {
 function unlock(){for(let i=2;i<=5;i++){const e=document.getElementById('ws'+i);e.classList.remove('locked');e.classList.add('done');}}
 
 // ============================================================
+// USAGE METER
+// ============================================================
+async function loadUsageMeter() {
+  try {
+    const meter = document.getElementById('usageMeter');
+    const countEl = document.getElementById('usageCount');
+    const barEl = document.getElementById('usageBar');
+    const noteEl = document.getElementById('usageNote');
+    if (!meter || !countEl) return;
+
+    // Get plan
+    const { data: plan } = await db.from('user_plans')
+      .select('plan, monthly_limit, sub_status')
+      .eq('user_id', currentUser.id)
+      .single();
+
+    const limit = plan?.monthly_limit ?? 0;
+    const planName = plan?.plan ?? 'free';
+
+    // Count lessons this month
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1); startOfMonth.setHours(0,0,0,0);
+    const { count } = await db.from('usage_log')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id)
+      .eq('call_type', 'lesson')
+      .gte('created_at', startOfMonth.toISOString());
+
+    const used = count || 0;
+    meter.style.display = 'block';
+
+    if (limit === 0) {
+      // Unlimited (free beta or admin)
+      countEl.textContent = used + ' generated';
+      if (barEl) barEl.style.width = '0%';
+      if (noteEl) noteEl.textContent = 'Unlimited — beta access';
+      if (noteEl) noteEl.style.color = 'var(--sage)';
+    } else {
+      const pct = Math.min(100, Math.round(used / limit * 100));
+      countEl.textContent = used + ' / ' + limit;
+      if (barEl) {
+        barEl.style.width = pct + '%';
+        barEl.style.background = pct >= 90 ? 'var(--rust)' : pct >= 70 ? 'var(--amber)' : 'var(--sage)';
+      }
+      if (noteEl) {
+        if (pct >= 100) {
+          noteEl.textContent = 'Limit reached — upgrade to Pro for unlimited access';
+          noteEl.style.color = 'var(--rust)';
+        } else if (pct >= 80) {
+          noteEl.textContent = (limit - used) + ' lessons remaining this month';
+          noteEl.style.color = 'var(--amber)';
+        } else {
+          noteEl.textContent = planName === 'pro' ? '✓ Pro plan' : 'Free beta';
+          noteEl.style.color = 'var(--muted)';
+        }
+      }
+    }
+  } catch(e) { /* silent — usage meter is non-critical */ }
+}
+
+// ============================================================
 // RETRY FETCH — handles 529 overload with exponential backoff
 // ============================================================
 async function retryAuthFetch(url, options, maxRetries=3) {
@@ -1748,13 +1915,14 @@ CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksh
         setProgress(Math.min(progVal, 85), stage ? stage[1] : null);
       }
     }, 600);
-    const res=await retryAuthFetch('/api/generate',{method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTok,messages:[{role:'user',content:prompt}]})});
+    const res=await retryAuthFetch('/api/generate',{method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTok,call_type:'lesson',topic,grades,messages:[{role:'user',content:prompt}]})});
     clearInterval(progInterval);
     setProgress(90, 'Processing response...');
     if(!res || !res.ok){
       const status = res?.status || 0;
       const errData = res ? await res.json().catch(()=>({})) : {};
       if(status===529) throw new Error('The AI service is currently at capacity. Please try again in a minute.');
+      if(errData?.error === 'monthly_limit_reached') throw new Error(errData.message || 'Monthly lesson limit reached. Please upgrade to continue.');
       throw new Error(errData?.error?.message || ('Server error ' + status));
     }
     const data=await res.json();
@@ -1789,6 +1957,7 @@ CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksh
     genC['_expectations'] = lessonExpectations;
 
     resetLinkCache();
+    loadUsageMeter();
     buildEditBlocks([...outputKeys,...answerKeyKeys],gradeDesc,subj,topic,lessonExpectations);
     buildShareCards(outputKeys);
     setProgress(100, 'Done!');
@@ -4541,6 +4710,76 @@ function renderExpectationsTracker() {
         </div>`).join('')}
       </div>
     </div>`).join('')}`;
+}
+
+// ============================================================
+// ACCOUNT PAGE
+// ============================================================
+async function loadAccountPage() {
+  // Fill email
+  const emailEl = document.getElementById('acct-email');
+  if (emailEl && currentUser) emailEl.value = currentUser.email || '';
+
+  // Fill name from profile
+  try {
+    const {data:profile} = await db.from('profiles').select('full_name').eq('id', currentUser.id).single();
+    const nameEl = document.getElementById('acct-name');
+    if (nameEl && profile?.full_name) nameEl.value = profile.full_name;
+  } catch(e) { /* silent */ }
+
+  // Usage stats
+  const usageEl = document.getElementById('acct-usage');
+  if (usageEl) {
+    try {
+      const {count:lessonCount} = await db.from('lessons').select('*', {count:'exact',head:true}).eq('teacher_id', currentUser.id);
+      const {count:sessionCount} = await db.from('assessment_sessions').select('*', {count:'exact',head:true}).eq('teacher_id', currentUser.id);
+      const {count:studentCount} = await db.from('students').select('*', {count:'exact',head:true}).eq('teacher_id', currentUser.id);
+      usageEl.innerHTML =
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">' +
+        '<div class="sc2"><div class="sn2">' + (lessonCount||0) + '</div><div class="sl">Lessons</div></div>' +
+        '<div class="sc2"><div class="sn2">' + (sessionCount||0) + '</div><div class="sl">Assessments</div></div>' +
+        '<div class="sc2"><div class="sn2">' + (studentCount||0) + '</div><div class="sl">Students</div></div>' +
+        '</div>' +
+        '<div style="font-size:.72rem;color:var(--muted);margin-top:10px;">Member since ' + new Date(currentUser.created_at).toLocaleDateString('en-CA') + ' · Account: Free Beta</div>';
+    } catch(e) { usageEl.textContent = 'Could not load usage data.'; }
+  }
+}
+
+async function saveProfile() {
+  const name = document.getElementById('acct-name')?.value.trim();
+  if (!name) { alert('Enter your name.'); return; }
+  const {error} = await db.from('profiles').update({full_name: name}).eq('id', currentUser.id);
+  if (error) { alert('Error: ' + error.message); return; }
+  alert('✅ Name updated!');
+}
+
+async function changePassword() {
+  const np = document.getElementById('acct-newpass')?.value;
+  const cp = document.getElementById('acct-confirmpass')?.value;
+  const msg = document.getElementById('acct-pass-msg');
+  if (!np || np.length < 6) { showPassMsg('Password must be at least 6 characters.', 'var(--rust)'); return; }
+  if (np !== cp) { showPassMsg('Passwords do not match.', 'var(--rust)'); return; }
+  const {error} = await db.auth.updateUser({password: np});
+  if (error) { showPassMsg('Error: ' + error.message, 'var(--rust)'); return; }
+  showPassMsg('✅ Password updated successfully!', 'var(--sage)');
+  document.getElementById('acct-newpass').value = '';
+  document.getElementById('acct-confirmpass').value = '';
+}
+
+function showPassMsg(text, color) {
+  const el = document.getElementById('acct-pass-msg');
+  if (!el) return;
+  el.textContent = text; el.style.color = color; el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function requestAccountDeletion() {
+  if (!confirm('Are you sure you want to delete your account? All your lessons, assessments, and student data will be permanently removed. This cannot be undone.')) return;
+  if (!confirm('Last chance — this will permanently delete everything. Continue?')) return;
+  // Send deletion request email since full DB cascade delete needs service role key
+  const email = currentUser.email;
+  window.open('mailto:teacheraicanada@gmail.com?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20TeacherAI%20account.%0A%0AEmail%3A%20' + encodeURIComponent(email) + '%0AUser%20ID%3A%20' + currentUser.id, '_blank');
+  alert('A deletion request email has been opened. Send it to confirm. We will remove your account and all data within 30 days.');
 }
 
 function toggleExpLessons(codeKey) {
