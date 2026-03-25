@@ -1511,14 +1511,17 @@ function unlock(){for(let i=2;i<=5;i++){const e=document.getElementById('ws'+i);
 async function retryAuthFetch(url, options, maxRetries=3) {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const res = await authFetch(url, options);
-    if (res.status !== 529 && res.status !== 529) return res;
-    // 529 = Anthropic overloaded. Also retry on 529.
+    // Return immediately on any non-overload response (success or real error)
+    if (res.status !== 529) return res;
+    // Check if it's actually an overload error
     const data = await res.clone().json().catch(() => ({}));
-    const isOverloaded = res.status === 529 || (data?.error?.type === 'overloaded_error');
+    const isOverloaded = res.status === 529 || data?.error?.type === 'overloaded_error';
     if (!isOverloaded || attempt === maxRetries) return res;
-    const wait = [5000, 12000, 25000][attempt] || 25000;
-    setProgress(null, 'AI service is busy — trying again in ' + Math.round(wait/1000) + ' seconds...');
+    // Short wait before retry — show brief message but don't alarm
+    const wait = [3000, 6000, 12000][attempt] || 12000;
+    setProgress(null, 'High demand — retrying shortly...');
     await new Promise(r => setTimeout(r, wait));
+    // Clear the busy message before retrying so it doesn't linger
     setProgress(null, 'Retrying...');
   }
 }
@@ -1680,11 +1683,11 @@ CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksh
     const res=await retryAuthFetch('/api/generate',{method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTok,messages:[{role:'user',content:prompt}]})});
     clearInterval(progInterval);
     setProgress(90, 'Processing response...');
-    if(!res.ok){
-      const errData=await res.json().catch(()=>({}));
-      const msg=errData?.error?.message||('Server error '+res.status);
-      if(res.status===529) throw new Error('The AI service is temporarily busy. Please wait a moment and try again — this usually resolves in under a minute.');
-      throw new Error(msg);
+    if(!res || !res.ok){
+      const status = res?.status || 0;
+      const errData = res ? await res.json().catch(()=>({})) : {};
+      if(status===529) throw new Error('The AI service is currently at capacity. Please try again in a minute.');
+      throw new Error(errData?.error?.message || ('Server error ' + status));
     }
     const data=await res.json();
     if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
