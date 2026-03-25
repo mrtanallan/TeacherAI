@@ -344,6 +344,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <label class="tab" for="tr-exp"><span class="tab-full">🎯 Expectations</span><span class="tab-short">🎯 Exp.</span></label>
   </div>
   <div class="nav-user">
+    <span class="nav-email" id="navEmail"></span>
     <label class="tab" for="tr-account" style="padding:5px 10px;font-size:.75rem;color:#9CA3AF;" title="Account">👤</label>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
   </div>
@@ -1207,6 +1208,8 @@ function showApp() {
   const savedTab = localStorage.getItem('teacherai_tab') || 'tr-plan';
   const tabEl = document.getElementById(savedTab);
   if (tabEl) tabEl.checked = true;
+  // Show onboarding banner for new teachers — always check on load
+  updateWelcomeBanner();
   // Save tab on change + refresh data when switching tabs
   document.querySelectorAll('.tab-r').forEach(r => {
     r.addEventListener('change', function() {
