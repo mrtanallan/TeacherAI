@@ -240,8 +240,35 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 .ph h1 em { font-style: italic; color: var(--sage); }
 .ph p { color: var(--muted); margin-top: 5px; font-size: 0.86rem; }
 
-@media(max-width:600px) { .st{grid-template-columns:1fr 1fr;} nav{padding:0 12px;} .page{padding:14px 12px;} .auth-box{padding:28px 20px;} .nav-email{display:none;} }
-@media(max-width:768px) { #pg-roster .roster-cols { grid-template-columns: 1fr !important; } }
+@media(max-width:600px) {
+  .st{grid-template-columns:1fr 1fr;}
+  nav{padding:0 10px;}
+  .page{padding:12px 12px;}
+  .auth-box{padding:24px 16px;}
+  .nav-email{display:none;}
+  .wf{padding:10px 12px;gap:0;}
+  .ws{padding:4px 8px;font-size:.75rem;}
+  .card{padding:14px 14px;}
+  .fg{grid-template-columns:1fr !important;}
+  .brow{flex-wrap:wrap;}
+  .btn.b-full{font-size:.85rem;padding:11px 16px;}
+  .lesson-card{flex-direction:column;align-items:flex-start !important;gap:8px;}
+  .lesson-card > div:last-child{align-self:flex-end;}
+  .ar{padding:12px 12px;}
+  .lbg{gap:1px;}
+  .lb{padding:4px 7px;font-size:.68rem;}
+  .dt{font-size:.78rem;}
+  .dt th,.dt td{padding:6px 7px;}
+  #pg-assess .st{grid-template-columns:1fr 1fr;}
+  .sc2{padding:12px 10px;}
+  .sn2{font-size:1.6rem;}
+  .chip{padding:6px 10px;font-size:.78rem;}
+}
+@media(max-width:768px) {
+  #pg-roster .roster-cols { grid-template-columns: 1fr !important; }
+  .fg{grid-template-columns:1fr 1fr;}
+  .wf{overflow-x:auto;}
+}
 </style>
 </head>
 <body>
@@ -357,7 +384,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       </div>
       <div class="fg">
         <div class="fi">
-          <label>Grade A ✱</label>
+          <label>Grade <span style="color:var(--rust);">✱</span></label>
           <select id="gA"><option value="">Select grade...</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select>
         </div>
         <div class="fi">
@@ -368,7 +395,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
           <label>Duration</label>
           <select id="dur"><option>Single lesson (1 day)</option><option>3-day mini unit (3 days)</option><option>1 week (5 days)</option><option>2 weeks (10 days)</option></select>
         </div>
-        <div class="fi s2"><label>Topic / Focus</label><input type="text" id="topic" placeholder="e.g. Making Inferences, Narrative Writing, Text Features..."></div>
+        <div class="fi s2"><label>Topic / Focus</label><input type="text" id="topic" placeholder="e.g. Making Inferences, Persuasive Writing, Text Features..."></div>
       </div>
 
       <!-- Split grade section — auto-filled from class, expandable -->
@@ -381,11 +408,11 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         </div>
         <div id="extraGrades" style="display:none;">
           <div class="fg" style="margin-bottom:6px;" id="extraGradeFields">
-            <div class="fi" id="gradeField_B"><label>Grade B</label><select id="gB"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select></div>
-            <div class="fi" id="gradeField_C"><label>Grade C</label><select id="gC"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select></div>
-            <div class="fi" id="gradeField_D"><label>Grade D</label><select id="gD"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select></div>
-            <div class="fi" id="gradeField_E" style="display:none;"><label>Grade E</label><select id="gE"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select></div>
-            <div class="fi" id="gradeField_F" style="display:none;"><label>Grade F</label><select id="gF"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select></div>
+            <div class="fi" id="gradeField_B"><label>2nd Grade</label><select id="gB"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select></div>
+            <div class="fi" id="gradeField_C"><label>3rd Grade</label><select id="gC"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select></div>
+            <div class="fi" id="gradeField_D"><label>4th Grade</label><select id="gD"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select></div>
+            <div class="fi" id="gradeField_E" style="display:none;"><label>5th Grade</label><select id="gE"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select></div>
+            <div class="fi" id="gradeField_F" style="display:none;"><label>6th Grade</label><select id="gF"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select></div>
           </div>
           <div id="classAutoFillNote" style="display:none;font-size:.75rem;color:var(--sage);margin-bottom:4px;">✓ Grades auto-filled from your class — adjust if needed</div>
         </div>
@@ -405,7 +432,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       <!-- Subject note for non-literacy subjects -->
       <div id="subjectNote" style="display:none;"></div>
 
-      <div class="ct" style="margin-bottom:9px;">📄 Generate</div>
+      <div class="ct" style="margin-bottom:9px;">✅ What to Generate</div>
       <div class="chips">
         <label class="chip"><input type="checkbox" id="ck-lp" checked> 🗓 Lesson Plan</label>
         <label class="chip"><input type="checkbox" id="ck-ws" checked> 📝 Student Worksheet</label>
@@ -608,12 +635,22 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 <!-- ===== MY LESSONS ===== -->
 <div class="page" id="pg-lessons">
   <div class="ph"><h1>My <em>Lessons</em></h1><p>All generated lessons are saved here. Click to view or reuse.</p></div>
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-    <span style="font-family:DM Mono,monospace;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Sort by</span>
-    <button class="btn b-out b-sm sort-btn active-sort" data-sort="date" onclick="sortLessons('date',this)">📅 Date</button>
-    <button class="btn b-out b-sm sort-btn" data-sort="subject" onclick="sortLessons('subject',this)">📚 Subject</button>
-    <button class="btn b-out b-sm sort-btn" data-sort="grade" onclick="sortLessons('grade',this)">🎓 Grade</button>
-    <button class="btn b-out b-sm sort-btn" data-sort="topic" onclick="sortLessons('topic',this)">🔤 Topic A–Z</button>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <input type="text" id="lessonSearch" placeholder="Search topics..." oninput="filterLessons()"
+      style="flex:1;min-width:160px;max-width:280px;font-family:DM Sans,sans-serif;font-size:.83rem;padding:7px 12px;border:1.5px solid var(--border);border-radius:7px;background:var(--paper);outline:none;">
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <span style="font-family:DM Mono,monospace;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Sort</span>
+      <button class="btn b-out b-sm sort-btn active-sort" data-sort="date" onclick="sortLessons('date',this)">📅 Date</button>
+      <button class="btn b-out b-sm sort-btn" data-sort="subject" onclick="sortLessons('subject',this)">📚 Subject</button>
+      <button class="btn b-out b-sm sort-btn" data-sort="grade" onclick="sortLessons('grade',this)">🎓 Grade</button>
+      <button class="btn b-out b-sm sort-btn" data-sort="topic" onclick="sortLessons('topic',this)">🔤 A–Z</button>
+    </div>
+    <button class="btn b-out b-sm" id="bulkSelectBtn" onclick="toggleBulkSelect()" style="font-size:.75rem;margin-left:auto;">☑️ Select</button>
+  </div>
+  <div id="bulkBar" style="display:none;background:var(--rust-l);border:1px solid var(--rust);border-radius:7px;padding:9px 13px;margin-bottom:10px;display:none;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span id="bulkCount" style="font-size:.82rem;color:var(--rust);font-weight:600;">0 selected</span>
+    <button class="btn b-sm" onclick="deleteSelectedLessons()" style="background:var(--rust);color:white;border:none;font-size:.75rem;">🗑 Delete selected</button>
+    <button class="btn b-out b-sm" onclick="toggleBulkSelect()" style="font-size:.75rem;">Cancel</button>
   </div>
   <div id="lessonsList"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Plan & Teach.</div></div>
 </div>
@@ -3420,11 +3457,11 @@ function renderTracker(){
 
   // Always render sessions list regardless of students
   if(!sessions.length){
-    document.getElementById('sList').innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No tasks yet.</div>';
+    document.getElementById('sList').innerHTML='<div style="text-align:center;padding:24px 16px;color:var(--muted);"><div style="font-size:1.6rem;margin-bottom:6px;">📋</div><div style="font-size:.85rem;font-weight:500;margin-bottom:3px;">No assessment tasks yet</div><div style="font-size:.78rem;">Generate a lesson and assess students to see tasks here.</div></div>';
   }
 
   if(!students.length||!sessions.length){
-    if(!students.length) document.getElementById('gTable').innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No data yet.</div>';
+    if(!students.length) document.getElementById('gTable').innerHTML='<div style="text-align:center;padding:28px 16px;color:var(--muted);"><div style="font-size:1.8rem;margin-bottom:8px;">👥</div><div style="font-size:.88rem;font-weight:500;margin-bottom:4px;">No students in this class yet</div><div style="font-size:.78rem;">Add students in the Class Roster tab to start tracking.</div></div>';
     document.getElementById('tAvg').textContent='—'; document.getElementById('tL4').textContent='0';
     if(!sessions.length) return;
   }
@@ -3627,7 +3664,7 @@ let savedLessons = [];
 async function renderLessonsList(){
   const {data}=await db.from('lessons').select('*').order('created_at',{ascending:false}).limit(50);
   if(!data||!data.length){
-    document.getElementById('lessonsList').innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet. Generate your first lesson in Plan & Teach.</div>';
+    document.getElementById('lessonsList').innerHTML='<div style="text-align:center;padding:32px 16px;color:var(--muted);"><div style="font-size:2rem;margin-bottom:10px;">📚</div><div style="font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:6px;">No lessons yet</div><div style="font-size:.82rem;margin-bottom:16px;">Every lesson you generate is saved here for reuse.</div><label for="tr-plan" class="btn b-sage b-sm" style="cursor:pointer;display:inline-block;">✨ Generate your first lesson →</label></div>';
     savedLessons = [];
     updateWelcomeBanner();
     return;
@@ -3655,6 +3692,54 @@ async function doDeleteLesson() {
 }
 
 let currentSort = 'date';
+let bulkSelectMode = false;
+const selectedLessonIds = new Set();
+
+function filterLessons() {
+  const q = (document.getElementById('lessonSearch')?.value || '').toLowerCase().trim();
+  const filtered = q
+    ? savedLessons.filter(l => (l.topic||'').toLowerCase().includes(q) || (l.subject||'').toLowerCase().includes(q) || (l.grades||[]).join(' ').toLowerCase().includes(q))
+    : savedLessons;
+  // Re-sort filtered results
+  const sorted = [...filtered];
+  if(currentSort === 'date') sorted.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  else if(currentSort === 'subject') sorted.sort((a,b) => (a.subject||'').localeCompare(b.subject||''));
+  else if(currentSort === 'grade') sorted.sort((a,b) => ((a.grades||[])[0]||'').localeCompare((b.grades||[])[0]||''));
+  else if(currentSort === 'topic') sorted.sort((a,b) => (a.topic||'').localeCompare(b.topic||''));
+  renderLessonsCards(sorted);
+}
+
+function toggleBulkSelect() {
+  bulkSelectMode = !bulkSelectMode;
+  selectedLessonIds.clear();
+  const btn = document.getElementById('bulkSelectBtn');
+  const bar = document.getElementById('bulkBar');
+  if (btn) btn.textContent = bulkSelectMode ? '✕ Cancel' : '☑️ Select';
+  if (bar) bar.style.display = bulkSelectMode ? 'flex' : 'none';
+  filterLessons();
+}
+
+function updateBulkCount() {
+  const el = document.getElementById('bulkCount');
+  if (el) el.textContent = selectedLessonIds.size + ' selected';
+}
+
+async function deleteSelectedLessons() {
+  if (!selectedLessonIds.size) return;
+  if (!confirm('Delete ' + selectedLessonIds.size + ' lesson(s)? This cannot be undone.')) return;
+  showLoading('Deleting lessons...');
+  for (const id of selectedLessonIds) {
+    await db.from('lessons').delete().eq('id', id);
+  }
+  hideLoading();
+  bulkSelectMode = false;
+  selectedLessonIds.clear();
+  const bar = document.getElementById('bulkBar');
+  const btn = document.getElementById('bulkSelectBtn');
+  if (bar) bar.style.display = 'none';
+  if (btn) btn.textContent = '☑️ Select';
+  await renderLessonsList();
+}
 
 function sortLessons(sortBy, btn) {
   currentSort = sortBy;
@@ -3673,23 +3758,48 @@ function sortLessons(sortBy, btn) {
 
 function renderLessonsCards(data) {
   const c = document.getElementById('lessonsList');
-  if(!data||!data.length){ c.innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet.</div>'; return; }
+  if(!data||!data.length){
+    const q = document.getElementById('lessonSearch')?.value?.trim();
+    c.innerHTML = q
+      ? '<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons match &ldquo;' + q + '&rdquo;.</div>'
+      : '<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No lessons saved yet.</div>';
+    return;
+  }
   c.innerHTML = data.map((l,i) => {
     const origIdx = savedLessons.indexOf(l);
-    return `<div class="lesson-card" id="lc-${l.id}" style="cursor:default;">
-      <div style="flex:1;min-width:0;cursor:pointer;" onclick="loadLesson(${origIdx})">
-        <div class="lesson-title">${l.topic}</div>
-        <div class="lesson-meta">${(l.grades||[]).join(' / ')} · ${l.subject} · ${new Date(l.created_at).toLocaleDateString('en-CA')}</div>
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;z-index:1;position:relative;">
-        <button class="btn b-out b-sm" onclick="loadLesson(${origIdx})">View →</button>
-        <button class="btn b-out b-sm del-btn" style="color:var(--rust);border-color:var(--rust);" data-id="${l.id}" data-topic="${l.topic.replace(/"/g,'&quot;')}">🗑 Delete</button>
-      </div>
-    </div>`;
+    const isChecked = selectedLessonIds.has(l.id);
+    const gradeLabel = (l.grades||[]).join(' / ');
+    const dateLabel = new Date(l.created_at).toLocaleDateString('en-CA');
+    return '<div class="lesson-card" id="lc-' + l.id + '" style="cursor:default;' + (isChecked ? 'background:var(--sage-l);border-color:#A8C4AB;' : '') + '">' +
+      (bulkSelectMode ? '<input type="checkbox" ' + (isChecked?'checked':'') + ' data-id="' + l.id + '" class="bulk-cb" style="width:16px;height:16px;margin-right:4px;flex-shrink:0;cursor:pointer;">' : '') +
+      '<div style="flex:1;min-width:0;cursor:pointer;" onclick="' + (bulkSelectMode ? 'toggleLessonSelect(\"' + l.id + '\")' : 'loadLesson(' + origIdx + ')') + '">' +
+        '<div class="lesson-title">' + l.topic + '</div>' +
+        '<div class="lesson-meta">' + gradeLabel + ' · ' + l.subject + ' · ' + dateLabel + '</div>' +
+      '</div>' +
+      (!bulkSelectMode ? '<div style="display:flex;gap:6px;flex-shrink:0;align-items:center;z-index:1;position:relative;">' +
+        '<button class="btn b-out b-sm" onclick="loadLesson(' + origIdx + ')">View →</button>' +
+        '<button class="btn b-out b-sm del-btn" style="color:var(--rust);border-color:var(--rust);" data-id="' + l.id + '" data-topic="' + l.topic.replace(/"/g,'&quot;') + '">🗑</button>' +
+      '</div>' : '') +
+    '</div>';
   }).join('');
   document.querySelectorAll('.del-btn').forEach(btn => {
     btn.addEventListener('click', function() { confirmDeleteLesson(this.dataset.id, this.dataset.topic); });
   });
+  document.querySelectorAll('.bulk-cb').forEach(cb => {
+    cb.addEventListener('change', function() { toggleLessonSelect(this.dataset.id); });
+  });
+}
+
+function toggleLessonSelect(id) {
+  if (selectedLessonIds.has(id)) selectedLessonIds.delete(id);
+  else selectedLessonIds.add(id);
+  updateBulkCount();
+  // Update card appearance
+  const card = document.getElementById('lc-' + id);
+  const cb = card?.querySelector('.bulk-cb');
+  if (card) card.style.background = selectedLessonIds.has(id) ? 'var(--sage-l)' : '';
+  if (card) card.style.borderColor = selectedLessonIds.has(id) ? '#A8C4AB' : '';
+  if (cb) cb.checked = selectedLessonIds.has(id);
 }
 
 function loadLesson(idx){
