@@ -442,6 +442,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
           <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-top:2px;" id="assMeta"></div>
         </div>
         <div class="brow">
+          <button class="btn b-out b-sm" id="markAllBtn" onclick="markAll()">✨ Mark All</button>
           <button class="btn b-sage b-sm" onclick="saveAss()">💾 Save All</button>
           <button class="btn b-out b-sm" onclick="gs(5)">Feedback →</button>
         </div>
@@ -644,8 +645,8 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   🇨🇦 Data stored in Canada &nbsp;·&nbsp;
   <a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
   <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a> &nbsp;·&nbsp;
-  <a href="mailto:teacheraicanada@gmail.com" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
-  <span style="font-family:'DM Mono',monospace;font-size:.65rem;">v2.1 · Mar 24 2026</span>
+  <a href="/cdn-cgi/l/email-protection#26524347454e4354474f45474847424766414b474f4a0845494b" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
+  <span style="font-family:'DM Mono',monospace;font-size:.65rem;">v2.2 · Mar 24 2026</span>
 </div>
 
 </div><!-- end appScreen -->
@@ -676,7 +677,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ============================================================
 // SUPABASE INIT
 // ============================================================
@@ -1487,9 +1488,11 @@ async function generate() {
     ? `For student worksheets, generate one per grade group: ${wsOutputKeys.map((k,i)=>`"${k}" for ${grades[i]}`).join(', ')}.`
     : '';
 
+  // Order: lesson_plan → worksheets → reading_resource → assessment_rubric → differentiation_tips
   const outputKeys = [
-    ...outputs.filter(k=>k!=='student_worksheet'),
-    ...wsOutputKeys
+    ...outputs.filter(k=>k==='lesson_plan'),
+    ...wsOutputKeys,
+    ...outputs.filter(k=>k!=='lesson_plan'&&k!=='student_worksheet'&&!wsOutputKeys.includes(k))
   ];
 
   const wsFormatNote = `Choose the most appropriate worksheet FORMAT based on the topic and subject:
@@ -1518,7 +1521,7 @@ Each value is a markdown string except "expectations" which is a JSON array:
 - lesson_plan: timing (0:00-0:10), Minds On/Action/Consolidation, materials
 ${isSplit ? wsOutputKeys.map((k,i)=>`- ${k}: worksheet for ${grades[i]} ONLY — ${wsFormatNote}`).join('\n') : `- student_worksheet: ${wsFormatNote}`}
 - reading_resource: original 200-300 word passage appropriate for the grade(s)
-- assessment_rubric: Ontario Achievement Chart. Use ## for each category (e.g. "## Knowledge & Understanding", "## Communication", "## Application"). Under each category use ### Level 1, ### Level 2, ### Level 3, ### Level 4 with one sentence describing achievement at that level.${iepStudents.length?' Include a modified criteria category for IEP students.':''}
+- assessment_rubric: Ontario Achievement Chart. IMPORTANT: always place this AFTER the worksheet and reading resource. Use ## for each category (e.g. "## Knowledge & Understanding", "## Communication", "## Application"). Under each category use ### Level 1, ### Level 2, ### Level 3, ### Level 4 with one sentence describing achievement at that level.${iepStudents.length?' Include a modified criteria category for IEP students.':''}
 - differentiation_tips: per-grade and per-student strategies
 - expectations: JSON array of expectation objects. Use Ontario 2023 Language curriculum ONLY. Codes use strand-letter format: C2.3, D1.1, B3.2 — NEVER grade-prefixed (not 4.R1.2). Each object must have: "code" (e.g. "C2.3"), "desc" (specific expectation text for the grade), "strand" (single letter A/B/C/D), "band" (grade band: "1-3", "4-6", or "7-8"). ${isSplit ? `For split classes ALSO include "grade" field (e.g. "Grade 4") to indicate which grade each expectation applies to. Return 1-2 expectations per grade.` : 'Return 2-5 most relevant expectations.'} ${preMatchedExp.length?'Prioritise teacher-requested expectations.':''}
 CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksheet must be its own top-level key.`;
@@ -1963,6 +1966,167 @@ async function saveAss(){
 }
 
 // ============================================================
+// AUTO-MARK
+// ============================================================
+async function markAll() {
+  if (!curSess) { alert('Generate a lesson first.'); return; }
+  if (!students.length) { alert('No students in roster.'); return; }
+
+  // Find a saved worksheet for this topic to get the answer key
+  let answerKey = null;
+  let worksheetContent = null;
+  try {
+    const { data: worksheets } = await db.from('worksheets')
+      .select('content')
+      .eq('teacher_id', currentUser.id)
+      .eq('topic', curSess.task)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (worksheets && worksheets.length) {
+      try { worksheetContent = JSON.parse(worksheets[0].content); } catch(e) {}
+      answerKey = worksheetContent?.answer_key || null;
+    }
+  } catch(e) { console.warn('Could not load worksheet for marking:', e); }
+
+  // If no stored answer key, generate one on the fly from current genC
+  if (!answerKey) {
+    const wsKey = Object.keys(genC).find(k => k.startsWith('student_worksheet'));
+    const wsText = wsKey ? genC[wsKey]?.cur : '';
+    if (!wsText) {
+      alert('No worksheet found. Generate a lesson and get the student link first, then try Mark All.');
+      return;
+    }
+    const btn = document.getElementById('markAllBtn');
+    btn.disabled = true; btn.textContent = '⏳ Building answer key...';
+    try {
+      const akRes = await authFetch('/api/generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'answer_key',
+          worksheetText: wsText,
+          topic: curSess.task,
+          grade: (curSess.grades || []).join(', '),
+          subject: curSess.subject
+        })
+      });
+      if (!akRes.ok) throw new Error('Answer key API error');
+      const akData = await akRes.json();
+      answerKey = akData.answer_key;
+    } catch(e) {
+      document.getElementById('markAllBtn').disabled = false;
+      document.getElementById('markAllBtn').textContent = '✨ Mark All';
+      alert('Could not generate answer key: ' + e.message);
+      return;
+    }
+  }
+
+  // Fetch all submissions for this lesson
+  let submissionsByStudent = {};
+  try {
+    const { data: worksheets } = await db.from('worksheets')
+      .select('id, content')
+      .eq('teacher_id', currentUser.id)
+      .eq('topic', curSess.task);
+    if (worksheets && worksheets.length) {
+      const wsIds = worksheets.map(w => w.id);
+      const { data: subs } = await db.from('worksheet_submissions')
+        .select('*')
+        .in('worksheet_id', wsIds);
+      if (subs) {
+        subs.forEach(sub => {
+          const byId = students.find(s => s.id === sub.student_id);
+          if (byId) { if (!submissionsByStudent[byId.id]) submissionsByStudent[byId.id] = sub; return; }
+          const name = (sub.student_name || '').toLowerCase().trim();
+          const byName = students.find(s =>
+            s.first.toLowerCase() === name ||
+            `${s.first} ${s.last||''}`.toLowerCase().trim() === name
+          );
+          if (byName && !submissionsByStudent[byName.id]) submissionsByStudent[byName.id] = sub;
+        });
+      }
+    }
+  } catch(e) { console.warn('Could not load submissions for marking:', e); }
+
+  const studentsWithSubs = students.filter(s => submissionsByStudent[s.id]);
+  if (!studentsWithSubs.length) {
+    alert('No student submissions found for this lesson yet. Students need to submit their worksheets first.');
+    return;
+  }
+
+  const btn = document.getElementById('markAllBtn');
+  btn.disabled = true; btn.textContent = `⏳ Marking ${studentsWithSubs.length} student(s)...`;
+
+  // Build anonymized submissions array for the API
+  const submissions = studentsWithSubs.map((s, i) => ({
+    studentLabel: 'Student ' + String.fromCharCode(65 + i),
+    _realId: s.id,
+    responses: submissionsByStudent[s.id]?.responses || {}
+  }));
+
+  try {
+    const markRes = await authFetch('/api/generate', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'mark',
+        submissions: submissions.map(s => ({ studentLabel: s.studentLabel, responses: s.responses })),
+        answerKey,
+        topic: curSess.task,
+        grade: (curSess.grades || []).join(', '),
+        subject: curSess.subject
+      })
+    });
+    if (!markRes.ok) throw new Error('Marking API error');
+    const markData = await markRes.json();
+    const results = markData.results || [];
+
+    // Map results back to real student IDs and apply to UI
+    let applied = 0;
+    results.forEach((result, i) => {
+      const studentId = submissions[i]?._realId;
+      if (!studentId) return;
+
+      // Map suggested_level string to our level format (L3 → L3, Level 3 → L3, etc.)
+      let level = (result.suggested_level || '').replace(/^Level\s*/i, 'L').trim();
+      if (!level.match(/^L[1-4][+-]?$/)) level = null;
+
+      if (level) {
+        // Pre-fill mark in curSess
+        if (!curSess.marks[studentId]) curSess.marks[studentId] = {};
+        curSess.marks[studentId].level = level;
+
+        // Store AI feedback and rationale in marks for Step 5
+        curSess.marks[studentId].aiFeedback = result.feedback || '';
+        curSess.marks[studentId].aiRationale = result.level_rationale || '';
+        curSess.marks[studentId].questionScores = result.question_scores || [];
+        applied++;
+      }
+    });
+
+    // Re-render the assess grid so level buttons show as selected
+    await renderAssGrid();
+
+    btn.disabled = false;
+    btn.textContent = '✅ Marked';
+    btn.style.background = 'var(--sage)';
+    btn.style.color = 'white';
+    setTimeout(() => {
+      btn.textContent = '✨ Mark All';
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 3000);
+
+    if (applied < studentsWithSubs.length) {
+      console.warn(`Auto-mark: applied ${applied}/${studentsWithSubs.length} results`);
+    }
+
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '✨ Mark All';
+    alert('Marking failed: ' + e.message);
+  }
+}
+
+// ============================================================
 // FEEDBACK
 // ============================================================
 function renderFbGrid(){
@@ -1975,21 +2139,35 @@ function renderFbGrid(){
     const base=m.level.replace(/[+-]/,'');
     const num=base.replace('L','');
     const sfx=m.level.includes('+')?'+':m.level.includes('-')?'−':'';
+    const hasFb = !!m.aiFeedback;
+    const fbContent = hasFb
+      ? `<div class="fb" id="fb-${s.id}" style="display:block;">
+          <div style="font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">✏️ Click to edit before copying</div>
+          <div class="fbe" contenteditable="true" id="fbt-${s.id}">${m.aiFeedback}</div>
+          ${m.aiRationale ? `<div style="font-size:.72rem;color:var(--muted);font-style:italic;margin-top:5px;">Level rationale: ${m.aiRationale}</div>` : ''}
+          <div class="brow" style="margin-top:7px;">
+            <button class="btn b-sage b-sm copyfb-btn" data-sid="${s.id}">📋 Copy Feedback</button>
+            <button class="btn b-out b-sm regenfb-btn" data-sid="${s.id}">🔄 Regenerate</button>
+          </div>
+        </div>`
+      : `<div class="fb" id="fb-${s.id}"></div>`;
     return`<div class="card" style="margin-bottom:11px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:9px;">
           <div class="av" style="background:${AVCOLORS[i%AVCOLORS.length]}">${s.first[0]}${(s.last||' ')[0]}</div>
           <div><div style="font-weight:600;">${s.first} ${s.last||''}</div><div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);">${s.grade} · Level ${num}${sfx}</div></div>
         </div>
-        <button class="btn b-ink b-sm genfb-btn" data-sid="${s.id}">✨ Generate Feedback</button>
+        <button class="btn b-ink b-sm genfb-btn" data-sid="${s.id}">${hasFb ? '🔄 Regenerate' : '✨ Generate Feedback'}</button>
       </div>
       ${m.notes?`<div style="font-size:.8rem;color:var(--muted);margin-bottom:7px;font-style:italic;">Notes: ${m.notes}</div>`:''}
-      <div class="fb" id="fb-${s.id}"></div>
+      ${fbContent}
     </div>`;
   }).join('');
   document.querySelectorAll('.genfb-btn').forEach(btn=>{
     btn.addEventListener('click',function(){genFb(this.dataset.sid);});
   });
+  document.querySelectorAll('.copyfb-btn').forEach(b=>b.addEventListener('click',function(){copyFb(this.dataset.sid);}));
+  document.querySelectorAll('.regenfb-btn').forEach(b=>b.addEventListener('click',function(){regenFb(this.dataset.sid);}));
 }
 
 async function genFb(sid){
@@ -2648,6 +2826,29 @@ async function getStudentLink(k, allGrades) {
     const rosterNames = students.map(s => ({
       id: s.id, first: s.first, last: s.last || '', grade: s.grade
     }));
+
+    // Silently generate answer key and embed in content payload
+    try {
+      const wsTextForKey = genC[k]?.cur || '';
+      const akRes = await authFetch('/api/generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'answer_key',
+          worksheetText: wsTextForKey,
+          topic, grade: grades.join(', '), subject
+        })
+      });
+      if (akRes.ok) {
+        const akData = await akRes.json();
+        if (akData.answer_key) {
+          const parsed = JSON.parse(contentPayload);
+          parsed.answer_key = akData.answer_key;
+          contentPayload = JSON.stringify(parsed);
+        }
+      }
+    } catch(akErr) {
+      console.warn('Answer key generation failed (non-fatal):', akErr);
+    }
 
     const { data, error } = await db.from('worksheets').insert({
       teacher_id: currentUser.id,
@@ -3676,14 +3877,4 @@ function renderExpectationsTracker() {
             <div style="font-size:.7rem;color:var(--muted);margin-top:1px;">${item.exp.overall} · ${item.lessons.slice(0,3).join(', ')}${item.lessons.length>3?'...':''}</div>
           </div>
           <div style="text-align:right;">
-            <div style="background:var(--sage-l);border:1px solid #A8C4AB;border-radius:5px;padding:2px 8px;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--sage);white-space:nowrap;">✓ Covered · ${item.count}×</div>
-          </div>
-        </div>`).join('')}
-      </div>
-    </div>`).join('')}`;
-}
-
-initApp();
-</script>
-</body>
-</html>
+            <div style="background:var(--sage-l);border:1px solid #A8C4AB;border-radius:5px;padding:2px 8px;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--sage);white-space:nowrap;">✓
