@@ -147,6 +147,8 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 .dots span:nth-child(3) { animation-delay: .4s; }
 @keyframes dp { 0%,80%,100%{opacity:.2;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
 .loading-overlay { position: fixed; inset: 0; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(22,18,14,0.75); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; pointer-events: all; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1C3A2B; color: white; padding: 10px 20px; border-radius: 8px; font-size: .84rem; font-family: DM Sans,sans-serif; z-index: 10000; opacity: 0; transition: opacity .3s, transform .3s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .loading-overlay.show { display: flex; }
 .loading-overlay .dots span { background: white; width: 8px; height: 8px; }
 .loading-text { color: white; font-size: 0.9rem; font-family: 'DM Mono', monospace; letter-spacing: 1px; }
@@ -273,6 +275,9 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 </style>
 </head>
 <body>
+
+<!-- Toast notification -->
+<div class="toast" id="appToast"></div>
 
 <!-- Loading overlay -->
 <div class="loading-overlay" id="loadingOverlay">
@@ -1105,6 +1110,14 @@ function switchAuth(mode, el) {
   document.getElementById('resetForm').style.display = mode==='reset'?'block':'none';
   document.getElementById('authErr').style.display='none';
   document.getElementById('authMsg').style.display='none';
+}
+
+function showToast(msg, duration) {
+  const t = document.getElementById('appToast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration || 3000);
 }
 
 async function sendReset() {
@@ -2042,6 +2055,7 @@ CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksh
         class_id: activeClassId || null
       });
       renderLessonsList();
+      showToast('✅ Lesson saved to My Lessons');
     }
   } catch(e) {
     clearInterval(progInterval);
@@ -2715,7 +2729,7 @@ async function saveAss(){
     await loadUserData();
     renderTracker();
     hideLoading();
-    alert(`✅ Assessment saved for ${assessed.length} student(s).`);
+    showToast('✅ Assessment saved for ' + assessed.length + ' student(s).');
   } catch(e) {
     hideLoading();
     alert('Error saving: '+e.message);
