@@ -1522,16 +1522,19 @@ async function createClass() {
 }
 
 async function switchClass(classId) {
+  console.log('[switchClass] called with classId:', classId);
   activeClassId = classId;
   // Reload students for the new class — build query correctly
   let stuQ = db.from('students').select('*').order('created_at');
   if (activeClassId) stuQ = stuQ.eq('class_id', activeClassId);
-  const {data:stuData} = await stuQ;
+  const {data:stuData, error:stuErr} = await stuQ;
+  console.log('[switchClass] students fetched:', stuData?.length, 'error:', stuErr, 'filter classId:', activeClassId);
   if (stuData) students = stuData.map(s=>({
     id:s.id, first:s.first_name, last:s.last_name||'', grade:s.grade,
     notes:s.notes||'', iep:s.learning_profile||'', dbId:s.id,
     classId:s.class_id, createdAt:s.created_at, prevClassName:s.previous_class_name||null
   }));
+  console.log('[switchClass] students mapped:', students.map(s=>s.first+' classId:'+s.classId));
   // Reload sessions for the new class
   let sessQ = db.from('assessment_sessions').select('*, student_marks(*)').order('created_at',{ascending:false});
   if (activeClassId) sessQ = sessQ.eq('class_id', activeClassId);
