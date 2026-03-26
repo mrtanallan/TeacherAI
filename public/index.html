@@ -455,13 +455,13 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
           </select>
         </div>
       </div>
-      <div id="classAutoFillNote" style="display:none;font-size:.75rem;color:var(--sage);margin-top:-10px;margin-bottom:12px;">✓ Grades auto-filled from your students — adjust if needed</div>
+      <div id="classAutoFillNote" style="display:none;"></div>
 
       <!-- Row 2: Grade pills (compact) -->
       <div style="margin-bottom:18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Grade <span style="color:var(--rust);">✱</span></label>
-          <span id="gradeSelectionNote" style="font-size:.72rem;color:var(--sage);display:none;">✓ Split class lesson</span>
+          <span id="gradeSelectionNote" style="display:none;"></span>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:5px;" id="gradePillContainer">
           <button type="button" class="grade-pill-btn" data-grade="Kindergarten" onclick="toggleGradePill(this)">K</button>
@@ -519,21 +519,18 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
             </div>
           </div>
           <div class="fi full">
-            <div onclick="const b=document.getElementById('expBody');const arr=document.getElementById('expArrow');const open=b.style.display!=='none';b.style.display=open?'none':'block';arr.style.transform=open?'rotate(0deg)':'rotate(90deg)';"
-              style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--cream);">
-              <span style="font-size:.78rem;font-weight:500;color:var(--muted);">🎯 Target Expectations <span style="font-weight:400;font-size:.72rem;">(optional)</span></span>
-              <span id="expArrow" style="font-size:.65rem;color:var(--muted);transition:transform .2s;display:inline-block;">▶</span>
+            <div style="margin-bottom:6px;">
+              <span style="font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">🎯 Target Expectations</span>
+              <span style="font-size:.72rem;color:var(--muted);margin-left:4px;">(optional)</span>
             </div>
-            <div id="expBody" style="display:none;margin-top:8px;">
-              <textarea id="targetExp" style="min-height:52px;" placeholder='e.g. C1.3, D2.1 or "making inferences, writing paragraphs"'></textarea>
-              <div style="display:flex;align-items:center;gap:10px;margin-top:7px;flex-wrap:wrap;">
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--ink);">
-                  <input type="checkbox" id="expPinOnly" checked style="accent-color:var(--sage);width:13px;height:13px;">
-                  <span><strong>Focus lesson on these expectations only</strong> — AI won't add others</span>
-                </label>
-              </div>
-              <div style="font-size:.72rem;color:var(--muted);margin-top:5px;">Leave blank to let AI choose. Enter specific codes (e.g. C1.3, D2.1) to guarantee they're covered — helpful when finishing expectations before report cards.</div>
+            <textarea id="targetExp" style="min-height:52px;" placeholder='e.g. C1.3, D2.1 or "making inferences, writing paragraphs"' oninput="updateMoreOptionsSummary()"></textarea>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:7px;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--ink);">
+                <input type="checkbox" id="expPinOnly" checked style="accent-color:var(--sage);width:13px;height:13px;">
+                <span><strong>Focus lesson on these expectations only</strong> — AI won't add others</span>
+              </label>
             </div>
+            <div style="font-size:.72rem;color:var(--muted);margin-top:5px;">Leave blank to let AI choose. Enter specific codes (e.g. C1.3, D2.1) to guarantee they're covered — helpful when finishing expectations before report cards.</div>
           </div>
         </div>
       </div>
@@ -1919,12 +1916,17 @@ async function loadUsageMeter() {
     const noteEl = document.getElementById('usageNote');
     if (!meter || !countEl) return;
 
-    // Count all-time lessons generated (not filtered by date — deletions shouldn't reduce this)
+    // Count lessons generated: use the higher of (localStorage running total) vs (current DB count)
+    // localStorage persists even when lessons are deleted, giving a true all-time count
     const { count } = await db.from('lessons')
       .select('*', { count: 'exact', head: true })
       .eq('teacher_id', currentUser.id);
-
-    const used = count || 0;
+    const dbCount = count || 0;
+    const localKey = 'teacherai_gen_count_' + currentUser.id;
+    const localCount = parseInt(localStorage.getItem(localKey) || '0', 10);
+    // If DB has more (e.g. new device), sync up localStorage
+    if (dbCount > localCount) localStorage.setItem(localKey, dbCount);
+    const used = Math.max(dbCount, localCount);
     meter.style.display = 'block';
     countEl.textContent = used + ' lesson' + (used !== 1 ? 's' : '') + ' generated';
     if (noteEl) { noteEl.textContent = 'Unlimited — beta access'; noteEl.style.color = 'var(--sage)'; }
@@ -2161,6 +2163,13 @@ CRITICAL: Return ONLY a valid JSON object. No markdown fences. Each grade worksh
     buildShareCards(outputKeys);
     setProgress(100, 'Done!');
     setTimeout(hideLoading, 400);
+    // Increment all-time generation count in localStorage
+    try {
+      const localKey = 'teacherai_gen_count_' + currentUser.id;
+      const cur = parseInt(localStorage.getItem(localKey) || '0', 10);
+      localStorage.setItem(localKey, cur + 1);
+      loadUsageMeter();
+    } catch(e) {}
     unlock(); gs(2);
 
     // Save lesson to Supabase
@@ -5044,30 +5053,69 @@ async function copyAllRCComments() {
 // EXPECTATIONS TRACKER
 // ============================================================
 function renderExpInAssess() {
-  // Mirror expectations tracker content into the merged Trackers tab
+  // Render expectations tracker directly into the Trackers tab container
   const wrap = document.getElementById('expInAssess');
   if (!wrap) return;
-  // Sync the class filter with activeClassId
-  const expFilter = document.getElementById('expClassFilter');
-  if (expFilter && activeClassId) {
-    expFilter.value = activeClassId;
+  if (!savedLessons || !savedLessons.length) {
+    wrap.innerHTML = '<div style="color:var(--muted);font-size:.83rem;font-style:italic;padding:12px 0;">Generate lessons to start tracking expectations coverage.</div>';
+    return;
   }
-  renderExpectationsTracker(); // reuses existing logic which populates expGrid
-  // Clone expGrid content into expInAssess
-  const expGrid = document.getElementById('expGrid');
-  const expClassSel = document.getElementById('expClassFilter');
-  if (expGrid) {
-    // Build a self-contained version
-    let classOptions = '<option value="">All Classes</option>';
-    classes.forEach(c => { classOptions += `<option value="${c.id}" ${c.id===activeClassId?'selected':''}>${c.name}</option>`; });
-    wrap.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
-        <select id="expInAssessFilter" style="font-family:'DM Sans',sans-serif;font-size:.82rem;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--paper);" onchange="document.getElementById('expClassFilter').value=this.value;renderExpectationsTracker();this.closest('#expInAssessWrap').querySelector('#expInAssessBody').innerHTML=document.getElementById('expGrid').innerHTML;">
-          ${classOptions}
-        </select>
-      </div>
-      <div id="expInAssessBody">${expGrid.innerHTML}</div>`;
+
+  // Build class filter options
+  let classOptions = '<option value="">All classes</option>';
+  classes.forEach(c => { classOptions += `<option value="${c.id}" ${c.id===activeClassId?'selected':''}>${c.name}</option>`; });
+
+  // Get currently selected class in this filter (preserve across re-renders)
+  const existingFilter = document.getElementById('expInAssessFilter');
+  const selectedClass = existingFilter?.value || activeClassId || '';
+
+  // Filter lessons
+  const filteredLessons = selectedClass
+    ? savedLessons.filter(l => l.class_id === selectedClass)
+    : savedLessons;
+
+  // Collect expectations
+  const allCovered = {};
+  filteredLessons.forEach(l => {
+    if (!l.expectations || !Array.isArray(l.expectations)) return;
+    l.expectations.forEach(e => {
+      if (!allCovered[e.code]) allCovered[e.code] = {exp:e, count:0, lessons:[]};
+      allCovered[e.code].count++;
+      allCovered[e.code].lessons.push(l.topic || 'Untitled');
+    });
+  });
+
+  const strandNames = {A:'Literacy Connections',B:'Foundations of Language',C:'Comprehension',D:'Composition'};
+  const byStrand = {};
+  Object.values(allCovered).forEach(item => {
+    const s = item.exp.strand || item.exp.code?.[0] || '?';
+    if (!byStrand[s]) byStrand[s] = [];
+    byStrand[s].push(item);
+  });
+
+  let html = `<div style="margin-bottom:10px;"><select id="expInAssessFilter" style="font-family:'DM Sans',sans-serif;font-size:.82rem;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--paper);" onchange="renderExpInAssess()">
+    ${classOptions.replace(`value="${selectedClass}"`, `value="${selectedClass}" selected`)}
+  </select></div>`;
+
+  if (!Object.keys(byStrand).length) {
+    html += '<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No expectations tracked for this class yet.</div>';
+  } else {
+    Object.keys(byStrand).sort().forEach(strand => {
+      html += `<div style="margin-bottom:16px;">
+        <div style="font-family:DM Mono,monospace;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--sage);margin-bottom:8px;font-weight:600;">${strandNames[strand]||'Strand '+strand}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">`;
+      byStrand[strand].forEach(item => {
+        html += `<div title="${item.lessons.join(', ')}" style="background:var(--sage-l);border:1px solid #A8C4AB;border-radius:6px;padding:5px 10px;font-size:.78rem;">
+          <span style="font-family:DM Mono,monospace;font-weight:600;color:var(--sage);margin-right:5px;">${item.exp.code}</span>
+          <span style="color:var(--ink);">${item.exp.desc||''}</span>
+          ${item.count > 1 ? `<span style="font-family:DM Mono,monospace;font-size:.62rem;color:var(--muted);margin-left:5px;">×${item.count}</span>` : ''}
+        </div>`;
+      });
+      html += '</div></div>';
+    });
   }
+
+  wrap.innerHTML = html;
 }
 
 function renderExpectationsTracker() {
@@ -5332,12 +5380,8 @@ function initMoreOptions() {
 function updateMoreOptionsSummary() {
   const summary = document.getElementById('moreOptionsSummary');
   if (!summary) return;
-  const strandCount = ['ck-o','ck-m','ck-r','ck-w'].filter(id => document.getElementById(id)?.checked).length;
   const hasTarget = document.getElementById('targetExp')?.value?.trim();
-  const parts = [];
-  if (strandCount < 4) parts.push(strandCount + ' strand' + (strandCount !== 1 ? 's' : ''));
-  if (hasTarget) parts.push('target expectations set');
-  summary.textContent = parts.length ? '· ' + parts.join(', ') : '';
+  summary.textContent = hasTarget ? '· target expectations set' : '';
 }
 
 function toggleGradePill(btn) {
