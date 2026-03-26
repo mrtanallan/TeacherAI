@@ -1827,6 +1827,7 @@ function toggleSplitGrades(){
   const toggle=document.getElementById('splitToggle');
   const extra=document.getElementById('extraGrades');
   const addBtn=document.getElementById('addGradeBtn');
+  if(!toggle || !extra) return;  // Generate tab elements — not present on other tabs
   extra.style.display=toggle.checked?'block':'none';
   if(addBtn) addBtn.style.display=toggle.checked?'inline-flex':'none';
   if(!toggle.checked){
