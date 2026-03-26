@@ -442,30 +442,35 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       <input type="checkbox" id="splitToggle" style="display:none;">
       <button id="addGradeBtn" style="display:none;"></button>
 
-      <!-- Row 1: Class selector (subtle, top) -->
-      <div id="classSelectorRow" style="display:none;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex-shrink:0;">Class</span>
-          <select id="classSelector" onchange="onClassSelect()" style="flex:1;font-family:'DM Sans',sans-serif;font-size:.86rem;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--cream);color:var(--ink);outline:none;"></select>
+      <!-- Row 1: Class · Subject · Duration — compact single row -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+        <div class="fi" id="classSelectorRow" style="display:none;flex:1.5;min-width:140px;">
+          <label>Class</label>
+          <select id="classSelector" onchange="onClassSelect()"></select>
         </div>
-        <div id="classAutoFillNote" style="display:none;font-size:.75rem;color:var(--sage);margin-top:6px;">✓ Grades auto-filled from your students — adjust if needed</div>
+        <div class="fi" style="flex:1.5;min-width:140px;">
+          <label>Subject</label>
+          <select id="subj" onchange="onSubjectChange()"><option>Language / Literacy</option></select>
+        </div>
+        <div class="fi" style="flex:1;min-width:110px;">
+          <label>Duration</label>
+          <select id="dur">
+            <option>Single lesson</option>
+            <option>3 days</option>
+            <option>1 week</option>
+            <option>2 weeks</option>
+          </select>
+        </div>
       </div>
+      <div id="classAutoFillNote" style="display:none;font-size:.75rem;color:var(--sage);margin-top:-10px;margin-bottom:12px;">✓ Grades auto-filled from your students — adjust if needed</div>
 
-      <!-- Row 2: Topic — big and prominent -->
-      <div style="margin-bottom:18px;">
-        <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px;">What are you teaching? <span style="color:var(--rust);">✱</span></label>
-        <input type="text" id="topic" placeholder="e.g. Making Inferences, Persuasive Writing, Text Features..."
-          style="width:100%;font-family:'DM Sans',sans-serif;font-size:1rem;padding:13px 16px;border:2px solid var(--border);border-radius:10px;background:var(--cream);color:var(--ink);outline:none;transition:border-color .15s;"
-          onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
-      </div>
-
-      <!-- Row 3: Grade pills -->
+      <!-- Row 2: Grade pills (compact) -->
       <div style="margin-bottom:18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Grade <span style="color:var(--rust);">✱</span></label>
           <span id="gradeSelectionNote" style="font-size:.72rem;color:var(--sage);display:none;">✓ Split class lesson</span>
         </div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;" id="gradePillContainer">
+        <div style="display:flex;flex-wrap:wrap;gap:5px;" id="gradePillContainer">
           <button type="button" class="grade-pill-btn" data-grade="Kindergarten" onclick="toggleGradePill(this)">K</button>
           <button type="button" class="grade-pill-btn" data-grade="Grade 1" onclick="toggleGradePill(this)">Gr. 1</button>
           <button type="button" class="grade-pill-btn" data-grade="Grade 2" onclick="toggleGradePill(this)">Gr. 2</button>
@@ -478,21 +483,12 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         </div>
       </div>
 
-      <!-- Row 4: Subject + Duration (small, secondary) -->
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
-        <div class="fi" style="flex:1;min-width:140px;">
-          <label>Subject</label>
-          <select id="subj" onchange="onSubjectChange()"><option>Language / Literacy</option></select>
-        </div>
-        <div class="fi" style="flex:1;min-width:140px;">
-          <label>Duration</label>
-          <select id="dur">
-            <option>Single lesson</option>
-            <option>3 days</option>
-            <option>1 week</option>
-            <option>2 weeks</option>
-          </select>
-        </div>
+      <!-- Row 3: Topic — big hero input -->
+      <div style="margin-bottom:18px;">
+        <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px;">What are you teaching? <span style="color:var(--rust);">✱</span></label>
+        <input type="text" id="topic" placeholder="e.g. Making Inferences, Persuasive Writing, Text Features..."
+          style="width:100%;font-family:'DM Sans',sans-serif;font-size:1rem;padding:13px 16px;border:2px solid var(--border);border-radius:10px;background:var(--cream);color:var(--ink);outline:none;transition:border-color .15s;"
+          onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
       </div>
 
       <!-- Subject note for non-literacy subjects -->
@@ -548,6 +544,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
           </div>
         </div>
       </div>
+      <div style="height:8px;"></div>
       <button class="btn b-ink b-full" id="genBtn" onclick="generate()">✨ Generate Lesson</button>
       <div id="usageMeter" style="display:none;text-align:center;margin-top:8px;">
         <span style="font-size:.72rem;color:var(--muted);">📊 <span id="usageCount">—</span> &nbsp;·&nbsp; <span id="usageNote" style="color:var(--sage);"></span></span>
@@ -1607,7 +1604,7 @@ function renderClassSelector() {
   const row = document.getElementById('classSelectorRow');
   if (!sel || !row) return;
   if (!classes.length) { row.style.display = 'none'; return; }
-  row.style.display = 'block';
+  row.style.display = 'flex';
   sel.innerHTML = `<option value="">✏️ Custom / no class</option>` +
     classes.map(c =>
       `<option value="${c.id}" ${c.id === activeClassId ? 'selected' : ''}>${c.name}${c.subject_focus?' · '+c.subject_focus:''}</option>`
