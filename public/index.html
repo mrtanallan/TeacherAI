@@ -390,7 +390,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         </div>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px;" id="onboardingSteps">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;" id="onboardingSteps">
       <div class="card onboard-step" id="ostep1" style="border-left:3px solid var(--sage);cursor:pointer;" onclick="document.getElementById('tr-roster').checked=true;">
         <div style="font-size:1.4rem;margin-bottom:6px;">👥</div>
         <div style="font-weight:600;font-size:.88rem;margin-bottom:3px;">Step 1 — Add Students</div>
@@ -400,15 +400,10 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       <div class="card onboard-step" id="ostep2" style="border-left:3px solid var(--amber);">
         <div style="font-size:1.4rem;margin-bottom:6px;">✨</div>
         <div style="font-weight:600;font-size:.88rem;margin-bottom:3px;">Step 2 — Generate a Lesson</div>
-        <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">Pick a topic below, select your grade(s), and hit Generate. You'll get a lesson plan, worksheet, reading resource, and rubric.</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">Type a topic, pick your grade, and hit Generate. Lesson plan, worksheet, rubric — done in under a minute.</div>
         <div style="margin-top:10px;font-size:.75rem;color:var(--amber);font-weight:600;">Complete Step 1 first</div>
       </div>
-      <div class="card onboard-step" id="ostep3" style="border-left:3px solid var(--blue);">
-        <div style="font-size:1.4rem;margin-bottom:6px;">🔗</div>
-        <div style="font-weight:600;font-size:.88rem;margin-bottom:3px;">Step 3 — Share with Students</div>
-        <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">After generating, share the student worksheet link however you like — Google Classroom, email, or just paste the URL. Students submit online, you see responses instantly.</div>
-        <div style="margin-top:10px;font-size:.75rem;color:var(--blue);font-weight:600;">Complete Steps 1 & 2 first</div>
-      </div>
+      <div id="ostep3" style="display:none;"></div>
     </div>
   </div>
 
@@ -838,11 +833,14 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <div id="expTrackerContent"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">Generate lessons to start tracking expectations coverage.</div></div>
 </div>
 
-<div style="text-align:center;padding:24px 16px 32px;border-top:1px solid var(--border);margin-top:20px;font-size:.75rem;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:6px;">
-  <a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
-  <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a> &nbsp;·&nbsp;
-  <a href="mailto:teacheraicanada@gmail.com" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
-  <span style="font-family:DM Mono,monospace;font-size:.65rem;">v3.8 · Mar 26 2026</span>
+<div style="text-align:center;padding:24px 16px 32px;border-top:1px solid var(--border);margin-top:20px;font-size:.75rem;color:var(--muted);">
+  <span>🍁 Aligned to the <strong>Ontario Curriculum</strong> · Student names anonymized before AI processing · 🇨🇦 Data stored in Canada</span><br>
+  <span style="margin-top:6px;display:inline-block;">
+    <a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a> &nbsp;·&nbsp;
+    <a href="mailto:teacheraicanada@gmail.com" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
+    <span style="font-family:'DM Mono',monospace;font-size:.65rem;">v3.8 · Mar 26 2026</span>
+  </span>
 </div>
 
 <!-- ===== ACCOUNT ===== -->
@@ -1336,6 +1334,7 @@ function updateWelcomeBanner() {
     const hasStudents = data && data.length > 0;
 
     // Permanently dismiss only once teacher has done both steps
+    // Dismiss once teacher has added students and generated first lesson
     if (hasStudents && hasLessons) { dismissWelcomeBanner(true); return; }
 
     // Only show if we're currently on the Plan tab
@@ -1522,9 +1521,7 @@ async function createClass() {
 
 async function switchClass(classId) {
   activeClassId = classId;
-  showLoading('Switching class...');
-  await loadUserData();
-  hideLoading();
+  // No full reload — just re-render with existing data, filtered to new class
   renderClassTabs();
   renderClassSelector();
   renderR();
@@ -1640,13 +1637,17 @@ function onClassSelect() {
   if (!sel) return;
   const selectedId = sel.value;
   if (!selectedId) {
-    // Custom / no class — clear grades, let teacher set manually
+    // Custom / no class — clear all grade selections
     activeClassId = null;
     ['gA','gB','gC','gD','gE','gF'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     const toggle=document.getElementById('splitToggle');
     if(toggle&&toggle.checked){toggle.checked=false;toggleSplitGrades();}
     const note=document.getElementById('classAutoFillNote');
     if(note)note.style.display='none';
+    // Clear grade pills
+    document.querySelectorAll('.grade-pill-btn').forEach(b=>b.classList.remove('selected'));
+    const gradeNote=document.getElementById('gradeSelectionNote');
+    if(gradeNote)gradeNote.style.display='none';
     return;
   }
   switchClass(selectedId);
