@@ -1734,13 +1734,7 @@ function autoFillGradesFromClass(gradesHint) {
       if (fieldEl) fieldEl.style.display = '';
       if (selEl) selEl.value = g;
     });
-    const note = document.getElementById('classAutoFillNote');
-    if (note) {
-      note.style.display = 'block';
-      note.textContent = uniqueGrades.length > 0
-        ? `✓ Grades filled from your ${classStudents.length} students — adjust if needed`
-        : '✓ Grades filled from class definition — adjust if needed';
-    }
+    // Note suppressed by design — grade pills auto-fill silently
   } else {
     const toggle = document.getElementById('splitToggle');
     if (toggle && toggle.checked) { toggle.checked = false; toggleSplitGrades(); }
@@ -2067,7 +2061,7 @@ async function generate() {
 - Math Practice: worked examples + practice problems — for math topics
 - Research Organizer: inquiry sections (question, facts, conclusion) — for research or inquiry topics
 - Experiment Record: hypothesis, materials, procedure, results — for science experiments
-Use [TEXT BOX] short answer, [LARGE BOX] paragraph/draft, [CIRCLE ONE: A / B / C] multiple choice, [CHECK ALL THAT APPLY: A / B / C] checkboxes, [WORD BANK: w1,w2,w3]. Use emoji headers. 4-6 varied activities. NEVER use underscores for blanks. DO NOT include a Name or Date field — the online platform handles this automatically. Start directly with the worksheet title and first activity.`;
+Use [TEXT BOX] short answer, [LARGE BOX] paragraph/draft, [CIRCLE ONE: A / B / C] multiple choice, [CHECK ALL THAT APPLY: A / B / C] checkboxes, [WORD BANK: w1,w2,w3]. Use emoji headers. 4-6 varied activities. NEVER use underscores for blanks. DO NOT include a Name or Date field — the online platform handles this automatically. Start directly with the worksheet title and first activity. CRITICAL CONSTRAINTS — students complete this digitally on a Chromebook or laptop: (1) NEVER ask students to draw, sketch, or illustrate anything — no drawing boxes, no 'draw a picture', no art activities. (2) NEVER use draw-a-line matching — instead convert matching questions to [CIRCLE ONE] multiple choice or letter-matching with [TEXT BOX] (e.g. 'Write the letter: Title ___ [TEXT BOX]'). (3) All answers must be typeable or selectable — no physical/hands-on responses.`;
 
   // Build worksheet lines and answer key lines outside the template literal to avoid nested backtick issues
   const wsLines = isSplit
@@ -2286,7 +2280,7 @@ function buildEditBlocks(outputs,gradeDesc,subj,topic,expectations){
           <button class="btn b-out b-sm" onclick="resetBlock('${k}')">↩ Reset</button>
           <button class="btn b-out b-sm" onclick="copyBlock('${k}')">📋 Copy</button>
           ${!isWS?`<button class="btn b-out b-sm" onclick="downloadPDF('${k}')">📄 PDF</button>`:''}
-          ${k==='lesson_plan'?`<button class="btn b-out b-sm" onclick="exportSlides()">📊 Slides</button>`:''}
+          ${k==='lesson_plan'?`<button class="btn b-out b-sm" onclick="exportSlides()">📊 Slides</button><button class="btn b-out b-sm" onclick="exportAnchorChart()" style="white-space:nowrap;">🖼️ Anchor Chart</button>`:''}
           ${isWS ? (k.match(/student_worksheet_[A-D]$/) ? `
             <button class="btn b-sage b-sm" onclick="getStudentLink('${k}', true)">🔗 One link (all grades)</button>
             <button class="btn b-out b-sm" onclick="getStudentLink('${k}', false)" style="font-size:.72rem;">🔗 This grade only</button>
@@ -2813,36 +2807,48 @@ async function autoMarkStudent(sid, studentObj, responses, answerKey, rubric, bt
 
 async function saveOneStu(sid, btn) {
   if (!curSess?.marks[sid]?.level) { if(btn?.showAlert) alert('Select a level for this student first.'); return; }
-  const origText = btn.textContent;
-  btn.disabled = true; btn.textContent = '⏳';
+  const origText = btn?.textContent || '';
+  if (btn?.disabled !== undefined) { btn.disabled = true; btn.textContent = '⏳'; }
   try {
     let sessId = curSess.id;
     if (!sessId) {
-      // Create session first if it doesn't exist
-      const {data:existing} = await db.from('assessment_sessions')
-        .select('id').eq('teacher_id', currentUser.id)
-        .eq('task', curSess.task).eq('date', curSess.date).maybeSingle();
-      if (existing) { sessId = existing.id; curSess.id = sessId; }
-      else {
-        const {data:s} = await db.from('assessment_sessions').insert({
-          teacher_id:currentUser.id, task:curSess.task, subject:curSess.subject,
-          strand:curSess.strand, grades:curSess.grades, date:curSess.date,
-          class_id: activeClassId || null, expectations: genC['_expectations'] || []
+      // Find or create the session
+      if (curSess.task && curSess.date) {
+        const {data:existing} = await db.from('assessment_sessions')
+          .select('id').eq('teacher_id', currentUser.id)
+          .eq('task', curSess.task).eq('date', curSess.date).maybeSingle();
+        if (existing) { sessId = existing.id; curSess.id = sessId; }
+      }
+      if (!sessId) {
+        const {data:s, error:sErr} = await db.from('assessment_sessions').insert({
+          teacher_id:currentUser.id,
+          task: curSess.task || 'Assessment',
+          subject: curSess.subject || 'General',
+          strand: curSess.strand || 'General',
+          grades: curSess.grades || [],
+          date: curSess.date || new Date().toLocaleDateString('en-CA'),
+          class_id: activeClassId || null,
+          expectations: genC['_expectations'] || []
         }).select().single();
+        if (sErr) throw new Error('Session error: ' + sErr.message);
         if (s) { sessId = s.id; curSess.id = sessId; }
       }
     }
-    if (!sessId) throw new Error('Could not create session');
+    if (!sessId) throw new Error('Could not create or find session');
     const m = curSess.marks[sid];
-    // Upsert this student's mark
-    await db.from('student_marks').upsert({
+    const {error:uErr} = await db.from('student_marks').upsert({
       session_id: sessId, student_id: sid, level: m.level, notes: m.notes || ''
     }, { onConflict: 'session_id,student_id' });
-    btn.textContent = '✅';
-    setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 1500);
+    if (uErr) throw new Error('Mark error: ' + uErr.message);
+    if (btn?.textContent !== undefined) {
+      btn.textContent = '✅';
+      setTimeout(() => { btn.textContent = origText; if(btn.disabled!==undefined) btn.disabled = false; }, 1500);
+    }
   } catch(e) {
-    alert('Error saving: ' + e.message);
-    btn.textContent = origText; btn.disabled = false;
+    console.error('[saveOneStu]', e);
+    if (btn?.showAlert) alert('Error saving: ' + e.message);
+    else showToast('⚠️ Save failed: ' + e.message);
+    if (btn?.textContent !== undefined) { btn.textContent = origText; btn.disabled = false; }
   }
 }
 
@@ -2978,28 +2984,126 @@ function downloadPDF(k) {
   const topic = curSess?.task || document.getElementById('topic')?.value || 'Document';
   const label = BLABELS[k] || k;
   const w = window.open('', '_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${topic} — ${label}</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  if (!w) { alert('Pop-up blocked — please allow pop-ups for this site, then try again.'); return; }
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${topic} — ${label}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:white;color:#16120E;padding:32px 40px;max-width:760px;margin:0 auto;}
-h1{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:600;border-bottom:3px solid #4A7C59;padding-bottom:12px;margin-bottom:20px;}
-h2{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;margin:16px 0 6px;padding:7px 12px;background:#EAF0EA;border-left:3px solid #4A7C59;border-radius:0 5px 5px 0;}
-h3{font-size:.78rem;font-weight:600;color:#4A7C59;text-transform:uppercase;letter-spacing:.5px;margin:11px 0 4px;}
-p{margin:4px 0;line-height:1.7;}
-li{margin-bottom:3px;line-height:1.6;}
+body{font-family:Georgia,serif;background:white;color:#16120E;padding:32px 40px;max-width:760px;margin:0 auto;font-size:14px;line-height:1.7;}
+h1{font-size:1.4rem;font-weight:700;border-bottom:3px solid #4A7C59;padding-bottom:10px;margin-bottom:18px;}
+h2{font-size:1rem;font-weight:700;margin:16px 0 6px;padding:7px 12px;background:#EAF0EA;border-left:3px solid #4A7C59;}
+h3{font-size:.82rem;font-weight:700;color:#4A7C59;text-transform:uppercase;letter-spacing:.5px;margin:11px 0 4px;}
+h4{font-size:.88rem;font-weight:700;margin:8px 0 3px;}
+p,li{margin-bottom:4px;}
 ul{padding-left:18px;margin:5px 0;}
-strong{font-weight:600;}
-.meta{font-size:.75rem;color:#7A726A;margin-bottom:20px;}
-.print-btn{position:fixed;top:16px;right:16px;padding:8px 16px;background:#4A7C59;color:white;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;}
-@media print{.print-btn{display:none;}}
-</' + 'style></' + 'head><' + 'body>
+strong{font-weight:700;}
+.meta{font-size:.75rem;color:#7A726A;margin-bottom:18px;}
+.print-btn{position:fixed;top:16px;right:16px;padding:10px 20px;background:#4A7C59;color:white;border:none;border-radius:6px;font-size:.88rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+@media print{.print-btn{display:none;}body{padding:20px;}}
+</style></head><body>
 <button class="print-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
 <h1>${topic}</h1>
 <div class="meta">${label} · ${new Date().toLocaleDateString('en-CA')}</div>
 ${renderMD(txt)}
-</' + 'body></' + 'html>`);
+</body></html>`;
+  w.document.open();
+  w.document.write(html);
   w.document.close();
+  // Auto-trigger print dialog after a short delay for fonts to render
+  w.setTimeout(() => w.focus(), 300);
+}
+
+// ============================================================
+// ANCHOR CHART — printable classroom wall chart
+// ============================================================
+async function exportAnchorChart() {
+  const topic = curSess?.task || document.getElementById('topic')?.value || 'Lesson';
+  const subject = curSess?.subject || '';
+  const grades = curSess?.grades || [];
+  const gradeStr = grades.join(' / ') || '';
+  const lpText = genC['lesson_plan']?.cur || '';
+  const btn = event?.target;
+  if (!topic) { alert('Generate a lesson first.'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating...'; }
+  try {
+    const prompt = `You are an Ontario elementary teacher. Create a simple, clear anchor chart for the classroom wall.
+Topic: ${topic}
+Grade(s): ${gradeStr}
+Subject: ${subject}
+${lpText ? 'Lesson context:
+' + lpText.substring(0, 500) : ''}
+
+Return ONLY valid JSON:
+{
+  "title": "Short punchy title for the anchor chart (max 6 words)",
+  "subtitle": "One sentence — what students will understand",
+  "sections": [
+    {"heading": "Section heading (2-4 words)", "points": ["Short point 1", "Short point 2", "Short point 3"]}
+  ],
+  "remember": "One key takeaway sentence students should memorize"
+}
+Rules: 2-4 sections, 2-4 bullet points each, language simple for grade ${gradeStr}. Pure JSON only.`;
+
+    const res = await authFetch('/api/generate', {
+      method: 'POST',
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(i => i.text || '').join('').trim();
+    let ac;
+    try { ac = JSON.parse(raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim()); }
+    catch(e) { const s=raw.indexOf('{'),e2=raw.lastIndexOf('}'); ac=JSON.parse(raw.slice(s,e2+1)); }
+
+    // Colour palette — warm amber/rust tones feel like a classroom
+    const palette = ['#C47B2A','#4A7C59','#2A5FA5','#B54B2A','#6B4A7C'];
+    const sections = ac.sections || [];
+    const sectionsHTML = sections.map((sec, i) => {
+      const col = palette[i % palette.length];
+      const points = (sec.points || []).map(p => `<li style="margin:6px 0;display:flex;align-items:flex-start;gap:8px;"><span style="color:${col};font-weight:700;flex-shrink:0;">▸</span><span>${p}</span></li>`).join('');
+      return `<div style="background:#FEFAF4;border:2px solid ${col};border-radius:10px;overflow:hidden;break-inside:avoid;">
+        <div style="background:${col};padding:10px 16px;">
+          <div style="color:white;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:.5px;">${sec.heading||''}</div>
+        </div>
+        <ul style="list-style:none;padding:12px 16px;margin:0;">${points}</ul>
+      </div>`;
+    }).join('');
+
+    const gridCols = sections.length >= 3 ? '1fr 1fr' : '1fr';
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${ac.title||topic} — Anchor Chart</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,serif;background:#FFFDF8;color:#1A1714;padding:28px 36px;max-width:880px;margin:0 auto;}
+.print-btn{position:fixed;top:16px;right:16px;padding:10px 20px;background:#4A7C59;color:white;border:none;border-radius:6px;font-size:.88rem;font-weight:700;cursor:pointer;}
+@media print{.print-btn{display:none;}body{background:white;padding:20px;}}
+</style></head><body>
+<button class="print-btn" onclick="window.print()">🖨️ Print</button>
+<div style="border-top:6px solid #C47B2A;padding-top:20px;margin-bottom:18px;">
+  <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:#C47B2A;margin-bottom:6px;font-weight:700;">📌 ANCHOR CHART</div>
+  <h1 style="font-size:2rem;font-weight:700;color:#1A1714;margin-bottom:6px;">${ac.title||topic}</h1>
+  <p style="font-size:1rem;color:#5A524A;font-style:italic;">${ac.subtitle||''}</p>
+</div>
+<div style="display:grid;grid-template-columns:${gridCols};gap:14px;margin-bottom:18px;">
+  ${sectionsHTML}
+</div>
+${ac.remember ? `<div style="background:#EAF0EA;border-left:5px solid #4A7C59;border-radius:0 8px 8px 0;padding:14px 18px;margin-top:4px;">
+  <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:#4A7C59;font-weight:700;margin-bottom:4px;">⭐ REMEMBER</div>
+  <div style="font-size:1.05rem;font-weight:600;">${ac.remember}</div>
+</div>` : ''}
+<div style="margin-top:22px;padding-top:12px;border-top:1px solid #E0D8CC;font-size:.68rem;color:#9CA3AF;">
+  ${topic} · ${subject} · ${gradeStr} · TeacherAI
+</div>
+</body></html>`;
+
+    const w = window.open('', '_blank');
+    if (!w) { alert('Pop-up blocked — please allow pop-ups and try again.'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+    w.setTimeout(() => w.focus(), 200);
+  } catch(e) {
+    console.error('Anchor chart error:', e);
+    alert('Error generating anchor chart: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🖼️ Anchor Chart'; }
+  }
 }
 
 // ============================================================
