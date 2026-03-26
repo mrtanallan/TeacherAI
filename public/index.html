@@ -3029,8 +3029,7 @@ async function exportAnchorChart() {
 Topic: ${topic}
 Grade(s): ${gradeStr}
 Subject: ${subject}
-${lpText ? 'Lesson context:
-' + lpText.substring(0, 500) : ''}
+${lpText ? ('Lesson context: ' + lpText.substring(0, 500)) : ''}
 
 Return ONLY valid JSON:
 {
