@@ -46,6 +46,8 @@ nav {
 }
 .logo { font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 700; color: var(--cream); margin-right: 24px; flex-shrink: 0; }
 .logo span { color: var(--amber); }
+.logo-full { color: var(--cream); }
+@media(max-width:480px) { .logo-full { display: none; } .logo { font-size:.95rem; margin-right:6px; } }
 .nav-tabs { display: flex; gap: 2px; overflow-x: auto; flex: 1; scrollbar-width: none; -ms-overflow-style: none; }
 .nav-tabs::-webkit-scrollbar { display: none; }
 .tab-short { display: none; }
@@ -261,7 +263,8 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
 @media(max-width:600px) {
   .st{grid-template-columns:1fr 1fr;}
-  nav{padding:0 10px;}
+  nav{padding:0 8px;}
+  .logo{font-size:.78rem;margin-right:8px;letter-spacing:-.5px;}
   .page{padding:12px 12px;}
   .auth-box{padding:24px 16px;}
   .nav-email{display:none;}
@@ -355,7 +358,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 <div id="appScreen" style="display:none;">
 <textarea id="ctx" style="display:none;"></textarea>
 <nav>
-  <div class="logo">Teacher<span>AI</span></div>
+  <div class="logo"><span class="logo-full">Teacher</span><span>AI</span></div>
   <div class="nav-tabs">
     <label class="tab" for="tr-roster"><span class="tab-full">👥 Class Roster</span><span class="tab-short">👥 Roster</span></label>
     <label class="tab" for="tr-plan"><span class="tab-full">✨ Plan</span><span class="tab-short">✨ Plan</span></label>
@@ -2869,9 +2872,21 @@ async function saveOneStu(sid, btn) {
     }
     if (!sessId) throw new Error('Could not create or find session');
     const m = curSess.marks[sid];
-    const {error:uErr} = await db.from('student_marks').upsert({
-      session_id: sessId, student_id: sid, level: m.level, notes: m.notes || ''
-    }, { onConflict: 'session_id,student_id' });
+    // Try update first; if no row exists, insert (avoids needing a DB unique constraint)
+    const {data:existing, error:findErr} = await db.from('student_marks')
+      .select('id').eq('session_id', sessId).eq('student_id', sid).maybeSingle();
+    if (findErr) throw new Error('Mark lookup error: ' + findErr.message);
+    let uErr;
+    if (existing) {
+      const {error:upErr} = await db.from('student_marks')
+        .update({ level: m.level, notes: m.notes || '' })
+        .eq('id', existing.id);
+      uErr = upErr;
+    } else {
+      const {error:inErr} = await db.from('student_marks')
+        .insert({ session_id: sessId, student_id: sid, level: m.level, notes: m.notes || '' });
+      uErr = inErr;
+    }
     if (uErr) throw new Error('Mark error: ' + uErr.message);
     if (btn?.textContent !== undefined) {
       btn.textContent = '✅';
