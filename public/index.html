@@ -412,11 +412,10 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <span class="wa">›</span>
     <div class="ws locked" id="ws2" onclick="gs(2)"><div class="wn">2</div>✏️ Review & Edit</div>
     <span class="wa">›</span>
-    <div class="ws locked" id="ws3" onclick="gs(3)"><div class="wn">3</div>📦 Resources</div>
+    <div class="ws locked" id="ws3" onclick="gs(3)" style="display:none;"><div class="wn">3</div>📦 Resources</div>
+    <div class="ws locked" id="ws4" onclick="gs(4)"><div class="wn">3</div>📊 Assess</div>
     <span class="wa">›</span>
-    <div class="ws locked" id="ws4" onclick="gs(4)"><div class="wn">4</div>📊 Assess</div>
-    <span class="wa">›</span>
-    <div class="ws locked" id="ws5" onclick="gs(5)"><div class="wn">5</div>💬 Feedback</div>
+    <div class="ws locked" id="ws5" onclick="gs(5)" style="display:none;"><div class="wn">5</div>💬 Feedback</div>
   </div>
 
   <!-- Step 1 -->
@@ -554,7 +553,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <div id="editBlocks"></div>
     <div class="brow">
       <button class="btn b-out" onclick="gs(1)">← Back to Plan</button>
-      <button class="btn b-ink" onclick="gs(3)">Resources →</button>
+      <button class="btn b-ink" onclick="gs(4)">Assess →</button>
     </div>
   </div>
 
@@ -582,14 +581,13 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         </div>
         <div class="brow">
           <button class="btn b-sage b-sm" onclick="saveAss()">💾 Save All</button>
-          <button class="btn b-out b-sm" onclick="gs(5)">Feedback →</button>
         </div>
       </div>
     </div>
     <div id="assGrid"><div style="color:var(--muted);font-size:.83rem;font-style:italic;padding:14px;">Add students in Class Roster first.</div></div>
     <div class="brow" style="margin-top:14px;">
       <button class="btn b-sage" onclick="saveAss()">💾 Save Assessment</button>
-      <button class="btn b-out" onclick="gs(3)">← Back to Resources</button>
+      <button class="btn b-out" onclick="gs(2)">← Back to Review</button>
     </div>
   </div>
 
@@ -1499,6 +1497,17 @@ async function createClass() {
   if (!name) { alert('Enter a class name.'); return; }
   const subject = document.getElementById('newClassSubject').value.trim();
   const context = document.getElementById('newClassContext')?.value?.trim() || '';
+  // Warn if there are unassigned students who won't auto-join this class
+  const unassigned = students.filter(s => !s.classId);
+  if (unassigned.length > 0) {
+    const ok = confirm(
+      `You have ${unassigned.length} student(s) not assigned to any class.
+
+` +
+      `Creating "${name}" won't delete them — they'll stay as "Unassigned" and you can move them in. Continue?`
+    );
+    if (!ok) return;
+  }
   showLoading('Creating class...');
   const {data, error} = await db.from('classes').insert({
     teacher_id: currentUser.id,
@@ -1894,17 +1903,14 @@ async function loadUsageMeter() {
     const noteEl = document.getElementById('usageNote');
     if (!meter || !countEl) return;
 
-    // Count lessons this month from lessons table (usage_log not yet set up)
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1); startOfMonth.setHours(0,0,0,0);
+    // Count all-time lessons generated (not filtered by date — deletions shouldn't reduce this)
     const { count } = await db.from('lessons')
       .select('*', { count: 'exact', head: true })
-      .eq('teacher_id', currentUser.id)
-      .gte('created_at', startOfMonth.toISOString());
+      .eq('teacher_id', currentUser.id);
 
     const used = count || 0;
     meter.style.display = 'block';
-    countEl.textContent = used + ' lesson' + (used !== 1 ? 's' : '') + ' this month';
+    countEl.textContent = used + ' lesson' + (used !== 1 ? 's' : '') + ' generated';
     if (noteEl) { noteEl.textContent = 'Unlimited — beta access'; noteEl.style.color = 'var(--sage)'; }
   } catch(e) { /* silent */ }
 }
@@ -2583,6 +2589,9 @@ function sl(sid,level,btn){
   const sfx=level.includes('+')?'+':level.includes('-')?'−':'';
   const cols={L1:'var(--rust)',L2:'var(--amber)',L3:'var(--blue)',L4:'var(--sage)'};
   d.textContent='Level '+num+sfx+' ●'; d.style.color=cols[base];
+  // Auto-save silently on level selection
+  const fakeBtn = { textContent: '', disabled: false };
+  saveOneStu(sid, fakeBtn).catch(() => {});
 }
 
 function sn(sid){if(!curSess.marks[sid])curSess.marks[sid]={};curSess.marks[sid].notes=document.getElementById('nt-'+sid)?.value||'';}
@@ -2747,6 +2756,12 @@ async function autoMarkStudent(sid, studentObj, responses, answerKey, rubric, bt
       const ntField = document.getElementById('nt-'+sid);
       if (ntField) ntField.value = obsNote;
     }
+
+    // ── Auto-save to DB silently after auto-mark ──
+    try {
+      const fakeBtn = { textContent: '', disabled: false };
+      await saveOneStu(sid, fakeBtn);
+    } catch(e) { /* silent — teacher can still save manually */ }
 
     btn.textContent = '🤖 Re-mark';
   } catch(e) {
@@ -4759,6 +4774,7 @@ async function generateReportCards() {
           <button class="btn b-out b-sm rc-regen-btn" data-sid="${s.id}" style="font-size:.7rem;">🔄 Regenerate</button>
         </div>
       </div>
+      <div id="rc-nodata-${s.id}" style="display:none;background:var(--amber-l);border:1px solid #E8C98A;border-radius:6px;padding:7px 11px;font-size:.78rem;color:#7A5020;margin-bottom:8px;">⚠️ No assessment data for this student — comment will be based on typical grade-level expectations. Add assessment marks in the <strong>Assessment</strong> tab for richer, personalized comments.</div>
       <div id="rc-loading-${s.id}" style="color:var(--muted);font-size:.83rem;font-style:italic;">
         <div class="dots"><span></span><span></span><span></span></div> Generating...
       </div>
@@ -4792,6 +4808,9 @@ async function generateOneComment(s, term, subj, charLimit, sessions, lvN, lvLab
 
   // Build assessment summary for this student — include expectations from lessons
   const stuSessions = sessions.filter(sess => sess.marks[s.id]?.level);
+  // Warn if no assessment data — comment will be generic
+  const noDataWarn = document.getElementById('rc-nodata-'+s.id);
+  if (noDataWarn) noDataWarn.style.display = stuSessions.length === 0 ? 'block' : 'none';
   const avgNum = stuSessions.length
     ? stuSessions.reduce((acc, sess) => acc + (lvN[sess.marks[s.id].level] || 2), 0) / stuSessions.length
     : null;
