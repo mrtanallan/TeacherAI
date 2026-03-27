@@ -1332,9 +1332,10 @@ function showApp() {
   renderR();
   initMoreOptions();
   renderTracker();
-  renderLessonsList();
-  renderExpectationsTracker();
-  switchTrackerView(localStorage.getItem('teacherai_tracker_view') || 'grade');
+  renderLessonsList().then(() => {
+    renderExpectationsTracker();
+    switchTrackerView(localStorage.getItem('teacherai_tracker_view') || 'grade');
+  });
   loadSubmissions();
   updateWelcomeBanner();
 }
@@ -2064,7 +2065,14 @@ async function generate() {
 - Math Practice: worked examples + practice problems — for math topics
 - Research Organizer: inquiry sections (question, facts, conclusion) — for research or inquiry topics
 - Experiment Record: hypothesis, materials, procedure, results — for science experiments
-Use [TEXT BOX] short answer, [LARGE BOX] paragraph/draft, [CIRCLE ONE: A / B / C] multiple choice, [CHECK ALL THAT APPLY: A / B / C] checkboxes, [WORD BANK: w1,w2,w3]. Use emoji headers. 4-6 varied activities. NEVER use underscores for blanks. DO NOT include a Name or Date field — the online platform handles this automatically. Start directly with the worksheet title and first activity. CRITICAL CONSTRAINTS — students complete this digitally on a Chromebook or laptop: (1) NEVER ask students to draw, sketch, or illustrate anything — no drawing boxes, no 'draw a picture', no art activities. (2) NEVER use draw-a-line matching — instead convert matching questions to [CIRCLE ONE] multiple choice or letter-matching with [TEXT BOX] (e.g. 'Write the letter: Title ___ [TEXT BOX]'). (3) All answers must be typeable or selectable — no physical/hands-on responses.`;
+ANSWER FORMAT RULES — read carefully before generating:
+(1) Multiple choice: write question text then [CIRCLE ONE: A) option / B) option / C) option] ALL ON THE SAME LINE. NEVER put options on a separate line. Example: What is the main idea? [CIRCLE ONE: A) The dog is lost / B) The cat is happy / C) The bird sings]
+(2) Checkboxes: [CHECK ALL THAT APPLY: A) option / B) option / C) option] same-line rule applies.
+(3) Short answer: question text [TEXT BOX]
+(4) Long answer/draft: question text [LARGE BOX]
+(5) Word bank: [WORD BANK: word1, word2, word3]
+Use emoji headers. 4-6 varied activities. NEVER use underscores for blanks. DO NOT include a Name or Date field. Start directly with the worksheet title and first activity.
+CRITICAL — digital Chromebook/laptop use only: NEVER ask students to draw, sketch, or illustrate. NEVER use draw-a-line matching (use [CIRCLE ONE] or [TEXT BOX] letter-match instead). All answers must be typeable or selectable.`;
 
   // Build worksheet lines and answer key lines outside the template literal to avoid nested backtick issues
   const wsLines = isSplit
@@ -2100,6 +2108,7 @@ Each value is a markdown string except "expectations" which is a JSON array:
 **Topic:** [topic] | **Grade(s):** [grade(s)] | **Subject:** [subject] | **Time:** [total time]
 **Expectation(s):** [codes e.g. C1.3, D2.1]
 **I can...:** [one student-facing learning goal in plain language]
+**Materials:** [list only what teacher must physically prepare or find — keep to 3 items max. Prefer zero-prep materials. If nothing needed beyond the worksheet, write 'Worksheet only.']
 
 ## MINDS ON — [8 min]
 **Ask:** "[Hook question that activates prior knowledge — one sentence]"
@@ -4592,8 +4601,35 @@ function renderRubric(text) {
 // ============================================================
 function renderWS(text){
   if(!text)return''; wsN=0;
+  // Pre-process: merge orphaned A) B) C) option lines back onto the preceding question line
+  const rawLines = text.split('\n');
+  const mergedLines = [];
+  for(let i=0;i<rawLines.length;i++){
+    const line = rawLines[i];
+    const nextLine = rawLines[i+1] || '';
+    // If this line has [CIRCLE ONE] with no options, and next line looks like options
+    if(line.includes('[CIRCLE ONE]') && nextLine.match(/^A\)/)){
+      // collect all option lines
+      let opts = [];
+      let j = i+1;
+      while(j<rawLines.length && rawLines[j].match(/^[A-E]\)/)){
+        opts.push(rawLines[j].trim());
+        j++;
+      }
+      mergedLines.push(line.replace('[CIRCLE ONE]','[CIRCLE ONE: ' + opts.join(' / ') + ']'));
+      i = j-1;
+      continue;
+    }
+    // If line looks like "1. Question:" and next line is "A) ... B) ... C) ..."
+    if(line.match(/^\d+\./) && !line.includes('[') && nextLine.match(/^A\).*B\)/)){
+      mergedLines.push(line + ' [CIRCLE ONE: ' + nextLine.trim().replace(/([A-E]\))/g,'$1').split(/(?=[B-E]\))/).map(s=>s.trim()).join(' / ') + ']');
+      i++;
+      continue;
+    }
+    mergedLines.push(line);
+  }
   let h='<div class="wsw">';
-  text.split('\n').forEach(line=>{
+  mergedLines.forEach(line=>{
     if(line.startsWith('## ')){h+=`<h2>${line.slice(3)}</h2>`;return;}
     if(line.startsWith('### ')){h+=`<h3>${line.slice(4)}</h3>`;return;}
     if(/\[TEXT BOX\]/i.test(line)){const l=line.replace(/\[TEXT BOX\]/gi,'').replace(/^[-*\d.]+\s*/,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\[[^\]]*\]/g,'').trim();wsN++;h+=`${l?`<div style="font-size:.86rem;margin-bottom:2px;">${l}</div>`:''}<input class="wsi" type="text" placeholder="Write your answer here...">`;return;}
