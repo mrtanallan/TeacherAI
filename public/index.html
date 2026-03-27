@@ -4,40 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TeacherAI — Ontario's AI Teaching Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 <style>
 :root {
-  /* Warm espresso neutrals */
-  --ink: #1C1612; --cream: #F9F5F0; --paper: #FFFFFF;
-  --muted: #8A8078; --border: #E8DDD4;
-
-  /* Terracotta — primary action colour */
-  --sage: #C4714A; --sage-l: #FAF0EA;
-
-  /* Forest green — success / save / assessment */
-  --forest: #3D6B4F; --forest-l: #EAF2EC;
-
-  /* Amber — warnings / highlights */
-  --amber: #C4952A; --amber-l: #FDF6E3;
-
-  /* Blue — links / info */
-  --blue: #3060A8; --blue-l: #EAF0FB;
-
-  /* Warm red — errors / destructive */
-  --rust: #B84B30; --rust-l: #FCECEA;
-
-  /* Border radius — slightly rounder */
-  --r: 12px;
+  --ink: #16120E; --cream: #F8F4EE; --paper: #fff;
+  --sage: #4A7C59; --sage-l: #EAF0EA;
+  --amber: #C47B2A; --amber-l: #FDF4E3;
+  --blue: #2A5FA5; --blue-l: #E8EFF9;
+  --rust: #B54B2A; --rust-l: #FCEEE9;
+  --border: #E0D8CC; --muted: #7A726A; --r: 10px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); font-size: 14px; min-height: 100vh; line-height: 1.55; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); font-size: 14px; min-height: 100vh; }
 
 /* AUTH SCREEN */
 #authScreen {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(145deg, #2C1F14 0%, #1C1612 60%, #3D2C1E 100%); padding: 20px;
+  background: var(--ink); padding: 20px;
 }
 .auth-box {
   background: var(--paper); border-radius: 14px; padding: 40px 36px;
@@ -56,12 +41,11 @@ body { font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif; background: var(
 .tab-r { display: none; }
 #appScreen { display: none; }
 nav {
-  background: #2C1F14; display: flex; align-items: center;
+  background: var(--ink); display: flex; align-items: center;
   padding: 0 20px; height: 52px; position: sticky; top: 0; z-index: 100;
-  border-bottom: 2px solid #C4714A;
 }
-.logo { font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 700; color: var(--cream); margin-right: 24px; flex-shrink: 0; letter-spacing: -.01em; }
-.logo span { color: #E8906A; }
+.logo { font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 700; color: var(--cream); margin-right: 24px; flex-shrink: 0; }
+.logo span { color: var(--amber); }
 .logo-full { color: var(--cream); }
 @media(max-width:480px) { .logo-full { display: none; } .logo { font-size:.95rem; margin-right:6px; } }
 .nav-tabs { display: flex; gap: 2px; overflow-x: auto; flex: 1; scrollbar-width: none; -ms-overflow-style: none; }
@@ -81,7 +65,7 @@ nav {
   white-space:nowrap;
 }
 .grade-pill-btn:hover { border-color:var(--sage); color:var(--sage); }
-.grade-pill-btn.selected { background:var(--sage); border-color:var(--sage); color:white; font-weight:600; }
+.grade-pill-btn.selected { background:var(--sage); border-color:var(--sage); color:white; }
 
 @media(max-width:600px) { .tab-full { display: none; } .tab-short { display: inline; } }
 .tab { padding: 7px 13px; color: #9CA3AF; cursor: pointer; border-radius: 6px; font-size: 0.8rem; font-weight: 500; white-space: nowrap; transition: all 0.15s; user-select: none; display: block; }
@@ -92,7 +76,7 @@ nav {
 #tr-lessons:checked ~ #appScreen nav .tab[for="tr-lessons"],
 #tr-rc:checked ~ #appScreen nav .tab[for="tr-rc"],
 #tr-exp:checked ~ #appScreen nav .tab[for="tr-exp"] {
-  color: white; background: var(--sage); border-radius: 6px;
+  color: var(--cream); background: rgba(255,255,255,0.14);
 }
 .nav-user { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .nav-email { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: #9CA3AF; }
@@ -112,15 +96,15 @@ nav {
 /* WORKFLOW */
 .wf { display: flex; align-items: center; background: var(--paper); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 16px; margin-bottom: 20px; overflow-x: auto; gap: 0; }
 .ws { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; color: var(--muted); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
-.ws.on { background: var(--sage-l); color: var(--sage); font-weight:600; }
-.ws.done { color: var(--forest); }
+.ws.on { background: var(--sage-l); color: var(--sage); }
+.ws.done { color: var(--sage); }
 .ws.locked { opacity: 0.3; pointer-events: none; }
 .wn { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 0.6rem; flex-shrink: 0; }
-.ws.done .wn { background: var(--forest); border-color: var(--forest); color: white; }
+.ws.done .wn { background: var(--sage); border-color: var(--sage); color: white; }
 .wa { color: var(--border); margin: 0 2px; }
 
 /* CARDS */
-.card { background: var(--paper); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(44,31,20,.06); }
+.card { background: var(--paper); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 16px; }
 .ct { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
 
 /* FORMS */
@@ -146,17 +130,15 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 /* BUTTONS */
 .btn { padding: 9px 18px; border: none; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; font-weight: 600; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.b-ink { background: #2C1F14; color: var(--cream); }
-.b-ink:hover:not(:disabled) { background: #3D2C1E; }
+.b-ink { background: var(--ink); color: var(--cream); }
+.b-ink:hover:not(:disabled) { background: #2D2A27; }
 .b-sage { background: var(--sage); color: white; }
-.b-sage:hover { background: #B0613C; }
-.b-forest { background: var(--forest); color: white; }
-.b-forest:hover { background: #2E5239; }
+.b-sage:hover { background: #3D6649; }
 .b-blue { background: var(--blue); color: white; }
-.b-blue:hover { background: #244E90; }
+.b-blue:hover { background: #1E4A8A; }
 .b-amber { background: var(--amber); color: white; }
 .b-out { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
-.b-out:hover { border-color: var(--sage); color: var(--sage); background: var(--sage-l); }
+.b-out:hover { border-color: var(--sage); color: var(--sage); }
 .b-sm { padding: 4px 10px; font-size: 0.75rem; }
 .b-full { width: 100%; justify-content: center; }
 .brow { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -556,7 +538,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         </div>
       </div>
       <div style="height:8px;"></div>
-      <button class="btn b-full" id="genBtn" onclick="generate()" style="background:linear-gradient(135deg,#C4714A,#A85A35);color:white;border:none;font-size:1.05rem;font-weight:700;padding:14px;letter-spacing:.01em;border-radius:var(--r);cursor:pointer;transition:opacity .15s,transform .1s;font-family:'Plus Jakarta Sans',sans-serif;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">✨ Generate Lesson</button>
+      <button class="btn b-full" id="genBtn" onclick="generate()" style="background:linear-gradient(135deg,#4A7C59,#2A5FA5);color:white;border:none;font-size:1.05rem;font-weight:600;padding:14px;letter-spacing:.01em;border-radius:var(--r);cursor:pointer;transition:opacity .15s,transform .1s;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">✨ Generate Lesson</button>
       <div id="usageMeter" style="display:none;text-align:center;margin-top:8px;">
         <span style="font-size:.72rem;color:var(--muted);">📊 <span id="usageCount">—</span> &nbsp;·&nbsp; <span id="usageNote" style="color:var(--sage);"></span></span>
         <div id="usageBar" style="display:none;"></div>
