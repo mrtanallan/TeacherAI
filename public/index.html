@@ -605,21 +605,24 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
 <!-- ===== CLASS ROSTER ===== -->
 <div class="page" id="pg-roster">
-  <div class="ph"><h1>Class <em>Roster</em></h1><p>Create classes, add students, and set context for each class.</p></div>
 
-  <!-- Class Manager -->
-  <div class="card" style="margin-bottom:16px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-      <div class="ct" style="margin-bottom:0;">🏫 My Classes</div>
-      <button class="btn b-sage b-sm" id="newClassToggleBtn" onclick="toggleNewClassForm()">+ New Class</button>
-    </div>
-    <div id="classTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;"></div>
-    <div id="newClassForm" style="display:none;border-top:1px solid var(--border);padding-top:12px;margin-top:8px;">
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+    <div class="ph" style="margin-bottom:0;"><h1>Class <em>Roster</em></h1></div>
+    <button class="btn b-sage" id="newClassToggleBtn" onclick="toggleNewClassForm()" style="flex-shrink:0;">🏫 + New Class</button>
+  </div>
+
+  <!-- Class tabs — clean pill row -->
+  <div class="card" style="margin-bottom:16px;padding:14px 16px;">
+    <div id="classTabs" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    <!-- New class form (slides in below tabs) -->
+    <div id="newClassForm" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:12px;">
+      <div style="font-family:DM Mono,monospace;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">New Class</div>
       <div class="fg" style="margin-bottom:10px;">
         <div class="fi s2"><label>Class Name</label><input type="text" id="newClassName" placeholder="e.g. Grade 6/7 Morning, French Period 2..." autocapitalize="words" oninput="this.value=this.value.replace(/(?:^|\s)\S/g,c=>c.toUpperCase())"></div>
-        <div class="fi"><label>Subject Focus (optional)</label><input type="text" id="newClassSubject" placeholder="e.g. Language, Math, French..."></div>
-        <div class="fi full"><label>Class Context <span style="font-weight:400;color:var(--muted);">(optional)</span> — notes for AI lesson generation</label>
-          <textarea id="newClassContext" style="min-height:60px;" placeholder="e.g. 24 students, 4 ELL, Chromebooks available, strong oral communicators..."></textarea>
+        <div class="fi"><label>Subject Focus <span style="font-weight:400;color:var(--muted);font-size:.75rem;">(optional)</span></label><input type="text" id="newClassSubject" placeholder="e.g. Language, Math, French..."></div>
+        <div class="fi full"><label>Class Context <span style="font-weight:400;color:var(--muted);font-size:.75rem;">(optional — used by AI)</span></label>
+          <textarea id="newClassContext" style="min-height:56px;" placeholder="e.g. 24 students, 4 ELL, Chromebooks available..."></textarea>
         </div>
       </div>
       <div class="brow">
@@ -627,13 +630,14 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         <button class="btn b-out b-sm" onclick="toggleNewClassForm()">Cancel</button>
       </div>
     </div>
-    <!-- Edit class panel (shown when editing active class) -->
-    <div id="editClassForm" style="display:none;border-top:1px solid var(--border);padding-top:12px;margin-top:8px;">
+    <!-- Edit class panel -->
+    <div id="editClassForm" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:12px;">
+      <div style="font-family:DM Mono,monospace;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Edit Class</div>
       <div class="fg" style="margin-bottom:10px;">
         <div class="fi s2"><label>Class Name</label><input type="text" id="editClassName" placeholder="Class name"></div>
         <div class="fi"><label>Subject Focus</label><input type="text" id="editClassSubject" placeholder="e.g. Language, Math..."></div>
-        <div class="fi full"><label>Class Context <span style="font-weight:400;color:var(--muted);">(optional)</span> — notes for AI lesson generation</label>
-          <textarea id="editClassContext" style="min-height:60px;" placeholder="e.g. 24 students, 4 ELL, Chromebooks available..."></textarea>
+        <div class="fi full"><label>Class Context <span style="font-weight:400;color:var(--muted);font-size:.75rem;">(optional — used by AI)</span></label>
+          <textarea id="editClassContext" style="min-height:56px;" placeholder="e.g. 24 students, 4 ELL, Chromebooks available..."></textarea>
         </div>
       </div>
       <div class="brow">
@@ -643,59 +647,32 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     </div>
   </div>
 
-  <!-- Two-column layout: Add student (left) + Student list (right) -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
-
-    <!-- Left: Add Student (collapsed by default, expands on click) -->
-    <div>
-      <div class="card" style="margin-bottom:12px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleAddStudent()">
-          <div class="ct" style="margin-bottom:0;">➕ Add Student</div>
-          <span id="addStuArrow" style="color:var(--muted);font-size:.8rem;">▼</span>
-        </div>
-        <div id="addStuForm" style="margin-top:12px;">
-          <div class="fg">
-            <div class="fi"><label>First Name</label><input type="text" id="sF" placeholder="First" autocapitalize="words" oninput="this.value=this.value.replace(/^(.)/, c=>c.toUpperCase())"></div>
-            <div class="fi"><label>Last Name (optional)</label><input type="text" id="sL" placeholder="Last" autocapitalize="words" oninput="this.value=this.value.replace(/^(.)/, c=>c.toUpperCase())"></div>
-            <div class="fi"><label>Grade</label>
-              <select id="sG"><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select>
-            </div>
-            <div class="fi"><label>Accommodation / Notes</label><input type="text" id="sN" placeholder="e.g. ELL, Gifted..." autocapitalize="words"></div>
-            <div class="fi full">
-              <label>Learning Profile — modified expectations</label>
-              <textarea id="sI" style="min-height:70px;" placeholder="Optional — teacher notes on modified expectations. Do not paste full IEP documents."></textarea>
-            </div>
-          </div>
-          <div class="brow">
-            <button class="btn b-sage" onclick="addStu()">➕ Add Student</button>
-            <button class="btn b-out b-sm" onclick="loadSample()">📋 Sample Roster</button>
-          </div>
-        </div>
+  <!-- Student list — full width, hero content -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="ct" style="margin-bottom:0;">👥 Students <span id="rCount" style="color:var(--muted);font-weight:400;">(0)</span></div>
+        <select id="rosterSort" onchange="renderR()" style="font-family:'DM Sans',sans-serif;font-size:.75rem;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--cream);color:var(--muted);">
+          <option value="added">Order added</option>
+          <option value="first">First name A–Z</option>
+          <option value="last">Last name A–Z</option>
+          <option value="grade">Grade</option>
+        </select>
       </div>
-      <div class="ban ban-a" style="font-size:.74rem;"><span>🔒</span><span>Student names never sent to AI · Canadian servers only · <strong>MFIPPA tip:</strong> Use first names or pseudonyms until your board approves.</span></div>
-    </div>
-
-    <!-- Right: Student list -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-        <div class="ct" style="margin-bottom:0;">👥 Students <span id="rCount" style="color:var(--muted);">(0)</span></div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <select id="rosterSort" onchange="renderR()" title="Sort students" style="font-family:'DM Sans',sans-serif;font-size:.75rem;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--paper);color:var(--muted);">
-            <option value="added">Order added</option>
-            <option value="first">First name A–Z</option>
-            <option value="last">Last name A–Z</option>
-            <option value="grade">Grade</option>
-          </select>
-          <button class="btn b-out b-sm" style="color:var(--rust);border-color:var(--rust);font-size:.7rem;" onclick="clearR()">Clear All</button>
-        </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn b-sage" onclick="openAddStudentModal()" style="font-size:.85rem;">➕ Add Student</button>
+        <button class="btn b-out b-sm" onclick="loadSample()" style="font-size:.78rem;">📋 Sample</button>
+        <button class="btn b-out b-sm" style="color:var(--rust);border-color:var(--rust);font-size:.78rem;" onclick="clearR()">Clear All</button>
       </div>
-      <div id="rGrid"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">No students yet.</div></div>
     </div>
-
+    <div id="rGrid"><div style="color:var(--muted);font-size:.83rem;font-style:italic;padding:20px 0;text-align:center;">No students yet — click Add Student to get started.</div></div>
   </div>
 
-  <!-- "What's next" nudge — shown once students exist -->
-  <div id="rosterNextStep" style="display:none;margin-top:4px;background:var(--sage-l);border:1.5px solid #A8C4AB;border-radius:var(--r);padding:16px 20px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <!-- Privacy note -->
+  <div class="ban ban-a" style="font-size:.74rem;margin-top:4px;"><span>🔒</span><span>Student names never sent to AI · Canadian servers only · <strong>MFIPPA tip:</strong> Use first names or pseudonyms until your board approves.</span></div>
+
+  <!-- "What's next" nudge -->
+  <div id="rosterNextStep" style="display:none;margin-top:12px;background:var(--sage-l);border:1.5px solid #A8C4AB;border-radius:var(--r);padding:16px 20px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div>
       <div style="font-weight:600;font-size:.9rem;margin-bottom:3px;">✅ Class is ready — generate your first lesson</div>
       <div style="font-size:.8rem;color:var(--muted);">Your students are set up. Head to Plan to generate a lesson tailored to your class.</div>
@@ -703,6 +680,32 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <label for="tr-plan" class="btn b-sage" style="cursor:pointer;">✨ Go to Plan →</label>
   </div>
 
+</div>
+
+<!-- Add Student Modal -->
+<div id="addStudentModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeAddStudentModal()">
+  <div style="background:var(--paper);border-radius:14px;padding:24px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;">Add Student</div>
+      <button onclick="closeAddStudentModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted);padding:2px 6px;">✕</button>
+    </div>
+    <div class="fg">
+      <div class="fi"><label>First Name <span style="color:var(--rust);">✱</span></label><input type="text" id="sF" placeholder="First" autocapitalize="words" oninput="this.value=this.value.replace(/^(.)/, c=>c.toUpperCase())" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('sL')?.focus();}" style="font-size:1rem;"></div>
+      <div class="fi"><label>Last Name <span style="font-weight:400;color:var(--muted);font-size:.75rem;">(optional)</span></label><input type="text" id="sL" placeholder="Last" autocapitalize="words" oninput="this.value=this.value.replace(/^(.)/, c=>c.toUpperCase())" style="font-size:1rem;"></div>
+      <div class="fi"><label>Grade</label>
+        <select id="sG" style="font-size:.95rem;"><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select>
+      </div>
+      <div class="fi"><label>Accommodation / Notes <span style="font-weight:400;color:var(--muted);font-size:.75rem;">(optional)</span></label><input type="text" id="sN" placeholder="e.g. ELL, Gifted, IEP-Reading..." autocapitalize="words"></div>
+      <div class="fi full">
+        <label>Learning Profile — modified expectations <span style="font-weight:400;color:var(--muted);font-size:.75rem;">(optional)</span></label>
+        <textarea id="sI" style="min-height:70px;" placeholder="Teacher notes on modified expectations. Do not paste full IEP documents."></textarea>
+      </div>
+    </div>
+    <div class="brow" style="margin-top:4px;">
+      <button class="btn b-sage b-full" onclick="addStu()" style="font-size:.95rem;">➕ Add Student</button>
+    </div>
+    <div style="text-align:center;margin-top:10px;font-size:.72rem;color:var(--muted);">Press Enter or click Add Student. The form stays open to add another.</div>
+  </div>
 </div>
 
 <!-- ===== ASSESSMENT ===== -->
@@ -1500,13 +1503,18 @@ function toggleNewClassForm() {
   document.getElementById('editClassForm').style.display = 'none';
 }
 
-function toggleAddStudent() {
-  const form = document.getElementById('addStuForm');
-  const arrow = document.getElementById('addStuArrow');
-  if (!form) return;
-  const open = form.style.display !== 'none';
-  form.style.display = open ? 'none' : 'block';
-  if (arrow) arrow.textContent = open ? '▼' : '▲';
+function toggleAddStudent() { openAddStudentModal(); }
+
+function openAddStudentModal() {
+  const modal = document.getElementById('addStudentModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('sF')?.focus(), 100);
+}
+
+function closeAddStudentModal() {
+  const modal = document.getElementById('addStudentModal');
+  if (modal) modal.style.display = 'none';
 }
 
 function cancelClassEdit() {
@@ -3965,6 +3973,7 @@ async function addStu(){
   if(error){alert('Error: '+error.message);return;}
   students.push({id:data.id,first:data.first_name,last:data.last_name||'',grade:data.grade,notes:data.notes||'',iep:data.learning_profile||'',dbId:data.id,classId:data.class_id});
   document.getElementById('sF').value='';document.getElementById('sL').value='';document.getElementById('sN').value='';document.getElementById('sI').value='';
+  document.getElementById('sF')?.focus();
   renderR();
   updateWelcomeBanner();
 }
