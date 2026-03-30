@@ -5,6 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TeacherAI — Ontario's AI Teaching Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- ── Guided tour modal ──────────────────────────────────── -->
+<div id="tourOverlay" class="tour-overlay" style="display:none;" onclick="if(event.target===this)skipTour()">
+  <div class="tour-box">
+    <span id="tourEmoji" class="tour-emoji">👋</span>
+    <div id="tourStep" class="tour-step">Step 1 of 5</div>
+    <div id="tourTitle" class="tour-title">Welcome to TeacherAI</div>
+    <div id="tourBody" class="tour-body"></div>
+    <div class="tour-dots" id="tourDots"></div>
+    <div class="tour-actions">
+      <button onclick="skipTour()" style="background:none;border:none;font-size:.78rem;color:var(--muted);cursor:pointer;padding:4px;">Skip tour</button>
+      <button class="btn b-sage" id="tourNext" onclick="tourNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 <style>
@@ -292,6 +307,18 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   .fg{grid-template-columns:1fr 1fr;}
   .wf{overflow-x:auto;}
 }
+
+/* ── Guided tour ─────────────────────────────────────────────── */
+.tour-overlay { position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;display:flex;align-items:center;justify-content:center; }
+.tour-box { background:var(--paper);border-radius:14px;padding:28px 28px 22px;max-width:400px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,.25);position:relative; }
+.tour-step { font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px; }
+.tour-title { font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;margin-bottom:10px;color:var(--ink); }
+.tour-body { font-size:.88rem;line-height:1.65;color:var(--muted);margin-bottom:20px; }
+.tour-emoji { font-size:2.2rem;margin-bottom:12px;display:block; }
+.tour-dots { display:flex;gap:6px;justify-content:center;margin-bottom:16px; }
+.tour-dot { width:7px;height:7px;border-radius:50%;background:var(--border);transition:background .2s; }
+.tour-dot.on { background:var(--sage); }
+.tour-actions { display:flex;gap:8px;justify-content:space-between;align-items:center; }
 </style>
 </head>
 <body>
@@ -581,6 +608,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
           <div style="font-family:DM Mono,monospace;font-size:.62rem;color:var(--muted);margin-top:2px;" id="assMeta"></div>
         </div>
         <div class="brow">
+          <button class="btn b-out b-sm" id="autoMarkAllBtn" onclick="autoMarkAll()" style="display:none;font-size:.7rem;background:#4A7C59;color:white;border:none;">🤖 Auto-mark All</button>
           <button class="btn b-sage b-sm" onclick="saveAss()">💾 Save All</button>
         </div>
       </div>
@@ -669,8 +697,6 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   </div>
 
   <!-- Privacy note -->
-  <div class="ban ban-a" style="font-size:.74rem;margin-top:4px;"><span>🔒</span><span>Student names never sent to AI · Canadian servers only · <strong>MFIPPA tip:</strong> Use first names or pseudonyms until your board approves.</span></div>
-
   <!-- "What's next" nudge -->
   <div id="rosterNextStep" style="display:none;margin-top:12px;background:var(--sage-l);border:1.5px solid #A8C4AB;border-radius:var(--r);padding:16px 20px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div>
@@ -678,6 +704,11 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       <div style="font-size:.8rem;color:var(--muted);">Your students are set up. Head to Plan to generate a lesson tailored to your class.</div>
     </div>
     <label for="tr-plan" class="btn b-sage" style="cursor:pointer;">✨ Go to Plan →</label>
+  </div>
+
+  <!-- Privacy footer — subtle, bottom of page -->
+  <div style="text-align:center;margin-top:16px;font-size:.72rem;color:var(--muted);">
+    🔒 Student names never sent to AI · Canadian servers only · <strong>MFIPPA tip:</strong> Use first names or pseudonyms until your board approves.
   </div>
 
 </div>
@@ -1128,6 +1159,7 @@ function matchExpectations(inputText, gradeBand) {
 // ============================================================
 let currentUser = null;
 let students = [], sessions = [], genC = {}, curSess = null, shareKey = '';
+let _submissionsByStudent = {}; // hoisted from renderAssGrid for batch auto-mark
 let classes = [], activeClassId = null;
 const AVCOLORS = ['#4A7C59','#2A5FA5','#C47B2A','#B54B2A','#6B46C1','#0F766E','#7C4A6E','#4A6E7C'];
 const BLABELS = {lesson_plan:'📅 Lesson Plan',student_worksheet:'📝 Student Worksheet',reading_resource:'📄 Reading Resource',assessment_rubric:'📏 Assessment Rubric',differentiation_tips:'🔀 Differentiation & Modified Expectations',answer_key:'📋 Answer Key'};
@@ -1326,6 +1358,8 @@ function showApp() {
   document.getElementById('authScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
   document.getElementById('navEmail').textContent=currentUser.email;
+  // Fire guided tour on first login
+  if (!localStorage.getItem('teacherai_tour_done')) { setTimeout(startTour, 800); }
   // Restore last active tab
   const savedTab = localStorage.getItem('teacherai_tab') || 'tr-plan';
   const tabEl = document.getElementById(savedTab);
@@ -2455,6 +2489,7 @@ async function renderAssGrid(){
 
   // Fetch submissions for this lesson's worksheets (also grab content for question extraction)
   let submissionsByStudent = {};
+  _submissionsByStudent = submissionsByStudent; // expose for autoMarkAll()
   let wsContentByGrade = {}; // grade -> worksheet text, for question label extraction
   try {
     // Only fetch worksheets created on or after the current session date
@@ -2653,6 +2688,11 @@ async function renderAssGrid(){
       await saveOneStu(this.dataset.sid, this);
     });
   });
+  // Show/hide Auto-mark All button based on whether any submissions exist
+  const hasAnySubmissions = document.querySelectorAll('.automark-btn').length > 0;
+  const allBtn = document.getElementById('autoMarkAllBtn');
+  if (allBtn) allBtn.style.display = hasAnySubmissions ? 'inline-flex' : 'none';
+
   // Attach auto-mark button listeners
   document.querySelectorAll('.automark-btn').forEach(btn => {
     btn.addEventListener('click', async function() {
@@ -2704,6 +2744,34 @@ function sn(sid){if(!curSess.marks[sid])curSess.marks[sid]={};curSess.marks[sid]
 // ============================================================
 // AUTO-MARK — AI-suggested level from student responses
 // ============================================================
+async function autoMarkAll() {
+  const btn = document.getElementById('autoMarkAllBtn');
+  const automarkBtns = [...document.querySelectorAll('.automark-btn')];
+  if (!automarkBtns.length) { showToast('No submitted worksheets to auto-mark.'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Marking...'; }
+  const gradeLetters = ['A','B','C','D','E','F'];
+  let marked = 0;
+  for (const ab of automarkBtns) {
+    const sid = ab.dataset.sid;
+    const studentObj = students.find(s => s.id === sid);
+    if (!studentObj) continue;
+    const gradeIndex = (curSess?.grades||[]).indexOf(studentObj.grade);
+    const akKey = gradeIndex >= 0 ? ('answer_key_'+gradeLetters[gradeIndex]) : 'answer_key';
+    const answerKey = genC[akKey]?.cur || genC['answer_key']?.cur || '';
+    const rubric = genC['assessment_rubric']?.cur || '';
+    const sub = _submissionsByStudent[sid];
+    if (!sub) continue;
+    const wsKeyForQ = gradeIndex >= 0 ? ('student_worksheet_'+gradeLetters[gradeIndex]) : 'student_worksheet';
+    const wsTextForQ = genC[wsKeyForQ]?.cur || '';
+    const totalQuestions = wsTextForQ ? Object.keys(extractWSQuestions(wsTextForQ)).length : 0;
+    if (btn) btn.textContent = `⏳ Marking ${marked + 1} of ${automarkBtns.length}...`;
+    await autoMarkStudent(sid, studentObj, sub.responses, answerKey, rubric, ab, totalQuestions);
+    marked++;
+  }
+  if (btn) { btn.disabled = false; btn.textContent = '🤖 Auto-mark All'; }
+  if (marked > 0) showToast(`✅ Auto-marked ${marked} student${marked!==1?'s':''}.`);
+}
+
 async function autoMarkStudent(sid, studentObj, responses, answerKey, rubric, btn, totalQuestions) {
   const resultDiv = document.getElementById('am-result-'+sid);
   if (!resultDiv) return;
@@ -4052,7 +4120,7 @@ async function saveIEP(sid){
 function renderR(){
   document.getElementById('rCount').textContent=`(${students.length})`;
   const nextStep = document.getElementById('rosterNextStep');
-  if (nextStep) nextStep.style.display = students.length >= 2 ? 'flex' : 'none';  // show after 2+ students added
+  if (nextStep) nextStep.style.display = (students.length >= 1 && savedLessons.length === 0) ? 'flex' : 'none';
   const g=document.getElementById('rGrid');
 
   if(!students.length){
@@ -5685,6 +5753,72 @@ function toggleExpLessons(codeKey) {
   const el = document.getElementById('explessons-' + codeKey);
   if (!el) return;
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// ============================================================
+// GUIDED TOUR — fires once on first login
+// ============================================================
+const TOUR_STEPS = [
+  {
+    emoji: '👋',
+    title: 'Welcome to TeacherAI',
+    body: 'Built for Ontario K–8 teachers. This quick tour shows you exactly how to use it — takes 60 seconds.'
+  },
+  {
+    emoji: '🏫',
+    title: 'Step 1: Set up your class',
+    body: 'Go to <strong>Class Roster</strong> → create a class → add your students. TeacherAI uses this to personalize every lesson for your grade(s) and IEP students.'
+  },
+  {
+    emoji: '✨',
+    title: 'Step 2: Generate a lesson',
+    body: "Go to <strong>Plan</strong> → pick your class, subject, and topic → click Generate. You'll get a lesson plan, worksheet, reading resource, and rubric in one shot."
+  },
+  {
+    emoji: '📊',
+    title: 'Step 3: Assess your class',
+    body: 'After teaching, go to <strong>Step 3: Assess</strong>. Students submit worksheets via the link — auto-mark them all at once, or tap a level (1–4) for each student manually.'
+  },
+  {
+    emoji: '📝',
+    title: 'Step 4: Report Cards',
+    body: 'Go to <strong>Report Cards</strong> → select your class and term → generate Ontario-style PowerSchool comments for every student in seconds.'
+  }
+];
+
+let _tourIndex = 0;
+
+function startTour() {
+  _tourIndex = 0;
+  renderTourStep();
+  document.getElementById('tourOverlay').style.display = 'flex';
+}
+
+function renderTourStep() {
+  const step = TOUR_STEPS[_tourIndex];
+  document.getElementById('tourEmoji').textContent = step.emoji;
+  document.getElementById('tourTitle').textContent = step.title;
+  document.getElementById('tourBody').innerHTML = step.body;
+  document.getElementById('tourStep').textContent = `Step ${_tourIndex + 1} of ${TOUR_STEPS.length}`;
+  const nextBtn = document.getElementById('tourNext');
+  nextBtn.textContent = _tourIndex === TOUR_STEPS.length - 1 ? "Let's go! →" : 'Next →';
+  // Dots
+  const dots = document.getElementById('tourDots');
+  dots.innerHTML = TOUR_STEPS.map((_,i) => `<div class="tour-dot ${i===_tourIndex?'on':''}"></div>`).join('');
+}
+
+function tourNext() {
+  if (_tourIndex < TOUR_STEPS.length - 1) {
+    _tourIndex++;
+    renderTourStep();
+  } else {
+    skipTour();
+  }
+}
+
+function skipTour() {
+  document.getElementById('tourOverlay').style.display = 'none';
+  localStorage.setItem('teacherai_tour_done', '1');
 }
 
 initApp();
