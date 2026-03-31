@@ -1971,7 +1971,7 @@ Use emoji headers. 4–6 varied activities. Start directly with the worksheet ti
   const akLines = isSplit
     ? answerKeyKeys.map((k,i)=>'- '+k+': answer key for '+grades[i]+' worksheet. Format: "Q1: [question] -> [ideal answer]"').join('\n')
     : hasWorksheet ? '- answer_key: answer key for the worksheet. Format: "Q1: [question] -> [ideal answer]". For open-ended give 2-3 key points expected at Level 3.' : '';
-  const splitExpNote = isSplit ? 'Include "grade" field for each expectation. Return 1-2 per grade.' : 'Return 2-5 most relevant.';
+  const splitExpNote = isSplit ? 'CRITICAL: Include a "grade" field (e.g. "Grade 5" or "Grade 6") on EVERY expectation so teachers know which grade it targets. Return 1-2 expectations per grade in the split.' : 'Return 2-5 most relevant expectations for this grade.';
 
   const prompt = `You are an expert Ontario elementary SSC teacher. Generate a classroom-ready lesson package.
 Grade(s): ${gradeDesc}
@@ -2151,11 +2151,15 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations) {
           const sBg = strandBgs[s]||'var(--sage-l)';
           const localExp = ONTARIO_EXPECTATIONS.find(x=>x.code===e.code);
           const bandLabel = e.band||localExp?.band||'';
-          const bandDisplay = bandLabel ? ` · Grades ${bandLabel}` : '';
+          // For split classes, show specific grade if AI returned it; otherwise show band
+          const gradeDisplay = e.grade
+            ? `<span style="font-family:DM Mono,monospace;font-size:.58rem;font-weight:600;background:var(--amber-l);color:var(--amber);padding:1px 6px;border-radius:3px;border:1px solid #E8C98A;">${e.grade}</span>`
+            : bandLabel ? `<span style="font-family:DM Mono,monospace;font-size:.55rem;color:var(--muted);">Grades ${bandLabel}</span>` : '';
           return `<div style="background:white;border:1px solid #A8C4AB;border-radius:6px;padding:6px 10px;max-width:100%;">
             <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;flex-wrap:wrap;">
               <span style="font-family:DM Mono,monospace;font-size:.65rem;font-weight:600;color:${sColor};background:${sBg};padding:1px 6px;border-radius:3px;">${e.code}</span>
-              <span style="font-family:DM Mono,monospace;font-size:.55rem;color:var(--muted);">${strandNames[s]||'Strand '+s}${bandDisplay}</span>
+              <span style="font-family:DM Mono,monospace;font-size:.55rem;color:var(--muted);">${strandNames[s]||'Strand '+s}</span>
+              ${gradeDisplay}
             </div>
             <div style="font-size:.78rem;color:#2A2520;">${e.desc}</div>
           </div>`;
@@ -2539,10 +2543,27 @@ async function getStudentLink(k, allGrades) {
         link = `${window.location.origin}/worksheet.html?id=${_combinedLinkCache}`;
       } else {
         const readingContent = genC['reading_resource']?.cur || '';
+        // Store combined payload so worksheet.html can serve any grade
+        // Uses worksheet_A/B/C/D keys alongside worksheet (first grade) for backward compat
+        const gradeLetters = ['A','B','C','D'];
+        const wsEntries = Object.fromEntries(
+          gradeLetters.filter(l=>genC['student_worksheet_'+l])
+            .map(l=>[`worksheet_${l}`, genC['student_worksheet_'+l].cur])
+        );
+        const akEntries = Object.fromEntries(
+          gradeLetters.filter(l=>genC['answer_key_'+l])
+            .map(l=>[`answer_key_${l}`, genC['answer_key_'+l].cur])
+        );
+        // First worksheet as fallback for older worksheet.html
+        const firstLetter = gradeLetters.find(l=>genC['student_worksheet_'+l]);
         const contentPayload = JSON.stringify({
-          worksheets: Object.fromEntries(['A','B','C','D'].filter(l=>genC['student_worksheet_'+l]).map(l=>[l,genC['student_worksheet_'+l].cur])),
-          reading: readingContent, grades,
-          answer_keys: Object.fromEntries(['A','B','C','D'].filter(l=>genC['answer_key_'+l]).map(l=>[l,genC['answer_key_'+l].cur]))
+          ...wsEntries,
+          ...akEntries,
+          worksheet: firstLetter ? genC['student_worksheet_'+firstLetter].cur : '',
+          answer_key: firstLetter ? (genC['answer_key_'+firstLetter]?.cur||'') : '',
+          reading: readingContent,
+          grades,
+          is_split: true
         });
         const rosterNames = students.map(s => ({id:s.id,first:s.first,last:s.last||'',grade:s.grade}));
         const { data, error } = await db.from('worksheets').insert({ teacher_id:currentUser.id, topic, grades, subject, content:contentPayload, roster:rosterNames }).select().single();
