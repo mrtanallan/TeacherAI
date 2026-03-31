@@ -900,7 +900,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
      REPORT CARDS TAB
      ══════════════════════════════════════════════════════════ -->
 <div class="page" id="pg-rc">
-  <div class="ph"><h1>Report <em>Cards</em></h1><p>Ontario-style comments ready to paste into PowerSchool.</p></div>
+  <div class="ph"><h1>Report <em>Cards</em></h1><p>Ontario-style comments ready to paste into your report card tool.</p></div>
   <div class="card" style="margin-bottom:16px;">
     <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border);">
       <div class="fi" style="flex:2;min-width:150px;">
@@ -3206,54 +3206,88 @@ async function renderAssGrid() {
   if (autoBtn) autoBtn.style.display = hasSubmissions ? 'inline-flex' : 'none';
 
   const lvlColors = {L1:'var(--rust)',L2:'var(--amber)',L3:'var(--blue)',L4:'var(--sage)'};
+  const gradeLetters = ['A','B','C','D','E','F'];
 
-  g.innerHTML = students.map(s => {
+  g.innerHTML = students.map((s,i) => {
     const mark = curSess.marks[s.id];
     const base = mark?.level?.replace(/[+-]/g,'');
-    const hasSub = !!submissionsByStudent[s.id];
-    const color = AVCOLORS[students.indexOf(s) % AVCOLORS.length];
+    const sub = submissionsByStudent[s.id];
+    const hasSub = !!sub;
+    const color = AVCOLORS[i % AVCOLORS.length];
     const initials = s.first[0]+(s.last?.[0]||'');
     const lvlDisplay = mark?.level ? `Level ${mark.level.replace('L','').replace(/[+-]/,'')}${mark.level.includes('+')?' +':mark.level.includes('-')?' −':''} ●` : 'Not assessed';
     const lvlColor = base ? lvlColors[base] : 'var(--muted)';
+
+    // Get worksheet questions for this student's grade to show question text
+    const gradeIndex = (curSess?.grades||[]).indexOf(s.grade);
+    const wsKey = gradeIndex >= 0 ? ('student_worksheet_'+gradeLetters[gradeIndex])
+      : (Object.keys(genC).find(k => k.startsWith('student_worksheet')) || '');
+    const wsText = wsKey && genC[wsKey] ? genC[wsKey]?.cur : '';
+    const wsQuestions = wsText ? extractWSQuestions(wsText) : {};
+    const akKey = gradeIndex >= 0 ? ('answer_key_'+gradeLetters[gradeIndex]) : 'answer_key';
+    const answerKeyText = genC[akKey]?.cur || genC['answer_key']?.cur || '';
+    const canAutoMark = !!(hasSub && sub.responses && Object.keys(sub.responses).length > 0 && answerKeyText);
+
+    // Build submission HTML with question text
+    const subHtml = hasSub ? `
+      <div style="margin-top:10px;">
+        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px;">
+          <button class="btn b-out b-sm sub-toggle-btn" onclick="toggleSubContent('${s.id}',this)" style="font-size:.7rem;">▼ View submitted work</button>
+          ${canAutoMark ? `<button class="btn b-sm automark-btn" data-sid="${s.id}" style="font-size:.7rem;background:#4A7C59;color:white;border:none;display:flex;align-items:center;gap:4px;">🤖 Auto-mark</button>` : ''}
+        </div>
+        <div id="am-result-${s.id}" style="display:none;"></div>
+        <div class="sub-content" id="subcon-${s.id}" style="display:none;">
+          <div style="background:var(--blue-l);border:1px solid #B0C8E8;border-radius:7px;padding:11px 13px;font-size:.82rem;margin-bottom:6px;">
+            <div style="font-family:DM Mono,monospace;font-size:.58rem;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">📥 Submitted ${sub.submittedAt ? new Date(sub.submittedAt).toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'})+' · '+new Date(sub.submittedAt).toLocaleDateString('en-CA') : ''}</div>
+            ${sub.responses ? Object.entries(sub.responses).filter(([,v])=>v&&(Array.isArray(v)?v.length>0:v!=='—'&&v!=='')).map(([q,a])=>`
+              <div data-qkey="${q}" style="margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid #B0C8E8;">
+                ${wsQuestions[q]
+                  ? `<div style="font-size:.8rem;font-weight:600;color:#1E3A6E;margin-bottom:3px;">${wsQuestions[q]}</div>`
+                  : `<div style="font-family:DM Mono,monospace;font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">${q}</div>`}
+                <div style="padding:5px 8px;background:white;border-radius:4px;line-height:1.5;">${Array.isArray(a)?a.join(', '):a}</div>
+              </div>`).join('') : '<div style="color:var(--muted);">No responses recorded.</div>'}
+          </div>
+        </div>
+      </div>` : `<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic;">No submission yet for this lesson.</div>`;
+
     return `<div class="ar" id="ar-${s.id}">
       <div class="art">
         <div class="an">
           <div class="av" style="background:${color};width:26px;height:26px;font-size:.75rem;">${initials}</div>
           ${s.first} ${s.last||''}
+          <span class="atag">${s.grade}</span>
           ${s.notes?`<span class="atag">${s.notes}</span>`:''}
-          <span id="ld-${s.id}" style="font-size:.75rem;font-family:DM Mono,monospace;color:${lvlColor};">${lvlDisplay}</span>
+          ${hasSub?'<span class="atag" style="background:var(--blue-l);border-color:#B0C8E8;color:var(--blue);">📥 submitted</span>':''}
         </div>
-        <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap;">
-          <div class="lbg">
-            <button class="lb L1 ${mark?.level==='L1-'?'sel':''}" data-level="L1-" onclick="sl('${s.id}','L1-',this)">1−</button>
-            <button class="lb L1 ${mark?.level==='L1'?'sel':''}" data-level="L1" onclick="sl('${s.id}','L1',this)">L1</button>
-            <button class="lb L1 ${mark?.level==='L1+'?'sel':''}" data-level="L1+" onclick="sl('${s.id}','L1+',this)">1+</button>
-          </div><div class="ld"></div>
-          <div class="lbg">
-            <button class="lb L2 ${mark?.level==='L2-'?'sel':''}" data-level="L2-" onclick="sl('${s.id}','L2-',this)">2−</button>
-            <button class="lb L2 ${mark?.level==='L2'?'sel':''}" data-level="L2" onclick="sl('${s.id}','L2',this)">L2</button>
-            <button class="lb L2 ${mark?.level==='L2+'?'sel':''}" data-level="L2+" onclick="sl('${s.id}','L2+',this)">2+</button>
-          </div><div class="ld"></div>
-          <div class="lbg">
-            <button class="lb L3 ${mark?.level==='L3-'?'sel':''}" data-level="L3-" onclick="sl('${s.id}','L3-',this)">3−</button>
-            <button class="lb L3 ${mark?.level==='L3'?'sel':''}" data-level="L3" onclick="sl('${s.id}','L3',this)">L3</button>
-            <button class="lb L3 ${mark?.level==='L3+'?'sel':''}" data-level="L3+" onclick="sl('${s.id}','L3+',this)">3+</button>
-          </div><div class="ld"></div>
-          <div class="lbg">
-            <button class="lb L4 ${mark?.level==='L4-'?'sel':''}" data-level="L4-" onclick="sl('${s.id}','L4-',this)">4−</button>
-            <button class="lb L4 ${mark?.level==='L4'?'sel':''}" data-level="L4" onclick="sl('${s.id}','L4',this)">L4</button>
-            <button class="lb L4 ${mark?.level==='L4+'?'sel':''}" data-level="L4+" onclick="sl('${s.id}','L4+',this)">4+</button>
-          </div>
-          <div class="ld"></div>
-          ${hasSub ? `<button class="btn b-sm automark-btn" data-sid="${s.id}" style="font-size:.65rem;background:var(--blue);color:white;border:none;padding:3px 8px;border-radius:4px;cursor:pointer;">🤖 Auto-mark</button>` : ''}
+        <div id="ld-${s.id}" style="font-family:DM Mono,monospace;font-size:.72rem;color:${lvlColor};">${lvlDisplay}</div>
+      </div>
+      ${subHtml}
+      <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap;margin-top:10px;">
+        <div class="lbg">
+          <button class="lb L1 ${mark?.level==='L1-'?'sel':''}" data-level="L1-" onclick="sl('${s.id}','L1-',this)">1−</button>
+          <button class="lb L1 ${mark?.level==='L1'?'sel':''}" data-level="L1" onclick="sl('${s.id}','L1',this)">L1</button>
+          <button class="lb L1 ${mark?.level==='L1+'?'sel':''}" data-level="L1+" onclick="sl('${s.id}','L1+',this)">1+</button>
+        </div><div class="ld"></div>
+        <div class="lbg">
+          <button class="lb L2 ${mark?.level==='L2-'?'sel':''}" data-level="L2-" onclick="sl('${s.id}','L2-',this)">2−</button>
+          <button class="lb L2 ${mark?.level==='L2'?'sel':''}" data-level="L2" onclick="sl('${s.id}','L2',this)">L2</button>
+          <button class="lb L2 ${mark?.level==='L2+'?'sel':''}" data-level="L2+" onclick="sl('${s.id}','L2+',this)">2+</button>
+        </div><div class="ld"></div>
+        <div class="lbg">
+          <button class="lb L3 ${mark?.level==='L3-'?'sel':''}" data-level="L3-" onclick="sl('${s.id}','L3-',this)">3−</button>
+          <button class="lb L3 ${mark?.level==='L3'?'sel':''}" data-level="L3" onclick="sl('${s.id}','L3',this)">L3</button>
+          <button class="lb L3 ${mark?.level==='L3+'?'sel':''}" data-level="L3+" onclick="sl('${s.id}','L3+',this)">3+</button>
+        </div><div class="ld"></div>
+        <div class="lbg">
+          <button class="lb L4 ${mark?.level==='L4-'?'sel':''}" data-level="L4-" onclick="sl('${s.id}','L4-',this)">4−</button>
+          <button class="lb L4 ${mark?.level==='L4'?'sel':''}" data-level="L4" onclick="sl('${s.id}','L4',this)">L4</button>
+          <button class="lb L4 ${mark?.level==='L4+'?'sel':''}" data-level="L4+" onclick="sl('${s.id}','L4+',this)">4+</button>
         </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
+      <div style="display:flex;gap:7px;margin-top:7px;align-items:center;">
         <input class="ni" id="nt-${s.id}" type="text" placeholder="Observation note..." value="${mark?.notes||''}" oninput="sn('${s.id}')" style="flex:1;">
         <button class="btn b-out b-sm" onclick="saveOneStu('${s.id}',this)" style="font-size:.72rem;white-space:nowrap;">💾 Save</button>
       </div>
-      <div id="am-result-${s.id}" style="display:none;margin-top:8px;"></div>
-      ${hasSub ? `<div style="margin-top:8px;"><button class="btn b-out b-sm sub-toggle-btn" onclick="toggleSubContent('${s.id}',this)" style="font-size:.7rem;color:var(--blue);">▶ View submitted work</button><div class="sub-content" id="subcon-${s.id}" style="display:none;margin-top:8px;background:var(--blue-l);border:1px solid #B0C8E8;border-radius:7px;padding:10px 12px;font-size:.8rem;">${renderSubContent(submissionsByStudent[s.id]?.responses||{})}</div></div>` : ''}
     </div>`;
   }).join('');
 
@@ -3539,8 +3573,19 @@ async function renderTracker() {
     return marks.length ? marks.reduce((a,b)=>a+b,0)/marks.length : null;
   }).filter(v => v!==null);
 
-  const classAvg = stuAvgs.length ? (stuAvgs.reduce((a,b)=>a+b,0)/stuAvgs.length).toFixed(1) : '—';
-  document.getElementById('tAvg').textContent = classAvg;
+  const classAvgNum = stuAvgs.length ? stuAvgs.reduce((a,b)=>a+b,0)/stuAvgs.length : null;
+  const classAvgLabel = classAvgNum === null ? '—'
+    : classAvgNum >= 3.85 ? 'L4'
+    : classAvgNum >= 3.5  ? 'L4−'
+    : classAvgNum >= 3.15 ? 'L3+'
+    : classAvgNum >= 2.85 ? 'L3'
+    : classAvgNum >= 2.5  ? 'L3−'
+    : classAvgNum >= 2.15 ? 'L2+'
+    : classAvgNum >= 1.85 ? 'L2'
+    : classAvgNum >= 1.5  ? 'L2−'
+    : classAvgNum >= 1.15 ? 'L1+'
+    : 'L1';
+  document.getElementById('tAvg').textContent = classAvgLabel;
 
   const atL4 = students.filter(s => {
     const marks = sessions.flatMap(sess => sess.marks[s.id]?.level ? [lvN[sess.marks[s.id].level]||2] : []);
@@ -3559,9 +3604,15 @@ async function renderTracker() {
       sorted.map(s => {
         const marks = sessions.flatMap(sess => sess.marks[s.id]?.level ? [lvN[sess.marks[s.id].level]||2] : []);
         const avg = marks.length ? marks.reduce((a,b)=>a+b,0)/marks.length : null;
-        const lv = avg ? (avg>=3.5?'L4':avg>=2.5?'L3':avg>=1.5?'L2':'L1') : null;
-        const gpClass = lv?`gp${lv.replace('L','')}`:'';
-        return `<tr><td>${s.first} ${s.last||''}</td><td><span style="font-family:DM Mono,monospace;font-size:.72rem;">${s.grade}</span></td><td style="font-family:DM Mono,monospace;text-align:center;">${marks.length}</td><td>${lv?`<span class="gp ${gpClass}">${lv}</span>`:'<span style="color:var(--muted);font-size:.78rem;">—</span>'}</td></tr>`;
+        const avgLvLabel = !avg ? null
+          : avg >= 3.85 ? 'L4'  : avg >= 3.5  ? 'L4−'
+          : avg >= 3.15 ? 'L3+' : avg >= 2.85 ? 'L3'
+          : avg >= 2.5  ? 'L3−' : avg >= 2.15 ? 'L2+'
+          : avg >= 1.85 ? 'L2'  : avg >= 1.5  ? 'L2−'
+          : avg >= 1.15 ? 'L1+' : 'L1';
+        const baseNum = avgLvLabel ? avgLvLabel.replace(/[^0-9]/g,'') : null;
+        const gpClass = baseNum ? `gp${baseNum}` : '';
+        return `<tr><td>${s.first} ${s.last||''}</td><td><span style="font-family:DM Mono,monospace;font-size:.72rem;">${s.grade}</span></td><td style="font-family:DM Mono,monospace;text-align:center;">${marks.length}</td><td>${avgLvLabel?`<span class="gp ${gpClass}">${avgLvLabel}</span>`:'<span style="color:var(--muted);font-size:.78rem;">—</span>'}</td></tr>`;
       }).join('')+'</tbody></table>';
   }
 
@@ -3571,8 +3622,8 @@ async function renderTracker() {
   sList.innerHTML = sessions.slice(0,20).map(sess => {
     const marked = Object.keys(sess.marks).filter(sid => sess.marks[sid]?.level).length;
     return `<div class="task-row" style="border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;">
-      <div class="task-row-header" onclick="loadSession('${sess.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;cursor:pointer;background:var(--paper);transition:background .15s;">
-        <div>
+      <div class="task-row-header" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;background:var(--paper);transition:background .15s;">
+        <div onclick="loadSessionToReview('${sess.id}')" style="flex:1;cursor:pointer;">
           <div style="font-weight:600;font-size:.85rem;">${sess.task}</div>
           <div style="font-family:DM Mono,monospace;font-size:.6rem;color:var(--muted);margin-top:2px;">${sess.subject} · ${sess.date} · ${marked} student${marked!==1?'s':''} marked</div>
         </div>
@@ -3621,6 +3672,15 @@ function loadSession(sessId) {
   window._curSessGrades = sess.grades||[];
   document.getElementById('tr-plan').checked=true;
   unlock(); gs(4);
+}
+
+function loadSessionToReview(sessId) {
+  const sess = sessions.find(s => s.id===sessId);
+  if (!sess) return;
+  curSess = {id:sess.id, date:sess.date, subject:sess.subject, strand:sess.strand||'General', grades:sess.grades||[], task:sess.task, marks:{...sess.marks}};
+  window._curSessGrades = sess.grades||[];
+  document.getElementById('tr-plan').checked=true;
+  unlock(); gs(2);
 }
 
 async function deleteSession(sessId) {
@@ -3786,7 +3846,7 @@ function _renderLessonsUI() {
         <div class="lesson-meta">${gradesStr} · ${subj} · ${date}</div>
       </div>
       ${!isBulk ? `<div class="brow">
-        <button class="btn b-sage b-sm" onclick="loadLesson('${l.id}')">↩ Load</button>
+        <button class="btn b-sage b-sm" onclick="loadLesson('${l.id}')">👁 View</button>
         <button class="btn b-out b-sm" onclick="deleteLesson('${l.id}',event)" style="color:var(--rust);border-color:transparent;font-size:.72rem;">🗑</button>
       </div>` : ''}
     </div>`;
