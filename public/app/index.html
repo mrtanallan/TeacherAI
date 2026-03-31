@@ -3036,6 +3036,26 @@ function renderR() {
         <button onclick="event.stopPropagation();removeStu('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:4px 6px;border-radius:4px;transition:color .15s;" onmouseover="this.style.color='var(--rust)'" onmouseout="this.style.color='var(--muted)'">✕</button>
       </div>
       <div class="sie" id="sie-${s.id}">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <div class="fi" style="flex:1;min-width:130px;">
+            <label style="font-family:DM Mono,monospace;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Grade</label>
+            <select id="sg-${s.id}" onchange="saveStuGrade('${s.id}',this.value)" style="font-family:'DM Sans',sans-serif;font-size:.86rem;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--cream);">
+              <option ${s.grade==='Kindergarten'?'selected':''}>Kindergarten</option>
+              <option ${s.grade==='Grade 1'?'selected':''}>Grade 1</option>
+              <option ${s.grade==='Grade 2'?'selected':''}>Grade 2</option>
+              <option ${s.grade==='Grade 3'?'selected':''}>Grade 3</option>
+              <option ${s.grade==='Grade 4'?'selected':''}>Grade 4</option>
+              <option ${s.grade==='Grade 5'?'selected':''}>Grade 5</option>
+              <option ${s.grade==='Grade 6'?'selected':''}>Grade 6</option>
+              <option ${s.grade==='Grade 7'?'selected':''}>Grade 7</option>
+              <option ${s.grade==='Grade 8'?'selected':''}>Grade 8</option>
+            </select>
+          </div>
+          <div class="fi" style="flex:1;min-width:130px;">
+            <label style="font-family:DM Mono,monospace;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Notes</label>
+            <input type="text" id="sn-${s.id}" value="${s.notes||''}" placeholder="ELL, IEP-Reading, Gifted..." onchange="saveStuNotes('${s.id}',this.value)" style="font-family:'DM Sans',sans-serif;font-size:.86rem;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--cream);">
+          </div>
+        </div>
         <div class="fi" style="margin-bottom:7px;">
           <label style="font-family:DM Mono,monospace;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Learning Profile / Modified Expectations</label>
           <textarea class="sit" id="sit-${s.id}" oninput="scheduleIEPSave('${s.id}')" placeholder="Modified expectations or learning profile notes...">${s.iep||''}</textarea>
@@ -3063,6 +3083,27 @@ async function saveIEP(sid) {
   const stu = students.find(s => s.id===sid);
   if (stu) stu.iep = val;
   await db.from('students').update({learning_profile:val||null}).eq('id',sid);
+}
+async function saveStuGrade(sid, grade) {
+  const stu = students.find(s => s.id===sid);
+  if (!stu) return;
+  stu.grade = grade;
+  // Update the grade display on the card
+  const card = document.getElementById('sie-'+sid)?.closest('.sc');
+  const gradeEl = card?.querySelector('.sm');
+  if (gradeEl) gradeEl.textContent = grade + (stu.notes ? ' · ' + stu.notes : '');
+  await db.from('students').update({grade}).eq('id', sid);
+  showToast('✅ Grade updated to ' + grade);
+  // Re-sync grade pills in Plan tab if this class is active
+  if (activeClassId) autoFillGradesFromClass();
+}
+async function saveStuNotes(sid, notes) {
+  const stu = students.find(s => s.id===sid);
+  if (!stu) return;
+  stu.notes = notes;
+  await db.from('students').update({notes: notes||null}).eq('id', sid);
+  showToast('✅ Notes updated');
+  renderR();
 }
 
 async function addStu() {
