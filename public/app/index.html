@@ -1919,6 +1919,7 @@ async function generate() {
   curSess = {id:null, date:new Date().toLocaleDateString('en-CA'), subject:subj, strand:strands[0]||'General', grades, task:topic, marks:{}};
   window._curSessGrades = grades;
   _combinedLinkCache = null;
+  Object.keys(_gradeLinksCache).forEach(k => delete _gradeLinksCache[k]);
 
   const iepStudents = students.filter(s => s.iep && s.iep.trim());
   const anonIEP = iepStudents.length
@@ -2569,13 +2570,19 @@ async function getStudentLink(k, allGrades) {
         link = `${window.location.origin}/worksheet.html?id=${data.id}`;
       }
     } else {
-      const readingContent = genC['reading_resource']?.cur || '';
-      const akKey = k.replace('student_worksheet','answer_key');
-      const contentPayload = JSON.stringify({ worksheet:genC[k]?.cur||'', reading:readingContent, answer_key:genC[akKey]?.cur||genC['answer_key']?.cur||'' });
-      const rosterNames = students.map(s => ({id:s.id,first:s.first,last:s.last||'',grade:s.grade}));
-      const { data, error } = await db.from('worksheets').insert({ teacher_id:currentUser.id, topic, grades, subject, content:contentPayload, roster:rosterNames }).select().single();
-      if (error) throw error;
-      link = `${window.location.origin}/worksheet.html?id=${data.id}`;
+      // Use cached link if already created for this grade this session
+      if (_gradeLinksCache[k]) {
+        link = `${window.location.origin}/worksheet.html?id=${_gradeLinksCache[k]}`;
+      } else {
+        const readingContent = genC['reading_resource']?.cur || '';
+        const akKey = k.replace('student_worksheet','answer_key');
+        const contentPayload = JSON.stringify({ worksheet:genC[k]?.cur||'', reading:readingContent, answer_key:genC[akKey]?.cur||genC['answer_key']?.cur||'' });
+        const rosterNames = students.map(s => ({id:s.id,first:s.first,last:s.last||'',grade:s.grade}));
+        const { data, error } = await db.from('worksheets').insert({ teacher_id:currentUser.id, topic, grades, subject, content:contentPayload, roster:rosterNames }).select().single();
+        if (error) throw error;
+        _gradeLinksCache[k] = data.id;
+        link = `${window.location.origin}/worksheet.html?id=${data.id}`;
+      }
     }
 
     // Show link in edit block
