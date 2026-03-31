@@ -2543,27 +2543,24 @@ async function getStudentLink(k, allGrades) {
         link = `${window.location.origin}/worksheet.html?id=${_combinedLinkCache}`;
       } else {
         const readingContent = genC['reading_resource']?.cur || '';
-        // Store combined payload so worksheet.html can serve any grade
-        // Uses worksheet_A/B/C/D keys alongside worksheet (first grade) for backward compat
-        const gradeLetters = ['A','B','C','D'];
-        const wsEntries = Object.fromEntries(
-          gradeLetters.filter(l=>genC['student_worksheet_'+l])
-            .map(l=>[`worksheet_${l}`, genC['student_worksheet_'+l].cur])
-        );
-        const akEntries = Object.fromEntries(
-          gradeLetters.filter(l=>genC['answer_key_'+l])
-            .map(l=>[`answer_key_${l}`, genC['answer_key_'+l].cur])
-        );
-        // First worksheet as fallback for older worksheet.html
-        const firstLetter = gradeLetters.find(l=>genC['student_worksheet_'+l]);
+        // Use grades_content format that worksheet.html expects for split classes
+        const gradesContent = {};
+        const answerKeysContent = {};
+        ['A','B','C','D'].forEach((letter, idx) => {
+          const wsKey = 'student_worksheet_' + letter;
+          const akKey = 'answer_key_' + letter;
+          if (genC[wsKey]?.cur && grades[idx]) {
+            gradesContent[grades[idx]] = genC[wsKey].cur;
+          }
+          if (genC[akKey]?.cur && grades[idx]) {
+            answerKeysContent[grades[idx]] = genC[akKey].cur;
+          }
+        });
         const contentPayload = JSON.stringify({
-          ...wsEntries,
-          ...akEntries,
-          worksheet: firstLetter ? genC['student_worksheet_'+firstLetter].cur : '',
-          answer_key: firstLetter ? (genC['answer_key_'+firstLetter]?.cur||'') : '',
+          worksheet: Object.values(gradesContent)[0] || '',
           reading: readingContent,
-          grades,
-          is_split: true
+          grades_content: gradesContent,
+          answer_keys: answerKeysContent
         });
         const rosterNames = students.map(s => ({id:s.id,first:s.first,last:s.last||'',grade:s.grade}));
         const { data, error } = await db.from('worksheets').insert({ teacher_id:currentUser.id, topic, grades, subject, content:contentPayload, roster:rosterNames }).select().single();
@@ -3035,7 +3032,7 @@ function renderR() {
         </div>
         <button onclick="event.stopPropagation();removeStu('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:4px 6px;border-radius:4px;transition:color .15s;" onmouseover="this.style.color='var(--rust)'" onmouseout="this.style.color='var(--muted)'">✕</button>
       </div>
-      <div class="sie" id="sie-${s.id}">
+      <div class="sie" id="sie-${s.id}" onclick="event.stopPropagation()">
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
           <div class="fi" style="flex:1;min-width:130px;">
             <label style="font-family:DM Mono,monospace;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Grade</label>
