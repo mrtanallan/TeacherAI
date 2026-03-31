@@ -36,18 +36,34 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 /* AUTH SCREEN */
 #authScreen {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: var(--ink); padding: 20px;
+  background: var(--cream); padding: 20px; position: relative; overflow: hidden;
+}
+/* Decorative circles — matches landing page feel */
+#authScreen::before {
+  content: ''; position: absolute;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, #B7E4C7 0%, transparent 70%);
+  top: -180px; right: -120px; opacity: .55; pointer-events: none;
+}
+#authScreen::after {
+  content: ''; position: absolute;
+  width: 320px; height: 320px; border-radius: 50%;
+  background: radial-gradient(circle, #FDF4E3 0%, transparent 70%);
+  bottom: -100px; left: -80px; opacity: .7; pointer-events: none;
 }
 .auth-box {
-  background: var(--paper); border-radius: 14px; padding: 40px 36px;
-  max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  background: var(--paper); border-radius: 18px; padding: 40px 36px;
+  max-width: 420px; width: 100%;
+  box-shadow: 0 4px 24px rgba(74,124,89,.1), 0 1px 4px rgba(0,0,0,.06);
+  border: 1px solid var(--border);
+  position: relative; z-index: 1;
 }
-.auth-logo { font-family: 'Fraunces', serif; font-size: 1.8rem; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.auth-logo { font-family: 'Fraunces', serif; font-size: 1.9rem; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
 .auth-logo span { color: var(--amber); }
-.auth-tagline { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
-.auth-tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--cream); border-radius: 8px; padding: 4px; }
-.auth-tab { flex: 1; padding: 8px; text-align: center; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: var(--muted); transition: all 0.15s; }
-.auth-tab.on { background: var(--paper); color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.auth-tagline { color: var(--muted); font-size: .85rem; line-height: 1.55; margin-bottom: 28px; }
+.auth-tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--cream); border-radius: 10px; padding: 4px; }
+.auth-tab { flex: 1; padding: 8px; text-align: center; border-radius: 7px; cursor: pointer; font-size: .85rem; font-weight: 500; color: var(--muted); transition: all 0.15s; }
+.auth-tab.on { background: var(--paper); color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.08); font-weight: 600; }
 .auth-err { background: var(--rust-l); border: 1px solid var(--rust); color: var(--rust); padding: 10px 13px; border-radius: 7px; font-size: 0.83rem; margin-bottom: 14px; display: none; }
 .auth-msg { background: var(--sage-l); border: 1px solid var(--sage); color: var(--sage); padding: 10px 13px; border-radius: 7px; font-size: 0.83rem; margin-bottom: 14px; display: none; }
 
@@ -340,7 +356,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 <div id="authScreen">
   <div class="auth-box">
     <div class="auth-logo">Teacher<span>AI</span></div>
-    <div class="auth-tagline">Stop spending evenings planning. AI lesson plans, auto-marking &amp; report card comments — built for Ontario teachers.</div>
+    <div class="auth-tagline">Lesson plans, auto-marking &amp; report card comments — built for Ontario K–8 teachers.</div>
     <div class="auth-tabs">
       <div class="auth-tab on" onclick="switchAuth('login',this)">Sign In</div>
       <div class="auth-tab" onclick="switchAuth('signup',this)">Create Account</div>
@@ -351,28 +367,29 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       <div class="fi" style="margin-bottom:12px;"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
       <div class="fi" style="margin-bottom:6px;"><label>Password</label><input type="password" id="loginPass" placeholder="Your password" onkeydown="if(event.key==='Enter')signIn()"></div>
       <div style="text-align:right;margin-bottom:18px;"><button onclick="switchAuth('reset',this)" style="background:none;border:none;font-size:.78rem;color:var(--muted);cursor:pointer;text-decoration:underline;padding:0;">Forgot password?</button></div>
-      <button class="btn b-ink b-full" onclick="signIn()">Sign In →</button>
+      <button class="btn b-sage b-full" onclick="signIn()" style="font-size:.95rem;padding:12px;">Sign In →</button>
     </div>
     <div id="resetForm" style="display:none;">
       <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px;">Enter your email and we'll send you a reset link.</div>
       <div class="fi" style="margin-bottom:18px;"><label>Email</label><input type="email" id="resetEmail" placeholder="your@email.com" onkeydown="if(event.key==='Enter')sendReset()"></div>
-      <button class="btn b-ink b-full" onclick="sendReset()">Send Reset Link →</button>
+      <button class="btn b-sage b-full" onclick="sendReset()" style="font-size:.95rem;padding:12px;">Send Reset Link →</button>
       <div style="text-align:center;margin-top:12px;"><button onclick="switchAuth('login',document.querySelector('.auth-tab.on'))" style="background:none;border:none;font-size:.78rem;color:var(--muted);cursor:pointer;text-decoration:underline;">← Back to Sign In</button></div>
     </div>
     <div id="signupForm" style="display:none;">
       <div class="fi" style="margin-bottom:12px;"><label>Full Name</label><input type="text" id="signupName" placeholder="Your name"></div>
       <div class="fi" style="margin-bottom:12px;"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div>
       <div class="fi" style="margin-bottom:20px;"><label>Password</label><input type="password" id="signupPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')signUp()"></div>
-      <button class="btn b-ink b-full" onclick="signUp()">Create Account →</button>
+      <button class="btn b-sage b-full" onclick="signUp()" style="font-size:.95rem;padding:12px;">Create Account →</button>
     </div>
     <div style="margin-top:20px;margin-bottom:4px;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="flex:1;height:1px;background:var(--border);"></div><span style="font-size:.72rem;color:var(--muted);white-space:nowrap;">or</span><div style="flex:1;height:1px;background:var(--border);"></div></div>
-      <button onclick="signInWithGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;border:1.5px solid var(--border);border-radius:8px;background:white;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;color:var(--ink);">
+      <button onclick="signInWithGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px 16px;border:1.5px solid var(--border);border-radius:10px;background:white;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;color:var(--ink);transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='var(--sage)';this.style.boxShadow='0 2px 8px rgba(74,124,89,.12)'" onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
         <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
         Continue with Google
       </button>
     </div>
-    <div style="text-align:center;margin-top:14px;font-size:0.75rem;color:var(--muted);">🇨🇦 Data stored in Canada · No student data sent to AI · MFIPPA-conscious design<br><span style="margin-top:6px;display:block;"><a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> · <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a></span></div>
+    <div style="text-align:center;margin-top:14px;font-size:0.75rem;color:var(--muted);">🇨🇦 Data stored in Canada · MFIPPA-conscious design<br><span style="margin-top:6px;display:block;"><a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> · <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a></span></div>
+    <div style="text-align:center;margin-top:10px;"><a href="/" style="font-size:.72rem;color:var(--sage);text-decoration:none;font-family:'DM Mono',monospace;letter-spacing:.5px;">← teacherai.ca</a></div>
   </div>
 </div>
 
