@@ -2027,12 +2027,21 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
   let progInterval = null;
   try {
     const maxTok = grades.length >= 4 ? 7000 : isSplit && grades.length >= 2 ? 5000 : 3200;
-    setProgress(15,'Sending to AI...');
+    setProgress(15,'Reading curriculum expectations...');
     let progVal = 15;
     progInterval = setInterval(() => {
       if (progVal < 85) {
         progVal += (grades.length >= 4 ? 0.8 : isSplit ? 1.1 : 1.6);
-        setProgress(Math.min(progVal,85), null);
+        const stages = [[15,'Building lesson content...']];
+        let sp = 25;
+        if (outputs.includes('lesson_plan'))       { stages.push([sp,'Writing lesson plan...']); sp+=12; }
+        if (outputs.includes('reading_resource'))  { stages.push([sp,'Generating reading resource...']); sp+=12; }
+        if (wsOutputKeys.length)                   { stages.push([sp,'Creating worksheet'+(isSplit?' for each grade...':'...')]); sp+=12; }
+        if (outputs.includes('assessment_rubric')) { stages.push([sp,'Building assessment rubric...']); sp+=10; }
+        if (hasWorksheet)                          { stages.push([sp,'Generating answer key...']); sp+=8; }
+        stages.push([82,'Matching Ontario expectations...']);
+        const stage = stages.filter(([p]) => progVal >= p).pop();
+        setProgress(Math.min(progVal,85), stage ? stage[1] : null);
       }
     }, 600);
 
@@ -2317,28 +2326,37 @@ function renderMD(text) {
 // ============================================================
 function renderRubric(text) {
   if (!text) return '';
-  const levelColors = {'Level 1':'#FEE2E2','Level 2':'#FEF9C3','Level 3':'#DBEAFE','Level 4':'#DCFCE7'};
-  const levelBorders = {'Level 1':'#EF4444','Level 2':'#EAB308','Level 3':'#3B82F6','Level 4':'#22C55E'};
-  let html = '';
+  const lvlColors = {'Level 1':'#EF4444','Level 2':'#EAB308','Level 3':'#3B82F6','Level 4':'#22C55E'};
+  const lvlBgs    = {'Level 1':'#FEE2E2','Level 2':'#FEF9C3','Level 3':'#DBEAFE','Level 4':'#DCFCE7'};
   const lines = text.split('\n');
-  let currentCat = '';
+  let html = '';
+  let inCategory = false;
+  let inLevel = false;
+
   lines.forEach(line => {
     if (line.startsWith('## ')) {
-      if (currentCat) html += '</div>';
-      currentCat = line.slice(3).trim();
-      html += `<div style="margin-bottom:16px;"><div style="font-family:Fraunces,serif;font-size:.96rem;font-weight:600;color:var(--ink);margin-bottom:8px;padding:8px 12px;background:var(--sage-l);border-left:3px solid var(--sage);border-radius:0 5px 5px 0;">${currentCat}</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">`;
+      if (inLevel) { html += '</div>'; inLevel = false; }
+      if (inCategory) { html += '</div></div>'; inCategory = false; }
+      const cat = line.slice(3).trim();
+      html += `<div style="margin-bottom:20px;">
+        <div style="font-family:Fraunces,serif;font-size:.95rem;font-weight:600;padding:8px 12px;background:var(--sage-l);border-left:3px solid var(--sage);border-radius:0 5px 5px 0;margin-bottom:8px;">${cat}</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">`;
+      inCategory = true;
     } else if (line.startsWith('### ')) {
+      if (inLevel) { html += '</div>'; inLevel = false; }
       const lvl = line.slice(4).trim();
-      const bg = levelColors[lvl]||'#F0F0F0';
-      const br = levelBorders[lvl]||'#999';
-      html += `<div style="background:${bg};border:1.5px solid ${br};border-radius:7px;padding:8px 10px;"><div style="font-family:DM Mono,monospace;font-size:.62rem;font-weight:700;margin-bottom:4px;color:${br};">${lvl}</div>`;
-    } else if (line.startsWith('- ') || line.match(/^\*\s/)) {
-      html += `<div style="font-size:.78rem;color:var(--ink);line-height:1.5;margin-bottom:3px;">• ${line.replace(/^[-*]\s*/,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</div>`;
+      const col = lvlColors[lvl]||'#999';
+      const bg  = lvlBgs[lvl]||'#f5f5f5';
+      html += `<div style="background:${bg};border:1.5px solid ${col};border-radius:7px;padding:9px 11px;">
+        <div style="font-family:DM Mono,monospace;font-size:.62rem;font-weight:700;color:${col};margin-bottom:6px;">${lvl}</div>`;
+      inLevel = true;
     } else if (line.trim() && !line.startsWith('#')) {
-      html += `<div style="font-size:.78rem;color:var(--ink);line-height:1.5;">${line.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</div>`;
+      const txt = line.replace(/^[-*]\s*/,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').trim();
+      if (txt) html += `<div style="font-size:.78rem;line-height:1.55;color:var(--ink);">${txt}</div>`;
     }
   });
-  if (currentCat) html += '</div></div>';
+  if (inLevel) html += '</div>';
+  if (inCategory) html += '</div></div>';
   return html || renderMD(text);
 }
 
@@ -2480,6 +2498,7 @@ h3{font-size:.75rem;font-weight:600;color:#4A7C59;text-transform:uppercase;lette
 .wswb{background:#E8EFF9;border:1px solid #B0C8E8;border-radius:6px;padding:10px 12px;margin:8px 0;}
 .wswbt{font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:#2A5FA5;margin-bottom:6px;font-weight:600;}
 .wswbw{display:flex;flex-wrap:wrap;gap:6px;}.wswbwd{background:white;border:1px solid #2A5FA5;border-radius:3px;padding:1px 8px;font-size:.78rem;}
+.wsw{font-size:.88rem;line-height:1.85;}
 .print-btn{position:fixed;top:14px;right:14px;background:#4A7C59;color:white;border:none;border-radius:6px;padding:8px 16px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
 p{margin:2px 0;line-height:1.65;}li{margin-bottom:2px;}ul{padding-left:17px;margin:4px 0;}
 @media print{.print-btn{display:none;}body{background:white;}.pg{padding:18px;}}
@@ -2511,7 +2530,7 @@ async function getStudentLink(k, allGrades) {
 
     if (allGrades && isSplitWS) {
       if (_combinedLinkCache) {
-        link = `${window.location.origin}/ws?id=${_combinedLinkCache}`;
+        link = `${window.location.origin}/worksheet.html?id=${_combinedLinkCache}`;
       } else {
         const readingContent = genC['reading_resource']?.cur || '';
         const contentPayload = JSON.stringify({
@@ -2523,7 +2542,7 @@ async function getStudentLink(k, allGrades) {
         const { data, error } = await db.from('worksheets').insert({ teacher_id:currentUser.id, topic, grades, subject, content:contentPayload, roster:rosterNames }).select().single();
         if (error) throw error;
         _combinedLinkCache = data.id;
-        link = `${window.location.origin}/ws?id=${data.id}`;
+        link = `${window.location.origin}/worksheet.html?id=${data.id}`;
       }
     } else {
       const readingContent = genC['reading_resource']?.cur || '';
@@ -2532,7 +2551,7 @@ async function getStudentLink(k, allGrades) {
       const rosterNames = students.map(s => ({id:s.id,first:s.first,last:s.last||'',grade:s.grade}));
       const { data, error } = await db.from('worksheets').insert({ teacher_id:currentUser.id, topic, grades, subject, content:contentPayload, roster:rosterNames }).select().single();
       if (error) throw error;
-      link = `${window.location.origin}/ws?id=${data.id}`;
+      link = `${window.location.origin}/worksheet.html?id=${data.id}`;
     }
 
     // Show link in edit block
