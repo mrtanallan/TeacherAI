@@ -580,24 +580,17 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
   <!-- Step 2 -->
   <div id="s2" style="display:none;">
-    <div class="ban ban-s" style="margin-bottom:14px;"><span>✏️</span><span><strong>Review & Edit:</strong> Click "Edit" on any section to modify before sharing with students.</span></div>
-    <div style="display:flex;gap:0;align-items:flex-start;">
+    <div class="ban ban-s" style="margin-bottom:10px;"><span>✏️</span><span><strong>Review & Edit:</strong> Click "Edit" on any section to modify before sharing with students.</span></div>
 
-      <!-- Sticky sidebar nav -->
-      <div id="lessonSidebar" style="width:152px;flex-shrink:0;position:sticky;top:64px;max-height:calc(100vh - 80px);overflow-y:auto;margin-right:12px;display:none;">
-        <div style="font-family:DM Mono,monospace;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;padding:0 4px;">Sections</div>
-        <div id="sidebarLinks" style="display:flex;flex-direction:column;gap:2px;"></div>
-      </div>
+    <!-- Floating horizontal section nav — shown after generation -->
+    <div id="lessonSidebar" style="display:none;margin-bottom:14px;position:sticky;top:60px;z-index:50;background:var(--paper);border:1px solid var(--border);border-radius:40px;padding:5px 8px;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+      <div id="sidebarLinks" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;"></div>
+    </div>
 
-      <!-- Main content -->
-      <div style="flex:1;min-width:0;">
-        <div id="editBlocks"></div>
-        <div class="brow" style="margin-top:4px;">
-          <button class="btn b-out" onclick="gs(1)">← Back to Plan</button>
-          <button class="btn b-ink" onclick="gs(4)">Assess →</button>
-        </div>
-      </div>
-
+    <div id="editBlocks"></div>
+    <div class="brow" style="margin-top:4px;">
+      <button class="btn b-out" onclick="gs(1)">← Back to Plan</button>
+      <button class="btn b-ink" onclick="gs(4)">Assess →</button>
     </div>
   </div>
 
@@ -1297,7 +1290,7 @@ async function sendReset() {
   const email = document.getElementById('resetEmail').value.trim();
   if (!email) { showAuthErr('Enter your email address.'); return; }
   const { error } = await db.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/?reset=1'
+    redirectTo: window.location.origin + '/app?reset=1'
   });
   if (error) { showAuthErr(error.message); return; }
   showAuthMsg('Reset link sent! Check your email — it may take a minute to arrive.');
@@ -1309,7 +1302,7 @@ function showAuthMsg(msg) { const e=document.getElementById('authMsg'); e.textCo
 async function signInWithGoogle() {
   const { error } = await db.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin }
+    options: { redirectTo: window.location.origin + '/app' }
   });
   if (error) showAuthErr('Google sign in failed: ' + error.message);
 }
@@ -2466,7 +2459,7 @@ function buildEditBlocks(outputs,gradeDesc,subj,topic,expectations){
           <button class="btn b-out b-sm" onclick="resetBlock('${k}')">↩ Reset</button>
           <button class="btn b-out b-sm" onclick="copyBlock('${k}')">📋 Copy</button>
           ${!isWS?`<button class="btn b-out b-sm" onclick="downloadPDF('${k}')">📄 PDF</button>`:''}
-          ${k==='lesson_plan'?`<button class="btn b-sage b-sm" onclick="presentSlides()" style="white-space:nowrap;">▶ Present</button><button class="btn b-out b-sm" onclick="downloadSlidesHTML()" style="white-space:nowrap;" title="Download as HTML file to open in any browser">⬇ Save Slides</button><button class="btn b-out b-sm" id="gSlidesBtn" onclick="exportToGoogleSlides()" style="white-space:nowrap;display:none;" title="Export to Google Slides">🔗 Google Slides</button><button class="btn b-out b-sm" onclick="exportAnchorChart()" style="white-space:nowrap;">🖼️ Anchor Chart</button>`:''}
+          ${k==='lesson_plan'?`<button class="btn b-sage b-sm" onclick="presentSlides()" style="white-space:nowrap;">▶ Present</button><button class="btn b-out b-sm" onclick="downloadSlidesHTML()" style="white-space:nowrap;" title="Download as HTML file to open in any browser">⬇ Save Slides</button><button class="btn b-out b-sm" id="gSlidesBtn" onclick="exportToGoogleSlides()" style="white-space:nowrap;display:none;" title="Export to Google Slides">🔗 Google Slides</button>`:''}
           ${isWS ? (k.match(/student_worksheet_[A-D]$/) ? `
             <button class="btn b-sage b-sm" onclick="getStudentLink('${k}', true)">🔗 One link (all grades)</button>
             <button class="btn b-out b-sm" onclick="getStudentLink('${k}', false)" style="font-size:.72rem;">🔗 This grade only</button>
@@ -2486,16 +2479,21 @@ function buildEditBlocks(outputs,gradeDesc,subj,topic,expectations){
     const icons = {lesson_plan:'📅',student_worksheet:'📝',reading_resource:'📄',assessment_rubric:'📏',answer_key:'📋',differentiation_tips:'🔀'};
     links.innerHTML = outputs.map(k => {
       const rawLabel = BLABELS[k] || k;
-      const label = rawLabel.replace(/^\S+\s/, ''); // strip leading emoji
+      // Short label: strip emoji + shorten long names
+      const label = rawLabel.replace(/^\S+\s/, '')
+        .replace('Student Worksheet', 'Worksheet')
+        .replace('Assessment Rubric', 'Rubric')
+        .replace('Differentiation Tips', 'Differentiation')
+        .replace(/— Gr\.\s*/, 'Gr. ');
       const icon = rawLabel.match(/^(\S+)/)?.[1] || '📄';
       return `<button onclick="document.getElementById('cb-${k}')?.scrollIntoView({behavior:'smooth',block:'start'});updateSidebarActive('${k}')"
         id="sbl-${k}"
-        style="text-align:left;background:none;border:none;cursor:pointer;padding:5px 8px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.75rem;color:var(--muted);width:100%;display:flex;align-items:center;gap:5px;line-height:1.3;"
-        onmouseover="this.style.background='var(--sage-l)';this.style.color='var(--sage)'"
-        onmouseout="if(!this.classList.contains('active')){this.style.background='none';this.style.color='var(--muted)'}"
-        ><span style="font-size:.85rem;">${icon}</span><span>${label}</span></button>`;
+        style="background:none;border:none;cursor:pointer;padding:4px 10px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.75rem;color:var(--muted);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:all .12s;"
+        onmouseover="if(!this.classList.contains('active')){this.style.background='var(--sage-l)';this.style.color='var(--sage)';}"
+        onmouseout="if(!this.classList.contains('active')){this.style.background='none';this.style.color='var(--muted)';}"
+        ><span style="font-size:.8rem;">${icon}</span><span>${label}</span></button>`;
     }).join('');
-    sidebar.style.display = outputs.length > 1 ? 'block' : 'none';
+    sidebar.style.display = outputs.length > 1 ? 'flex' : 'none';
     if (outputs.length > 0) updateSidebarActive(outputs[0]);
     initSidebarScroll();
   }, 120);
@@ -2504,8 +2502,8 @@ function buildEditBlocks(outputs,gradeDesc,subj,topic,expectations){
 function updateSidebarActive(k) {
   document.querySelectorAll('[id^="sbl-"]').forEach(b => {
     const isActive = b.id === 'sbl-'+k;
-    b.style.background = isActive ? 'var(--sage-l)' : 'none';
-    b.style.color = isActive ? 'var(--sage)' : 'var(--muted)';
+    b.style.background = isActive ? 'var(--sage)' : 'none';
+    b.style.color = isActive ? 'white' : 'var(--muted)';
     b.style.fontWeight = isActive ? '600' : '400';
     b.classList.toggle('active', isActive);
   });
@@ -3388,7 +3386,7 @@ ${ac.remember ? `<div style="background:#EAF0EA;border-left:5px solid #4A7C59;bo
 // ============================================================
 // GOOGLE SLIDES EXPORT
 // ============================================================
-const GSLIDES_CLIENT_ID = ''; // Set in Vercel env or here after Google Console setup
+const GSLIDES_CLIENT_ID = '745642384007-u7anvn00lh74qum6b9u19eodm7flokfd.apps.googleusercontent.com';
 const GSLIDES_SCOPE = 'https://www.googleapis.com/auth/presentations https://www.googleapis.com/auth/drive.file';
 let _gToken = null;
 
@@ -5802,7 +5800,7 @@ async function connectGoogleDrive() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Connecting...'; }
   const { error } = await db.auth.linkIdentity({
     provider: 'google',
-    options: { redirectTo: window.location.origin + '/?account=1' }
+    options: { redirectTo: window.location.origin + '/app?account=1' }
   });
   if (error) {
     alert('Could not connect Google: ' + error.message);
