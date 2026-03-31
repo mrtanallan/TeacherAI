@@ -355,10 +355,10 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 </head>
 <body>
 
-<!-- -- Toast -- -->
+<!-- ── Toast ── -->
 <div class="toast" id="appToast"></div>
 
-<!-- -- Loading overlay -- -->
+<!-- ── Loading overlay ── -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="dots"><span></span><span></span><span></span></div>
   <div class="loading-text" id="loadingText">Loading...</div>
@@ -366,7 +366,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <div class="loading-stage" id="loadingStage"></div>
 </div>
 
-<!-- -- Tour overlay -- -->
+<!-- ── Tour overlay ── -->
 <div id="tourOverlay" class="tour-overlay" style="display:none;" onclick="if(event.target===this)skipTour()">
   <div class="tour-box">
     <span id="tourEmoji" class="tour-emoji">👋</span>
@@ -381,7 +381,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   </div>
 </div>
 
-<!-- -- Add student modal -- -->
+<!-- ── Add student modal ── -->
 <div class="mbg" id="addStudentModal" onclick="if(event.target===this)closeAddStudentModal()">
   <div class="modal" style="max-width:500px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -524,7 +524,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <div class="ws locked" id="ws4" onclick="gs(4)"><div class="wn">3</div>📊 Assess</div>
   </div>
 
-  <!-- -- Step 1: Generate -- -->
+  <!-- ── Step 1: Generate ── -->
   <div id="s1">
     <div class="card">
       <!-- Hidden grade selects for JS compatibility -->
@@ -656,7 +656,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     </div>
   </div>
 
-  <!-- -- Step 2: Review & Edit -- -->
+  <!-- ── Step 2: Review & Edit ── -->
   <div id="s2" style="display:none;">
     <div class="ban ban-s" style="margin-bottom:10px;"><span>✏️</span><span><strong>Review &amp; Edit:</strong> Click "Edit" on any section to modify before sharing with students.</span></div>
     <!-- Floating section nav -->
@@ -670,7 +670,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     </div>
   </div>
 
-  <!-- -- Step 3: Share (resources) -- -->
+  <!-- ── Step 3: Share (resources) ── -->
   <div id="s3" style="display:none;">
     <div class="ban ban-b" style="margin-bottom:14px;"><span>📦</span><span><strong>Resources</strong> — Quick access to all shareable content from this lesson.</span></div>
     <div id="shareCards"></div>
@@ -680,7 +680,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     </div>
   </div>
 
-  <!-- -- Step 4: Assess -- -->
+  <!-- ── Step 4: Assess ── -->
   <div id="s4" style="display:none;">
     <div class="ban ban-a"><span>📊</span><span><strong>Quick Assessment:</strong> Tap a level for each student. Add notes while circulating.</span></div>
     <div class="card" style="margin-bottom:14px;">
@@ -1127,7 +1127,7 @@ const EXPECTATIONS = {
 // Backward-compat alias used throughout existing code
 const ONTARIO_EXPECTATIONS = EXPECTATIONS.language;
 
-// -- Unified expectations lookup ------------------------------
+// ── Unified expectations lookup ──────────────────────────────
 function getExpectations(subject, grades, strands) {
   const subjectKey = subject === 'Language / Literacy' ? 'language'
     : subject === 'Mathematics' ? 'math'
@@ -1945,7 +1945,7 @@ async function generate() {
     : [];
   const allOutputKeys = [...outputKeys, ...answerKeyKeys];
 
-  // -- Worksheet format rules — laptop/Chromebook safe ----------
+  // ── Worksheet format rules — laptop/Chromebook safe ──────────
   const isMath = subj === 'Mathematics';
   const wsFormatNote = isMath
     ? `Math worksheet FORMAT RULES — Chromebook/laptop only, students cannot show handwritten work:
@@ -2814,7 +2814,7 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg) {
     #fsb{border-radius:8px!important;width:auto!important;padding:.3rem .85rem!important;font-size:.7rem!important;letter-spacing:.5px;font-family:'DM Mono',monospace}
   `;
 
-  // -- FIX: JS defers show(0) until DOMContentLoaded instead of running inline --
+  // ── FIX: JS defers show(0) until DOMContentLoaded instead of running inline ──
   const JS = `
     var c=0,t=${total};
     var sl,pr,nm;
@@ -3631,6 +3631,462 @@ function renderAssessClassTabs() {
 }
 function buildAssessTab(cid, label, active) {
   return `<button class="assess-class-tab" data-cid="${cid}" style="padding:9px 16px;border:none;border-bottom:3px solid ${active?'var(--sage)':'transparent'};background:none;font-size:.83rem;font-weight:${active?'600':'400'};color:${active?'var(--sage)':'var(--muted)'};cursor:pointer;white-space:nowrap;transition:all .15s;">${label}</button>`;
+}
+
+// ============================================================
+// LESSONS LIST
+// ============================================================
+let _lessonsSortMode = 'date';
+let _lessonsFilterText = '';
+
+async function renderLessonsList() {
+  if (!currentUser) return;
+  const { data } = await db.from('lessons').select('*').eq('teacher_id',currentUser.id).order('created_at',{ascending:false}).limit(50);
+  savedLessons = data || [];
+  _renderLessonsUI();
+}
+
+function _renderLessonsUI() {
+  const el = document.getElementById('lessonsList');
+  if (!el) return;
+  if (!savedLessons.length) {
+    el.innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--muted);"><div style="font-size:2rem;margin-bottom:10px;">📚</div><div style="font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:6px;">No lessons yet</div><div style="font-size:.82rem;margin-bottom:16px;">Every lesson you generate is saved here for reuse.</div><label for="tr-plan" class="btn b-sage b-sm" style="cursor:pointer;display:inline-block;">✨ Generate your first lesson →</label></div>';
+    return;
+  }
+  const filterText = _lessonsFilterText.toLowerCase();
+  let filtered = savedLessons.filter(l => !filterText || (l.topic||'').toLowerCase().includes(filterText) || (l.subject||'').toLowerCase().includes(filterText));
+  filtered = [...filtered].sort((a,b) => {
+    if (_lessonsSortMode==='date')    return new Date(b.created_at)-new Date(a.created_at);
+    if (_lessonsSortMode==='subject') return (a.subject||'').localeCompare(b.subject||'');
+    if (_lessonsSortMode==='grade')   return (a.grades?.[0]||'').localeCompare(b.grades?.[0]||'');
+    if (_lessonsSortMode==='topic')   return (a.topic||'').localeCompare(b.topic||'');
+    return 0;
+  });
+  const isBulk = document.getElementById('bulkSelectBtn')?.textContent?.includes('Done');
+  el.innerHTML = filtered.map(l => {
+    const date = l.created_at ? new Date(l.created_at).toLocaleDateString('en-CA') : '';
+    const gradesStr = (l.grades||[]).join(' / ');
+    const subj = (l.subject||'Language').replace('Language / Literacy','Language');
+    return `<div class="lesson-card">
+      ${isBulk ? `<input type="checkbox" class="lesson-cb" data-lid="${l.id}" style="width:16px;height:16px;accent-color:var(--sage);flex-shrink:0;" onchange="updateBulkCount()">` : ''}
+      <div onclick="${isBulk ? `document.querySelector('.lesson-cb[data-lid=\\'${l.id}\\']').click()` : `loadLesson('${l.id}')`}" style="flex:1;cursor:pointer;">
+        <div class="lesson-title">${l.topic||'Untitled'}</div>
+        <div class="lesson-meta">${gradesStr} · ${subj} · ${date}</div>
+      </div>
+      ${!isBulk ? `<div class="brow">
+        <button class="btn b-sage b-sm" onclick="loadLesson('${l.id}')">↩ Load</button>
+        <button class="btn b-out b-sm" onclick="deleteLesson('${l.id}',event)" style="color:var(--rust);border-color:transparent;font-size:.72rem;">🗑</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function filterLessons() { _lessonsFilterText = document.getElementById('lessonSearch')?.value||''; _renderLessonsUI(); }
+
+function sortLessons(mode, btn) {
+  _lessonsSortMode = mode;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active-sort'));
+  if (btn) btn.classList.add('active-sort');
+  _renderLessonsUI();
+}
+
+function toggleBulkSelect() {
+  const btn = document.getElementById('bulkSelectBtn');
+  const bar = document.getElementById('bulkBar');
+  const isBulk = btn.textContent.includes('Done');
+  btn.textContent = isBulk ? '☑️ Select' : '✓ Done';
+  if (bar) bar.style.display = isBulk ? 'none' : 'flex';
+  _renderLessonsUI();
+}
+
+function updateBulkCount() {
+  const cnt = document.querySelectorAll('.lesson-cb:checked').length;
+  const el = document.getElementById('bulkCount');
+  if (el) el.textContent = cnt + ' selected';
+}
+
+async function deleteSelectedLessons() {
+  const ids = [...document.querySelectorAll('.lesson-cb:checked')].map(cb => cb.dataset.lid);
+  if (!ids.length) { showToast('No lessons selected.'); return; }
+  if (!confirm(`Delete ${ids.length} lesson${ids.length!==1?'s':''}? Cannot be undone.`)) return;
+  showLoading('Deleting...');
+  const { error } = await db.from('lessons').delete().in('id', ids);
+  hideLoading();
+  if (error) { alert('Error: '+error.message); return; }
+  savedLessons = savedLessons.filter(l => !ids.includes(l.id));
+  toggleBulkSelect();
+  showToast(`✅ Deleted ${ids.length} lesson${ids.length!==1?'s':''}.`);
+}
+
+async function deleteLesson(id, e) {
+  e.stopPropagation();
+  if (!confirm('Delete this lesson?')) return;
+  showLoading('Deleting...');
+  await db.from('lessons').delete().eq('id', id);
+  savedLessons = savedLessons.filter(l => l.id!==id);
+  hideLoading(); _renderLessonsUI(); showToast('✅ Lesson deleted.');
+}
+
+function loadLesson(id) {
+  const lesson = savedLessons.find(l => l.id===id);
+  if (!lesson) return;
+  const content = lesson.content || {};
+  genC = {};
+  Object.keys(content).forEach(k => { if (typeof content[k]==='string') genC[k]={orig:content[k],cur:content[k]}; });
+  genC['_expectations'] = lesson.expectations || [];
+  curSess = { id:null, date:new Date().toLocaleDateString('en-CA'), subject:lesson.subject||'Language / Literacy', strand:'General', grades:lesson.grades||[], task:lesson.topic||'', marks:{} };
+  window._curSessGrades = lesson.grades || [];
+  window._slideData = null;
+  _combinedLinkCache = null;
+  const gradeDesc = (lesson.grades||[]).length > 1 ? (lesson.grades||[]).join(' / ')+' split class' : (lesson.grades||[])[0]||'';
+  const displayKeys = Object.keys(content).filter(k => k!=='expectations' && !k.startsWith('answer_key'));
+  buildEditBlocks(displayKeys, gradeDesc, lesson.subject||'', lesson.topic||'', lesson.expectations||[]);
+  buildShareCards(displayKeys.filter(k => SHAREABLE.includes(k)));
+  unlock();
+  document.getElementById('tr-plan').checked = true;
+  gs(2);
+  showToast('✅ Lesson loaded.');
+}
+
+// ============================================================
+// REPORT CARDS
+// ============================================================
+const AVCOLORS_RC = ['#4A7C59','#2A5FA5','#C47B2A','#B54B2A','#6B46C1','#0F766E','#7C4A6E','#4A6E7C'];
+
+async function populateRCFilters() {
+  const classSel = document.getElementById('rc-class');
+  if (!classSel) return;
+  classSel.innerHTML = '<option value="">— Select a class —</option>' +
+    classes.map(c => `<option value="${c.id}" ${c.id===activeClassId?'selected':''}>${c.name}</option>`).join('');
+  if (activeClassId) updateRCStudentFilter();
+}
+
+function updateRCStudentFilter() {
+  const classId = document.getElementById('rc-class')?.value || '';
+  const gradeEl = document.getElementById('rc-grade');
+  const noClassMsg = document.getElementById('rc-no-class-msg');
+  const stuArea = document.getElementById('rc-student-area');
+  const genBtn = document.getElementById('rcGenBtn');
+  if (!classId) {
+    if (noClassMsg) noClassMsg.style.display = 'block';
+    if (stuArea) stuArea.style.display = 'none';
+    if (genBtn) { genBtn.disabled=true; genBtn.style.opacity='.5'; }
+    return;
+  }
+  if (noClassMsg) noClassMsg.style.display = 'none';
+  if (stuArea) stuArea.style.display = 'block';
+  const classStudents = students.filter(s => s.classId===classId);
+  _rcAllStudents = classStudents;
+  if (gradeEl) {
+    gradeEl.disabled = false;
+    const gradeOrder = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
+    const grades = [...new Set(classStudents.map(s=>s.grade))].filter(g=>g).sort((a,b)=>gradeOrder.indexOf(a)-gradeOrder.indexOf(b));
+    gradeEl.innerHTML = '<option value="">All grades</option>'+grades.map(g=>`<option value="${g}">${g}</option>`).join('');
+  }
+  renderRCStudentCheckboxes(classStudents);
+  if (genBtn) { genBtn.disabled=false; genBtn.style.opacity='1'; }
+}
+
+function renderRCStudentCheckboxes(stuList) {
+  const el = document.getElementById('rc-student-checkboxes');
+  if (!el) return;
+  const sorted = [...stuList].sort((a,b) => (a.last||a.first).localeCompare(b.last||b.first));
+  el.innerHTML = sorted.map(s => `<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:.83rem;" onmouseover="this.style.background='var(--sage-l)'" onmouseout="this.style.background='none'">
+    <input type="checkbox" class="rc-stu-cb" data-sid="${s.id}" checked style="accent-color:var(--sage);width:14px;height:14px;" onchange="updateRCScopeSummary()">
+    <span>${s.last ? s.last+', '+s.first : s.first}</span>
+    <span style="font-family:DM Mono,monospace;font-size:.62rem;color:var(--muted);">${s.grade}</span>
+  </label>`).join('');
+  updateRCScopeSummary();
+}
+
+function updateRCScopeSummary() {
+  const checked = document.querySelectorAll('.rc-stu-cb:checked').length;
+  const el = document.getElementById('rc-scope-summary');
+  if (el) el.textContent = checked > 0 ? `${checked} student${checked!==1?'s':''} selected` : '';
+}
+
+function rcSelectAll(val) {
+  document.querySelectorAll('.rc-stu-cb').forEach(cb => cb.checked = val);
+  updateRCScopeSummary();
+}
+
+async function loadSavedRCPage() {
+  try {
+    const term = document.getElementById('rc-term')?.value || 'progress';
+    const subj = document.getElementById('rc-subj')?.value || 'Language / Literacy';
+    const classId = document.getElementById('rc-class')?.value || '';
+    if (!classId) return;
+    const { data } = await db.from('report_card_comments').select('*').eq('teacher_id',currentUser.id).eq('term',term).eq('subject',subj).order('updated_at',{ascending:false});
+    if (!data || !data.length) return;
+    const sids = data.map(r => r.student_id);
+    const { data:stuData } = await db.from('students').select('id,first_name,last_name,grade,class_id').in('id',sids);
+    const stuMap = {};
+    (stuData||[]).forEach(s => { if (!classId || s.class_id===classId) stuMap[s.id]=s; });
+    const results = document.getElementById('rcResults');
+    const copyBar = document.getElementById('rcCopyAllBar');
+    results.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">📂 Saved — '+term.replace('progress','Progress Report').replace('term1','Term 1').replace('term2','Term 2')+' · '+subj+'</div>' +
+      data.map((r,i) => {
+        const s = stuMap[r.student_id];
+        if (!s) return '';
+        const name = s.last_name ? s.last_name+', '+s.first_name : s.first_name;
+        const initials = s.first_name[0]+(s.last_name?.[0]||'');
+        return `<div class="card" id="rc-card-${r.student_id}" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+            <div class="av" style="background:${AVCOLORS_RC[i%AVCOLORS_RC.length]};width:30px;height:30px;font-size:.8rem;">${initials}</div>
+            <div><div style="font-weight:600;font-size:.9rem;">${name}</div><div style="font-family:DM Mono,monospace;font-size:.6rem;color:var(--muted);">${s.grade} · Saved ${new Date(r.updated_at).toLocaleDateString('en-CA')}</div></div>
+            <div style="margin-left:auto;"><button class="btn b-out b-sm rc-regen-btn" data-sid="${r.student_id}" style="font-size:.7rem;">🔄 Regenerate</button></div>
+          </div>
+          <div id="rc-comment-${r.student_id}"></div>
+        </div>`;
+      }).join('');
+    data.forEach(r => { if (stuMap[r.student_id]) renderCommentCard(r.student_id, r.comment, r.char_limit||500); });
+    if (copyBar) copyBar.style.display = 'block';
+    const lvN = {L1:1,'L1-':.7,'L1+':1.3,L2:2,'L2-':1.7,'L2+':2.3,L3:3,'L3-':2.7,'L3+':3.3,L4:4,'L4-':3.7,'L4+':4.3};
+    const lvLabel = {L1:'Level 1',L2:'Level 2',L3:'Level 3',L4:'Level 4'};
+    const termLabels = {progress:'Progress Report (November) — observational language, learning skills, no grade references.',term1:'Term 1 (February) — achievement language, expectations met, strengths + next step.',term2:'Term 2 (June) — summative, year-in-review, readiness for next grade.'};
+    document.querySelectorAll('.rc-regen-btn').forEach(b => {
+      b.addEventListener('click', async function() {
+        const s = stuMap[this.dataset.sid];
+        if (!s) return;
+        const { data:sessData } = await db.from('assessment_sessions').select('*').eq('teacher_id',currentUser.id);
+        await generateOneComment({id:this.dataset.sid,first:s.first_name,last:s.last_name||'',grade:s.grade}, term, subj, parseInt(document.getElementById('rc-charlimit')?.value)||500, sessData||[], lvN, lvLabel, termLabels);
+      });
+    });
+  } catch(e) { /* silent */ }
+}
+
+async function generateReportCards() {
+  if (!students.length) { alert('Add students to your Class Roster first.'); return; }
+  const term = document.getElementById('rc-term').value;
+  const subj = document.getElementById('rc-subj').value;
+  const charLimit = parseInt(document.getElementById('rc-charlimit').value) || 500;
+  const btn = document.getElementById('rcGenBtn');
+  btn.disabled=true; btn.textContent='⏳ Generating...';
+  const termLabels = {
+    progress:'Progress Report (November) — use observational language, focus on learning skills and work habits. No letter grades.',
+    term1:'Term 1 Provincial Report Card (February) — use achievement language, reference curriculum expectations met, strengths, one specific next step.',
+    term2:'Term 2 Provincial Report Card (June) — use summative language, describe overall achievement, growth, and readiness for next grade.'
+  };
+  const lvN = {L1:1,'L1-':.7,'L1+':1.3,L2:2,'L2-':1.7,'L2+':2.3,L3:3,'L3-':2.7,'L3+':3.3,L4:4,'L4-':3.7,'L4+':4.3};
+  const lvLabel = {L1:'Level 1',L2:'Level 2',L3:'Level 3',L4:'Level 4'};
+  const checkedSids = new Set([...document.querySelectorAll('.rc-stu-cb:checked')].map(cb => cb.dataset.sid));
+  const pool = _rcAllStudents.length ? _rcAllStudents : students;
+  const scope = pool.filter(s => checkedSids.has(s.id));
+  if (!scope.length) { alert('Select at least one student.'); btn.disabled=false; btn.textContent='📝 Generate Comments'; return; }
+  const sorted = [...scope].sort((a,b) => (a.last||a.first).toLowerCase().localeCompare((b.last||b.first).toLowerCase()));
+  const results = document.getElementById('rcResults');
+  results.innerHTML = sorted.map((s,i) => `<div class="card" id="rc-card-${s.id}" style="margin-bottom:12px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+      <div class="av" style="background:${AVCOLORS_RC[i%AVCOLORS_RC.length]};width:30px;height:30px;font-size:.8rem;">${s.first[0]}${(s.last||' ')[0]}</div>
+      <div><div style="font-weight:600;font-size:.9rem;">${s.last?s.last+', '+s.first:s.first}</div><div style="font-family:DM Mono,monospace;font-size:.6rem;color:var(--muted);">${s.grade}</div></div>
+      <div style="margin-left:auto;"><button class="btn b-out b-sm rc-regen-btn" data-sid="${s.id}" style="font-size:.7rem;">🔄 Regenerate</button></div>
+    </div>
+    <div id="rc-nodata-${s.id}" style="display:none;background:var(--amber-l);border:1px solid #E8C98A;border-radius:6px;padding:7px 11px;font-size:.78rem;color:#7A5020;margin-bottom:8px;">⚠️ No assessment data — comment based on grade-level expectations. Add marks in Trackers for richer comments.</div>
+    <div id="rc-loading-${s.id}" style="color:var(--muted);font-size:.83rem;font-style:italic;"><div class="dots"><span></span><span></span><span></span></div> Generating...</div>
+    <div id="rc-comment-${s.id}" style="display:none;"></div>
+  </div>`).join('');
+  document.querySelectorAll('.rc-regen-btn').forEach(b => {
+    b.addEventListener('click', function() { const s=students.find(x=>x.id===this.dataset.sid); if(s) generateOneComment(s,term,subj,charLimit,sessions,lvN,lvLabel,termLabels); });
+  });
+  for (const s of sorted) { await generateOneComment(s, term, subj, charLimit, sessions, lvN, lvLabel, termLabels); }
+  btn.disabled=false; btn.textContent='📝 Generate All Comments';
+}
+
+async function generateOneComment(s, term, subj, charLimit, sessData, lvN, lvLabel, termLabels) {
+  const loadEl = document.getElementById('rc-loading-'+s.id);
+  const noDataEl = document.getElementById('rc-nodata-'+s.id);
+  const commentEl = document.getElementById('rc-comment-'+s.id);
+  if (loadEl) loadEl.style.display = 'block';
+  if (commentEl) commentEl.style.display = 'none';
+  const stuSessions = (sessData||[]).filter(sess => sess.subject===subj || subj==='Language / Literacy');
+  const stuMarks = stuSessions.flatMap(sess => sess.marks[s.id]?.level ? [{task:sess.task,level:sess.marks[s.id].level,notes:sess.marks[s.id].notes||''}] : []);
+  if (!stuMarks.length && noDataEl) noDataEl.style.display = 'block';
+  const avgRaw = stuMarks.length ? stuMarks.map(m=>lvN[m.level]||2).reduce((a,b)=>a+b,0)/stuMarks.length : null;
+  const overallLvl = avgRaw ? (avgRaw>=3.5?'Level 4':avgRaw>=2.5?'Level 3':avgRaw>=1.5?'Level 2':'Level 1') : '';
+  const marksText = stuMarks.length ? stuMarks.map(m=>`${m.task}: ${lvLabel[m.level.replace(/[+-]/g,'')]||m.level}${m.notes?' — '+m.notes:''}`).join('\n') : 'No assessment data available.';
+  const iepNote = s.iep && s.iep.trim() ? `\nModified Expectations:\n${s.iep}` : '';
+  const prompt = `You are an Ontario elementary teacher writing a PowerSchool report card comment.
+Report type: ${termLabels[term]}
+Subject: ${subj}
+Student: ${s.first}, Grade ${s.grade}${iepNote}
+Assessment data:\n${marksText}
+${overallLvl ? `Overall achievement: ${overallLvl}` : ''}
+Requirements:
+- Third person (e.g. "[Name] demonstrates...")
+- ${charLimit} characters MAX — do not exceed
+- Warm, professional Ontario teacher voice
+- Mention one specific strength from assessment data
+- Include one specific next step
+- No bullet points — flowing paragraph only
+Return ONLY the comment text, nothing else.`;
+  try {
+    const res = await authFetch('/api/generate', {method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    if (!res.ok) throw new Error('Server error');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message||'API error');
+    const comment = data.content.map(i=>i.text||'').join('').trim();
+    renderCommentCard(s.id, comment, charLimit);
+    await db.from('report_card_comments').upsert({teacher_id:currentUser.id,student_id:s.id,term,subject:subj,comment,char_limit:charLimit,updated_at:new Date().toISOString()},{onConflict:'teacher_id,student_id,term,subject'});
+  } catch(e) {
+    if (commentEl) { commentEl.style.display='block'; commentEl.innerHTML=`<div style="color:var(--rust);font-size:.82rem;padding:6px 0;">Error: ${e.message}</div>`; }
+  }
+  if (loadEl) loadEl.style.display = 'none';
+}
+
+function renderCommentCard(sid, comment, charLimit) {
+  const commentEl = document.getElementById('rc-comment-'+sid);
+  if (!commentEl) return;
+  commentEl.style.display = 'block';
+  const len = comment.length;
+  const pct = len/charLimit;
+  const counterColor = pct>1?'var(--rust)':pct>.9?'var(--amber)':'var(--sage)';
+  commentEl.innerHTML = `<div>
+    <div id="rc-text-${sid}" contenteditable="true" style="border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:.88rem;line-height:1.7;min-height:60px;outline:none;background:var(--paper);" oninput="updateRCCounter('${sid}',${charLimit})">${comment}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:6px;">
+      <span id="rc-counter-${sid}" style="font-family:DM Mono,monospace;font-size:.65rem;color:${counterColor};">${len} / ${charLimit} chars</span>
+      <div class="brow">
+        <button class="btn b-out b-sm" onclick="copyRCComment('${sid}')" style="font-size:.72rem;">📋 Copy</button>
+        <button class="btn b-sage b-sm" onclick="saveRCComment('${sid}',${charLimit})" style="font-size:.72rem;">💾 Save</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateRCCounter(sid, charLimit) {
+  const el = document.getElementById('rc-text-'+sid);
+  const cnt = document.getElementById('rc-counter-'+sid);
+  if (!el||!cnt) return;
+  const len = el.innerText.length;
+  const pct = len/charLimit;
+  cnt.textContent = `${len} / ${charLimit} chars`;
+  cnt.style.color = pct>1?'var(--rust)':pct>.9?'var(--amber)':'var(--sage)';
+}
+
+function copyRCComment(sid) {
+  const el = document.getElementById('rc-text-'+sid);
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText);
+  showToast('✅ Comment copied!');
+}
+
+async function saveRCComment(sid, charLimit) {
+  const el = document.getElementById('rc-text-'+sid);
+  const comment = el ? el.innerText : '';
+  const term = document.getElementById('rc-term')?.value||'progress';
+  const subj = document.getElementById('rc-subj')?.value||'Language / Literacy';
+  await db.from('report_card_comments').upsert({teacher_id:currentUser.id,student_id:sid,term,subject:subj,comment,char_limit:charLimit,updated_at:new Date().toISOString()},{onConflict:'teacher_id,student_id,term,subject'});
+  showToast('✅ Comment saved!');
+}
+
+function copyAllRCComments() {
+  const cards = document.querySelectorAll('[id^="rc-text-"]');
+  if (!cards.length) { showToast('No comments to copy.'); return; }
+  const text = [...cards].map(el => {
+    const nameEl = el.closest('.card')?.querySelector('.av + div div:first-child');
+    const name = nameEl?.textContent || '';
+    return name ? name+'\n'+el.innerText : el.innerText;
+  }).join('\n\n---\n\n');
+  navigator.clipboard.writeText(text);
+  showToast('✅ All comments copied!');
+}
+
+// ============================================================
+// ACCOUNT PAGE
+// ============================================================
+async function loadAccountPage() {
+  if (!currentUser) { const{data:{user}}=await db.auth.getUser(); if(user)currentUser=user; }
+  if (!currentUser) return;
+  const emailEl = document.getElementById('acct-email');
+  if (emailEl) emailEl.value = currentUser.email||'';
+  try {
+    const { data:profile } = await db.from('profiles').select('full_name').eq('id',currentUser.id).single();
+    const nameEl = document.getElementById('acct-name');
+    if (nameEl && profile?.full_name) nameEl.value = profile.full_name;
+  } catch(e) {}
+  const usageEl = document.getElementById('acct-usage');
+  if (usageEl) {
+    try {
+      const [{ count:lc },{ count:sc },{ count:stc }] = await Promise.all([
+        db.from('lessons').select('*',{count:'exact',head:true}).eq('teacher_id',currentUser.id),
+        db.from('assessment_sessions').select('*',{count:'exact',head:true}).eq('teacher_id',currentUser.id),
+        db.from('students').select('*',{count:'exact',head:true}).eq('teacher_id',currentUser.id)
+      ]);
+      const since = currentUser.created_at ? new Date(currentUser.created_at).toLocaleDateString('en-CA') : '—';
+      usageEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div class="sc2"><div class="sn2">${lc||0}</div><div class="sl">Lessons</div></div>
+        <div class="sc2"><div class="sn2">${sc||0}</div><div class="sl">Assessments</div></div>
+        <div class="sc2"><div class="sn2">${stc||0}</div><div class="sl">Students</div></div>
+      </div><div style="font-size:.72rem;color:var(--muted);margin-top:10px;">Member since ${since} · Account: Free Beta</div>`;
+    } catch(e) { usageEl.textContent = 'Could not load usage data.'; }
+  }
+  checkGoogleConnection();
+}
+
+async function saveProfile() {
+  const name = document.getElementById('acct-name')?.value.trim();
+  if (!name) { alert('Enter your name.'); return; }
+  const { error } = await db.from('profiles').update({full_name:name}).eq('id',currentUser.id);
+  if (error) { alert('Error: '+error.message); return; }
+  alert('✅ Name updated!');
+}
+
+async function changePassword() {
+  const np = document.getElementById('acct-newpass')?.value;
+  const cp = document.getElementById('acct-confirmpass')?.value;
+  if (!np||np.length<6) { showPassMsg('Password must be at least 6 characters.','var(--rust)'); return; }
+  if (np!==cp) { showPassMsg('Passwords do not match.','var(--rust)'); return; }
+  const { error } = await db.auth.updateUser({password:np});
+  if (error) { showPassMsg('Error: '+error.message,'var(--rust)'); return; }
+  showPassMsg('✅ Password updated!','var(--sage)');
+  document.getElementById('acct-newpass').value = '';
+  document.getElementById('acct-confirmpass').value = '';
+}
+
+function showPassMsg(text, color) {
+  const el = document.getElementById('acct-pass-msg');
+  if (!el) return;
+  el.textContent=text; el.style.color=color; el.style.display='block';
+  setTimeout(() => { el.style.display='none'; }, 4000);
+}
+
+async function checkGoogleConnection() {
+  const statusEl = document.getElementById('acct-google-status');
+  const btn = document.getElementById('acct-google-btn');
+  if (!statusEl) return;
+  try {
+    const { data:{ user:freshUser } } = await db.auth.getUser();
+    const user = freshUser||currentUser;
+    if (user) currentUser = user;
+    const identities = user?.identities||[];
+    const googleIdentity = identities.find(i=>i.provider==='google');
+    const isGoogleProvider = user?.app_metadata?.provider==='google'||(user?.app_metadata?.providers||[]).includes('google');
+    if (googleIdentity||isGoogleProvider) {
+      const googleEmail = googleIdentity?.identity_data?.email||user?.user_metadata?.email||'';
+      statusEl.innerHTML = '<span style="color:var(--sage);">✅ Google connected</span>'+(googleEmail?' · <span style="color:var(--muted);font-size:.75rem;">'+googleEmail+'</span>':'');
+      if (btn) { btn.innerHTML='✓ Google Connected'; btn.disabled=true; btn.style.opacity='.6'; }
+    } else {
+      statusEl.textContent = 'Not connected — link Google to export slides directly to Drive.';
+      if (btn) { btn.disabled=false; btn.style.opacity='1'; }
+    }
+  } catch(e) {
+    statusEl.textContent = 'Connect Google to export slides to Drive.';
+    if (btn) { btn.disabled=false; btn.style.opacity='1'; }
+  }
+}
+
+async function connectGoogleDrive() {
+  const btn = document.getElementById('acct-google-btn');
+  if (btn) { btn.disabled=true; btn.textContent='⏳ Connecting...'; }
+  const { error } = await db.auth.linkIdentity({ provider:'google', options:{ redirectTo: window.location.origin+'/app?account=1' } });
+  if (error) { alert('Could not connect Google: '+error.message); if(btn){ btn.disabled=false; btn.textContent='Connect Google Drive'; } }
+}
+
+function requestAccountDeletion() {
+  if (!confirm('Are you sure you want to delete your account? All your lessons, assessments, and student data will be permanently removed. This cannot be undone.')) return;
+  if (!confirm('Last chance — this will permanently delete everything. Continue?')) return;
+  const email = currentUser.email;
+  window.open('mailto:teacheraicanada@gmail.com?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20TeacherAI%20account.%0A%0AEmail%3A%20'+encodeURIComponent(email)+'%0AUser%20ID%3A%20'+currentUser.id, '_blank');
+  alert('A deletion request email has been opened. Send it to confirm. We will remove your account and all data within 30 days.');
 }
 function requestAccountDeletion(){if(!confirm('Are you sure you want to delete your account? All your lessons, assessments, and student data will be permanently removed. This cannot be undone.'))return;if(!confirm('Last chance — this will permanently delete everything. Continue?'))return;const email=currentUser.email;window.open('mailto:teacheraicanada@gmail.com?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20TeacherAI%20account.%0A%0AEmail%3A%20'+encodeURIComponent(email)+'%0AUser%20ID%3A%20'+currentUser.id,'_blank');alert('A deletion request email has been opened. Send it to confirm. We will remove your account and all data within 30 days.');}
 
