@@ -2511,6 +2511,7 @@ function updateSidebarActive(k) {
 
 // Highlight sidebar item as user scrolls
 function initSidebarScroll() {
+  // Use topmost-visible approach — whichever block is closest to top of viewport wins
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -2518,7 +2519,7 @@ function initSidebarScroll() {
         updateSidebarActive(k);
       }
     });
-  }, {threshold:0.4, rootMargin:'-60px 0px -40% 0px'});
+  }, {threshold:0.05, rootMargin:'-64px 0px -60% 0px'});
   document.querySelectorAll('.cb[id^="cb-"]').forEach(el => observer.observe(el));
 }
 
@@ -2804,6 +2805,20 @@ async function renderAssGrid(){
       this.textContent = open ? '📏 View Rubric' : '📏 Hide Rubric';
     });
   });
+  // Autosave observation notes after typing stops (800ms debounce)
+  let _notesSaveTimer = {};
+  document.querySelectorAll('.ni[id^="nt-"]').forEach(input => {
+    input.addEventListener('input', function() {
+      const sid = this.dataset.sid;
+      sn(sid);
+      clearTimeout(_notesSaveTimer[sid]);
+      _notesSaveTimer[sid] = setTimeout(() => {
+        const fakeBtn = { textContent: '', disabled: false };
+        saveOneStu(sid, fakeBtn).catch(()=>{});
+      }, 800);
+    });
+  });
+
   // Attach per-student save listeners
   document.querySelectorAll('.save-one-btn').forEach(btn => {
     btn.addEventListener('click', async function() {
@@ -3280,12 +3295,7 @@ strong{font-weight:700;}
 <div class="meta">${label} · ${new Date().toLocaleDateString('en-CA')}</div>
 ${renderMD(txt)}
 </body></html>`;
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
-  // Auto-trigger print dialog after a short delay for fonts to render
-  w.setTimeout(() => w.focus(), 300);
-}
+  
 
 // ============================================================
 // ANCHOR CHART — printable classroom wall chart
@@ -4939,8 +4949,8 @@ function renderMD(text){
 function previewWS(k){
   const txt=genC[k]?.cur||'';
   const topic=document.getElementById('topic')?.value||'Worksheet';
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${topic}</title>
+  // Build HTML first, then open via blob URL to avoid popup blocker issues
+  const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${topic}</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'DM Sans',sans-serif;background:#F8F4EE;color:#16120E;}
 .pg{max-width:720px;margin:0 auto;background:white;min-height:100vh;padding:28px 36px;}
@@ -4969,8 +4979,12 @@ p{margin:2px 0;line-height:1.65;}li{margin-bottom:2px;}ul{padding-left:17px;marg
 <div class="nr"><div class="nf"><label class="nl">Name</label><input class="ni" type="text" placeholder="Type your name..."></div><div class="nf"><label class="nl">Date</label><input class="ni" type="text" placeholder="${new Date().toLocaleDateString('en-CA')}"></div></div>
 ${renderWS(txt)}
 <div class="footer">Generated with TeacherAI · teacherai.ca</div>
-</div></' + 'body></' + 'html>`);
-  w.document.close();
+</div></' + 'body></' + 'html>`;
+  // Open via blob URL — avoids popup blocker and blank tab issues
+  const blob = new Blob([fullHtml], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 // ============================================================
@@ -5570,7 +5584,12 @@ function renderExpInAssess() {
   </div>`;
 
   if (!Object.keys(byStrand).length) {
-    html += '<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No expectations tracked for this class yet.</div>';
+    const className = selectedClass ? (classes.find(c=>c.id===selectedClass)?.name || 'this class') : 'any class';
+    html += `<div style="text-align:center;padding:24px 16px;color:var(--muted);">
+      <div style="font-size:1.6rem;margin-bottom:8px;">🎯</div>
+      <div style="font-size:.88rem;font-weight:500;margin-bottom:4px;color:var(--ink);">No expectations tracked yet</div>
+      <div style="font-size:.78rem;">Generate and save a lesson for ${className} to start tracking coverage.</div>
+    </div>`;
   } else {
     Object.keys(byStrand).sort().forEach(strand => {
       html += `<div style="margin-bottom:16px;">
@@ -5966,6 +5985,7 @@ function skipTour() {
   localStorage.setItem('teacherai_tour_done', '1');
 }
 
+}
 initApp();
 </script>
 </body>
