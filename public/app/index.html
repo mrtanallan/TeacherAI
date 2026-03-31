@@ -1973,7 +1973,21 @@ Use emoji headers. 4–6 varied activities. Start directly with the worksheet ti
   const akLines = isSplit
     ? answerKeyKeys.map((k,i)=>'- '+k+': answer key for '+grades[i]+' worksheet. Format: "Q1: [question] -> [ideal answer]"').join('\n')
     : hasWorksheet ? '- answer_key: answer key for the worksheet. Format: "Q1: [question] -> [ideal answer]". For open-ended give 2-3 key points expected at Level 3.' : '';
-  const splitExpNote = isSplit ? 'CRITICAL: Include a "grade" field (e.g. "Grade 5" or "Grade 6") on EVERY expectation so teachers know which grade it targets. Return 1-2 expectations per grade in the split.' : 'Return 2-5 most relevant expectations for this grade.';
+  // Give the AI better guidance on which strand to prioritize based on topic keywords
+  const topicLower = topic.toLowerCase();
+  const isWritingTopic = /writ|story|narrative|essay|paragraph|persuasive|report|journal|letter|poem|draft|composition/.test(topicLower);
+  const isReadingTopic = /read|comprehension|infer|main idea|text feature|author|visualiz|predict|connect|summar/.test(topicLower);
+  const isOralTopic = /speak|listen|oral|present|discuss|debate|talk/.test(topicLower);
+  
+  const strandGuidance = isWritingTopic
+    ? 'PRIORITY: This is a WRITING topic. Lead with Strand D expectations (writing process D1.x, writing forms D2.x, writing craft D2.3/D2.4). Include at least 2 Strand D expectations. Only add C or B strands if directly relevant.'
+    : isReadingTopic
+    ? 'PRIORITY: This is a READING/COMPREHENSION topic. Lead with Strand C expectations (C2.x comprehension, C1.x knowledge about texts, C3.x critical thinking). Include at least 2 Strand C expectations.'
+    : isOralTopic
+    ? 'PRIORITY: This is an ORAL topic. Lead with Strand B expectations (B1.x oral communication). Include at least 1 Strand B expectation.'
+    : 'Select the 2-4 most relevant expectations across strands that best match this specific topic.';
+
+  const splitExpNote = isSplit ? 'CRITICAL: Include a "grade" field (e.g. "Grade 5" or "Grade 6") on EVERY expectation so teachers know which grade it targets. Return 1-2 expectations per grade in the split.' : 'Return 2-5 most relevant expectations for this grade. '+strandGuidance;;
 
   const prompt = `You are an expert Ontario elementary SSC teacher. Generate a classroom-ready lesson package.
 Grade(s): ${gradeDesc}
@@ -2023,7 +2037,7 @@ ${wsLines}
 - assessment_rubric: Ontario Achievement Chart. Use ## for each category, ### Level 1–4 under each.${iepStudents.length?' Include modified criteria for IEP students.':''}
 - differentiation_tips: per-grade and per-student strategies
 ${akLines}
-- expectations: JSON array. Ontario 2023 Language curriculum. Each object: "code" (e.g. "C2.3"), "desc", "strand" (A/B/C/D), "band" ("1-3","4-6","7-8"). ${splitExpNote}
+- expectations: JSON array. Ontario 2023 Language curriculum. Each object: "code" (e.g. "C2.3"), "desc", "strand" (A/B/C/D), "band" ("1-3","4-6","7-8"). ${splitExpNote} NEVER return the same code twice.
 CRITICAL: Return ONLY valid JSON. No markdown fences.`;
 
   let progInterval = null;
@@ -2189,9 +2203,11 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations) {
       <button class="btn b-out b-sm" id="gSlidesBtn" onclick="exportToGoogleSlides()" style="white-space:nowrap;display:none;" title="Export to Google Slides">🔗 Google Slides</button>` : '';
 
     const wsLinkBtns = isWS ? (k.match(/student_worksheet_[A-D]$/) ? `
+      <button class="btn b-out b-sm" onclick="downloadPDF('${k}')">📄 PDF</button>
       <button class="btn b-sage b-sm" onclick="getStudentLink('${k}',true)">🔗 One link (all grades)</button>
       <button class="btn b-out b-sm" onclick="getStudentLink('${k}',false)" style="font-size:.72rem;">🔗 This grade only</button>`
-      : `<button class="btn b-sage b-sm" onclick="getStudentLink('${k}',false)">🔗 Get Student Link</button>`) : '';
+      : `<button class="btn b-out b-sm" onclick="downloadPDF('${k}')">📄 PDF</button>
+      <button class="btn b-sage b-sm" onclick="getStudentLink('${k}',false)">🔗 Get Student Link</button>`) : '';
 
     c.innerHTML += `<div class="cb" id="cb-${k}">
       <div class="cbh">
@@ -2209,7 +2225,7 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations) {
         </div>
       </div>
       <div class="cbb" id="cbb-${k}" contenteditable="false">${rendered}</div>
-      ${isWS?`<div class="cbf"><span>💡 Students tap to fill in answers on their devices</span><button class="btn b-out b-sm" onclick="downloadPDF('${k}')">📄 PDF</button></div>`:''}
+      ${isWS?`<div class="cbf"><span>💡 Students tap to fill in answers on their devices</span></div>`:''}
     </div>`;
   });
 
