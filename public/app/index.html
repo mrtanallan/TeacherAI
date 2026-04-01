@@ -1697,13 +1697,9 @@ async function loadUsageMeter() {
     const noteEl = document.getElementById('usageNote');
     if (!meter||!countEl) return;
     const { count } = await db.from('lessons').select('*',{count:'exact',head:true}).eq('teacher_id',currentUser.id);
-    const dbCount = count||0;
-    const localKey = 'teacherai_gen_count_'+currentUser.id;
-    const localCount = parseInt(localStorage.getItem(localKey)||'0',10);
-    if (dbCount > localCount) localStorage.setItem(localKey, dbCount);
-    const used = Math.max(dbCount, localCount);
+    const used = count||0;
     meter.style.display='block';
-    countEl.textContent = used+' lesson'+(used!==1?'s':'')+' generated';
+    countEl.textContent = used+' lesson'+(used!==1?'s':'')+' generated all time';
     if (noteEl) { noteEl.textContent='Unlimited — beta access'; noteEl.style.color='var(--sage)'; }
   } catch(e) {}
 }
