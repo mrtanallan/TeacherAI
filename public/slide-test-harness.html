@@ -187,10 +187,19 @@ async function apiFetch(endpoint, body) {
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify(body)
     });
-    if (!r.ok) { console.error('API error', r.status); return null; }
-    return r.json();
-  } catch(e) { console.error('Fetch error', e); return null; }
+    if (!r.ok) {
+      let errTxt = '';
+      try { const j = await r.json(); errTxt = JSON.stringify(j); } catch(e) { errTxt = await r.text().catch(()=>''); }
+      console.error('API error', r.status, errTxt);
+      lastApiError = r.status + ': ' + errTxt.substring(0,120);
+      return null;
+    }
+    const j = await r.json();
+    if (j.error) { console.error('API returned error:', j.error); lastApiError = JSON.stringify(j.error).substring(0,120); }
+    return j;
+  } catch(e) { console.error('Fetch error', e); lastApiError = e.message; return null; }
 }
+let lastApiError = '';
 
 // ── Structure prompt ─────────────────────────────────────────────────────────
 function buildStructurePrompt(unit) {
@@ -276,7 +285,7 @@ async function runUnit(idx) {
     messages: [{role:'user', content: buildStructurePrompt(unit)}]
   });
 
-  if (!structureData) { setStatus(idx, 'fail', [], 'Structure call failed'); return; }
+  if (!structureData) { setStatus(idx, 'fail', [], 'Structure call failed: '+lastApiError); setStatusBar('Structure failed for '+unit.topic+': '+lastApiError); return; }
 
   const raw = (structureData.content||[]).map(b=>b.text||'').join('').trim();
   let sd;
@@ -285,7 +294,7 @@ async function runUnit(idx) {
     sd = JSON.parse(clean);
   } catch(e) {
     try { const s=raw.indexOf('{'),en=raw.lastIndexOf('}'); sd=JSON.parse(raw.slice(s,en+1)); }
-    catch(e2) { setStatus(idx, 'fail', [], 'JSON parse failed: '+raw.substring(0,100)); return; }
+    catch(e2) { setStatus(idx, 'fail', [], 'JSON parse failed. Raw: '+raw.substring(0,200)); setStatusBar('Parse failed for '+unit.topic+': '+raw.substring(0,150)); return; }
   }
 
   const slides = (sd.content_slides||[]).slice(0,4);
@@ -551,7 +560,22 @@ function exportReport() {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 renderGrid();
-getToken().then(t=>{ if(t) setStatusBar('Authenticated. Ready to run.'); else setStatusBar('⚠ Not logged in — open teacherai.ca/app first.'); });
+getToken().then(t=>{
+  if(t) {
+    setStatusBar('Authenticated. Token: ...'+t.slice(-12)+' — Ready to run.');
+    // Quick connectivity test
+    fetch(API_BASE+'/api/generate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:10,messages:[{role:'user',content:'say ok'}]})
+    }).then(r=>{
+      if(r.ok) setStatusBar('✓ API connectivity OK. Token valid. Ready to run 25 units.');
+      else r.json().then(j=>setStatusBar('⚠ API test failed: HTTP '+r.status+' — '+JSON.stringify(j).substring(0,100))).catch(()=>setStatusBar('⚠ API test failed: HTTP '+r.status));
+    }).catch(e=>setStatusBar('⚠ API connectivity error: '+e.message));
+  } else {
+    setStatusBar('⚠ Not logged in. Go to teacherai.ca/app, log in, then open teacherai.ca/slide-test-harness.html');
+  }
+});
 </script>
 </body>
 </html>
