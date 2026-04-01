@@ -2127,6 +2127,18 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
     genC['_expectations'] = lessonExpectations;
 
     loadUsageMeter();
+    // Auto-switch active class to match lesson grades so student link roster is correct
+    if (grades.length) {
+      const _matchingClass = classes.find(cls => {
+        const _clsStu = students.filter(s => s.classId === cls.id);
+        return _clsStu.some(s => grades.includes(s.grade));
+      });
+      if (_matchingClass && _matchingClass.id !== activeClassId) {
+        await switchClass(_matchingClass.id);
+        const sel = document.getElementById('classSelector');
+        if (sel) sel.value = _matchingClass.id;
+      }
+    }
     buildEditBlocks([...outputKeys,...answerKeyKeys], gradeDesc, subj, topic, lessonExpectations);
     buildShareCards(outputKeys);
     setProgress(100,'Done!');
@@ -2480,8 +2492,8 @@ function renderWS(text) {
     if (line.startsWith('### ')) { h+=`<h3>${line.slice(4)}</h3>`; return; }
     if (/\[TEXT BOX\]/i.test(line)) { const l=line.replace(/\[TEXT BOX\]/gi,'').replace(/^[-*\d.]+\s*/,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\[[^\]]*\]/g,'').trim(); wsN++; h+=`${l?`<div style="font-size:.86rem;margin-bottom:2px;">${l}</div>`:''}<input class="wsi" type="text" placeholder="Write your answer here...">`;return;}
     if (line.includes('[LARGE BOX]')) { const l=line.replace('[LARGE BOX]','').replace(/^[-*\d.]+\s*/,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').trim(); wsN++; h+=`${l?`<div style="font-size:.86rem;margin-bottom:2px;">${l}</div>`:''}<textarea class="wst" placeholder="Write your answer here..."></textarea>`; return; }
-    if (line.includes('[CIRCLE ONE:')) { const m=line.match(/\[CIRCLE ONE: (.+?)\]/); const pre=line.split('[CIRCLE ONE:')[0].replace(/^[-*\d.]+\s*/,'').trim(); if(m){wsN++;const nm='r'+wsN;h+=`${pre?`<div style="font-size:.86rem;margin-bottom:4px;">${pre}</div>`:''}<div class="wsc">${m[1].split('/').map(o=>`<label class="wscho"><input type="radio" name="${nm}"> ${o.trim()}</label>`).join('')}</div>`;return;} }
-    if (line.includes('[CHECK ALL THAT APPLY:')) { const m=line.match(/\[CHECK ALL THAT APPLY: (.+?)\]/); const pre=line.split('[CHECK ALL THAT APPLY:')[0].replace(/^[-*\d.]+\s*/,'').trim(); if(m){wsN++;h+=`${pre?`<div style="font-size:.86rem;margin-bottom:4px;">${pre}</div>`:''}<div class="wsc">${m[1].split('/').map((o,oi)=>`<label class="wscho"><input type="checkbox" id="wc${wsN}-${oi}"> ${o.trim()}</label>`).join('')}</div>`;return;} }
+    if (line.includes('[CIRCLE ONE:')) { const m=line.match(/\[CIRCLE ONE: (.+?)\]/); const pre=line.split('[CIRCLE ONE:')[0].replace(/^[-*\d.]+\s*/,'').trim(); if(m){wsN++;const nm='r'+wsN;h+=`${pre?`<div style="font-size:.86rem;margin-bottom:4px;">${pre}</div>`:''}<div class="wsc">${(m[1].includes(' / ')?m[1].split(' / '):m[1].split('/')).map(o=>`<label class="wscho"><input type="radio" name="${nm}"> ${o.trim()}</label>`).join('')}</div>`;return;} }
+    if (line.includes('[CHECK ALL THAT APPLY:')) { const m=line.match(/\[CHECK ALL THAT APPLY: (.+?)\]/); const pre=line.split('[CHECK ALL THAT APPLY:')[0].replace(/^[-*\d.]+\s*/,'').trim(); if(m){wsN++;h+=`${pre?`<div style="font-size:.86rem;margin-bottom:4px;">${pre}</div>`:''}<div class="wsc">${(m[1].includes(' / ')?m[1].split(' / '):m[1].split('/')).map((o,oi)=>`<label class="wscho"><input type="checkbox" id="wc${wsN}-${oi}"> ${o.trim()}</label>`).join('')}</div>`;return;} }
     if (line.includes('[WORD BANK:')) { const m=line.match(/\[WORD BANK: (.+?)\]/); if(m){h+=`<div class="wswb"><div class="wswbt">📚 Word Bank</div><div class="wswbw">${m[1].split(',').map(w=>`<span class="wswbwd">${w.trim()}</span>`).join('')}</div></div>`;return;} }
     if (line.includes('[DIAGRAM:')) { const m=line.match(/\[DIAGRAM: (.+?)\]/); if(m){h+=`<div class="wsd">📊 ${m[1]}</div>`;return;} }
     if (line.match(/^\d+\.\s/)) {
@@ -4028,7 +4040,7 @@ async function deleteLesson(id, e) {
   hideLoading(); _renderLessonsUI(); showToast('✅ Lesson deleted.');
 }
 
-function loadLesson(id) {
+async function loadLesson(id) {
   const lesson = savedLessons.find(l => l.id===id);
   if (!lesson) return;
   const content = lesson.content || {};
@@ -4039,6 +4051,17 @@ function loadLesson(id) {
   window._curSessGrades = lesson.grades || [];
   window._slideData = null;
   _combinedLinkCache = null;
+  Object.keys(_gradeLinksCache).forEach(k => delete _gradeLinksCache[k]);
+  // Auto-switch active class to match lesson grades
+  const _llGrades = lesson.grades || [];
+  if (_llGrades.length) {
+    const _llClass = classes.find(cls => students.filter(s=>s.classId===cls.id).some(s=>_llGrades.includes(s.grade)));
+    if (_llClass && _llClass.id !== activeClassId) {
+      await switchClass(_llClass.id);
+      const sel = document.getElementById('classSelector');
+      if (sel) sel.value = _llClass.id;
+    }
+  }
   const gradeDesc = (lesson.grades||[]).length > 1 ? (lesson.grades||[]).join(' / ')+' split class' : (lesson.grades||[])[0]||'';
   const displayKeys = Object.keys(content).filter(k => k!=='expectations' && !k.startsWith('answer_key'));
   const answerKeyKeys = Object.keys(content).filter(k => k.startsWith('answer_key'));
