@@ -224,8 +224,25 @@ let lastApiError = '';
 // ── Structure prompt ─────────────────────────────────────────────────────────
 function buildStructurePrompt(unit, gradeExps) {
   const isEarlyGrade = unit.grade === 'Kindergarten' || unit.grade === 'Grade 1';
-  const gradeExpsStr = (gradeExps && gradeExps.length)
-    ? '\n' + gradeExps.slice(0,20).map(function(e){ return e.code + ' [' + e.strand + ']: ' + e.desc; }).join('\n')
+  // Strand-aware expectation injection — prioritize the relevant strand
+  var primaryStrand = 'B'; // default number
+  if (unit.unit === 'spatial') primaryStrand = 'E';
+  else if (unit.unit === 'financial') primaryStrand = 'F';
+  else if (unit.unit === 'data') primaryStrand = 'D';
+  else if (unit.unit === 'algebra') primaryStrand = 'C';
+  // Topic keyword override
+  var topicLower = unit.topic.toLowerCase();
+  if (/measure|area|perim|angle|transform|shape|volume|circle|pythag|geomet/.test(topicLower)) primaryStrand = 'E';
+  if (/interest|budget|money|financ/.test(topicLower)) primaryStrand = 'F';
+  if (/probab|graph|data|statistic|mean|median|mode|scatter/.test(topicLower)) primaryStrand = 'D';
+  if (/pattern|equat|variable|algebra|linear/.test(topicLower)) primaryStrand = 'C';
+
+  var primaryExps = (gradeExps||[]).filter(function(e){ return e.strand === primaryStrand; });
+  var otherExps = (gradeExps||[]).filter(function(e){ return e.strand !== primaryStrand; });
+  var sortedExps = primaryExps.concat(otherExps).slice(0,15);
+
+  const gradeExpsStr = sortedExps.length
+    ? '\n' + sortedExps.map(function(e){ return e.code + ' [' + e.strand + ']: ' + e.desc; }).join('\n')
     : ' (use real Ontario Math 2020 codes for ' + unit.grade + ')';
 
   const VT = [
@@ -262,6 +279,15 @@ function buildStructurePrompt(unit, gradeExps) {
     '* Measurement with non-standard units: measurement_bar. NEVER worked_steps or comparison_table.\n' +
     '* Angles Acute/Obtuse/Right comparison slide: angle_types. Individual angle: angle_diagram.\n' +
     '* Area of rectangles: area_grid for visual model. NEVER formula_display or worked_steps as primary.\n' +
+    '* 2D shapes/3D shapes lessons: shape_grid for shape identification. NEVER counting_dots or ten_frame.\n' +
+    '* Sorting and classifying: sort_diagram. NEVER comparison_table for sorting concepts.\n' +
+    '* Pythagorean theorem: pythagorean. NEVER worked_steps or concept_card.\n' +
+    '* Circle area/circumference: circle_diagram. NEVER formula_display alone.\n' +
+    '* Volume: isometric_box with volume_label. NEVER formula_display alone.\n' +
+    '* place_value: single number only. NEVER for addition/subtraction.\n' +
+    '* area_grid area_label: write label only like "A=24cm2", NOT a formula equation.\n' +
+    '* ten_frame: one number only in filled param.\n' +
+    '* Addition/subtraction: number_line or array. NOT place_value.\n' +
     (isEarlyGrade ? '* K and Grade 1: counting_dots, ten_frame, shape_grid, sort_diagram. NEVER concept_card or worked_steps.\n' : '') +
     'CRITICAL: visual_type must be exact type name above. NEVER use NUMBER/ALGEBRA/DATA/SPATIAL/FINANCIAL.\n' +
     'content_slides: exactly 4. visual_params must use REAL numbers for ' + unit.grade + '.\n' +
@@ -425,7 +451,10 @@ async function runUnit(idx) {
 
   // ── Expectations critic ──────────────────────────────────────────────────
   setStatusBar('['+( idx+1)+'/36] '+unit.grade+' — '+unit.topic+': checking expectations...');
-  const expVerdict = await runExpectationsCritic(unit, sd.expectations||[]);
+  // Skip for Kindergarten — Ontario Math curriculum starts at Grade 1, no K band exists
+  const expVerdict = unit.grade === 'Kindergarten'
+    ? { pass: true, issues: [] }
+    : await runExpectationsCritic(unit, sd.expectations||[]);
   if (!expVerdict.pass) {
     // Add expectation issues as a virtual slide result
     slideResults.push({
