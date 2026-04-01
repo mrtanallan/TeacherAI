@@ -2802,6 +2802,11 @@ async function generateSlideVisuals(contentSlides, topic, subject, gradeStr) {
     '- Keep it simple and readable. A Grade 3 student must understand it at a glance.',
   ].join('\n');
 
+  // Stagger calls by 300ms each to avoid rate limit spikes
+
+  // Stagger calls 350ms apart to avoid rate-limit spikes after the main lesson call
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
   const calls = contentSlides.slice(0,4).map((cs, i) => {
     const userPrompt = [
       'Topic: '+topic,
@@ -2813,25 +2818,34 @@ async function generateSlideVisuals(contentSlides, topic, subject, gradeStr) {
       cs.visual_prompt || ('Illustrate the concept: '+(cs.key_point||topic)),
     ].join('\n');
 
-    return authFetch('/api/generate', {
-      method: 'POST',
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1800,
-        system: svgSystemPrompt,
-        messages: [{role:'user', content: userPrompt}]
+    // Merge system into user message so old backend still gets the drawing instructions
+    const fullPrompt = svgSystemPrompt + '\n\n---\n\n' + userPrompt;
+
+    return delay(i * 350).then(() =>
+      authFetch('/api/generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1800,
+          call_type: 'svg',
+          system: svgSystemPrompt,
+          messages: [{role:'user', content: fullPrompt}]
+        })
       })
-    })
-    .then(r => r?.ok ? r.json() : null)
-    .then(d => {
-      const raw = (d?.content||[]).map(i=>i.text||'').join('').trim();
-      // Extract SVG element robustly
-      const svgStart = raw.indexOf('<svg');
-      const svgEnd = raw.lastIndexOf('</svg>');
-      if (svgStart !== -1 && svgEnd !== -1) return raw.slice(svgStart, svgEnd+6);
-      return '';
-    })
-    .catch(() => '');
+      .then(r => {
+        if (!r?.ok) { console.warn('SVG slide '+i+' HTTP '+r?.status); return null; }
+        return r.json();
+      })
+      .then(d => {
+        if (!d) return '';
+        const raw = (d?.content||[]).map(b=>b.text||'').join('').trim();
+        const s = raw.indexOf('<svg'), e = raw.lastIndexOf('</svg>');
+        if (s !== -1 && e !== -1) { console.log('SVG '+i+' OK len='+raw.slice(s,e+6).length); return raw.slice(s,e+6); }
+        console.warn('SVG '+i+' no <svg> tag. Preview:', raw.substring(0,150));
+        return '';
+      })
+      .catch(err => { console.error('SVG '+i+' error:', err); return ''; })
+    );
   });
 
   return Promise.all(calls);
