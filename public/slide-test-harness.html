@@ -415,42 +415,65 @@ async function runUnit(idx) {
     const sr = slideResults[i];
 
     if (sr.hardcoded) {
-      // Hardcoded renderer — still run critic to verify output quality
-      // Get the actual SVG from the renderer type name for critic review
-      // We pass the type and params as context; critic evaluates conceptual correctness
-      setStatusBar('['+(idx+1)+'/36] '+unit.grade+' — '+unit.topic+': critiquing slide '+(i+1)+'/4 (hardcoded: '+sr.type+')...');
-      const criticData2 = await apiFetch('/api/generate', {
-        model: MODEL, max_tokens: 600, call_type: 'svg',
-        system: CRITIC_SYSTEM,
-        messages: [{role:'user', content: [
-          'GRADE: '+unit.grade,
-          'TOPIC: '+unit.topic,
-          'SLIDE TITLE: '+(cs.title||''),
-          'KEY CONCEPT: '+(cs.key_point||''),
-          'VISUAL TYPE: '+sr.type,
-          'VISUAL PARAMS: '+JSON.stringify(sr.params||{}),
-          '',
-          'NOTE: This is a hardcoded renderer. You cannot see the SVG output.',
-          'Based ONLY on the visual type and params provided, evaluate:',
-          '1. Is this the CORRECT type of diagram for this concept? (e.g. triangle_area for area, not labelled_shape)',
-          '2. Do the params contain the required values? (e.g. area diagram needs base, height, formula)',
-          '3. Are all param values mathematically correct for the grade level?',
-          '4. Are the param values consistent with each other? (e.g. area_label matches base × height calculation)',
-          '5. Is any required param missing that would make the diagram incomplete?',
-        ].join('\n')}]
+      setStatusBar('['+(idx+1)+'/36] '+unit.grade+' — '+unit.topic+': checking slide '+(i+1)+'/4...');
+
+      const HDESC = {
+        concept_card:'Text-only card with bullet points. NO diagrams. Only for vocabulary/definitions — WRONG for area, geometry, graphs.',
+        worked_steps:'Numbered algebraic steps with highlighted answer. For arithmetic/algebra procedures only — WRONG for geometry concepts needing diagrams.',
+        comparison_table:'Table with header and data rows. Text/numbers only — WRONG when visual diagrams are required.',
+        formula_display:'Large formula with variable boxes. Formula only, no diagram — WRONG alone for spatial concepts needing shape visuals.',
+        number_line:'Line with ticks from min to max. ALWAYS includes 0. Good for ordering, fractions, integers.',
+        fraction_bar:'Rectangle divided into d equal parts, n shaded. Division must be exact.',
+        fraction_circle:'Circle divided into d equal slices, n shaded.',
+        fraction_compare:'Two fraction bars side by side. Comparison operator must be correct (2/6 < 4/6, NOT >).',
+        area_grid:'Unit square grid inside rectangle. Shows counting method only — NOT for formula method. Does NOT show height line.',
+        triangle_area:'Triangle with dashed perpendicular height, right-angle box, base+height labels, area formula. CORRECT for triangle area.',
+        parallelogram_area:'Parallelogram with dashed height, right-angle box, labels, formula. CORRECT for parallelogram area.',
+        labelled_shape:'Shape with side and angle labels only. NO height line — WRONG for area lessons.',
+        pythagorean:'Right triangle with squares on all 3 sides and a²+b²=c² formula.',
+        transform_translate:'Original shape (teal) + Image shape (orange) on grid + dashed arrow. Both labelled. Arrow shows direction.',
+        transform_reflect:'Original + Image on grid + dashed mirror line. Both labelled.',
+        transform_rotate:'Original + Image on grid + arc arrow + pivot dot. Both labelled. Degrees shown.',
+        transform_overview:'All 3 transformations on one grid. Each pair labelled. Translation/Reflection/Rotation labelled.',
+        bar_graph:'Vertical bars with axis labels and value labels above bars.',
+        line_graph:'Connected points with axis labels and value labels.',
+        pie_chart:'Circle with labelled slices. Percentages/values shown.',
+        coordinate_graph:'X/Y axes with grid, plotted points labelled with coordinates, axis arrows.',
+        t_table:'Two-column table x/y with rule stated.',
+        pictograph:'Symbol rows with category labels and scale. Same symbol type throughout.',
+        probability_scale:'0-to-1 line with events placed at probability values.',
+        angle_diagram:'Two rays with arc and degree measurement.',
+        circle_diagram:'Circle with radius/diameter lines and measurements.',
+        integer_line:'Number line with negatives, 0 centred.',
+        isometric_box:'3D prism with l/w/h labels. Volume formula should be present.',
+        place_value:'Place value columns with digits.',
+        array:'Dot grid showing rows×cols.',
+        balance_scale:'Two-pan scale showing equation. Solution below.',
+        pattern_row:'Shape sequence with rule and next element.',
+        budget_bar:'Bar chart income vs expenses.',
+        percent_bar:'Filled bar showing percentage.',
+      };
+
+      const typeDesc = HDESC[sr.type] || sr.type;
+      const HCRITIC = 'You are a veteran Ontario K-8 math teacher. Evaluate ONLY: (1) is this the right diagram type for the concept, (2) are the params complete and mathematically correct. Respond ONLY with JSON: {"pass":true,"issues":[]} or {"pass":false,"issues":["specific issue"]}.';
+
+      const hCriticData = await apiFetch('/api/generate', {
+        model: MODEL, max_tokens: 500, call_type: 'svg',
+        system: HCRITIC,
+        messages: [{role:'user', content:
+          'GRADE: '+unit.grade+'\nTOPIC: '+unit.topic+'\nSLIDE: '+(cs.title||'')+'\nCONCEPT: '+(cs.key_point||'')+'\n\nCHOSEN TYPE: '+sr.type+'\nWHAT IT RENDERS: '+typeDesc+'\nPARAMS: '+JSON.stringify(sr.params||{})+'\n\nCHECK ONLY:\n1. Is "'+sr.type+'" the correct diagram type for this concept at '+unit.grade+'? Fail if wrong type (e.g. concept_card for area, worked_steps for geometry, formula_display alone for spatial, area_grid for triangle formula method)\n2. Are ALL required params present and non-empty?\n3. Are all numbers in params mathematically correct? (verify calculations, check comparison operators, check that formula results match stated answers)\n4. Are numbers appropriate for '+unit.grade+'?\nDo NOT fail for missing SVG elements that the renderer always includes (labels, tick marks, arrows). Only fail for param errors or clearly wrong type.'
+        }]
       });
-      await new Promise(r=>setTimeout(r,200));
-      const criticRaw2 = (criticData2?.content||[]).map(b=>b.text||'').join('').trim();
+      await new Promise(r=>setTimeout(r,300));
+      const hRaw = (hCriticData?.content||[]).map(b=>b.text||'').join('').trim();
       try {
-        const verdict2 = JSON.parse(criticRaw2.replace(/^[^{]*/,'').replace(/[^}]*$/,''));
-        sr.pass = verdict2.pass;
-        sr.issues = verdict2.issues||[];
+        const hv = JSON.parse(hRaw.replace(/^[^{]*/,'').replace(/[^}]*$/,''));
+        sr.pass = hv.pass; sr.issues = hv.issues||[];
       } catch(e) { sr.pass = true; sr.issues = []; }
       sr.svg = '<!-- hardcoded: '+sr.type+' -->';
       setStatus(idx, 'running', slideResults);
       continue;
     }
-
     // Agent loop
     setStatusBar(`[${idx+1}/36] ${unit.grade} — ${unit.topic}: generating visual ${i+1}/4...`);
     const userPrompt = `Topic: ${unit.topic}\nGrade: ${unit.grade}\nSlide: ${cs.title||''}\nConcept: ${cs.key_point||''}\n\nDraw this visual:\n${cs.visual_type?'Type requested: '+cs.visual_type+'\nParams: '+JSON.stringify(cs.visual_params||{}):'Illustrate the concept visually'}`;
