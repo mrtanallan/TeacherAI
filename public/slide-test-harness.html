@@ -245,7 +245,7 @@ Return ONLY valid JSON:
   "exit_ticket": {"question": "consolidation question", "answer_hint": "expected answer"}
 }
 
-VISUAL TYPES — use exact names, populate visual_params with real grade-appropriate numbers:
+VISUAL TYPES — use EXACT type names from this list. Do NOT use strand names (NUMBER, ALGEBRA, DATA, SPATIAL, FINANCIAL) as visual_type values — those are categories only. Use the specific type names below:
 NUMBER: place_value, array, fraction_bar, fraction_compare, fraction_circle, fraction_circle_compare, number_line, integer_line, percent_bar
 ALGEBRA: worked_steps, formula_display, balance_scale, t_table, coordinate_graph, pattern_row
 DATA: bar_graph, line_graph, pie_chart, pictograph, double_bar, probability_scale, stem_leaf
@@ -254,8 +254,9 @@ FINANCIAL: money_display, budget_bar
 UNIVERSAL: comparison_table, concept_card, venn_diagram
 
 MATH SEQUENCE: slide1=formula/concept, slide2=worked_steps or visual model, slide3=diagram or data visual, slide4=comparison_table or harder worked_steps
-content_slides: exactly 4. visual_params must use REAL numbers for ${unit.grade}.
-Pure JSON only, no markdown.`;
+content_slides: exactly 4. visual_params must use REAL numbers for \${unit.grade}.
+CRITICAL: visual_type must be one of the exact type names listed above (e.g. "worked_steps", "array", "bar_graph"). Never use "NUMBER", "ALGEBRA", "DATA", "SPATIAL", or "FINANCIAL" as a visual_type.
+Return ONLY the JSON object. Do not wrap in markdown code fences. Do not include any text before or after the JSON.\`;
 }
 
 // ── SVG system prompt ────────────────────────────────────────────────────────
@@ -301,7 +302,7 @@ async function runUnit(idx) {
   // Step 1: Structure call
   setStatusBar(`[${idx+1}/25] ${unit.grade} — ${unit.topic}: getting structure...`);
   const structureData = await apiFetch('/api/generate', {
-    model: MODEL, max_tokens: 3500,
+    model: MODEL, max_tokens: 4500,
     messages: [{role:'user', content: buildStructurePrompt(unit)}]
   });
 
@@ -311,10 +312,16 @@ async function runUnit(idx) {
   console.log('['+unit.topic+'] raw response length:', raw.length, 'preview:', raw.substring(0,100));
   let sd;
   try {
-    const clean = raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+    // Strip markdown fences aggressively
+    let clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/\s*```\s*$/,'').trim();
     sd = JSON.parse(clean);
   } catch(e) {
-    try { const s=raw.indexOf('{'),en=raw.lastIndexOf('}'); sd=JSON.parse(raw.slice(s,en+1)); }
+    try {
+      // Find outermost JSON object
+      const s=raw.indexOf('{'), en=raw.lastIndexOf('}');
+      if (s === -1) throw new Error('no JSON object found');
+      sd=JSON.parse(raw.slice(s,en+1));
+    }
     catch(e2) {
       const errDetail = 'RAW['+raw.length+']: '+raw.substring(0,300);
       console.error('Parse failed for', unit.topic, errDetail);
