@@ -2694,10 +2694,21 @@ async function generateSlideData(callerBtn) {
   if (callerBtn) { callerBtn.disabled=true; callerBtn.textContent='⏳ Building slides...'; }
   try {
     const iepCount = students.filter(s=>s.iep&&s.iep.trim()).length;
+    const isMath = (subject||'').toLowerCase().includes('math');
+    const visualTypeRules = [
+      'VISUAL TYPE RULES — pick the best type for each content slide:',
+      '1. formula_box — introducing a formula. visual_data: {"formula":"A = l × w","variables":[{"symbol":"A","meaning":"Area"},{"symbol":"l","meaning":"length"},{"symbol":"w","meaning":"width"}],"unit":"cm²"}',
+      '2. worked_example — step-by-step solved problem. visual_data: {"problem":"Find the area of a rectangle 6 cm × 4 cm","steps":[{"label":"Write formula","work":"A = l × w"},{"label":"Substitute","work":"A = 6 × 4"},{"label":"Solve","work":"A = 24 cm²"}]}',
+      '3. labelled_diagram — shapes or geometric concepts. visual_data: {"shape":"rectangle","labels":[{"pos":"top","text":"6 cm"},{"pos":"right","text":"4 cm"},{"pos":"center","text":"A = 24 cm²"}]} — shape options: rectangle, square, triangle, circle, parallelogram, trapezoid',
+      '4. comparison_table — comparing formulas or concepts. visual_data: {"headers":["Shape","Formula","Example"],"rows":[["Rectangle","l × w","6×4=24"],["Square","s²","5²=25"]]}',
+      '5. number_line — fractions, decimals, ordering. visual_data: {"min":0,"max":10,"marks":[{"value":0,"label":"0"},{"value":5,"label":"5"},{"value":10,"label":"10"}],"highlight":[{"value":3.5,"label":"3½","color":"teal"}]}',
+      '6. text_only — non-visual concepts. visual_data: {"bullets":["point 1","point 2","point 3"]}'
+    ].join('\n');
+
     const prompt = [
-      'You are an Ontario elementary teacher creating a classroom presentation deck.',
-      'Generate a TEACHING SLIDE DECK for live classroom delivery — student-facing, engaging, age-appropriate.',
-      'This is NOT a lesson plan summary. It is what students SEE on the screen.',
+      'You are an Ontario elementary teacher creating a VISUAL classroom presentation deck.',
+      'Generate slides for live classroom delivery — student-facing, visual, age-appropriate.',
+      'This is NOT a lesson plan. These are projected slides that students SEE.',
       '',
       'Topic: '+topic,
       'Grade(s): '+(gradeStr||'Elementary'),
@@ -2705,23 +2716,36 @@ async function generateSlideData(callerBtn) {
       'Duration: '+dur,
       'Class context: '+(ctx||'Standard Ontario classroom'),
       iepCount ? 'Note: '+iepCount+' student(s) have modified expectations.' : '',
-      lpText ? 'Reference (do not copy verbatim):\n'+lpText.substring(0,600) : '',
+      lpText ? 'Reference (do not copy verbatim):\n'+lpText.substring(0,500) : '',
       '',
-      'Return ONLY valid JSON with exactly these keys:',
-      '{"learning_goals":["2-3 I can... statements in student language"],',
-      '"minds_on":{"hook":"engaging opening question","prompt":"think-pair-share prompt"},',
-      '"vocabulary":[{"word":"term","definition":"simple definition","example":"example sentence"}],',
-      '"content_slides":[{"title":"slide title","key_point":"core concept 1-2 sentences","example":"concrete example","teacher_note":"brief delivery note max 12 words"}],',
-      '"discussion_questions":["recall question","apply question","evaluate question"],',
-      '"activity_intro":"2-3 sentences introducing the worksheet activity",',
-      '"exit_ticket":"One consolidation question"}',
-      'Rules: learning_goals=2-3, vocabulary=3-5 words, content_slides=3-5, discussion_questions=exactly 3.',
-      'Age-appropriate for grade '+(gradeStr||'Elementary')+'. Pure JSON only, no markdown.'
-    ].filter(l=>l!==null).join('\n');
+      'Return ONLY valid JSON:',
+      '{',
+      '  "learning_goals": ["I can... statement 1", "I can... statement 2"],',
+      '  "minds_on": {"hook": "engaging real-world scenario max 2 sentences", "prompt": "think-pair-share prompt"},',
+      '  "vocabulary": [{"word": "term", "definition": "student-friendly definition", "example": "use in a sentence"}],',
+      '  "content_slides": [',
+      '    {"title":"slide title","key_point":"1 clear sentence","teacher_note":"delivery note max 10 words","visual_type":"formula_box|worked_example|labelled_diagram|comparison_table|number_line|text_only","visual_data":{...}}',
+      '  ],',
+      '  "practice_problem": {"question": "one problem for students to solve", "solution_steps": ["step 1", "step 2", "step 3"]},',
+      '  "discussion_questions": ["recall question", "apply question", "evaluate question"],',
+      '  "exit_ticket": {"question": "consolidation question", "answer_hint": "brief expected answer"}',
+      '}',
+      '',
+      visualTypeRules,
+      '',
+      'Rules:',
+      '- learning_goals: exactly 2-3',
+      '- vocabulary: 3-5 words',
+      '- content_slides: exactly 4 — choose visual_type that SHOWS the concept, not just describes it',
+      isMath ? '- Math flow: slide 1=formula_box, slide 2=worked_example, slide 3=labelled_diagram or comparison_table, slide 4=worked_example with harder numbers' : '- Use text_only only as last resort when no visual type fits',
+      '- discussion_questions: exactly 3',
+      '- All content age-appropriate for grade '+(gradeStr||'Elementary'),
+      '- Pure JSON only, no markdown, no comments'
+    ].filter(Boolean).join('\n');
 
     const res = await authFetch('/api/generate', {
       method:'POST',
-      body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:3500,messages:[{role:'user',content:prompt}]})
+      body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4500,messages:[{role:'user',content:prompt}]})
     });
     const data = await res.json();
     const raw = data.content?.map(i=>i.text||'').join('')||'';
@@ -2770,215 +2794,383 @@ async function presentSlides(e) {
 }
 
 function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg) {
-  const date = new Date().toLocaleDateString('en-CA', {month:'short', day:'numeric', year:'numeric'});
-  const P = {
-    title:   {bg:'#1B4332', acc:'#52B788', txt:'#FFFFFF', sub:'rgba(255,255,255,.55)'},
-    goals:   {bg:'#1C3A2B', acc:'#B7E4C7', txt:'#FFFFFF', sub:'rgba(255,255,255,.6)'},
-    mindson: {bg:'#FDF4E3', acc:'#C47B2A', txt:'#1A1209', sub:'rgba(26,18,9,.6)'},
-    vocab:   {bg:'#03045E', acc:'#90E0EF', txt:'#FFFFFF', sub:'rgba(255,255,255,.5)'},
-    content: {bg:'#FFFFFF', acc:'#2D6A4F', txt:'#1A1714', sub:'#7A726A'},
-    discuss: {bg:'#5E0B8B', acc:'#E0AAFF', txt:'#FFFFFF', sub:'rgba(255,255,255,.6)'},
-    activity:{bg:'#E76F51', acc:'#FFFFFF', txt:'#FFFFFF', sub:'rgba(255,255,255,.65)'},
-    exit:    {bg:'#1B4332', acc:'#95D5B2', txt:'#FFFFFF', sub:'rgba(255,255,255,.55)'},
-  };
-  function blob(x,y,r,color,op=0.18) { return `<circle cx="${x}" cy="${y}" r="${r}" fill="${color}" fill-opacity="${op}"/>`; }
-  function wrap(type, content) { const c=P[type]; return `<div class="slide" style="background:${c.bg}" data-type="${type}">${content}</div>`; }
+  const date = new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
 
-  const sTitle = wrap('title', `
-    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">${blob(1050,80,280,'#52B788',.14)}${blob(900,580,200,'#52B788',.1)}${blob(150,600,180,'#52B788',.08)}</svg>
-    <div class="slide-inner title-inner">
-      ${wikiImg?`<div class="title-img-ring"><img src="${wikiImg}" class="title-img" alt=""></div>`:''}
-      <div class="title-text">
-        <div class="eyebrow" style="background:rgba(82,183,136,.3);color:#95D5B2">${subject||'Lesson'}</div>
-        <h1 class="title-h1">${topic}</h1>
-        <p class="title-meta">${gradeStr?gradeStr+' &nbsp;·&nbsp; ':' '}${date}</p>
-        <p class="title-brand">TeacherAI &nbsp;·&nbsp; Ontario 2023 Curriculum</p>
-      </div>
-    </div>`);
+  // ── SVG VISUAL RENDERERS ────────────────────────────────────────────────────
+  function svgFormulaBox(vd) {
+    if (!vd) return '';
+    const vars = (vd.variables||[]).slice(0,4);
+    const varBoxes = vars.map((v,i)=>{
+      const x = 40 + i*(160/Math.max(vars.length,1));
+      const bw = vars.length<=2?140:vars.length===3?120:100;
+      const bx = 20 + i*(bw+12);
+      return `<g>
+        <rect x="${bx}" y="142" width="${bw}" height="52" rx="6" fill="#E8F4F0" stroke="#1D9E75" stroke-width="1"/>
+        <text x="${bx+bw/2}" y="165" text-anchor="middle" font-size="18" font-weight="700" fill="#0F6E56" font-family="Georgia,serif">${esc(v.symbol)}</text>
+        <text x="${bx+bw/2}" y="183" text-anchor="middle" font-size="11" fill="#3D3D3A" font-family="sans-serif">${esc(v.meaning)}</text>
+      </g>`;
+    }).join('');
+    return `<svg viewBox="0 0 520 210" style="width:100%;max-height:210px">
+      <rect x="10" y="10" width="500" height="68" rx="10" fill="#1D9E75"/>
+      <text x="260" y="52" text-anchor="middle" font-size="28" font-weight="700" fill="white" font-family="Georgia,serif">${esc(vd.formula||'')}</text>
+      ${vd.unit?`<text x="260" y="78" text-anchor="middle" font-size="13" fill="rgba(255,255,255,.7)" font-family="sans-serif">unit: ${esc(vd.unit)}</text>`:''}
+      <text x="260" y="130" text-anchor="middle" font-size="12" fill="#5F5E5A" font-family="sans-serif" letter-spacing="2">WHERE</text>
+      ${varBoxes}
+    </svg>`;
+  }
 
+  function svgWorkedExample(vd) {
+    if (!vd) return '';
+    const steps = (vd.steps||[]).slice(0,5);
+    const rowH = 44;
+    const totalH = 60 + steps.length * rowH + 20;
+    const rows = steps.map((s,i)=>{
+      const y = 60 + i*rowH;
+      const isLast = i===steps.length-1;
+      return `<g>
+        <rect x="10" y="${y}" width="500" height="${rowH-4}" rx="6"
+          fill="${isLast?'#1D9E75':'#F1EFE8'}" opacity="${isLast?'1':'1'}"/>
+        <rect x="10" y="${y}" width="36" height="${rowH-4}" rx="6"
+          fill="${isLast?'#0F6E56':'#D3D1C7'}"/>
+        <text x="28" y="${y+(rowH-4)/2+5}" text-anchor="middle" font-size="14" font-weight="700"
+          fill="${isLast?'white':'#888780'}" font-family="sans-serif">${i+1}</text>
+        <text x="56" y="${y+16}" font-size="11" fill="${isLast?'rgba(255,255,255,.75)':'#5F5E5A'}" font-family="sans-serif">${esc(s.label||'')}</text>
+        <text x="56" y="${y+32}" font-size="15" font-weight="700" fill="${isLast?'white':'#2C2C2A'}" font-family="Georgia,serif">${esc(s.work||'')}</text>
+      </g>`;
+    }).join('');
+    return `<svg viewBox="0 0 520 ${totalH}" style="width:100%;max-height:${totalH}px">
+      <text x="10" y="22" font-size="12" fill="#5F5E5A" font-family="sans-serif" font-weight="600" letter-spacing="1">PROBLEM</text>
+      <text x="10" y="44" font-size="14" fill="#2C2C2A" font-family="sans-serif">${esc(vd.problem||'')}</text>
+      ${rows}
+    </svg>`;
+  }
+
+  function svgLabelledDiagram(vd) {
+    if (!vd) return '';
+    const shape = (vd.shape||'rectangle').toLowerCase();
+    const labels = vd.labels||[];
+    const get = pos => labels.find(l=>l.pos===pos);
+    const ctr = get('center'), top = get('top'), right = get('right'), bottom = get('bottom'), left2 = get('left');
+
+    let shapeEl = '';
+    if (shape==='rectangle'||shape==='square') {
+      const w=shape==='square'?200:280, h=shape==='square'?200:140;
+      const sx=120, sy=55;
+      shapeEl = `<rect x="${sx}" y="${sy}" width="${w}" height="${h}" rx="6" fill="#E1F5EE" stroke="#1D9E75" stroke-width="2.5"/>
+        ${ctr?`<text x="${sx+w/2}" y="${sy+h/2+6}" text-anchor="middle" font-size="15" font-weight="700" fill="#0F6E56" font-family="Georgia,serif">${esc(ctr.text)}</text>`:''}
+        ${top?`<text x="${sx+w/2}" y="${sy-10}" text-anchor="middle" font-size="13" font-weight="700" fill="#2C2C2A" font-family="sans-serif">${esc(top.text)}</text>
+               <line x1="${sx+20}" y1="${sy-6}" x2="${sx+w-20}" y2="${sy-6}" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#arrd)" marker-start="url(#arrd)"/>`:''}
+        ${right?`<text x="${sx+w+38}" y="${sy+h/2+5}" text-anchor="middle" font-size="13" font-weight="700" fill="#2C2C2A" font-family="sans-serif">${esc(right.text)}</text>
+                 <line x1="${sx+w+8}" y1="${sy+20}" x2="${sx+w+8}" y2="${sy+h-20}" stroke="#1D9E75" stroke-width="1.5"/>`:''}`;
+    } else if (shape==='triangle') {
+      shapeEl = `<polygon points="260,50 130,220 390,220" fill="#E1F5EE" stroke="#1D9E75" stroke-width="2.5"/>
+        ${ctr?`<text x="260" y="175" text-anchor="middle" font-size="15" font-weight="700" fill="#0F6E56" font-family="Georgia,serif">${esc(ctr.text)}</text>`:''}
+        ${top?`<text x="260" y="38" text-anchor="middle" font-size="13" font-weight="700" fill="#2C2C2A" font-family="sans-serif">${esc(top.text)}</text>`:''}
+        ${bottom?`<text x="260" y="245" text-anchor="middle" font-size="13" font-weight="700" fill="#2C2C2A" font-family="sans-serif">${esc(bottom.text)}</text>`:''}`;
+    } else if (shape==='circle') {
+      shapeEl = `<circle cx="260" cy="140" r="110" fill="#E1F5EE" stroke="#1D9E75" stroke-width="2.5"/>
+        <line x1="260" y1="140" x2="370" y2="140" stroke="#0F6E56" stroke-width="2" stroke-dasharray="5,4"/>
+        ${ctr?`<text x="310" y="132" text-anchor="middle" font-size="13" font-weight="700" fill="#0F6E56" font-family="sans-serif">${esc(ctr.text)}</text>`:''}
+        ${top?`<text x="260" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#2C2C2A" font-family="sans-serif">${esc(top.text)}</text>`:''}
+        ${right?`<text x="420" y="145" font-size="13" font-weight="700" fill="#2C2C2A" font-family="sans-serif">${esc(right.text)}</text>`:''}`;
+    } else {
+      shapeEl = `<rect x="100" y="70" width="320" height="150" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="2.5"/>
+        ${ctr?`<text x="260" y="152" text-anchor="middle" font-size="15" font-weight="700" fill="#0F6E56" font-family="Georgia,serif">${esc(ctr.text)}</text>`:''}`;
+    }
+    return `<svg viewBox="0 0 520 280" style="width:100%;max-height:280px">
+      <defs><marker id="arrd" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 2L8 5L2 8" fill="none" stroke="#1D9E75" stroke-width="1.5"/></marker></defs>
+      ${shapeEl}
+    </svg>`;
+  }
+
+  function svgComparisonTable(vd) {
+    if (!vd||!vd.rows) return '';
+    const hdrs = vd.headers||[];
+    const rows = (vd.rows||[]).slice(0,5);
+    const cols = Math.max(hdrs.length, ...rows.map(r=>r.length));
+    const cw = Math.floor(490/cols);
+    const totalH = 44 + rows.length*42 + 16;
+    const thCells = hdrs.map((h,i)=>`
+      <rect x="${10+i*cw}" y="10" width="${cw-4}" height="34" rx="4" fill="#1D9E75"/>
+      <text x="${10+i*cw+cw/2-2}" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="white" font-family="sans-serif">${esc(h)}</text>`).join('');
+    const dataRows = rows.map((row,ri)=>{
+      const y = 50+ri*42;
+      const bg = ri%2===0?'#F1EFE8':'white';
+      return row.map((cell,ci)=>`
+        <rect x="${10+ci*cw}" y="${y}" width="${cw-4}" height="36" rx="4" fill="${bg}"/>
+        <text x="${10+ci*cw+cw/2-2}" y="${y+22}" text-anchor="middle" font-size="13" fill="${ci===0?'#0F6E56':'#2C2C2A'}" font-weight="${ci===0?'700':'400'}" font-family="${ci===0?'Georgia,serif':'sans-serif'}">${esc(String(cell))}</text>`).join('');
+    }).join('');
+    return `<svg viewBox="0 0 520 ${totalH}" style="width:100%;max-height:${totalH}px">
+      ${thCells}${dataRows}
+    </svg>`;
+  }
+
+  function svgNumberLine(vd) {
+    if (!vd) return '';
+    const mn=parseFloat(vd.min||0), mx=parseFloat(vd.max||10);
+    const range=mx-mn||1;
+    const px=x=>40+((x-mn)/range)*440;
+    const marks=(vd.marks||[]);
+    const highlights=(vd.highlight||[]);
+    const tickLines=marks.map(m=>`
+      <line x1="${px(m.value)}" y1="85" x2="${px(m.value)}" y2="105" stroke="#5F5E5A" stroke-width="1.5"/>
+      <text x="${px(m.value)}" y="122" text-anchor="middle" font-size="12" fill="#5F5E5A" font-family="sans-serif">${esc(String(m.label||m.value))}</text>`).join('');
+    const hlPoints=highlights.map(h=>`
+      <circle cx="${px(h.value)}" cy="95" r="10" fill="#1D9E75" stroke="white" stroke-width="2"/>
+      <text x="${px(h.value)}" y="72" text-anchor="middle" font-size="12" font-weight="700" fill="#0F6E56" font-family="sans-serif">${esc(String(h.label||h.value))}</text>
+      <line x1="${px(h.value)}" y1="78" x2="${px(h.value)}" y2="85" stroke="#0F6E56" stroke-width="1.5"/>`).join('');
+    return `<svg viewBox="0 0 520 150" style="width:100%;max-height:150px">
+      <line x1="30" y1="95" x2="490" y2="95" stroke="#2C2C2A" stroke-width="2.5"/>
+      <polygon points="490,90 502,95 490,100" fill="#2C2C2A"/>
+      ${tickLines}${hlPoints}
+    </svg>`;
+  }
+
+  function svgTextOnly(vd) { return ''; }
+
+  function renderVisual(type, vd) {
+    try {
+      if (type==='formula_box') return svgFormulaBox(vd);
+      if (type==='worked_example') return svgWorkedExample(vd);
+      if (type==='labelled_diagram') return svgLabelledDiagram(vd);
+      if (type==='comparison_table') return svgComparisonTable(vd);
+      if (type==='number_line') return svgNumberLine(vd);
+    } catch(e) { console.warn('Visual render error:', e); }
+    return '';
+  }
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── SLIDE BUILDERS ──────────────────────────────────────────────────────────
+  // Design language: teal header bar, white card on light grey bg, coloured corner arcs
+  // Inspired by Ontario math TpT slide decks teachers already know
+
+  const TEAL='#3BBFAD', NAVY='#1D3461', YELLOW='#F5C842', WHITE='#FFFFFF', GREY='#F4F3EF';
+  const HEADER_H = 72;
+
+  function corners(accent='#F5C842') {
+    return `
+      <circle cx="0" cy="0" r="80" fill="${accent}" opacity=".18"/>
+      <circle cx="1200" cy="675" r="100" fill="${TEAL}" opacity=".14"/>
+      <circle cx="1200" cy="0" r="60" fill="#BDBDBD" opacity=".13"/>`;
+  }
+
+  function headerBar(text, bg=TEAL) {
+    return `<rect x="0" y="0" width="1200" height="${HEADER_H}" fill="${bg}"/>
+      <text x="48" y="46" font-family="'Arial Black',Arial,sans-serif" font-size="28" font-weight="900" fill="white" letter-spacing="0.5">${esc(text)}</text>`;
+  }
+
+  function slideWrap(contentHTML, bgColor=WHITE) {
+    return `<div class="slide" style="background:${bgColor}">${contentHTML}</div>`;
+  }
+
+  // 1. TITLE SLIDE
+  const sTitle = slideWrap(`
+    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+      <rect width="1200" height="675" fill="#1D3461"/>
+      <rect x="0" y="0" width="8" height="675" fill="${TEAL}"/>
+      <rect x="0" y="550" width="1200" height="125" fill="rgba(0,0,0,.15)"/>
+      <circle cx="1100" cy="80" r="200" fill="${TEAL}" opacity=".12"/>
+      <circle cx="100" cy="600" r="150" fill="${YELLOW}" opacity=".1"/>
+      <circle cx="950" cy="580" r="120" fill="${TEAL}" opacity=".1"/>
+      <text x="80" y="240" font-family="'Arial Black',Arial,sans-serif" font-size="62" font-weight="900" fill="white" letter-spacing="-1">${esc(topic)}</text>
+      <text x="82" y="310" font-family="Arial,sans-serif" font-size="26" fill="rgba(255,255,255,.65)">${esc(gradeStr?gradeStr+' · ':'')}${esc(subject||'')}</text>
+      <rect x="80" y="340" width="120" height="4" rx="2" fill="${TEAL}"/>
+      <text x="80" y="390" font-family="Arial,sans-serif" font-size="18" fill="rgba(255,255,255,.4)">${esc(date)}</text>
+      <text x="80" y="624" font-family="'Courier New',monospace" font-size="13" fill="rgba(255,255,255,.25)" letter-spacing="2">TEACHERAI · ONTARIO CURRICULUM</text>
+    </svg>`, '#1D3461');
+
+  // 2. LEARNING GOALS
   const goals = (sd.learning_goals||[]).slice(0,3);
-  const sGoals = wrap('goals', `
-    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">${blob(1100,60,260,'#B7E4C7',.12)}${blob(80,620,200,'#B7E4C7',.1)}</svg>
-    <div class="slide-inner">
-      <div class="eyebrow" style="background:rgba(183,228,199,.25);color:#B7E4C7">Learning Goals</div>
-      <div class="goals-stack">${goals.map((g,i)=>`<div class="goal-row"><div class="goal-num">${i+1}</div><div class="goal-txt">${g}</div></div>`).join('')}</div>
-    </div>`);
+  const goalItems = goals.map((g,i)=>{
+    const colors=['#F5C842','#3BBFAD','#E07B39'];
+    const yb=160+i*130;
+    return `<div style="display:flex;align-items:flex-start;gap:18px;margin-bottom:${i<goals.length-1?'18px':'0'}">
+      <div style="min-width:52px;height:52px;border-radius:8px;background:${colors[i%3]};display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:${i===0?'#2C2C2A':'white'};flex-shrink:0">${i+1}</div>
+      <div style="background:white;border-radius:10px;padding:14px 18px;flex:1;font-size:19px;color:#1D3461;line-height:1.5;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.06)">${esc(g)}</div>
+    </div>`;
+  }).join('');
+  const sGoals = slideWrap(`
+    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+      <rect width="1200" height="675" fill="${GREY}"/>
+      ${corners(YELLOW)}
+      ${headerBar('Learning Goals')}
+    </svg>
+    <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+28}px 60px 28px;display:flex;flex-direction:column;justify-content:center;">
+      <p style="font-size:15px;color:#888780;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:20px">By the end of this lesson, we will...</p>
+      ${goalItems}
+    </div>`, GREY);
 
-  const sMindson = sd.minds_on ? wrap('mindson', `
-    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">${blob(1080,100,240,'#1A1209',.08)}${blob(120,580,180,'#1A1209',.07)}</svg>
-    <div class="slide-inner">
-      <div class="eyebrow" style="background:rgba(26,18,9,.15);color:rgba(26,18,9,.7)">Minds On</div>
-      <div class="mindson-hook"><span class="big-emoji">🧠</span><p class="hook-q">${sd.minds_on.hook||''}</p></div>
-      ${sd.minds_on.prompt?`<div class="tps-strip"><span class="tps-badge">Think</span><span class="tps-sep">·</span><span class="tps-badge">Pair</span><span class="tps-sep">·</span><span class="tps-badge">Share</span></div><p class="tps-q">${sd.minds_on.prompt}</p>`:''}
-    </div>`) : null;
-
-  const vocabWords = (sd.vocabulary||[]).slice(0,4);
-  const sVocab = vocabWords.length ? wrap('vocab', `
-    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">${blob(1080,80,250,'#90E0EF',.12)}${blob(100,600,200,'#90E0EF',.1)}</svg>
-    <div class="slide-inner">
-      <div class="eyebrow" style="background:rgba(144,224,239,.2);color:#90E0EF">Key Vocabulary</div>
-      <div class="vocab-grid" style="--vcols:${vocabWords.length<=2?vocabWords.length:2}">
-        ${vocabWords.map(v=>`<div class="vocab-card"><div class="vocab-word">${v.word}</div><div class="vocab-def">${v.definition}</div>${v.example?`<div class="vocab-ex">"${v.example}"</div>`:''}</div>`).join('')}
+  // 3. MINDS ON
+  const sMindson = sd.minds_on ? slideWrap(`
+    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+      <rect width="1200" height="675" fill="${GREY}"/>
+      ${corners('#E07B39')}
+      ${headerBar('Minds On!', '#E07B39')}
+    </svg>
+    <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+24}px 60px 24px;display:flex;flex-direction:column;justify-content:center;">
+      <div style="background:white;border-radius:14px;padding:28px 32px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:24px">
+        <p style="font-size:22px;color:#1D3461;line-height:1.6;font-weight:500">${esc(sd.minds_on.hook||'')}</p>
       </div>
-    </div>`) : null;
+      ${sd.minds_on.prompt?`<div style="display:flex;gap:10px;align-items:center">
+        ${['Think','Pair','Share'].map((t,i)=>`<div style="background:${['#F5C842','#3BBFAD','#E07B39'][i]};color:${i===0?'#2C2C2A':'white'};padding:10px 22px;border-radius:40px;font-weight:700;font-size:15px">${t}</div><div style="color:#BDBDBD;font-size:20px">${i<2?'·':''}</div>`).join('')}
+        <div style="margin-left:8px;font-size:17px;color:#5F5E5A;flex:1">${esc(sd.minds_on.prompt)}</div>
+      </div>`:''}
+    </div>`, GREY) : null;
 
-  const contentSlides = (sd.content_slides||[]).slice(0,5).map((cs,i) => {
-    const total = (sd.content_slides||[]).length;
-    const useImg = wikiImg && i===0;
-    return wrap('content', `
-      <div class="slide-inner content-inner">
-        <div class="content-left">
-          <div class="eyebrow" style="background:#EAF2EC;color:#2D6A4F">${cs.title||'Key Concept'}</div>
-          <p class="content-counter" style="color:#7A726A">${i+1} / ${total}</p>
-          <div class="key-block"><div class="key-stripe" style="background:#2D6A4F"></div><p class="key-text">${cs.key_point||''}</p></div>
-          ${cs.example?`<div class="example-block"><span class="example-label">✦ Example</span><p class="example-text">${cs.example}</p></div>`:''}
-          ${cs.teacher_note?`<p class="teacher-note">📌 ${cs.teacher_note}</p>`:''}
+  // 4. VOCABULARY
+  const vocabWords = (sd.vocabulary||[]).slice(0,4);
+  const vocabCards = vocabWords.map((v,i)=>{
+    const accents=['#3BBFAD','#F5C842','#E07B39','#6B63D4'];
+    return `<div style="background:white;border-radius:12px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,.07);border-top:4px solid ${accents[i%4]}">
+      <div style="font-size:20px;font-weight:900;color:#1D3461;margin-bottom:6px">${esc(v.word)}</div>
+      <div style="font-size:14px;color:#5F5E5A;line-height:1.5;margin-bottom:6px">${esc(v.definition)}</div>
+      ${v.example?`<div style="font-size:13px;color:#888780;font-style:italic">"${esc(v.example)}"</div>`:''}
+    </div>`;
+  }).join('');
+  const sVocab = vocabWords.length ? slideWrap(`
+    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+      <rect width="1200" height="675" fill="${GREY}"/>
+      ${corners('#6B63D4')}
+      ${headerBar('Key Vocabulary', '#6B63D4')}
+    </svg>
+    <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+24}px 60px 24px;display:flex;align-items:center">
+      <div style="display:grid;grid-template-columns:repeat(${Math.min(vocabWords.length,2)},1fr);gap:16px;width:100%">${vocabCards}</div>
+    </div>`, GREY) : null;
+
+  // 5. CONTENT SLIDES — with SVG visuals
+  const contentSlides = (sd.content_slides||[]).slice(0,4).map((cs,i)=>{
+    const total = Math.min((sd.content_slides||[]).length,4);
+    const visual = renderVisual(cs.visual_type, cs.visual_data);
+    const hasVis = visual.length > 0;
+    return slideWrap(`
+      <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+        <rect width="1200" height="675" fill="${GREY}"/>
+        ${corners()}
+        ${headerBar(esc(cs.title||'Key Concept'))}
+        <text x="1152" y="46" text-anchor="end" font-family="'Courier New',monospace" font-size="14" fill="rgba(255,255,255,.55)">${i+1}/${total}</text>
+      </svg>
+      <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+20}px 52px 20px;display:flex;flex-direction:${hasVis?'row':'column'};gap:28px;align-items:center">
+        <div style="flex:${hasVis?'0 0 38%':'1'};display:flex;flex-direction:column;justify-content:center">
+          <div style="background:white;border-left:5px solid ${TEAL};border-radius:0 10px 10px 0;padding:16px 20px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.06)">
+            <p style="font-size:18px;color:#1D3461;line-height:1.6;font-weight:500;margin:0">${esc(cs.key_point||'')}</p>
+          </div>
+          ${cs.teacher_note?`<p style="font-size:12px;color:#888780;font-style:italic;padding-left:4px">📌 ${esc(cs.teacher_note)}</p>`:''}
         </div>
-        ${useImg?`<div class="content-img-col"><img src="${wikiImg}" class="content-img" alt=""></div>`:''}
-      </div>`);
+        ${hasVis?`<div style="flex:1;display:flex;align-items:center;justify-content:center;background:white;border-radius:14px;padding:20px;box-shadow:0 2px 14px rgba(0,0,0,.07)">${visual}</div>`:''}
+      </div>`, GREY);
   });
 
+  // 6. PRACTICE PROBLEM
+  const pp = sd.practice_problem;
+  const sPractice = pp ? slideWrap(`
+    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+      <rect width="1200" height="675" fill="${GREY}"/>
+      ${corners('#E07B39')}
+      ${headerBar('Practice Questions', '#1D3461')}
+    </svg>
+    <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+24}px 60px 24px;display:flex;flex-direction:row;gap:28px;align-items:center">
+      <div style="flex:1">
+        <div style="background:#1D3461;border-radius:12px;padding:22px 26px;margin-bottom:20px">
+          <p style="font-size:14px;font-weight:700;color:${TEAL};letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">YOUR TURN</p>
+          <p style="font-size:20px;color:white;line-height:1.6;margin:0">${esc(pp.question||'')}</p>
+        </div>
+        <div style="background:white;border-radius:12px;padding:18px 22px;box-shadow:0 2px 10px rgba(0,0,0,.07)">
+          <p style="font-size:12px;font-weight:700;color:#888780;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">STEPS TO FOLLOW</p>
+          ${(pp.solution_steps||[]).map((s,i)=>`<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:${i<(pp.solution_steps.length-1)?'10px':'0'}">
+            <div style="min-width:26px;height:26px;border-radius:50%;background:${TEAL};color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${i+1}</div>
+            <p style="font-size:15px;color:#2C2C2A;margin:4px 0 0">${esc(s)}</p>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`, GREY) : null;
+
+  // 7. DISCUSSION
   const dqs = (sd.discussion_questions||[]).slice(0,3);
-  const sDiscuss = dqs.length ? wrap('discuss', `
-    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">${blob(1080,80,260,'#E0AAFF',.12)}${blob(100,600,200,'#E0AAFF',.1)}</svg>
-    <div class="slide-inner">
-      <div class="eyebrow" style="background:rgba(224,170,255,.2);color:#E0AAFF">Discussion</div>
-      <div class="dq-stack">${dqs.map((q,i)=>{const icons=['💭','💡','⭐'];const labels=['Recall','Apply','Evaluate'];return`<div class="dq-row"><div class="dq-icon">${icons[i]}</div><div><div class="dq-label">${labels[i]}</div><div class="dq-text">${q}</div></div></div>`;}).join('')}</div>
-    </div>`) : null;
+  const sDiscuss = dqs.length ? slideWrap(`
+    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+      <rect width="1200" height="675" fill="${GREY}"/>
+      ${corners('#6B63D4')}
+      ${headerBar('Discussion', '#6B63D4')}
+    </svg>
+    <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+24}px 60px 24px;display:flex;flex-direction:column;justify-content:center;gap:14px">
+      ${dqs.map((q,i)=>{
+        const icons=['💭','💡','⭐'];
+        const labels=['Recall','Apply','Evaluate'];
+        const bgs=['#E1F5EE','#FFF8E1','#EDE7F6'];
+        const borders=['#3BBFAD','#F5C842','#6B63D4'];
+        return `<div style="display:flex;align-items:flex-start;gap:16px;background:${bgs[i]};border-left:5px solid ${borders[i]};border-radius:0 10px 10px 0;padding:16px 20px">
+          <span style="font-size:22px;flex-shrink:0">${icons[i]}</span>
+          <div>
+            <p style="font-size:11px;font-weight:700;color:${borders[i]};letter-spacing:2px;text-transform:uppercase;margin:0 0 5px">${labels[i]}</p>
+            <p style="font-size:17px;color:#1D3461;margin:0;line-height:1.5">${esc(q)}</p>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`, GREY) : null;
 
-  const sActivity = sd.activity_intro ? wrap('activity', `
-    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">${blob(1080,80,260,'#FFFFFF',.1)}</svg>
-    <div class="slide-inner center-inner">
-      <span class="big-emoji" style="font-size:5rem">✏️</span>
-      <h2 class="center-h2">Your Turn</h2>
-      <p class="center-body">${sd.activity_intro}</p>
-      <div class="cue-pill">Open your worksheet and begin</div>
-    </div>`) : null;
+  // 8. EXIT TICKET
+  const et = typeof sd.exit_ticket === 'object' ? sd.exit_ticket : {question: sd.exit_ticket||'', answer_hint:''};
+  const sExit = et.question ? slideWrap(`
+    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+      <rect width="1200" height="675" fill="#1D3461"/>
+      <circle cx="1100" cy="80" r="200" fill="${TEAL}" opacity=".1"/>
+      <circle cx="100" cy="600" r="150" fill="${YELLOW}" opacity=".08"/>
+      <rect x="0" y="0" width="8" height="675" fill="${TEAL}"/>
+    </svg>
+    <div style="position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 60px;text-align:center">
+      <div style="background:${TEAL};color:white;padding:8px 24px;border-radius:40px;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:24px">SHOW WHAT YOU KNOW</div>
+      <div style="background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);border-radius:16px;padding:32px 40px;max-width:680px;margin-bottom:20px">
+        <p style="font-size:24px;color:white;line-height:1.6;margin:0;font-weight:500">${esc(et.question)}</p>
+      </div>
+      ${et.answer_hint?`<p style="font-size:14px;color:rgba(255,255,255,.45);font-style:italic">Hint: ${esc(et.answer_hint)}</p>`:''}
+      <div style="margin-top:28px;display:flex;gap:12px">
+        ${['Name:','Date:','Class:'].map(l=>`<div style="border-bottom:1px solid rgba(255,255,255,.3);padding:8px 32px 4px;font-size:13px;color:rgba(255,255,255,.4)">${l}</div>`).join('')}
+      </div>
+    </div>`, '#1D3461') : null;
 
-  const sExit = sd.exit_ticket ? wrap('exit', `
-    <svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">${blob(1080,80,260,'#95D5B2',.12)}</svg>
-    <div class="slide-inner center-inner">
-      <span class="big-emoji" style="font-size:4rem">🎟️</span>
-      <h2 class="center-h2">Exit Ticket</h2>
-      <div class="exit-card"><p class="exit-prompt">Before you leave, answer this:</p><p class="exit-q">${sd.exit_ticket}</p></div>
-    </div>`) : null;
-
-  const allSlides = [sTitle,sGoals,sMindson,sVocab,...contentSlides,sDiscuss,sActivity,sExit].filter(Boolean);
+  const allSlides = [sTitle, sGoals, sMindson, sVocab, ...contentSlides, sPractice, sDiscuss, sExit].filter(Boolean);
   const total = allSlides.length;
 
   const CSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap');
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Plus Jakarta Sans',sans-serif}
+    html,body{width:100%;height:100%;overflow:hidden;background:#111;font-family:Arial,'Helvetica Neue',sans-serif}
     #deck{width:100%;height:100vh;position:relative}
-    .slide{position:absolute;inset:0;opacity:0;transition:opacity .45s cubic-bezier(.4,0,.2,1);pointer-events:none;overflow:hidden}
+    .slide{position:absolute;inset:0;opacity:0;transition:opacity .35s ease;pointer-events:none;overflow:hidden}
     .slide.active{opacity:1;pointer-events:all}
     .deco{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-    .slide-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;padding:3.5rem 5rem}
-    .eyebrow{display:inline-block;font-family:'DM Mono',monospace;font-size:.68rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:.35rem 1rem;border-radius:20px;margin-bottom:1.6rem;width:fit-content}
-    .title-inner{flex-direction:row;align-items:center;gap:4rem}
-    .title-text{flex:1}
-    .title-h1{font-family:'Fraunces',serif;font-size:clamp(2.8rem,6vw,4.8rem);font-weight:700;color:#fff;line-height:1.08;letter-spacing:-.03em;margin-bottom:1.4rem}
-    .title-meta{font-size:1rem;color:rgba(255,255,255,.55);margin-bottom:.4rem}
-    .title-brand{font-family:'DM Mono',monospace;font-size:.62rem;color:rgba(255,255,255,.28);letter-spacing:1.5px;text-transform:uppercase;margin-top:1.8rem}
-    .title-img-ring{flex-shrink:0;width:260px;height:260px;border-radius:50%;overflow:hidden;border:6px solid rgba(255,255,255,.18);box-shadow:0 24px 64px rgba(0,0,0,.35)}
-    .title-img{width:100%;height:100%;object-fit:cover}
-    .goals-stack{display:flex;flex-direction:column;gap:1.1rem;margin-top:.4rem}
-    .goal-row{display:flex;align-items:center;gap:1.4rem;background:rgba(255,255,255,.12);border-radius:14px;padding:1.1rem 1.4rem;backdrop-filter:blur(4px)}
-    .goal-num{width:44px;height:44px;border-radius:50%;background:#B7E4C7;color:#1B3A2B;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;flex-shrink:0}
-    .goal-txt{font-size:1.15rem;color:#fff;line-height:1.55}
-    .big-emoji{display:block;font-size:3.5rem;margin-bottom:1rem}
-    .mindson-hook{display:flex;align-items:flex-start;gap:1.2rem;margin-bottom:1.4rem}
-    .hook-q{font-family:'Fraunces',serif;font-size:1.8rem;font-style:italic;color:#1A1209;line-height:1.45;flex:1}
-    .tps-strip{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem}
-    .tps-badge{background:rgba(26,18,9,.15);color:rgba(26,18,9,.75);padding:.3rem .9rem;border-radius:20px;font-weight:700;font-size:.85rem;letter-spacing:.5px}
-    .tps-sep{color:rgba(26,18,9,.35);font-size:1.2rem}
-    .tps-q{font-size:1.1rem;color:rgba(26,18,9,.8);line-height:1.65;padding-left:.2rem}
-    .vocab-grid{display:grid;grid-template-columns:repeat(var(--vcols,2),1fr);gap:1.1rem;margin-top:.4rem}
-    .vocab-card{background:rgba(255,255,255,.14);border-radius:16px;padding:1.3rem 1.5rem;border:1.5px solid rgba(255,255,255,.2);backdrop-filter:blur(4px)}
-    .vocab-word{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;color:#fff;margin-bottom:.5rem}
-    .vocab-def{font-size:.95rem;color:rgba(255,255,255,.8);line-height:1.55;margin-bottom:.35rem}
-    .vocab-ex{font-size:.85rem;color:rgba(255,255,255,.5);font-style:italic}
-    .content-inner{flex-direction:row;align-items:center;gap:2.5rem}
-    .content-left{flex:1}
-    .content-counter{font-family:'DM Mono',monospace;font-size:.68rem;margin-bottom:1.4rem;margin-top:-.8rem}
-    .key-block{display:flex;gap:0;background:#F8FAF8;border-radius:12px;overflow:hidden;margin-bottom:1.1rem;box-shadow:0 2px 20px rgba(0,0,0,.06)}
-    .key-stripe{width:6px;flex-shrink:0}
-    .key-text{font-size:1.2rem;color:#1A1714;line-height:1.7;padding:1.2rem 1.5rem}
-    .example-block{background:#FDF4E3;border-radius:10px;padding:1rem 1.3rem;border-left:4px solid #C47B2A}
-    .example-label{font-family:'DM Mono',monospace;font-size:.6rem;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:#C47B2A;display:block;margin-bottom:.4rem}
-    .example-text{font-size:1rem;color:#1A1714;font-style:italic;line-height:1.6}
-    .teacher-note{font-size:.75rem;color:#9A9590;margin-top:.8rem;font-style:italic}
-    .content-img-col{flex-shrink:0;width:280px}
-    .content-img{width:100%;height:280px;object-fit:cover;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15)}
-    .dq-stack{display:flex;flex-direction:column;gap:.9rem;margin-top:.4rem}
-    .dq-row{display:flex;align-items:flex-start;gap:1.2rem;background:rgba(255,255,255,.12);border-radius:14px;padding:1rem 1.4rem;backdrop-filter:blur(4px)}
-    .dq-icon{font-size:1.5rem;flex-shrink:0;margin-top:.1rem}
-    .dq-label{font-family:'DM Mono',monospace;font-size:.62rem;color:rgba(224,170,255,.7);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.3rem}
-    .dq-text{font-size:1.05rem;color:#fff;line-height:1.55}
-    .center-inner{align-items:center;text-align:center;gap:.8rem}
-    .center-h2{font-family:'Fraunces',serif;font-size:3rem;font-weight:700;color:#fff;letter-spacing:-.02em;margin:.4rem 0 .8rem}
-    .center-body{font-size:1.12rem;color:rgba(255,255,255,.8);max-width:580px;line-height:1.65}
-    .cue-pill{margin-top:.8rem;border:2px dashed rgba(255,255,255,.35);border-radius:40px;padding:.55rem 1.5rem;font-family:'DM Mono',monospace;font-size:.78rem;color:rgba(255,255,255,.55);letter-spacing:.5px}
-    .exit-card{background:rgba(255,255,255,.12);border-radius:16px;padding:1.6rem 2rem;max-width:600px;margin-top:.6rem;backdrop-filter:blur(4px);border:1.5px solid rgba(255,255,255,.18)}
-    .exit-prompt{font-family:'DM Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase;margin-bottom:.8rem}
-    .exit-q{font-family:'Fraunces',serif;font-size:1.55rem;font-style:italic;color:#fff;line-height:1.5}
-    #progress{position:fixed;top:0;left:0;height:3px;background:#52B788;transition:width .3s ease;z-index:300;border-radius:0 2px 2px 0}
-    #ctrl{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:.75rem;z-index:200;background:rgba(0,0,0,.6);backdrop-filter:blur(16px);border-radius:40px;padding:.55rem 1.2rem;border:1px solid rgba(255,255,255,.1)}
-    #ctrl button{background:rgba(255,255,255,.12);border:none;color:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:background .15s}
-    #ctrl button:hover{background:rgba(255,255,255,.26)}
-    #snum{color:rgba(255,255,255,.55);font-family:'DM Mono',monospace;font-size:.72rem;min-width:3.5rem;text-align:center}
-    #fsb{border-radius:8px!important;width:auto!important;padding:.3rem .85rem!important;font-size:.7rem!important;letter-spacing:.5px;font-family:'DM Mono',monospace}
+    #progress{position:fixed;top:0;left:0;height:4px;background:${TEAL};transition:width .3s ease;z-index:300}
+    #ctrl{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:.6rem;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(16px);border-radius:40px;padding:.5rem 1rem;border:1px solid rgba(255,255,255,.1)}
+    #ctrl button{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+    #ctrl button:hover{background:rgba(255,255,255,.28)}
+    #snum{color:rgba(255,255,255,.55);font-size:.72rem;min-width:3.2rem;text-align:center;font-family:monospace}
+    #fsb{border-radius:8px!important;width:auto!important;padding:.3rem .85rem!important;font-size:.7rem!important;font-family:monospace}
   `;
-
-  // ── FIX: JS defers show(0) until DOMContentLoaded instead of running inline ──
-  const JS = `
-    var c=0,t=${total};
-    var sl,pr,nm;
-    function show(n){
-      if(sl[c])sl[c].classList.remove('active');
-      c=Math.max(0,Math.min(n,t-1));
-      if(sl[c])sl[c].classList.add('active');
-      nm.textContent=(c+1)+' / '+t;
-      pr.style.width=((c+1)/t*100)+'%';
-    }
+  const JS = `var c=0,t=${total},sl,pr,nm;
+    function show(n){if(sl[c])sl[c].classList.remove('active');c=Math.max(0,Math.min(n,t-1));if(sl[c])sl[c].classList.add('active');nm.textContent=(c+1)+'/'+t;pr.style.width=((c+1)/t*100)+'%';}
     function go(d){show(c+d);}
     function fs(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.();}
-    document.addEventListener('DOMContentLoaded',function(){
-      sl=document.querySelectorAll('.slide');
-      pr=document.getElementById('progress');
-      nm=document.getElementById('snum');
-      show(0);
-    });
-    document.addEventListener('keydown',function(e){
-      if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();go(1);}
-      if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}
-      if(e.key==='f'||e.key==='F')fs();
-    });
-    document.addEventListener('click',function(e){
-      if(e.target.closest('#ctrl'))return;
-      e.clientX>window.innerWidth/2?go(1):go(-1);
-    });
-  `;
+    document.addEventListener('DOMContentLoaded',function(){sl=document.querySelectorAll('.slide');pr=document.getElementById('progress');nm=document.getElementById('snum');show(0);});
+    document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();go(1);}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}if(e.key==='f'||e.key==='F')fs();});
+    document.addEventListener('click',function(e){if(e.target.closest('#ctrl'))return;e.clientX>window.innerWidth/2?go(1):go(-1);});`;
 
   const html = `<!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${topic} — TeacherAI</title>
+<title>${esc(topic)} — TeacherAI</title>
 <style>${CSS}</style></head><body>
 <div id="progress"></div>
 <div id="deck">${allSlides.join('\n')}</div>
 <div id="ctrl">
   <button onclick="go(-1)">‹</button>
-  <span id="snum">1 / ${total}</span>
+  <span id="snum">1/${total}</span>
   <button onclick="go(1)">›</button>
   <button id="fsb" onclick="fs()">⛶ Full</button>
 </div>
 <script>${JS}<\/script>
 </body></html>`;
 
-  // Use blob URL — avoids document.write timing issue and popup blocker edge cases
-  const blob2 = new Blob([html], {type:'text/html'});
-  const blobUrl = URL.createObjectURL(blob2);
+  const b = new Blob([html], {type:'text/html'});
+  const blobUrl = URL.createObjectURL(b);
   const w = window.open(blobUrl, '_blank');
   if (!w) { alert('Pop-up blocked — allow pop-ups for teacherai.ca and try again.'); return; }
   setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
