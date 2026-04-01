@@ -265,39 +265,6 @@ function onNameInput(){
 
 function checkName(){
   const typed=document.getElementById('studentName').value.trim();
-  if(!typed) return;
-  if(!roster.length) return; // no roster — allow any name
-  // Exact match — silent green
-  const exact=roster.find(s=>
-    s.first.toLowerCase()===typed.toLowerCase()||
-    `${s.first} ${s.last||''}`.toLowerCase().trim()===typed.toLowerCase()
-  );
-  if(exact){matchedStudent=exact;document.getElementById('studentName').classList.add('matched');document.getElementById('nameSuggestion').classList.remove('show');return;}
-  // Prefix match — "Sofia" matches "Sofia P."
-  const prefix=roster.find(s=>
-    s.first.toLowerCase().startsWith(typed.toLowerCase())||
-    typed.toLowerCase().startsWith(s.first.toLowerCase())
-  );
-  if(prefix&&prefix.first.toLowerCase()!==typed.toLowerCase()){
-    const name=prefix.last?`${prefix.first} ${prefix.last}`:prefix.first;
-    document.getElementById('suggestionText').textContent=`Did you mean "${name}"?`;
-    document.getElementById('nameSuggestion').classList.add('show');
-    window._pendingSuggestion=prefix;
-    return;
-  }
-  if(prefix){matchedStudent=prefix;document.getElementById('studentName').classList.add('matched');return;}
-  // Fuzzy — lower threshold
-  const best=findBestMatch(typed,roster);
-  if(best&&best.score>=0.35){
-    const name=best.student.last?`${best.student.first} ${best.student.last}`:best.student.first;
-    document.getElementById('suggestionText').textContent=`Did you mean "${name}"?`;
-    document.getElementById('nameSuggestion').classList.add('show');
-    window._pendingSuggestion=best.student;
-  }
-}
-
-function checkName(){
-  const typed=document.getElementById('studentName').value.trim();
   if(!typed||!roster.length)return;
   // Exact match — silent
   const exact=roster.find(s=>
@@ -305,21 +272,29 @@ function checkName(){
     `${s.first} ${s.last||''}`.toLowerCase().trim()===typed.toLowerCase()
   );
   if(exact){matchedStudent=exact;document.getElementById('studentName').classList.add('matched');return;}
-  // Prefix match — "Ayaan" matches "Ayaan M"
-  const prefix=roster.find(s=>
+  // Prefix match — find ALL names that start with or contain typed prefix
+  const prefixMatches=roster.filter(s=>
     s.first.toLowerCase().startsWith(typed.toLowerCase()) ||
     typed.toLowerCase().startsWith(s.first.toLowerCase())
   );
-  if(prefix){
-    const name=prefix.last?`${prefix.first} ${prefix.last}`:prefix.first;
+  if(prefixMatches.length===1){
+    const s=prefixMatches[0];
+    const name=s.last?`${s.first} ${s.last}`:s.first;
     if(name.toLowerCase()!==typed.toLowerCase()){
-      document.getElementById('suggestionText').textContent=`Did you mean "${name}"?`;
+      document.getElementById('suggestionText').innerHTML=`Did you mean <strong>"${name}"</strong>?`;
       document.getElementById('nameSuggestion').classList.add('show');
-      window._pendingSuggestion=prefix;
+      window._pendingSuggestion=s;
       return;
     }
-    matchedStudent=prefix;
-    document.getElementById('studentName').classList.add('matched');
+    matchedStudent=s;document.getElementById('studentName').classList.add('matched');return;
+  } else if(prefixMatches.length>1){
+    const btnsHtml=prefixMatches.map(s=>{
+      const name=s.last?`${s.first} ${s.last}`:s.first;
+      return `<button class="sug-yes" style="font-size:.78rem;padding:5px 10px;" onclick="selectStudent('${s.id}','${name.replace(/'/g,"\'")}')">I am ${name}</button>`;
+    }).join('');
+    document.getElementById('suggestionText').innerHTML=`<span style="display:block;margin-bottom:6px;">Which one are you?</span>${btnsHtml}`;
+    document.getElementById('nameSuggestion').classList.add('show');
+    window._pendingSuggestion=null;
     return;
   }
   // Fuzzy match — show ALL similar names, not just the single best
