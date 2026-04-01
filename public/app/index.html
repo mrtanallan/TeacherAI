@@ -2815,6 +2815,24 @@ async function generateSlideVisuals(contentSlides, topic, subject, gradeStr) {
   const delay = ms => new Promise(r => setTimeout(r, ms));
 
   const calls = contentSlides.slice(0,4).map((cs, i) => {
+    // Detect transformation/geometry topics to force grid requirement
+    const topicLower = (topic+' '+(cs.title||'')+' '+(cs.visual_prompt||'')).toLowerCase();
+    const isTransform = /transform|translat|reflec|rotat|slide|flip|turn|symmetr|congruent|similar/.test(topicLower);
+    const isCoordinate = /coordinat|plot|grid|quadrant|ordered pair|x.axis|y.axis/.test(topicLower);
+    const needsGrid = isTransform || isCoordinate;
+
+    const gridInstruction = needsGrid
+      ? '\nCRITICAL REQUIREMENT: Draw this on a grid background. Grid lines every 36px, stroke="#D0D0D0" stroke-width="0.7". Original shape filled #1D9E75. Transformed/image shape filled #E07B39 opacity 0.85. Label "Original" and "Image" clearly in bold navy. Show the transformation: dashed arrow for slides, dashed vertical/horizontal line for flips, curved arc arrow for turns. Do NOT draw a mangled shape — keep geometry simple (use rectangles, right-angled triangles, or simple arrows as the shape).'
+      : '';
+
+    // Detect transformation/geometry topics — force grid in the prompt itself
+    const _tl = (topic+' '+(cs.title||'')+' '+(cs.visual_prompt||'')).toLowerCase();
+    const _needsGrid = /transform|translat|reflec|rotat|\bslide\b|\bflip\b|\bturn\b|symmetr|congruent|coordinat|quadrant/.test(_tl);
+
+    const _gridNote = _needsGrid
+      ? 'CRITICAL: Draw on a grid. Grid lines every 36px, stroke="#D0D0D0" stroke-width="0.7". Original shape: filled #1D9E75, label "Original". Transformed shape: filled #E07B39 opacity=0.85, label "Image". Use SIMPLE shapes only — rectangles or right triangles (no complex polygons). Show transformation action: dotted arrow for slides, dashed line (#1D3461) for flips, curved arc arrow for turns/rotations.'
+      : '';
+
     const userPrompt = [
       'Topic: '+topic,
       'Grade: '+gradeStr,
@@ -2823,7 +2841,8 @@ async function generateSlideVisuals(contentSlides, topic, subject, gradeStr) {
       '',
       'Draw this visual:',
       cs.visual_prompt || ('Illustrate the concept: '+(cs.key_point||topic)),
-    ].join('\n');
+      _gridNote,
+    ].filter(Boolean).join('\n');
 
     // Merge system into user message so old backend still gets the drawing instructions
     const fullPrompt = svgSystemPrompt + '\n\n---\n\n' + userPrompt;
