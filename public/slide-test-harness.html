@@ -223,7 +223,7 @@ let lastApiError = '';
 
 // ── Structure prompt ─────────────────────────────────────────────────────────
 function buildStructurePrompt(unit) {
-  const isMath = true;
+  const isEarlyGrade = unit.grade === 'Kindergarten' || unit.grade === 'Grade 1';
   return `You are an Ontario elementary teacher creating a classroom presentation deck.
 Generate TEXT CONTENT and visual specifications for a slide deck.
 
@@ -253,7 +253,7 @@ SPATIAL: area_grid, perimeter_shape, circle_diagram, angle_diagram, transform_tr
 FINANCIAL: money_display, budget_bar
 UNIVERSAL: comparison_table, concept_card, venn_diagram
 
-MATH SEQUENCE: slide1=formula/concept, slide2=worked_steps or visual model, slide3=diagram or data visual, slide4=comparison_table or harder worked_steps
+${isEarlyGrade ? 'EARLY GRADE SEQUENCE: slide1=concept_card (explain the concept simply), slide2=array or number_line or pattern_row (concrete visual), slide3=worked_steps (simple example with 1-2 steps), slide4=concept_card (summary). Keep ALL visuals concrete and simple.' : 'MATH SEQUENCE: slide1=formula/concept, slide2=worked_steps or visual model, slide3=diagram or data visual, slide4=comparison_table or harder worked_steps'}
 content_slides: exactly 4. visual_params must use REAL numbers for ${unit.grade}.
 CRITICAL: visual_type must be an exact type name from the list above. NEVER use NUMBER, ALGEBRA, DATA, SPATIAL, or FINANCIAL as a visual_type.
 Return ONLY the raw JSON object. No markdown fences. No text before or after.`;
@@ -299,8 +299,15 @@ async function runUnit(idx) {
   const unit = UNITS[idx];
   setStatus(idx, 'running');
 
+  // Refresh token every 10 units to prevent expiry
+  if (idx % 10 === 0) {
+    const { data: { session } } = await db.auth.getSession();
+    if (session) token = session.access_token;
+    else { setStatusBar('⚠ Session expired — please log in again at teacherai.ca/app'); return; }
+  }
+
   // Step 1: Structure call
-  setStatusBar(`[${idx+1}/25] ${unit.grade} — ${unit.topic}: getting structure...`);
+  setStatusBar(`[${idx+1}/36] ${unit.grade} — ${unit.topic}: getting structure...`);
   const structureData = await apiFetch('/api/generate', {
     model: MODEL, max_tokens: 4500,
     messages: [{role:'user', content: buildStructurePrompt(unit)}]
@@ -359,7 +366,7 @@ async function runUnit(idx) {
     }
 
     // Agent loop
-    setStatusBar(`[${idx+1}/25] ${unit.grade} — ${unit.topic}: generating visual ${i+1}/4...`);
+    setStatusBar(`[${idx+1}/36] ${unit.grade} — ${unit.topic}: generating visual ${i+1}/4...`);
     const userPrompt = `Topic: ${unit.topic}\nGrade: ${unit.grade}\nSlide: ${cs.title||''}\nConcept: ${cs.key_point||''}\n\nDraw this visual:\n${cs.visual_type?'Type requested: '+cs.visual_type+'\nParams: '+JSON.stringify(cs.visual_params||{}):'Illustrate the concept visually'}`;
     const fullPrompt = SVG_SYSTEM + '\n\n---\n\n' + userPrompt;
 
@@ -377,7 +384,7 @@ async function runUnit(idx) {
     if (!sr.svg) { sr.pass = false; sr.issues = ['No SVG generated']; setStatus(idx,'running',slideResults); continue; }
 
     // Critic
-    setStatusBar(`[${idx+1}/25] ${unit.grade} — ${unit.topic}: critiquing visual ${i+1}/4...`);
+    setStatusBar(`[${idx+1}/36] ${unit.grade} — ${unit.topic}: critiquing visual ${i+1}/4...`);
     const criticData = await apiFetch('/api/generate', {
       model: MODEL, max_tokens: 400, call_type: 'svg',
       system: CRITIC_SYSTEM,
@@ -394,7 +401,7 @@ async function runUnit(idx) {
 
     // Retry once if failed
     if (!sr.pass) {
-      setStatusBar(`[${idx+1}/25] ${unit.grade} — ${unit.topic}: retrying visual ${i+1}/4...`);
+      setStatusBar(`[${idx+1}/36] ${unit.grade} — ${unit.topic}: retrying visual ${i+1}/4...`);
       await delay(1000);
       const retryData = await apiFetch('/api/generate', {
         model: MODEL, max_tokens: 1800, call_type: 'svg',
