@@ -2742,61 +2742,14 @@ async function generateSlideData(callerBtn) {
       '══ VISUAL TYPE LIBRARY ══',
       'Pick the BEST type for each slide. Use exact type names. Populate visual_params precisely.',
       '',
-      '── STRAND B: NUMBER ──',
-      '"place_value" — place value chart. params: {"digits":{"thousands":3,"hundreds":0,"tens":4,"ones":2},"highlight":"tens"}',
-      '"array" — multiplication array of dots/squares. params: {"rows":4,"cols":6,"label":"4 × 6 = 24"}',
-      '"fraction_bar" — rectangle divided into equal parts. params: {"numerator":3,"denominator":4,"label":"3/4","color":"#1D9E75"}',
-      '"fraction_compare" — two fraction bars side by side. params: {"fractions":[{"n":1,"d":2,"label":"1/2"},{"n":3,"d":4,"label":"3/4"}]}',
-      '"fraction_circle" — single pie circle showing a fraction. params: {"numerator":1,"denominator":2,"label":"1/2","color":"#1D9E75"}',
-      '"fraction_circle_compare" — 2-4 pie circles side by side for comparing fractions. params: {"fractions":[{"n":1,"d":2,"label":"1/2"},{"n":1,"d":3,"label":"1/3"},{"n":1,"d":4,"label":"1/4"}],"comparison":"1/2 > 1/3 > 1/4"}',
-      '"number_line" — marked number line. params: {"min":0,"max":10,"step":1,"highlights":[{"value":3.5,"label":"3½"}],"show_negatives":false}',
-      '"percent_bar" — percent/ratio bar. params: {"percent":75,"label":"75%","part_label":"75","whole_label":"100"}',
-      '"integer_line" — number line with negatives. params: {"min":-5,"max":5,"highlights":[{"value":-2,"label":"-2"}]}',
-      '',
-      '── STRAND C: ALGEBRA ──',
-      '"worked_steps" — numbered step-by-step solution. params: {"problem":"2x + 3 = 11","steps":[{"label":"Subtract 3","work":"2x = 8"},{"label":"Divide by 2","work":"x = 4"}],"answer":"x = 4"}',
-      '"formula_display" — large formula with variable legend. params: {"formula":"A = l × w","variables":[{"symbol":"A","meaning":"Area","unit":"cm²"},{"symbol":"l","meaning":"length","unit":"cm"},{"symbol":"w","meaning":"width","unit":"cm"}]}',
-      '"balance_scale" — equation as a balance. params: {"left":"2x + 3","right":"11","solution":"x = 4"}',
-      '"pattern_row" — repeating or growing pattern. params: {"items":["▲","■","▲","■","▲","■"],"rule":"Repeating: triangle, square","next":"▲"}',
-      '"t_table" — table of values. params: {"headers":["x","y"],"rows":[[0,2],[1,4],[2,6],[3,8]],"rule":"y = 2x"}',
-      '"coordinate_graph" — x/y axes with plotted points. params: {"points":[{"x":1,"y":2,"label":"(1,2)"},{"x":3,"y":6,"label":"(3,6)"}],"line":true,"x_max":8,"y_max":10}',
-      '',
-      '── STRAND D: DATA ──',
-      '"bar_graph" — vertical bar chart. params: {"title":"Favourite Sports","labels":["Soccer","Basketball","Swimming","Hockey"],"values":[12,8,5,10],"y_label":"Number of Students"}',
-      '"pictograph" — symbol chart. params: {"title":"Books Read","rows":[{"label":"Jan","count":3},{"label":"Feb","count":5}],"symbol":"📚","scale":2,"scale_label":"= 2 books"}',
-      '"line_graph" — connected points over time. params: {"title":"Temperature","labels":["Mon","Tue","Wed","Thu","Fri"],"values":[12,15,11,18,14],"y_label":"°C"}',
-      '"pie_chart" — circle graph with slices. params: {"title":"Transport to School","slices":[{"label":"Bus","value":45,"color":"#1D9E75"},{"label":"Walk","value":30,"color":"#F5C842"},{"label":"Car","value":25,"color":"#E07B39"}]}',
-      '"probability_scale" — 0-to-1 line with events. params: {"events":[{"label":"Impossible","value":0},{"label":"Flip heads","value":0.5},{"label":"Certain","value":1}]}',
-      '"stem_leaf" — stem and leaf plot. params: {"title":"Test Scores","stems":[{"stem":6,"leaves":[2,5,8]},{"stem":7,"leaves":[0,3,3,7]},{"stem":8,"leaves":[1,4,9]}]}',
-      '"double_bar" — grouped bar chart. params: {"title":"Sports by Grade","labels":["Soccer","Basketball","Swimming"],"series":[{"name":"Grade 4","values":[8,5,3],"color":"#1D9E75"},{"name":"Grade 5","values":[6,9,4],"color":"#E07B39"}]}',
-      '',
-      '── STRAND E: SPATIAL SENSE ──',
-      '"area_grid" — shape filled with unit squares. params: {"cols":6,"rows":4,"label_top":"6 cm","label_right":"4 cm","area_label":"A = 24 cm²"}',
-      '"perimeter_shape" — shape with all sides labelled. params: {"shape":"rectangle","sides":{"top":"6 cm","bottom":"6 cm","left":"4 cm","right":"4 cm"},"perimeter_label":"P = 20 cm"}',
-      '"circle_diagram" — circle with radius/diameter/circumference. params: {"radius":5,"show_diameter":true,"show_radius":true,"radius_label":"r = 5 cm","diameter_label":"d = 10 cm","formula":"C = πd ≈ 31.4 cm"}',
-      '"angle_diagram" — two rays with angle arc. params: {"degrees":60,"label":"60°","type":"acute","ray1_label":"","ray2_label":""}',
-      '"transform_translate" — shape on grid sliding. params: {"shape":"rectangle","shape_w":3,"shape_h":2,"start_col":1,"start_row":3,"dx":4,"dy":-1,"unit_label":"units","cols":12,"rows":8}',
-      '"transform_reflect" — shape on grid flipped. params: {"shape":"right_triangle","shape_w":3,"shape_h":3,"col":1,"row":1,"axis":"vertical","axis_col":5,"cols":12,"rows":8}',
-      '"transform_rotate" — shape on grid rotated. params: {"shape":"rectangle","shape_w":4,"shape_h":2,"col":2,"row":4,"degrees":90,"direction":"clockwise","pivot_col":2,"pivot_row":4,"cols":12,"rows":8}',
-      '"transform_overview" — all 3 transformations on one diagram. params: {"shape":"rectangle"}',
-      '"labelled_shape" — 2D shape with side labels and angles — USE ONLY for shape identification lessons, NOT area. params: {"shape":"triangle","sides":["8 cm","6 cm","10 cm"],"angles":["90°","53°","37°"]}',
-      '"triangle_area" — triangle with base, dashed height, right-angle marker and area formula. USE THIS for triangle area lessons. params: {"base":8,"height":6,"units":"cm","area_label":"A = (8 × 6) ÷ 2 = 24 cm²"}',
-      '"parallelogram_area" — parallelogram with base, dashed height and area formula. USE THIS for parallelogram area lessons. params: {"base":10,"height":6,"units":"cm","area_label":"A = 10 × 6 = 60 cm²"}',
-      '"triangle_area" — triangle with base, dashed height line, right-angle box, and area formula. USE THIS for triangle area lessons. params: {"base":8,"height":6,"units":"cm","area_label":"A = (8 × 6) ÷ 2 = 24 cm²"}',
-      '"parallelogram_area" — parallelogram with base, dashed height, and area formula. USE THIS for parallelogram area lessons. params: {"base":10,"height":6,"units":"cm","area_label":"A = 10 × 6 = 60 cm²"}',
-      '"pythagorean" — right triangle with squares on sides. params: {"a":3,"b":4,"c":5,"units":"cm"}',
-      '"net_diagram" — unfolded 3D shape. params: {"shape":"cube","side":4,"unit":"cm"}',
-      '"isometric_box" — 3D rectangular prism. params: {"l":6,"w":4,"h":3,"unit":"cm","volume_label":"V = 72 cm³"}',
-      '',
-      '── STRAND F: FINANCIAL ──',
-      '"money_display" — coins and bills. params: {"amount":2.75,"breakdown":[{"coin":"toonie","count":1},{"coin":"quarter","count":3}]}',
-      '"budget_bar" — income vs expenses. params: {"income":500,"expenses":[{"label":"Food","amount":200},{"label":"Transport","amount":80},{"label":"Fun","amount":120}]}',
-      '',
-      '── UNIVERSAL ──',
-      '"comparison_table" — header row + data rows. params: {"headers":["Shape","Formula","Example"],"rows":[["Rectangle","l × w","6×4=24 cm²"],["Triangle","b×h÷2","8×6÷2=24 cm²"]]}',
-      '"concept_card" — anchor chart style. params: {"title":"Types of Triangles","items":[{"name":"Equilateral","detail":"3 equal sides"},{"name":"Isosceles","detail":"2 equal sides"},{"name":"Scalene","detail":"no equal sides"}]}',
-      '"venn_diagram" — two overlapping circles. params: {"left_label":"Rectangles","right_label":"Rhombuses","overlap_label":"Squares","left_items":["4 right angles"],"right_items":["4 equal sides"],"overlap_items":["Both!"]}',
-      '',
+      '── VISUAL TYPES (use exact names) ──',
+      '== NUMBER: place_value({digits:{hundreds:3,tens:2,ones:4},highlight:"tens"}) | array({rows:4,cols:6,label:"4×6=24"}) | fraction_bar({numerator:3,denominator:4,label:"3/4"}) | fraction_compare({fractions:[{n:1,d:2,label:"1/2"},{n:3,d:4,label:"3/4"}]}) | fraction_circle({numerator:1,denominator:2,label:"1/2"}) | fraction_circle_compare({fractions:[{n:1,d:2},{n:1,d:3},{n:1,d:4}],comparison:"1/2>1/3>1/4"}) | number_line({min:0,max:10,step:1,highlights:[{value:3,label:"3"}]}) | integer_line({min:-5,max:5,highlights:[{value:-2,label:"-2"}]}) | percent_bar({percent:75,label:"75%",part_label:"75",whole_label:"100"})',
+      '== EARLY GRADES K-1 ONLY: counting_dots({count:7,label:"Count the dots!"}) | ten_frame({filled:7,label:"Show 7"}) | shape_grid({shapes:[{name:"Circle",color:"#1D9E75"},{name:"Square",color:"#E07B39"},{name:"Triangle",color:"#F5C842"},{name:"Rectangle",color:"#6B63D4"}],properties:["0 sides","4 equal sides","3 sides","4 sides"]}) | sort_diagram({left_label:"Has corners",right_label:"No corners",left_items:["Square","Triangle","Rectangle"],right_items:["Circle"],rule:"Corners"})',
+      '== ALGEBRA: worked_steps({problem:"2x+3=11",steps:[{label:"Subtract 3",work:"2x=8"},{label:"Divide by 2",work:"x=4"}],answer:"x=4"}) | formula_display({formula:"A=l×w",variables:[{symbol:"A",meaning:"Area",unit:"cm²"},{symbol:"l",meaning:"length",unit:"cm"},{symbol:"w",meaning:"width",unit:"cm"}]}) | balance_scale({left:"2x+3",right:"11",solution:"x=4"}) | pattern_row({items:["▲","■","▲","■"],rule:"Repeating",next:"▲"}) | t_table({headers:["x","y"],rows:[[0,2],[1,4],[2,6]],rule:"y=2x"}) | coordinate_graph({points:[{x:1,y:2,label:"(1,2)"},{x:3,y:6,label:"(3,6)"}],line:true,x_max:8,y_max:10})',
+      '== DATA: bar_graph({title:"T",labels:["A","B","C"],values:[12,8,10],y_label:"Count"}) | line_graph({title:"T",labels:["Mon","Tue","Wed"],values:[12,15,11],y_label:"°C"}) | pie_chart({title:"T",slices:[{label:"A",value:50,color:"#1D9E75"},{label:"B",value:30,color:"#F5C842"},{label:"C",value:20,color:"#E07B39"}]}) | pictograph({title:"T",rows:[{label:"Jan",count:4},{label:"Feb",count:6}],symbol:"🌟",scale:2,scale_label:"=2"}) | double_bar({title:"T",labels:["A","B"],series:[{name:"Gr4",values:[8,5],color:"#1D9E75"},{name:"Gr5",values:[6,9],color:"#E07B39"}]}) | probability_scale({events:[{label:"Impossible",value:0},{label:"Flip heads",value:0.5},{label:"Certain",value:1}]}) | stem_leaf({title:"T",stems:[{stem:6,leaves:[2,5,8]},{stem:7,leaves:[0,3,7]}]}) | scatter_plot({points:[{x:2,y:4},{x:4,y:7},{x:6,y:9}],x_max:10,y_max:12,x_label:\"Hours\",y_label:\"Score\",line_of_best_fit:true})',
+      '== SPATIAL: area_grid({cols:6,rows:4,label_top:"6cm",label_right:"4cm",area_label:"A=24cm²"}) | triangle_area({base:8,height:6,units:"cm",area_label:"A=(8×6)÷2=24cm²"}) | parallelogram_area({base:10,height:6,units:"cm",area_label:"A=10×6=60cm²"}) | perimeter_shape({shape:"rectangle",sides:{top:"6cm",bottom:"6cm",left:"4cm",right:"4cm"},perimeter_label:"P=20cm"}) | circle_diagram({radius:5,show_diameter:true,radius_label:"r=5cm",diameter_label:"d=10cm",formula:"C=πd≈31.4cm"}) | angle_diagram({degrees:60,label:"60°",type:"acute"}) | transform_translate({shape:"rectangle",shape_w:3,shape_h:2,start_col:1,start_row:3,dx:4,dy:0,cols:12,rows:8}) | transform_reflect({shape:"right_triangle",shape_w:3,shape_h:3,col:1,row:1,axis:"vertical",axis_col:5,cols:12,rows:8}) | transform_rotate({shape:"rectangle",shape_w:4,shape_h:2,col:2,row:4,degrees:90,direction:"clockwise",pivot_col:2,pivot_row:4,cols:12,rows:8}) | transform_overview({shape:"rectangle"}) | labelled_shape({shape:"triangle",sides:["8cm","6cm","10cm"],angles:["90°","53°","37°"]}) | pythagorean({a:3,b:4,c:5,units:"cm"}) | isometric_box({l:6,w:4,h:3,unit:"cm",volume_label:"V=72cm³"})',
+      '== FINANCIAL: money_display({amount:2.75,breakdown:[{coin:"toonie",count:1},{coin:"quarter",count:3}]}) | budget_bar({income:500,expenses:[{label:"Food",amount:200},{label:"Transport",amount:80}]})',
+      '== UNIVERSAL: comparison_table({headers:["Shape","Formula","Example"],rows:[["Rectangle","l×w","6×4=24cm²"]]}) | concept_card({title:"Types",items:[{name:"Equilateral",detail:"3 equal sides"}]}) | venn_diagram({left_label:"A",right_label:"B",overlap_label:"Both",left_items:["only A"],right_items:["only B"],overlap_items:["shared"]})',
       'RULES:',
       '- learning_goals: exactly 2-3',
       '- vocabulary: 3-5 words',
@@ -2817,6 +2770,7 @@ async function generateSlideData(callerBtn) {
       '- CRITICAL: visual_type must be an exact type name. NEVER use strand names (NUMBER/ALGEBRA/DATA/SPATIAL/FINANCIAL) as visual_type.',
       '- Return ONLY the JSON object with no markdown fences and no text before or after it.',
       '- VISUAL TYPE SELECTION — read before choosing:',
+      '  For KINDERGARTEN and GRADE 1: always use concrete visual types. counting_dots for counting lessons. ten_frame for number sense and addition. shape_grid for 2D shape lessons. sort_diagram for sorting/classifying. pattern_row for patterns. array for simple grouping. NEVER use concept_card or worked_steps as the primary visual for K/Gr1 math concepts.',
       '  concept_card/worked_steps/comparison_table/formula_display = TEXT ONLY. NEVER choose these for: area, geometry shapes, transformations, graphing, or any concept that requires students to see a diagram.',
       '  area_grid = counting squares method only. For triangle/parallelogram formula method use triangle_area/parallelogram_area.',
       '  labelled_shape = sides and angles only. NEVER for area — area requires triangle_area.',
@@ -2825,6 +2779,16 @@ async function generateSlideData(callerBtn) {
       '  For circle graphs: pie_chart. For probability: probability_scale.',
       '  For coordinate geometry: coordinate_graph with points array including label field.',
       '- PARAM VERIFICATION before submitting: check every calculation is correct, comparison operators are right (1/4 < 1/2), t_table rule matches all rows, pie_chart slices sum to 100.',
+      '- BEFORE SUBMITTING: verify every calculation in your params. Check:',
+      '  * fraction_compare: is the comparison operator correct? (1/4 < 1/2 is true, 1/4 > 1/2 is false)',
+      '  * worked_steps answer: does the final answer follow correctly from the steps?',
+      '  * pie_chart/circle graph percentages: do they sum to exactly 100%? are individual values correct?',
+      '  * mean/average: sum all values, divide by count, verify the result',
+      '  * number_line: does min include or equal 0? are highlights within [min,max]?',
+      '  * t_table: does every row satisfy the rule exactly?',
+      '  * coordinate_graph points: do they make sense for the concept being shown?',
+      '  * area_label in triangle_area: verify (base × height) ÷ 2 = stated answer',
+      '  * volume_label in isometric_box: verify l × w × h = stated answer',
       '- Pure JSON only, no markdown, no comments'
     ].filter(Boolean).join('\n');
 
@@ -3013,7 +2977,10 @@ const SVG_RENDERERS = {
   },
 
   number_line(p) {
-    const mn=parseFloat(p.min??0), mx=parseFloat(p.max??10), step=parseFloat(p.step||1);
+    // Enforce 0 is always in range — number lines must include 0
+    let mn=parseFloat(p.min??0), mx=parseFloat(p.max??10);
+    if (mn > 0) mn = 0; // never start above 0
+    const step=parseFloat(p.step||1);
     const range=mx-mn||1;
     const px=v=>40+((v-mn)/range)*420;
     const ticks=[];
@@ -3158,6 +3125,134 @@ const SVG_RENDERERS = {
       ${p.next?`<text x="250" y="${40+iw+50}" text-anchor="middle" font-size="14" fill="#5F5E5A" font-family="Arial,sans-serif">Next: ${p.next}</text>`:''}
     </svg>`;
   },
+
+  // ── EARLY GRADES (K–1) ──────────────────────────────────────────────────
+
+  counting_dots(p) {
+    // Dots arranged in rows of 5, K-style counting visual
+    const n = Math.min(Math.max(p.count||5, 1), 20);
+    const cols = 5, rows = Math.ceil(n/cols);
+    const r = 22, gap = 56, ox = Math.round((500 - cols*gap)/2), oy = 30;
+    let dots = '';
+    for(let i=0;i<n;i++){
+      const col=i%cols, row=Math.floor(i/cols);
+      const x=ox+col*gap+r, y=oy+row*gap+r;
+      dots += `<circle cx="${x}" cy="${y}" r="${r}" fill="#1D9E75" stroke="white" stroke-width="3"/>
+        <text x="${x}" y="${y+7}" text-anchor="middle" font-size="18" font-weight="700" fill="white" font-family="Arial,sans-serif">${i+1}</text>`;
+    }
+    const totalH = oy + rows*gap + r + 50;
+    return `<svg viewBox="0 0 500 ${Math.min(totalH,300)}" width="100%" height="100%">
+      ${dots}
+      <text x="250" y="${Math.min(totalH-10,288)}" text-anchor="middle" font-size="24" font-weight="900" fill="#1D3461" font-family="Arial,sans-serif">${p.label||'Count: '+n}</text>
+    </svg>`;
+  },
+
+  ten_frame(p) {
+    // Standard 2×5 ten frame — core K/Gr1 number sense tool
+    const filled = Math.min(Math.max(p.filled||7, 0), 10);
+    const cellW = 64, cellH = 64, gap = 6;
+    const ox = Math.round((500 - (5*cellW + 4*gap)) / 2), oy = 40;
+    let cells = '';
+    for(let i=0;i<10;i++){
+      const col=i%5, row=Math.floor(i/5);
+      const x=ox+col*(cellW+gap), y=oy+row*(cellH+gap);
+      const isFilled = i < filled;
+      cells += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" rx="6"
+        fill="${isFilled?'#1D9E75':'#F4F3EF'}" stroke="#1D3461" stroke-width="2"/>
+        ${isFilled?`<circle cx="${x+cellW/2}" cy="${y+cellH/2}" r="20" fill="white" opacity="0.4"/>`:''}`; 
+    }
+    const num2 = p.second_count != null ? p.second_count : null;
+    return `<svg viewBox="0 0 500 240" width="100%" height="100%">
+      <rect x="${ox-8}" y="${oy-8}" width="${5*(cellW+gap)+gap}" height="${2*(cellH+gap)+gap}" rx="8" fill="none" stroke="#1D3461" stroke-width="3"/>
+      ${cells}
+      <text x="250" y="195" text-anchor="middle" font-size="22" font-weight="900" fill="#1D9E75" font-family="Arial,sans-serif">${filled} filled</text>
+      <text x="250" y="222" text-anchor="middle" font-size="18" fill="#888780" font-family="Arial,sans-serif">${10-filled} empty · Total: 10</text>
+      ${p.label?`<text x="250" y="20" text-anchor="middle" font-size="15" font-weight="700" fill="#1D3461" font-family="Arial,sans-serif">${p.label}</text>`:''}
+    </svg>`;
+  },
+
+  shape_grid(p) {
+    // 4 basic 2D shapes drawn with SVG + name labels — K/Gr1 shape recognition
+    const shapes = p.shapes || [
+      {name:'Circle', color:'#1D9E75'},
+      {name:'Square', color:'#E07B39'},
+      {name:'Triangle', color:'#F5C842'},
+      {name:'Rectangle', color:'#6B63D4'}
+    ];
+    const count = Math.min(shapes.length, 4);
+    const cw = 110, ch = 110, gap = 10;
+    const totalW = count*cw + (count-1)*gap;
+    const ox = Math.round((500-totalW)/2);
+    const oy = 30;
+
+    const drawShape = (s, x, cy, size) => {
+      const name = (s.name||'').toLowerCase();
+      const fill = s.color||'#1D9E75';
+      const label = s.name||'Shape';
+      const cx = x + cw/2;
+      if(name.includes('circle')) {
+        return `<circle cx="${cx}" cy="${cy}" r="${size*0.45}" fill="${fill}" opacity="0.85" stroke="${fill}" stroke-width="2"/>
+          <text x="${cx}" y="${cy+size*0.45+22}" text-anchor="middle" font-size="15" font-weight="700" fill="#1D3461" font-family="Arial,sans-serif">${label}</text>`;
+      } else if(name.includes('triangle')) {
+        const s2=size*0.45;
+        return `<polygon points="${cx},${cy-s2} ${cx-s2*1.1},${cy+s2*0.8} ${cx+s2*1.1},${cy+s2*0.8}" fill="${fill}" opacity="0.85" stroke="${fill}" stroke-width="2"/>
+          <text x="${cx}" y="${cy+s2*0.8+22}" text-anchor="middle" font-size="15" font-weight="700" fill="#1D3461" font-family="Arial,sans-serif">${label}</text>`;
+      } else if(name.includes('rectangle')) {
+        const rw=size*0.85, rh=size*0.5;
+        return `<rect x="${cx-rw/2}" y="${cy-rh/2}" width="${rw}" height="${rh}" rx="4" fill="${fill}" opacity="0.85" stroke="${fill}" stroke-width="2"/>
+          <text x="${cx}" y="${cy+rh/2+22}" text-anchor="middle" font-size="15" font-weight="700" fill="#1D3461" font-family="Arial,sans-serif">${label}</text>`;
+      } else {
+        // Square (default)
+        const sq=size*0.65;
+        return `<rect x="${cx-sq/2}" y="${cy-sq/2}" width="${sq}" height="${sq}" rx="4" fill="${fill}" opacity="0.85" stroke="${fill}" stroke-width="2"/>
+          <text x="${cx}" y="${cy+sq/2+22}" text-anchor="middle" font-size="15" font-weight="700" fill="#1D3461" font-family="Arial,sans-serif">${label}</text>`;
+      }
+    };
+
+    const svgShapes = shapes.slice(0,4).map((s,i) => {
+      const x = ox + i*(cw+gap);
+      return drawShape(s, x, oy+ch/2, ch*0.7);
+    }).join('');
+
+    const propRows = (p.properties||[]).slice(0,4).map((prop,i) => {
+      const x = ox + i*(cw+gap);
+      return prop ? `<text x="${x+cw/2}" y="${oy+ch+44}" text-anchor="middle" font-size="12" fill="#5F5E5A" font-family="Arial,sans-serif">${prop}</text>` : '';
+    }).join('');
+
+    return `<svg viewBox="0 0 500 ${oy+ch+70}" width="100%" height="100%">
+      ${svgShapes}${propRows}
+    </svg>`;
+  },
+
+  sort_diagram(p) {
+    // Two labeled groups with items sorted into each — K/Gr1 sorting & classifying
+    const left = p.left_label||'Group A';
+    const right = p.right_label||'Group B';
+    const leftItems = (p.left_items||[]).slice(0,6);
+    const rightItems = (p.right_items||[]).slice(0,6);
+    const rule = p.rule||'';
+
+    const bw=210, bh=170, ox=20, oy=60, gap=30;
+
+    const renderItems = (items, startX, startY) => items.map((item, i) => {
+      const col=i%3, row=Math.floor(i/3);
+      const x=startX+16+col*62, y=startY+10+row*52;
+      return `<rect x="${x}" y="${y}" width="52" height="40" rx="8" fill="white" stroke="#D0D0D0" stroke-width="1.5"/>
+        <text x="${x+26}" y="${y+26}" text-anchor="middle" font-size="13" font-weight="600" fill="#1D3461" font-family="Arial,sans-serif">${item}</text>`;
+    }).join('');
+
+    return `<svg viewBox="0 0 500 270" width="100%" height="100%">
+      ${rule?`<text x="250" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="#1D9E75" font-family="Arial,sans-serif">Sort by: ${rule}</text>`:''}
+      <rect x="${ox}" y="${oy}" width="${bw}" height="${bh}" rx="12" fill="#E8F5E9" stroke="#1D9E75" stroke-width="2.5"/>
+      <rect x="${ox+gap+bw}" y="${oy}" width="${bw}" height="${bh}" rx="12" fill="#FFF3E0" stroke="#E07B39" stroke-width="2.5"/>
+      <text x="${ox+bw/2}" y="${oy-10}" text-anchor="middle" font-size="15" font-weight="700" fill="#0F6E56" font-family="Arial,sans-serif">${left}</text>
+      <text x="${ox+gap+bw+bw/2}" y="${oy-10}" text-anchor="middle" font-size="15" font-weight="700" fill="#C05A20" font-family="Arial,sans-serif">${right}</text>
+      ${renderItems(leftItems, ox, oy)}
+      ${renderItems(rightItems, ox+gap+bw, oy)}
+    </svg>`;
+  },
+
+
 
   // ── STRAND D: DATA ───────────────────────────────────────────────────────────
 
@@ -3310,6 +3405,30 @@ const SVG_RENDERERS = {
       <text x="40" y="44" text-anchor="middle" font-size="10" font-weight="700" fill="white" font-family="Arial,sans-serif">Stem</text>
       <text x="80" y="44" font-size="10" font-weight="700" fill="#1D9E75" font-family="Arial,sans-serif">Leaf</text>
       ${rows}
+    </svg>`;
+  },
+
+  scatter_plot(p) {
+    const pts = p.points||[], xMax=p.x_max||10, yMax=p.y_max||10, gs=22;
+    const ox=50, oy=20, gw=xMax*gs, gh=yMax*gs;
+    let grid='';
+    for(let x=0;x<=xMax;x+=2) grid+=`<line x1="${ox+x*gs}" y1="${oy}" x2="${ox+x*gs}" y2="${oy+gh}" stroke="#E0E0E0" stroke-width="0.8"/>`;
+    for(let y=0;y<=yMax;y+=2) grid+=`<line x1="${ox}" y1="${oy+y*gs}" x2="${ox+gw}" y2="${oy+y*gs}" stroke="#E0E0E0" stroke-width="0.8"/>`;
+    const xLabels = Array.from({length:Math.floor(xMax/2)+1},(_,i)=>`<text x="${ox+i*2*gs}" y="${oy+gh+16}" text-anchor="middle" font-size="11" fill="#5F5E5A" font-family="Arial,sans-serif">${i*2}</text>`).join('');
+    const yLabels = Array.from({length:Math.floor(yMax/2)+1},(_,i)=>`<text x="${ox-8}" y="${oy+gh-i*2*gs+4}" text-anchor="end" font-size="11" fill="#5F5E5A" font-family="Arial,sans-serif">${i*2}</text>`).join('');
+    const dots = pts.map(pt=>`<circle cx="${ox+pt.x*gs}" cy="${oy+gh-pt.y*gs}" r="6" fill="#1D9E75" stroke="white" stroke-width="1.5" opacity="0.8"/>`).join('');
+    const lobf = p.line_of_best_fit ? `<line x1="${ox}" y1="${oy+gh}" x2="${ox+gw}" y2="${oy}" stroke="#E07B39" stroke-width="2" stroke-dasharray="8,4" opacity="0.7"/>` : '';
+    const totalH = oy+gh+50;
+    return `<svg viewBox="0 0 ${ox+gw+40} ${totalH}" width="100%" height="100%">
+      ${grid}
+      <line x1="${ox}" y1="${oy}" x2="${ox}" y2="${oy+gh+4}" stroke="#1D3461" stroke-width="2.5"/>
+      <line x1="${ox-4}" y1="${oy+gh}" x2="${ox+gw+4}" y2="${oy+gh}" stroke="#1D3461" stroke-width="2.5"/>
+      <polygon points="${ox+gw+4},${oy+gh-4} ${ox+gw+12},${oy+gh} ${ox+gw+4},${oy+gh+4}" fill="#1D3461"/>
+      <polygon points="${ox-4},${oy} ${ox},${oy-8} ${ox+4},${oy}" fill="#1D3461"/>
+      <text x="${ox+gw/2}" y="${totalH-4}" text-anchor="middle" font-size="13" font-weight="700" fill="#1D3461" font-family="Arial,sans-serif">${p.x_label||'x'}</text>
+      <text x="14" y="${oy+gh/2}" text-anchor="middle" font-size="13" font-weight="700" fill="#1D3461" font-family="Arial,sans-serif" transform="rotate(-90,14,${oy+gh/2})">${p.y_label||'y'}</text>
+      ${xLabels}${yLabels}${dots}${lobf}
+      ${p.title?`<text x="${ox+gw/2}" y="14" text-anchor="middle" font-size="14" font-weight="700" fill="#1D3461" font-family="Arial,sans-serif">${p.title}</text>`:''}
     </svg>`;
   },
 
