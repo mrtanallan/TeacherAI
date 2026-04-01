@@ -2173,7 +2173,11 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations) {
     return (ai===-1?99:ai)-(bi===-1?99:bi);
   });
 
-  const strandNames = {A:'Literacy Connections',B:'Foundations of Language',C:'Comprehension',D:'Composition'};
+  const _subj = curSess?.subject||'';
+  const _isMath = _subj.toLowerCase().includes('math');
+  const strandNames = _isMath
+    ? {B:'Number',C:'Algebra',D:'Data',E:'Spatial Sense',F:'Financial Literacy'}
+    : {A:'Literacy Connections',B:'Foundations of Language',C:'Comprehension',D:'Composition'};
   const strandColors = {A:'var(--blue)',B:'var(--amber)',C:'var(--sage)',D:'var(--rust)'};
   const strandBgs   = {A:'var(--blue-l)',B:'var(--amber-l)',C:'var(--sage-l)',D:'var(--rust-l)'};
 
