@@ -245,15 +245,15 @@ Return ONLY valid JSON:
   "exit_ticket": {"question": "consolidation question", "answer_hint": "expected answer"}
 }
 
-VISUAL TYPES — use EXACT type names from this list. Do NOT use strand names (NUMBER, ALGEBRA, DATA, SPATIAL, FINANCIAL) as visual_type values — those are categories only. Use the specific type names below:
-NUMBER: place_value, array, fraction_bar, fraction_compare, fraction_circle, fraction_circle_compare, number_line, integer_line, percent_bar
-ALGEBRA: worked_steps, formula_display, balance_scale, t_table, coordinate_graph, pattern_row
-DATA: bar_graph, line_graph, pie_chart, pictograph, double_bar, probability_scale, stem_leaf
-SPATIAL: area_grid, perimeter_shape, circle_diagram, angle_diagram, transform_translate, transform_reflect, transform_rotate, transform_overview, labelled_shape, pythagorean, isometric_box
-FINANCIAL: money_display, budget_bar
-UNIVERSAL: comparison_table, concept_card, venn_diagram
-
-${isEarlyGrade ? 'EARLY GRADE SEQUENCE: slide1=concept_card (explain the concept simply), slide2=array or number_line or pattern_row (concrete visual), slide3=worked_steps (simple example with 1-2 steps), slide4=concept_card (summary). Keep ALL visuals concrete and simple.' : 'MATH SEQUENCE: slide1=formula/concept, slide2=worked_steps or visual model, slide3=diagram or data visual, slide4=comparison_table or harder worked_steps'}
+VISUAL TYPES (exact names only — never use strand names NUMBER/ALGEBRA/DATA/SPATIAL/FINANCIAL):
+EARLY GRADES K-1: counting_dots({count:7,label:"Count!"}) | ten_frame({filled:7,label:"Show 7"}) | shape_grid({shapes:[{name:"Circle",color:"#1D9E75"},{name:"Square",color:"#E07B39"},{name:"Triangle",color:"#F5C842"},{name:"Rectangle",color:"#6B63D4"}]}) | sort_diagram({left_label:"Has corners",right_label:"No corners",left_items:["Square","Triangle"],right_items:["Circle"],rule:"Corners"})
+NUMBER: place_value({digits:{hundreds:3,tens:2,ones:4},highlight:"tens"}) | array({rows:4,cols:6,label:"4×6=24"}) | fraction_bar({numerator:3,denominator:4,label:"3/4"}) | fraction_compare({fractions:[{n:1,d:2,label:"1/2"},{n:3,d:4,label:"3/4"}]}) | fraction_circle({numerator:1,denominator:2}) | fraction_circle_compare({fractions:[{n:1,d:2},{n:1,d:3}],comparison:"1/2>1/3"}) | number_line({min:0,max:10,step:1,highlights:[{value:3,label:"3"}]}) | integer_line({min:-5,max:5,highlights:[{value:-2,label:"-2"}]}) | percent_bar({percent:75,label:"75%"})
+ALGEBRA: worked_steps({problem:"2x+3=11",steps:[{label:"Subtract 3",work:"2x=8"},{label:"Divide by 2",work:"x=4"}],answer:"x=4"}) | formula_display({formula:"A=l×w",variables:[{symbol:"A",meaning:"Area",unit:"cm²"}]}) | balance_scale({left:"2x+3",right:"11",solution:"x=4"}) | pattern_row({items:["▲","■","▲","■"],rule:"Repeating",next:"▲"}) | t_table({headers:["x","y"],rows:[[0,2],[1,4],[2,6]],rule:"y=2x"}) | coordinate_graph({points:[{x:1,y:2,label:"(1,2)"}],line:true,x_max:8,y_max:10})
+DATA: bar_graph({title:"T",labels:["A","B"],values:[12,8],y_label:"Count"}) | line_graph({title:"T",labels:["Mon","Tue"],values:[12,15],y_label:"°C"}) | pie_chart({title:"T",slices:[{label:"A",value:50,color:"#1D9E75"},{label:"B",value:50,color:"#F5C842"}]}) | pictograph({title:"T",rows:[{label:"Jan",count:4}],symbol:"🌟",scale:2,scale_label:"=2"}) | double_bar({title:"T",labels:["A"],series:[{name:"Gr4",values:[8],color:"#1D9E75"}]}) | probability_scale({events:[{label:"Impossible",value:0},{label:"Heads",value:0.5},{label:"Certain",value:1}]}) | stem_leaf({title:"T",stems:[{stem:6,leaves:[2,5]}]})
+SPATIAL: area_grid({cols:6,rows:4,label_top:"6cm",label_right:"4cm",area_label:"A=24cm²"}) | triangle_area({base:8,height:6,units:"cm",area_label:"A=(8×6)÷2=24cm²"}) | parallelogram_area({base:10,height:6,units:"cm",area_label:"A=10×6=60cm²"}) | perimeter_shape({shape:"rectangle",sides:{top:"6cm",bottom:"6cm",left:"4cm",right:"4cm"},perimeter_label:"P=20cm"}) | circle_diagram({radius:5,show_diameter:true,radius_label:"r=5cm",diameter_label:"d=10cm",formula:"C=πd≈31.4cm"}) | angle_diagram({degrees:60,label:"60°",type:"acute"}) | transform_translate({shape:"rectangle",shape_w:3,shape_h:2,start_col:1,start_row:3,dx:4,dy:0,cols:12,rows:8}) | transform_reflect({shape:"right_triangle",shape_w:3,shape_h:3,col:1,row:1,axis:"vertical",axis_col:5,cols:12,rows:8}) | transform_rotate({shape:"rectangle",shape_w:4,shape_h:2,col:2,row:4,degrees:90,direction:"clockwise",pivot_col:2,pivot_row:4,cols:12,rows:8}) | transform_overview({shape:"rectangle"}) | labelled_shape({shape:"triangle",sides:["8cm","6cm","10cm"],angles:["90°","53°","37°"]}) | pythagorean({a:3,b:4,c:5,units:"cm"}) | isometric_box({l:6,w:4,h:3,unit:"cm",volume_label:"V=72cm³"})
+FINANCIAL: money_display({amount:2.75,breakdown:[{coin:"toonie",count:1}]}) | budget_bar({income:500,expenses:[{label:"Food",amount:200}]})
+UNIVERSAL: comparison_table({headers:["A","B"],rows:[["x","y"]]}) | concept_card({title:"T",items:[{name:"N",detail:"D"}]}) | venn_diagram({left_label:"A",right_label:"B",overlap_label:"Both",left_items:["a"],right_items:["b"],overlap_items:["c"]})
+MATH SEQUENCE: slide1=formula/concept, slide2=worked_steps or visual model, slide3=diagram or data visual, slide4=comparison_table or harder worked_steps'}
 content_slides: exactly 4. visual_params must use REAL numbers for ${unit.grade}.
 CRITICAL: visual_type must be an exact type name from the list above. NEVER use NUMBER, ALGEBRA, DATA, SPATIAL, or FINANCIAL as a visual_type.
 Return ONLY the raw JSON object. No markdown fences. No text before or after.`;
@@ -328,6 +328,7 @@ const HARDCODED_TYPES = new Set([
   't_table','coordinate_graph','pattern_row','bar_graph','line_graph','pie_chart','pictograph',
   'double_bar','probability_scale','stem_leaf','area_grid','perimeter_shape','circle_diagram',
   'angle_diagram','transform_translate','transform_reflect','transform_rotate','transform_overview',
+  'counting_dots','ten_frame','shape_grid','sort_diagram',
   'labelled_shape','pythagorean','isometric_box','money_display','budget_bar',
   'comparison_table','concept_card','venn_diagram'
 ]);
@@ -406,6 +407,20 @@ async function runUnit(idx) {
   const slideResults = slides.map(s=>({type:s.visual_type||'unknown', params:s.visual_params, title:s.title, key_point:s.key_point, svg:'', pass:null, issues:[], hardcoded:HARDCODED_TYPES.has(s.visual_type)}));
   setStatus(idx, 'running', slideResults);
 
+  // ── Expectations critic ──────────────────────────────────────────────────
+  setStatusBar('['+( idx+1)+'/36] '+unit.grade+' — '+unit.topic+': checking expectations...');
+  const expVerdict = await runExpectationsCritic(unit, sd.expectations||[]);
+  if (!expVerdict.pass) {
+    // Add expectation issues as a virtual slide result
+    slideResults.push({
+      type:'expectations', params:{}, title:'Curriculum Expectations',
+      key_point:'Expectation codes returned by AI',
+      svg:'', pass:false, issues:expVerdict.issues, hardcoded:false
+    });
+    setStatus(idx, 'running', slideResults);
+  }
+  await new Promise(r=>setTimeout(r,300));
+
   // Step 2: For each slide — if hardcoded type, mark as auto-pass; else call agent
   const delay = ms => new Promise(r=>setTimeout(r,ms));
 
@@ -431,10 +446,10 @@ async function runUnit(idx) {
         parallelogram_area:'Parallelogram with dashed height, right-angle box, labels, formula. CORRECT for parallelogram area.',
         labelled_shape:'Shape with side and angle labels only. NO height line — WRONG for area lessons.',
         pythagorean:'Right triangle with squares on all 3 sides and a²+b²=c² formula.',
-        transform_translate:'Original shape (teal) + Image shape (orange) on grid + dashed arrow. Both labelled. Arrow shows direction.',
-        transform_reflect:'Original + Image on grid + dashed mirror line. Both labelled.',
-        transform_rotate:'Original + Image on grid + arc arrow + pivot dot. Both labelled. Degrees shown.',
-        transform_overview:'All 3 transformations on one grid. Each pair labelled. Translation/Reflection/Rotation labelled.',
+        transform_translate:'ALWAYS renders Original (teal) + Image (orange) labels, dashed arrow, grid. Do NOT fail for missing Original/Image labels — renderer always includes them. Only fail if shape/dx/dy params are wrong.',
+        transform_reflect:'ALWAYS renders Original + Image labels, dashed mirror line, grid. Do NOT fail for missing labels. Only fail if axis or shape params are wrong.',
+        transform_rotate:'ALWAYS renders Original + Image labels, arc arrow, pivot dot, degrees. Do NOT fail for missing labels. Only fail if degrees/direction/shape params are wrong.',
+        transform_overview:'ALWAYS renders all 3 transformation types with labels. Do NOT fail for missing labels. Check only that shape param is valid.',
         bar_graph:'Vertical bars with axis labels and value labels above bars.',
         line_graph:'Connected points with axis labels and value labels.',
         pie_chart:'Circle with labelled slices. Percentages/values shown.',
@@ -452,6 +467,10 @@ async function runUnit(idx) {
         pattern_row:'Shape sequence with rule and next element.',
         budget_bar:'Bar chart income vs expenses.',
         percent_bar:'Filled bar showing percentage.',
+        counting_dots:'Dots arranged in rows of 5, numbered 1 to N. For counting lessons K-Gr1. params need count (1-20) and label.',
+        ten_frame:'2×5 grid with filled and empty cells. Standard K-Gr1 number sense tool. params need filled (0-10) and label.',
+        shape_grid:'4 basic 2D shapes drawn (circle, square, triangle, rectangle) with name labels and optional property descriptions. For K-Gr1 shape lessons.',
+        sort_diagram:'Two labeled groups with items in each. For sorting and classifying. params need left_label, right_label, left_items array, right_items array, rule.',
       };
 
       const typeDesc = HDESC[sr.type] || sr.type;
@@ -569,6 +588,83 @@ async function runUnit(idx) {
 }
 
 // ── Run all ──────────────────────────────────────────────────────────────────
+// ── Curriculum loader ────────────────────────────────────────────────────────
+let _mathCurriculum = null;
+async function getMathCurriculum() {
+  if (_mathCurriculum) return _mathCurriculum;
+  try {
+    const r = await fetch('/data/curriculum_math.json');
+    if (r.ok) _mathCurriculum = await r.json();
+  } catch(e) { console.warn('Could not load math curriculum'); }
+  return _mathCurriculum || [];
+}
+
+function getExpectationsForGrade(allExps, grade) {
+  const n = grade === 'Kindergarten' ? 1 : parseInt(grade.replace('Grade ',''));
+  if (!n) return [];
+  return allExps.filter(e => {
+    if (/^\d+$/.test(e.band)) return parseInt(e.band) === n;
+    if (e.band === '1-3') return n <= 3;
+    if (e.band === '4-6') return n >= 4 && n <= 6;
+    if (e.band === '7-8') return n >= 7;
+    return false;
+  });
+}
+
+const EXP_CRITIC_SYSTEM = `You are an Ontario curriculum expert. Evaluate whether the lesson expectations are correct.
+Respond ONLY with JSON: {"pass": true, "issues": []} or {"pass": false, "issues": ["specific issue"]}
+
+CHECK:
+1. Are the returned expectation codes REAL codes that exist in the provided list? Fail if any code does not appear in the valid expectations list.
+2. Do the returned expectations MATCH the lesson topic? (e.g. a Fractions lesson should have Strand B fraction expectations, not Strand C algebra expectations)
+3. Are the expectations appropriate for the stated grade level?
+4. Are there 2-4 expectations returned (not 0, not 5+)?
+
+Be precise — name the specific code that is wrong and why.`;
+
+async function runExpectationsCritic(unit, lessonExpectations) {
+  if (!lessonExpectations || lessonExpectations.length === 0) {
+    return { pass: false, issues: ['No expectations returned — lesson must include 2-4 curriculum expectation codes'] };
+  }
+
+  const allExps = await getMathCurriculum();
+  if (!allExps || allExps.length === 0) {
+    return { pass: true, issues: [] }; // Can't validate without curriculum — skip
+  }
+
+  const gradeNum = unit.grade === 'Kindergarten' ? 1 : parseInt(unit.grade.replace('Grade ',''));
+  const validExps = getExpectationsForGrade(allExps, unit.grade);
+  const validCodes = validExps.map(e => e.code);
+
+  // Quick pre-check: are any returned codes clearly not in the valid list?
+  const returnedCodes = lessonExpectations.map(e => e.code || e);
+  const invalidCodes = returnedCodes.filter(code => !validCodes.includes(code));
+
+  if (invalidCodes.length > 0) {
+    return {
+      pass: false,
+      issues: invalidCodes.map(code => `"${code}" is not a valid Ontario Math expectation for ${unit.grade}. Valid codes are: ${validCodes.slice(0,8).join(', ')}...`)
+    };
+  }
+
+  // Deeper check: are the codes relevant to the topic?
+  const validExpsText = validExps.map(function(e){return e.code+' ['+e.strand+']: '+e.desc;}).join('\n');
+  const returnedText = lessonExpectations.map(function(e){return (e.code||String(e))+': '+(e.desc||'');}).join('\n');
+
+  const data = await apiFetch('/api/generate', {
+    model: MODEL, max_tokens: 300, call_type: 'svg',
+    system: EXP_CRITIC_SYSTEM,
+    messages: [{role:'user', content:
+      'GRADE: '+unit.grade+'\nTOPIC: '+unit.topic+'\n\nVALID EXPECTATIONS FOR THIS GRADE:\n'+validExpsText+'\n\nRETURNED EXPECTATIONS:\n'+returnedText+'\n\nAre the returned expectations real codes from the valid list AND relevant to the topic?'
+    }]
+  });
+  await new Promise(r=>setTimeout(r,200));
+  const raw = (data?.content||[]).map(b=>b.text||'').join('').trim();
+  try {
+    return JSON.parse(raw.replace(/^[^{]*/,'').replace(/[^}]*$/,''));
+  } catch(e) { return { pass: true, issues: [] }; }
+}
+
 async function runAll() {
   token = await getToken();
   if (!token) return;
