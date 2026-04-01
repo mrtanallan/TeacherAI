@@ -1908,15 +1908,28 @@ async function generate() {
   // Build curriculum context from loaded JSON — real codes the model MUST choose from
   const isMathSubj = subj === 'Mathematics';
   const relevantExps = getExpectations(subj, grades, []);
-  // Limit by grade — upper grades have complex topics, need response space
-  const isUpperGrade = grades.some(g => ['Grade 6','Grade 7','Grade 8'].includes(g));
-  const expLimit = isUpperGrade ? 15 : 25;
-  const expContext = relevantExps.length
+  // Strand-aware expectation injection — prioritize relevant strand for topic
+  const topicLower2 = (topic||'').toLowerCase();
+  let primaryStrand2 = 'B'; // default number
+  if (/measure|area|perim|angle|transform|shape|volume|circle|pythag|geomet/.test(topicLower2)) primaryStrand2 = 'E';
+  else if (/interest|budget|money|financ/.test(topicLower2)) primaryStrand2 = 'F';
+  else if (/probab|graph|data|statistic|mean|median|mode|scatter/.test(topicLower2)) primaryStrand2 = 'D';
+  else if (/pattern|equat|variable|algebra|linear/.test(topicLower2)) primaryStrand2 = 'C';
+  // Also use strand from loaded strands if available
+  if (strands && strands.length) {
+    const strandMap = {'Number':'B','Algebra':'C','Data':'D','Spatial Sense':'E','Financial Literacy':'F'};
+    const mappedStrand = strandMap[strands[0]];
+    if (mappedStrand) primaryStrand2 = mappedStrand;
+  }
+  const primaryExps2 = relevantExps.filter(e => e.strand === primaryStrand2);
+  const otherExps2 = relevantExps.filter(e => e.strand !== primaryStrand2);
+  const sortedExps2 = [...primaryExps2, ...otherExps2].slice(0,15);
+  const expContext = sortedExps2.length
     ? (isMathSubj
-        ? 'ONTARIO MATH CURRICULUM EXPECTATIONS FOR '+grades.join('/')+' (choose 2-4 most relevant):\n'
-          + relevantExps.slice(0,expLimit).map(e=>e.code+' ['+e.strand+'] '+e.desc).join('\n')
+        ? 'ONTARIO MATH CURRICULUM EXPECTATIONS FOR '+grades.join('/')+' — choose 2-4 from '+primaryStrand2+' strand first (most relevant to this topic):\n'
+          + sortedExps2.map(e=>e.code+' ['+e.strand+'] '+e.desc).join('\n')
         : 'ONTARIO LANGUAGE CURRICULUM EXPECTATIONS (choose 2-4 most relevant):\n'
-          + relevantExps.slice(0,expLimit).map(e=>e.code+' '+e.desc).join('\n'))
+          + relevantExps.slice(0,15).map(e=>e.code+' '+e.desc).join('\n'))
     : '';
 
   const expHint = preMatchedExp.length
@@ -2771,6 +2784,15 @@ async function generateSlideData(callerBtn) {
       '- Return ONLY the JSON object with no markdown fences and no text before or after it.',
       '- VISUAL TYPE SELECTION — read before choosing:',
       '  EXPLICIT TOPIC MAPPINGS — these override all other rules:',
+      '  * 2D shapes / 3D shapes / shape identification (any grade): shape_grid. NEVER counting_dots or ten_frame.',
+      '  * Pythagorean theorem (any slide): pythagorean. NEVER worked_steps or concept_card for the main visual.',
+      '  * Circle area/circumference: circle_diagram (shows radius/diameter/formula). NEVER formula_display alone.',
+      '  * Volume (any grade): isometric_box with volume_label param. NEVER formula_display alone.',
+      '  * place_value: use ONLY for showing a SINGLE number place value. NEVER for addition or subtraction.',
+      '  * area_grid area_label: write ONLY a label like "A = 24 cm²". Do NOT put a formula equation like "4 × 3 = 12" as it contradicts the counting-method renderer.',
+      '  * ten_frame filled param: set to show ONE number only. If comparing two numbers, use two separate ten_frame slides or array instead.',
+      '  * For addition/subtraction lessons: use number_line (with movement arrows) or array (for multiplication/grouping), NOT place_value.',
+      '  * Sorting and classifying (any grade): sort_diagram for sorting slides. NEVER comparison_table or concept_card.',
       '  * Multiplication/Division (any grade): use grouped_objects showing equal groups. NEVER concept_card or comparison_table.',
       '  * Measurement with non-standard units (Gr1-3): use measurement_bar. NEVER worked_steps or comparison_table.',
       '  * Angles - Acute/Obtuse/Right (Gr3-5): use angle_types for any comparison/overview slide. Use angle_diagram for individual angle slides.',
