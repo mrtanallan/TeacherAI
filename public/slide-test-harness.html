@@ -254,9 +254,9 @@ FINANCIAL: money_display, budget_bar
 UNIVERSAL: comparison_table, concept_card, venn_diagram
 
 MATH SEQUENCE: slide1=formula/concept, slide2=worked_steps or visual model, slide3=diagram or data visual, slide4=comparison_table or harder worked_steps
-content_slides: exactly 4. visual_params must use REAL numbers for \${unit.grade}.
-CRITICAL: visual_type must be one of the exact type names listed above (e.g. "worked_steps", "array", "bar_graph"). Never use "NUMBER", "ALGEBRA", "DATA", "SPATIAL", or "FINANCIAL" as a visual_type.
-Return ONLY the JSON object. Do not wrap in markdown code fences. Do not include any text before or after the JSON.\`;
+content_slides: exactly 4. visual_params must use REAL numbers for ${unit.grade}.
+CRITICAL: visual_type must be an exact type name from the list above. NEVER use NUMBER, ALGEBRA, DATA, SPATIAL, or FINANCIAL as a visual_type.
+Return ONLY the raw JSON object. No markdown fences. No text before or after.`;
 }
 
 // ── SVG system prompt ────────────────────────────────────────────────────────
