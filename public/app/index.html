@@ -1661,6 +1661,7 @@ function unlock() {
   });
 }
 function resetWorkflow() {
+  window._slideData = null;
   const sidebar = document.getElementById('lessonSidebar');
   if (sidebar) sidebar.style.display='none';
   for (let i=1; i<=5; i++) {
@@ -2121,6 +2122,7 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
     }
 
     genC = {};
+    window._slideData = null; // clear cached slides — new lesson generated
     outputKeys.forEach(k => { genC[k] = {orig:parsed[k]||'', cur:parsed[k]||''}; });
     answerKeyKeys.forEach(k => { if(parsed[k]) genC[k]={orig:parsed[k],cur:parsed[k]}; });
     const lessonExpectations = parsed.expectations || preMatchedExp || [];
