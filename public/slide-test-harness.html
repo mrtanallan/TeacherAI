@@ -222,42 +222,55 @@ async function apiFetch(endpoint, body) {
 let lastApiError = '';
 
 // ── Structure prompt ─────────────────────────────────────────────────────────
-function buildStructurePrompt(unit) {
+function buildStructurePrompt(unit, gradeExps) {
   const isEarlyGrade = unit.grade === 'Kindergarten' || unit.grade === 'Grade 1';
-  return `You are an Ontario elementary teacher creating a classroom presentation deck.
-Generate TEXT CONTENT and visual specifications for a slide deck.
+  const gradeExpsStr = (gradeExps && gradeExps.length)
+    ? '\n' + gradeExps.slice(0,20).map(function(e){ return e.code + ' [' + e.strand + ']: ' + e.desc; }).join('\n')
+    : ' (use real Ontario Math 2020 codes for ' + unit.grade + ')';
 
-Topic: ${unit.topic}
-Grade(s): ${unit.grade}
-Subject: Mathematics
-Duration: 1 lesson
+  const VT = [
+    'EARLY GRADES K-1: counting_dots({count:7,label:"Count!"}) | ten_frame({filled:7,label:"Show 7"}) | shape_grid({shapes:[{name:"Circle",color:"#1D9E75"},{name:"Square",color:"#E07B39"},{name:"Triangle",color:"#F5C842"},{name:"Rectangle",color:"#6B63D4"}]}) | sort_diagram({left_label:"Has corners",right_label:"No corners",left_items:["Square","Triangle"],right_items:["Circle"],rule:"Corners"})',
+    'NUMBER: place_value({digits:{hundreds:3,tens:2,ones:4},highlight:"tens"}) | array({rows:4,cols:6,label:"4x6=24"}) | fraction_bar({numerator:3,denominator:4,label:"3/4"}) | fraction_compare({fractions:[{n:1,d:2,label:"1/2"},{n:3,d:4,label:"3/4"}]}) | fraction_circle({numerator:1,denominator:2}) | fraction_circle_compare({fractions:[{n:1,d:2},{n:1,d:3}],comparison:"1/2>1/3"}) | number_line({min:0,max:10,step:1,highlights:[{value:3,label:"3"}]}) | integer_line({min:-5,max:5,highlights:[{value:-2,label:"-2"}]}) | percent_bar({percent:75,label:"75%"})',
+    'ALGEBRA: worked_steps({problem:"2x+3=11",steps:[{label:"Subtract 3",work:"2x=8"},{label:"Divide by 2",work:"x=4"}],answer:"x=4"}) | formula_display({formula:"A=lxw",variables:[{symbol:"A",meaning:"Area",unit:"cm2"}]}) | balance_scale({left:"2x+3",right:"11",solution:"x=4"}) | pattern_row({items:["tri","sq","tri","sq"],rule:"Repeating",next:"tri"}) | t_table({headers:["x","y"],rows:[[0,2],[1,4],[2,6]],rule:"y=2x"}) | coordinate_graph({points:[{x:1,y:2,label:"(1,2)"}],line:true,x_max:8,y_max:10})',
+    'DATA: bar_graph({title:"T",labels:["A","B"],values:[12,8],y_label:"Count"}) | line_graph({title:"T",labels:["Mon","Tue"],values:[12,15],y_label:"deg C"}) | pie_chart({title:"T",slices:[{label:"A",value:50,color:"#1D9E75"},{label:"B",value:50,color:"#F5C842"}]}) | pictograph({title:"T",rows:[{label:"Jan",count:4}],symbol:"star",scale:2,scale_label:"=2"}) | double_bar({title:"T",labels:["A"],series:[{name:"Gr4",values:[8],color:"#1D9E75"}]}) | probability_scale({events:[{label:"Impossible",value:0},{label:"Heads",value:0.5},{label:"Certain",value:1}]}) | stem_leaf({title:"T",stems:[{stem:6,leaves:[2,5]}]}) | scatter_plot({points:[{x:2,y:4},{x:4,y:7}],x_max:10,y_max:12,x_label:"Hours",y_label:"Score",line_of_best_fit:true})',
+    'SPATIAL: grouped_objects({groups:3,per_group:4,label:"3 groups of 4",operator:"x"}) | measurement_bar({unit_name:"paperclip",count:5,object:"pencil"}) | angle_types({types:[{degrees:45,label:"Acute",desc:"Less than 90",color:"#1D9E75"},{degrees:90,label:"Right",desc:"Exactly 90",color:"#1D3461"},{degrees:130,label:"Obtuse",desc:"Greater than 90",color:"#E07B39"}]}) | area_grid({cols:6,rows:4,label_top:"6cm",label_right:"4cm",area_label:"A=24cm2"}) | triangle_area({base:8,height:6,units:"cm",area_label:"A=(8x6)/2=24cm2"}) | parallelogram_area({base:10,height:6,units:"cm",area_label:"A=10x6=60cm2"}) | perimeter_shape({shape:"rectangle",sides:{top:"6cm",bottom:"6cm",left:"4cm",right:"4cm"},perimeter_label:"P=20cm"}) | circle_diagram({radius:5,show_diameter:true,radius_label:"r=5cm",diameter_label:"d=10cm",formula:"C=pi*d"}) | angle_diagram({degrees:60,label:"60deg",type:"acute"}) | transform_translate({shape:"rectangle",shape_w:3,shape_h:2,start_col:1,start_row:3,dx:4,dy:0,cols:12,rows:8}) | transform_reflect({shape:"right_triangle",shape_w:3,shape_h:3,col:1,row:1,axis:"vertical",axis_col:5,cols:12,rows:8}) | transform_rotate({shape:"rectangle",shape_w:4,shape_h:2,col:2,row:4,degrees:90,direction:"clockwise",pivot_col:2,pivot_row:4,cols:12,rows:8}) | transform_overview({shape:"rectangle"}) | labelled_shape({shape:"triangle",sides:["8cm","6cm","10cm"],angles:["90deg","53deg","37deg"]}) | pythagorean({a:3,b:4,c:5,units:"cm"}) | isometric_box({l:6,w:4,h:3,unit:"cm",volume_label:"V=72cm3"})',
+    'FINANCIAL: money_display({amount:2.75,breakdown:[{coin:"toonie",count:1}]}) | budget_bar({income:500,expenses:[{label:"Food",amount:200}]})',
+    'UNIVERSAL: comparison_table({headers:["A","B"],rows:[["x","y"]]}) | concept_card({title:"T",items:[{name:"N",detail:"D"}]}) | venn_diagram({left_label:"A",right_label:"B",overlap_label:"Both",left_items:["a"],right_items:["b"],overlap_items:["c"]})',
+  ].join('\n');
 
-Return ONLY valid JSON:
-{
-  "learning_goals": ["I can... statement", "I can... statement"],
-  "minds_on": {"hook": "real-world hook max 2 sentences", "prompt": "think-pair-share prompt"},
-  "vocabulary": [{"word": "term", "definition": "student-friendly definition", "example": "sentence"}],
-  "content_slides": [
-    {"title": "slide title", "key_point": "core concept 1 sentence", "teacher_note": "tip max 10 words", "visual_type": "TYPE", "visual_params": {...}}
-  ],
-  "practice_problem": {"question": "one problem", "solution_steps": ["step 1", "step 2", "step 3"]},
-  "discussion_questions": ["recall", "apply", "evaluate"],
-  "exit_ticket": {"question": "consolidation question", "answer_hint": "expected answer"}
+  return (
+    'You are an Ontario elementary teacher creating a classroom presentation deck.\n' +
+    'Generate TEXT CONTENT and visual specifications for a slide deck.\n\n' +
+    'Topic: ' + unit.topic + '\n' +
+    'Grade(s): ' + unit.grade + '\n' +
+    'Subject: Mathematics\nDuration: 1 lesson\n\n' +
+    'Return ONLY valid JSON:\n{\n' +
+    '  "learning_goals": ["I can... statement"],\n' +
+    '  "minds_on": {"hook": "real-world hook", "prompt": "think-pair-share"},\n' +
+    '  "vocabulary": [{"word": "term", "definition": "definition", "example": "sentence"}],\n' +
+    '  "content_slides": [\n' +
+    '    {"title": "title", "key_point": "concept", "teacher_note": "tip", "visual_type": "TYPE", "visual_params": {}}\n' +
+    '  ],\n' +
+    '  "practice_problem": {"question": "problem", "solution_steps": ["step 1", "step 2"]},\n' +
+    '  "discussion_questions": ["recall", "apply", "evaluate"],\n' +
+    '  "exit_ticket": {"question": "question", "answer_hint": "answer"},\n' +
+    '  "expectations": [{"code": "E2.1", "strand": "E", "desc": "description"}]\n' +
+    '}\n\n' +
+    VT + '\n\n' +
+    'EXPLICIT TOPIC MAPPINGS — override all other rules:\n' +
+    '* Multiplication/Division: grouped_objects. NEVER concept_card or comparison_table.\n' +
+    '* Measurement with non-standard units: measurement_bar. NEVER worked_steps or comparison_table.\n' +
+    '* Angles Acute/Obtuse/Right comparison slide: angle_types. Individual angle: angle_diagram.\n' +
+    '* Area of rectangles: area_grid for visual model. NEVER formula_display or worked_steps as primary.\n' +
+    (isEarlyGrade ? '* K and Grade 1: counting_dots, ten_frame, shape_grid, sort_diagram. NEVER concept_card or worked_steps.\n' : '') +
+    'CRITICAL: visual_type must be exact type name above. NEVER use NUMBER/ALGEBRA/DATA/SPATIAL/FINANCIAL.\n' +
+    'content_slides: exactly 4. visual_params must use REAL numbers for ' + unit.grade + '.\n' +
+    'expectations: 2-4 objects using ONLY these real codes:' + gradeExpsStr + '\n' +
+    'BEFORE SUBMITTING: verify all arithmetic. Check fraction operators, formulas, percentages.\n' +
+    'Return ONLY the raw JSON object. No markdown fences.'
+  );
 }
 
-VISUAL TYPES (exact names only — never use strand names NUMBER/ALGEBRA/DATA/SPATIAL/FINANCIAL):
-EARLY GRADES K-1: counting_dots({count:7,label:"Count!"}) | ten_frame({filled:7,label:"Show 7"}) | shape_grid({shapes:[{name:"Circle",color:"#1D9E75"},{name:"Square",color:"#E07B39"},{name:"Triangle",color:"#F5C842"},{name:"Rectangle",color:"#6B63D4"}]}) | sort_diagram({left_label:"Has corners",right_label:"No corners",left_items:["Square","Triangle"],right_items:["Circle"],rule:"Corners"})
-NUMBER: place_value({digits:{hundreds:3,tens:2,ones:4},highlight:"tens"}) | array({rows:4,cols:6,label:"4×6=24"}) | fraction_bar({numerator:3,denominator:4,label:"3/4"}) | fraction_compare({fractions:[{n:1,d:2,label:"1/2"},{n:3,d:4,label:"3/4"}]}) | fraction_circle({numerator:1,denominator:2}) | fraction_circle_compare({fractions:[{n:1,d:2},{n:1,d:3}],comparison:"1/2>1/3"}) | number_line({min:0,max:10,step:1,highlights:[{value:3,label:"3"}]}) | integer_line({min:-5,max:5,highlights:[{value:-2,label:"-2"}]}) | percent_bar({percent:75,label:"75%"})
-ALGEBRA: worked_steps({problem:"2x+3=11",steps:[{label:"Subtract 3",work:"2x=8"},{label:"Divide by 2",work:"x=4"}],answer:"x=4"}) | formula_display({formula:"A=l×w",variables:[{symbol:"A",meaning:"Area",unit:"cm²"}]}) | balance_scale({left:"2x+3",right:"11",solution:"x=4"}) | pattern_row({items:["▲","■","▲","■"],rule:"Repeating",next:"▲"}) | t_table({headers:["x","y"],rows:[[0,2],[1,4],[2,6]],rule:"y=2x"}) | coordinate_graph({points:[{x:1,y:2,label:"(1,2)"}],line:true,x_max:8,y_max:10})
-DATA: bar_graph({title:"T",labels:["A","B"],values:[12,8],y_label:"Count"}) | line_graph({title:"T",labels:["Mon","Tue"],values:[12,15],y_label:"°C"}) | pie_chart({title:"T",slices:[{label:"A",value:50,color:"#1D9E75"},{label:"B",value:50,color:"#F5C842"}]}) | pictograph({title:"T",rows:[{label:"Jan",count:4}],symbol:"🌟",scale:2,scale_label:"=2"}) | double_bar({title:"T",labels:["A"],series:[{name:"Gr4",values:[8],color:"#1D9E75"}]}) | probability_scale({events:[{label:"Impossible",value:0},{label:"Heads",value:0.5},{label:"Certain",value:1}]}) | stem_leaf({title:"T",stems:[{stem:6,leaves:[2,5]}]})
-SPATIAL: area_grid({cols:6,rows:4,label_top:"6cm",label_right:"4cm",area_label:"A=24cm²"}) | triangle_area({base:8,height:6,units:"cm",area_label:"A=(8×6)÷2=24cm²"}) | parallelogram_area({base:10,height:6,units:"cm",area_label:"A=10×6=60cm²"}) | perimeter_shape({shape:"rectangle",sides:{top:"6cm",bottom:"6cm",left:"4cm",right:"4cm"},perimeter_label:"P=20cm"}) | circle_diagram({radius:5,show_diameter:true,radius_label:"r=5cm",diameter_label:"d=10cm",formula:"C=πd≈31.4cm"}) | angle_diagram({degrees:60,label:"60°",type:"acute"}) | transform_translate({shape:"rectangle",shape_w:3,shape_h:2,start_col:1,start_row:3,dx:4,dy:0,cols:12,rows:8}) | transform_reflect({shape:"right_triangle",shape_w:3,shape_h:3,col:1,row:1,axis:"vertical",axis_col:5,cols:12,rows:8}) | transform_rotate({shape:"rectangle",shape_w:4,shape_h:2,col:2,row:4,degrees:90,direction:"clockwise",pivot_col:2,pivot_row:4,cols:12,rows:8}) | transform_overview({shape:"rectangle"}) | labelled_shape({shape:"triangle",sides:["8cm","6cm","10cm"],angles:["90°","53°","37°"]}) | pythagorean({a:3,b:4,c:5,units:"cm"}) | isometric_box({l:6,w:4,h:3,unit:"cm",volume_label:"V=72cm³"})
-FINANCIAL: money_display({amount:2.75,breakdown:[{coin:"toonie",count:1}]}) | budget_bar({income:500,expenses:[{label:"Food",amount:200}]})
-UNIVERSAL: comparison_table({headers:["A","B"],rows:[["x","y"]]}) | concept_card({title:"T",items:[{name:"N",detail:"D"}]}) | venn_diagram({left_label:"A",right_label:"B",overlap_label:"Both",left_items:["a"],right_items:["b"],overlap_items:["c"]})
-MATH SEQUENCE: slide1=formula/concept, slide2=worked_steps or visual model, slide3=diagram or data visual, slide4=comparison_table or harder worked_steps'}
-content_slides: exactly 4. visual_params must use REAL numbers for ${unit.grade}.
-CRITICAL: visual_type must be an exact type name from the list above. NEVER use NUMBER, ALGEBRA, DATA, SPATIAL, or FINANCIAL as a visual_type.
-Return ONLY the raw JSON object. No markdown fences. No text before or after.`;
-}
 
 // ── SVG system prompt ────────────────────────────────────────────────────────
 const SVG_SYSTEM = `You are a specialist in drawing educational SVG diagrams for K-8 Ontario classrooms.
@@ -326,11 +339,14 @@ const HARDCODED_TYPES = new Set([
   'place_value','array','fraction_bar','fraction_compare','fraction_circle','fraction_circle_compare',
   'number_line','integer_line','percent_bar','worked_steps','formula_display','balance_scale',
   't_table','coordinate_graph','pattern_row','bar_graph','line_graph','pie_chart','pictograph',
-  'double_bar','probability_scale','stem_leaf','area_grid','perimeter_shape','circle_diagram',
-  'angle_diagram','transform_translate','transform_reflect','transform_rotate','transform_overview',
+  'double_bar','probability_scale','stem_leaf','scatter_plot',
+  'area_grid','perimeter_shape','circle_diagram','angle_diagram',
+  'transform_translate','transform_reflect','transform_rotate','transform_overview',
+  'labelled_shape','pythagorean','isometric_box','triangle_area','parallelogram_area',
+  'money_display','budget_bar',
+  'comparison_table','concept_card','venn_diagram',
   'counting_dots','ten_frame','shape_grid','sort_diagram',
-  'labelled_shape','pythagorean','isometric_box','money_display','budget_bar',
-  'comparison_table','concept_card','venn_diagram'
+  'grouped_objects','measurement_bar','angle_types',
 ]);
 
 // ── Run a single unit ────────────────────────────────────────────────────────
@@ -349,7 +365,7 @@ async function runUnit(idx) {
   setStatusBar(`[${idx+1}/36] ${unit.grade} — ${unit.topic}: getting structure...`);
   const structureData = await apiFetch('/api/generate', {
     model: MODEL, max_tokens: 6000,
-    messages: [{role:'user', content: buildStructurePrompt(unit)}]
+    messages: [{role:'user', content: buildStructurePrompt(unit, getExpectationsForGrade(await getMathCurriculum()||[], unit.grade))}]
   });
 
   if (!structureData) { setStatus(idx, 'fail', [], 'Structure call failed: '+lastApiError); setStatusBar('Structure failed for '+unit.topic+': '+lastApiError); return; }
@@ -470,7 +486,13 @@ async function runUnit(idx) {
         counting_dots:'Dots arranged in rows of 5, numbered 1 to N. For counting lessons K-Gr1. params need count (1-20) and label.',
         ten_frame:'2×5 grid with filled and empty cells. Standard K-Gr1 number sense tool. params need filled (0-10) and label.',
         shape_grid:'4 basic 2D shapes drawn (circle, square, triangle, rectangle) with name labels and optional property descriptions. For K-Gr1 shape lessons.',
-        sort_diagram:'Two labeled groups with items in each. For sorting and classifying. params need left_label, right_label, left_items array, right_items array, rule.',
+        grouped_objects:'Equal groups of dots in colored boxes showing multiplication/division. CORRECT for multiplication and division concepts. params: groups, per_group, label, operator.',
+        measurement_bar:'Object above ruler made of non-standard units (paperclips, blocks). CORRECT for measurement with non-standard units. params: unit_name, count, object.',
+        angle_types:'Three angles side by side — acute, right, obtuse — with labels and degree values. CORRECT for angle classification comparison slides. params: types array.',
+        sort_diagram:'Two labeled groups with items in each. For sorting/classifying.',
+        grouped_objects:'Equal groups of dots showing multiplication/division. CORRECT for mult/div. params: groups, per_group, label.',
+        measurement_bar:'Object above ruler of non-standard units. CORRECT for measurement. params: unit_name, count, object.',
+        angle_types:'Three angles (acute, right, obtuse) side by side. CORRECT for angle comparison. params: types array.',
       };
 
       const typeDesc = HDESC[sr.type] || sr.type;
