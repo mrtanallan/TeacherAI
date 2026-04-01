@@ -688,6 +688,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         <div>
           <div style="font-family:'Fraunces',serif;font-size:.98rem;font-weight:600;" id="assLabel">Today's Assessment</div>
           <div style="font-family:DM Mono,monospace;font-size:.62rem;color:var(--muted);margin-top:2px;" id="assMeta"></div>
+          <div style="font-family:DM Mono,monospace;font-size:.58rem;color:var(--sage);margin-top:2px;" id="assExpCodes"></div>
         </div>
         <div class="brow">
           <button class="btn b-out b-sm" id="autoMarkAllBtn" onclick="autoMarkAll()" style="display:none;font-size:.7rem;background:#4A7C59;color:white;border:none;">🤖 Auto-mark All</button>
@@ -3195,7 +3196,13 @@ async function removeStu(sid) {
 async function renderAssGrid() {
   if (!curSess) return;
   document.getElementById('assLabel').textContent = curSess.task||'Today\'s Assessment';
-  document.getElementById('assMeta').textContent = `${curSess.subject} · ${curSess.strand} · ${curSess.date}`;
+  const _gradesStr = (curSess.grades||[]).join(' / ') || '';
+  const _className = classes.find(c=>c.id===activeClassId)?.name || '';
+  const _expCodes = (curSess.expectations||[]).slice(0,4).map(e=>e.code).join(', ');
+  const _metaParts = [curSess.subject, _gradesStr, _className, curSess.date].filter(Boolean);
+  document.getElementById('assMeta').textContent = _metaParts.join(' · ');
+  const _expEl = document.getElementById('assExpCodes');
+  if (_expEl) _expEl.textContent = _expCodes ? '📎 ' + _expCodes : '';
   const g = document.getElementById('assGrid');
   if (!students.length) { g.innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;padding:14px;">Add students in Class Roster first.</div>'; return; }
 
@@ -3230,7 +3237,13 @@ async function renderAssGrid() {
   const lvlColors = {L1:'var(--rust)',L2:'var(--amber)',L3:'var(--blue)',L4:'var(--sage)'};
   const gradeLetters = ['A','B','C','D','E','F'];
 
-  g.innerHTML = students.map((s,i) => {
+  // Only show students whose grade matches the session's grades
+  const sessGrades = curSess.grades || [];
+  const visibleStudents = sessGrades.length
+    ? students.filter(s => sessGrades.includes(s.grade))
+    : students;
+
+  g.innerHTML = visibleStudents.map((s,i) => {
     const mark = curSess.marks[s.id];
     const base = mark?.level?.replace(/[+-]/g,'');
     const sub = submissionsByStudent[s.id];
@@ -3260,7 +3273,7 @@ async function renderAssGrid() {
         <div id="am-result-${s.id}" style="display:none;"></div>
         <div class="sub-content" id="subcon-${s.id}" style="display:none;">
           <div style="background:var(--blue-l);border:1px solid #B0C8E8;border-radius:7px;padding:11px 13px;font-size:.82rem;margin-bottom:6px;">
-            <div style="font-family:DM Mono,monospace;font-size:.58rem;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">📥 Submitted ${sub.submittedAt ? new Date(sub.submittedAt).toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'})+' · '+new Date(sub.submittedAt).toLocaleDateString('en-CA') : ''}</div>
+            <div style="font-family:DM Mono,monospace;font-size:.58rem;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">📥 Submitted ${sub.submittedAt ? new Date(sub.submittedAt).toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'})+' · '+new Date(sub.submittedAt).toLocaleDateString('en-CA') : ''} ${s.grade ? '· '+s.grade : ''}</div>
             ${sub.responses ? Object.entries(sub.responses).filter(([,v])=>v&&(Array.isArray(v)?v.length>0:v!=='—'&&v!=='')).map(([q,a])=>`
               <div data-qkey="${q}" style="margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid #B0C8E8;">
                 ${wsQuestions[q]
@@ -3278,6 +3291,7 @@ async function renderAssGrid() {
           <div class="av" style="background:${color};width:26px;height:26px;font-size:.75rem;">${initials}</div>
           ${s.first} ${s.last||''}
           <span class="atag">${s.grade}</span>
+          ${activeClassId ? `<span class="atag" style="background:var(--amber-l);border-color:#E8C98A;color:#7A5020;">${classes.find(c=>c.id===activeClassId)?.name||''}</span>` : ''}
           ${s.notes?`<span class="atag">${s.notes}</span>`:''}
           ${hasSub?'<span class="atag" style="background:var(--blue-l);border-color:#B0C8E8;color:var(--blue);">📥 submitted</span>':''}
         </div>
