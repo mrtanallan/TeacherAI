@@ -1911,7 +1911,7 @@ async function generate() {
   const expContext = relevantExps.length
     ? (isMathSubj
         ? 'ONTARIO MATH CURRICULUM EXPECTATIONS FOR '+grades.join('/')+' (choose 2-4 most relevant to the topic):\n'
-          + relevantExps.slice(0,60).map(e=>`${e.code} [Strand ${e.strand}] — ${e.desc}`).join('\n')
+          + relevantExps.slice(0,30).map(e=>`${e.code} [Strand ${e.strand}] — ${e.desc}`).join('\n')
         : 'ONTARIO LANGUAGE CURRICULUM EXPECTATIONS FOR THIS GRADE (choose 2-4 most relevant):\n'
           + relevantExps.slice(0,40).map(e=>`${e.code} — ${e.desc}`).join('\n'))
     : '';
@@ -2776,7 +2776,11 @@ async function generateSlideData(callerBtn) {
       '"transform_reflect" — shape on grid flipped. params: {"shape":"right_triangle","shape_w":3,"shape_h":3,"col":1,"row":1,"axis":"vertical","axis_col":5,"cols":12,"rows":8}',
       '"transform_rotate" — shape on grid rotated. params: {"shape":"rectangle","shape_w":4,"shape_h":2,"col":2,"row":4,"degrees":90,"direction":"clockwise","pivot_col":2,"pivot_row":4,"cols":12,"rows":8}',
       '"transform_overview" — all 3 transformations on one diagram. params: {"shape":"rectangle"}',
-      '"labelled_shape" — 2D shape with side labels and angles. params: {"shape":"triangle","sides":["8 cm","6 cm","10 cm"],"angles":["90°","53°","37°"],"area_label":"A = 24 cm²"}',
+      '"labelled_shape" — 2D shape with side labels and angles — USE ONLY for shape identification lessons, NOT area. params: {"shape":"triangle","sides":["8 cm","6 cm","10 cm"],"angles":["90°","53°","37°"]}',
+      '"triangle_area" — triangle with base, dashed height, right-angle marker and area formula. USE THIS for triangle area lessons. params: {"base":8,"height":6,"units":"cm","area_label":"A = (8 × 6) ÷ 2 = 24 cm²"}',
+      '"parallelogram_area" — parallelogram with base, dashed height and area formula. USE THIS for parallelogram area lessons. params: {"base":10,"height":6,"units":"cm","area_label":"A = 10 × 6 = 60 cm²"}',
+      '"triangle_area" — triangle with base, dashed height line, right-angle box, and area formula. USE THIS for triangle area lessons. params: {"base":8,"height":6,"units":"cm","area_label":"A = (8 × 6) ÷ 2 = 24 cm²"}',
+      '"parallelogram_area" — parallelogram with base, dashed height, and area formula. USE THIS for parallelogram area lessons. params: {"base":10,"height":6,"units":"cm","area_label":"A = 10 × 6 = 60 cm²"}',
       '"pythagorean" — right triangle with squares on sides. params: {"a":3,"b":4,"c":5,"units":"cm"}',
       '"net_diagram" — unfolded 3D shape. params: {"shape":"cube","side":4,"unit":"cm"}',
       '"isometric_box" — 3D rectangular prism. params: {"l":6,"w":4,"h":3,"unit":"cm","volume_label":"V = 72 cm³"}',
@@ -2805,7 +2809,7 @@ async function generateSlideData(callerBtn) {
 
     const res = await authFetch('/api/generate', {
       method: 'POST',
-      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:5000, messages:[{role:'user',content:structurePrompt}]})
+      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:6000, messages:[{role:'user',content:structurePrompt}]})
     });
     if (!res||!res.ok) throw new Error('Slide structure generation failed ('+res?.status+')');
     const data = await res.json();
@@ -2816,12 +2820,21 @@ async function generateSlideData(callerBtn) {
 
     window._slideData = {sd, topic, subject, gradeStr};
 
-    // ── STEP 2: Open deck IMMEDIATELY with skeleton visuals ────────────────────
+    // ── STEP 2: Generate hardcoded visuals synchronously (instant for 90%+ of slides) ──
+    if (callerBtn) callerBtn.textContent='⏳ Drawing visuals...';
+    const slides = sd.content_slides||[];
+    for (let i=0; i<Math.min(slides.length,4); i++) {
+      const svg = renderHardcoded(slides[i].visual_type, slides[i].visual_params);
+      if (svg) { slides[i].svg_html = svg; console.log('Hardcoded: '+slides[i].visual_type); }
+    }
+
+    // ── STEP 3: Open deck with visuals already embedded ────────────────────────
     if (callerBtn) { callerBtn.disabled=false; callerBtn.textContent='▶ Present'; }
     const deckWindow = openHTMLPresenter(sd, topic, subject, gradeStr);
 
-    // ── STEP 3: Generate visuals in background, push via postMessage ───────────
-    generateAndPushVisuals(sd.content_slides||[], topic, subject, gradeStr, deckWindow);
+    // ── STEP 4: Fire agent loop for any slides that didn't get a hardcoded visual ─
+    const needsAgent = slides.slice(0,4).some(s=>!s.svg_html);
+    if (needsAgent) generateAndPushVisuals(slides, topic, subject, gradeStr, deckWindow);
 
     const gsBtn = document.getElementById('gSlidesBtn');
     if (gsBtn && _gToken) gsBtn.style.display='inline-flex';
@@ -3515,6 +3528,77 @@ const SVG_RENDERERS = {
     return SVG_RENDERERS.perimeter_shape({sides:{top:sides[0],bottom:sides[2],left:sides[1],right:sides[3]},perimeter_label:p.area_label||''});
   },
 
+  // triangle_area — triangle with explicit base, dashed height line, and formula
+  triangle_area(p) {
+    const base = p.base || 8, height = p.height || 6, u = p.units || 'cm';
+    const area = Math.round((base * height / 2) * 10) / 10;
+    const areaLabel = p.area_label || `A = (${base} × ${height}) ÷ 2 = ${area} ${u}²`;
+    // Triangle vertices: base centred, apex above
+    const bw = Math.min(base * 28, 340);
+    const bh = Math.min(height * 22, 200);
+    const cx = 250, baseY = 240, apexY = baseY - bh;
+    const x1 = cx - bw/2, x2 = cx + bw/2;
+    // Foot of height from apex — for isoceles, directly below apex
+    const footX = cx;
+    return `<svg viewBox="0 0 500 310" width="100%" height="100%">
+      <polygon points="${x1},${baseY} ${x2},${baseY} ${cx},${apexY}"
+        fill="#E8F5E9" stroke="#0F6E56" stroke-width="3"/>
+      <!-- Dashed height line -->
+      <line x1="${footX}" y1="${apexY}" x2="${footX}" y2="${baseY}"
+        stroke="#E07B39" stroke-width="2" stroke-dasharray="8,5"/>
+      <!-- Right angle box at foot -->
+      <rect x="${footX}" y="${baseY-12}" width="12" height="12"
+        fill="none" stroke="#E07B39" stroke-width="1.5"/>
+      <!-- Base label -->
+      <text x="${cx}" y="${baseY+22}" text-anchor="middle" font-size="17"
+        font-weight="700" fill="#1D3461" font-family="Arial,sans-serif">base = ${base} ${u}</text>
+      <!-- Height label -->
+      <text x="${footX+18}" y="${apexY + bh/2 + 5}" font-size="15"
+        font-weight="700" fill="#E07B39" font-family="Arial,sans-serif">h = ${height} ${u}</text>
+      <!-- Height arrow tips -->
+      <line x1="${footX}" y1="${apexY}" x2="${footX}" y2="${apexY+10}"
+        stroke="#E07B39" stroke-width="2"/>
+      <line x1="${footX}" y1="${baseY}" x2="${footX}" y2="${baseY-14}"
+        stroke="#E07B39" stroke-width="2"/>
+      <!-- Formula -->
+      <rect x="60" y="268" width="380" height="34" rx="8" fill="#1D3461"/>
+      <text x="250" y="290" text-anchor="middle" font-size="15"
+        font-weight="700" fill="white" font-family="Arial,sans-serif">${areaLabel}</text>
+    </svg>`;
+  },
+
+  // parallelogram_area — parallelogram with base, dashed height, formula
+  parallelogram_area(p) {
+    const base = p.base || 10, height = p.height || 6, u = p.units || 'cm';
+    const area = Math.round(base * height * 10) / 10;
+    const areaLabel = p.area_label || `A = base × height = ${base} × ${height} = ${area} ${u}²`;
+    const bw = Math.min(base * 30, 320);
+    const bh = Math.min(height * 22, 180);
+    const slant = 40; // horizontal offset for slanted sides
+    const baseY = 230, topY = baseY - bh;
+    const x1 = 80, x2 = x1 + bw;
+    // parallelogram: bottom-left, bottom-right, top-right+slant, top-left+slant
+    const pts = `${x1},${baseY} ${x2},${baseY} ${x2+slant},${topY} ${x1+slant},${topY}`;
+    const footX = x1 + 40; // foot of height on base
+    return `<svg viewBox="0 0 500 300" width="100%" height="100%">
+      <polygon points="${pts}" fill="#E8F5E9" stroke="#0F6E56" stroke-width="3"/>
+      <!-- Dashed height -->
+      <line x1="${footX}" y1="${topY}" x2="${footX}" y2="${baseY}"
+        stroke="#E07B39" stroke-width="2" stroke-dasharray="8,5"/>
+      <rect x="${footX}" y="${baseY-12}" width="12" height="12"
+        fill="none" stroke="#E07B39" stroke-width="1.5"/>
+      <!-- Labels -->
+      <text x="${x1+bw/2}" y="${baseY+22}" text-anchor="middle" font-size="17"
+        font-weight="700" fill="#1D3461" font-family="Arial,sans-serif">base = ${base} ${u}</text>
+      <text x="${footX+18}" y="${topY + bh/2 + 5}" font-size="15"
+        font-weight="700" fill="#E07B39" font-family="Arial,sans-serif">h = ${height} ${u}</text>
+      <!-- Formula -->
+      <rect x="50" y="262" width="400" height="30" rx="8" fill="#1D3461"/>
+      <text x="250" y="282" text-anchor="middle" font-size="14"
+        font-weight="700" fill="white" font-family="Arial,sans-serif">${areaLabel}</text>
+    </svg>`;
+  },
+
   pythagorean(p) {
     const a=p.a||3, b=p.b||4, c=p.c||5, u=p.units||'cm';
     const sc=24, ox=140, oy=60;
@@ -3667,17 +3751,63 @@ async function generateWithAgentLoop(cs, topic, subject, gradeStr) {
   ].join('\n');
 
   const CRITIC_SYSTEM = [
-    'You are a strict quality checker for K-8 educational SVG diagrams.',
-    'Respond with ONLY a JSON object: {"pass": true/false, "issues": ["issue1", "issue2"]}',
-    'Check for:',
-    '1. Mathematical accuracy — all numbers, formulas, and calculations correct',
-    '2. Completeness — all required labels, arrows, and elements present',
-    '3. Readability — no overlapping text, adequate font sizes, all content within viewBox (0 0 500 300)',
-    '4. Pedagogical correctness — diagram actually teaches the concept correctly for the grade',
-    '5. SVG arc geometry — for pie/circle diagrams: verify arc paths use correct large-arc-flag (1 if sweep>180°, else 0). A filled sector that looks like a balloon or teardrop shape is a geometry error — FAIL.',
-    '6. No shape overflow — shapes must not extend outside the viewBox or overlap each other',
-    'Be strict. A diagram that could confuse or mislead a student MUST fail.',
-    'If the SVG is empty, has malformed paths, or shows incorrect geometry, fail immediately.',
+    'You are a veteran Ontario K-8 mathematics teacher with 20 years of classroom experience.',
+    'You are reviewing a slide visual BEFORE it is shown to students. Your job is to catch every mistake.',
+    'Think exactly like this: imagine projecting this diagram on a classroom wall. Would every student learn the correct concept? Would any student be confused or learn something wrong?',
+    'Respond with ONLY valid JSON: {"pass": true, "issues": []} or {"pass": false, "issues": ["specific issue"]}',
+    'Be extremely specific in issues — name the exact element that is wrong and what it should be instead.',
+    '',
+    '═══ AUTOMATIC FAIL CONDITIONS — any one of these = immediate fail ═══',
+    '',
+    'MATHEMATICAL ERRORS:',
+    '- Any arithmetic that is incorrect (e.g. 3×4=11, (8×6)÷2=40 when answer is 24)',
+    '- Formula written incorrectly (e.g. A = b+h instead of A = b×h÷2)',
+    '- Values in formula do not match values shown in diagram (e.g. formula says base=10 but diagram labels base=8)',
+    '- Fraction shading does not exactly match numerator/denominator (e.g. 3/4 shown with 2 of 4 parts shaded)',
+    '- Number line values not evenly spaced or in wrong order',
+    '- Probability values not between 0 and 1',
+    '- Percent bar showing wrong proportion',
+    '',
+    'MISSING REQUIRED ELEMENTS (fail if absent):',
+    '- Area of triangle/parallelogram: missing dashed perpendicular height line, missing right-angle marker at foot, missing height label, missing base label, missing area formula, or formula values do not match diagram values',
+    '- Number line: missing 0, missing tick marks, highlighted point not labelled',
+    '- Worked example: missing the original problem statement, missing numbered steps, final answer not visually distinct',
+    '- Transformation: missing "Original" label, missing "Image" label, missing transformation indicator (arrow/mirror line/arc)',
+    '- Bar/line graph: missing axis labels, missing data labels on bars or points',
+    '- Fraction circle/bar: dividing lines not reaching centre/edge, unequal parts',
+    '- Place value chart: wrong column names, or digit in wrong column',
+    '- Pythagorean theorem: missing squares on all three sides, formula not shown',
+    '- Coordinate graph: missing axis labels (x, y), missing axis arrows, points not labelled with coordinates',
+    '- Pattern row: rule not stated, next element not shown',
+    '- Angle diagram: angle arc not drawn, degree measurement not shown',
+    '',
+    'CONCEPT-VISUAL MISMATCH (fail if wrong diagram for concept):',
+    '- Diagram shows a different concept than what the key concept states',
+    '- A shape identification diagram used for an area lesson (area requires height line — shape outlines alone are wrong)',
+    '- A static shape used when a transformation should be shown',
+    '- Variables in formula not defined/explained anywhere in diagram',
+    '- Diagram teaches a special case as if it were the general rule (e.g. only showing equilateral triangles for "types of triangles")',
+    '',
+    'GRADE-LEVEL APPROPRIATENESS:',
+    '- Numbers too large or complex for the stated grade (e.g. 4-digit multiplication for Grade 2)',
+    '- Numbers too simple to be meaningful for the stated grade (e.g. counting to 5 for Grade 6)',
+    '- Concepts prerequisite to this lesson shown as if they are the main concept',
+    '- Notation used that students at this grade have not learned (e.g. algebraic variables for Grade 1)',
+    '',
+    'READABILITY (fail if present):',
+    '- Any text overlapping another text element or shape',
+    '- Any text or shape extending outside the viewBox boundary',
+    '- Font size below 13px for any label a student must read',
+    '- Key labels (Original/Image, axis labels, formula) missing or illegible',
+    '- Colour contrast insufficient (light grey text on white background)',
+    '',
+    'SVG GEOMETRY:',
+    '- Pie/circle arc: large-arc-flag must be 1 when sweep angle > 180°, otherwise 0. A teardrop or balloon shape = wrong flag = FAIL',
+    '- Transformation coordinate math: verify rotated/reflected points are geometrically correct',
+    '- Grid-based diagrams: shapes must snap to grid intersections, not float between lines',
+    '',
+    '═══ PASS ONLY IF ═══',
+    'Every required element is present. Every number is correct. Every value is consistent. The concept is taught completely and unambiguously. A student with no prior knowledge of this topic could look at this diagram and learn the correct concept.',
   ].join('\n');
 
   const delay = ms => new Promise(r => setTimeout(r, ms));
@@ -3715,14 +3845,23 @@ async function generateWithAgentLoop(cs, topic, subject, gradeStr) {
     return (s!==-1&&e!==-1) ? raw.slice(s,e+6) : '';
   };
 
-  const callCritic = (svg) => authFetch('/api/generate', {
+  const callCritic = (svg, issues_from_prev) => authFetch('/api/generate', {
     method: 'POST',
     body: JSON.stringify({
-      model:'claude-sonnet-4-20250514', max_tokens:400, call_type:'svg',
+      model:'claude-sonnet-4-20250514', max_tokens:600, call_type:'svg',
       system: CRITIC_SYSTEM,
-      messages:[{role:'user', content:
-        'Grade: '+gradeStr+'\nConcept: '+(cs.key_point||'')+'\nSVG to check:\n'+svg.substring(0,2000)
-      }]
+      messages:[{role:'user', content: [
+        'GRADE: '+gradeStr,
+        'TOPIC: '+topic,
+        'SLIDE TITLE: '+(cs.title||''),
+        'KEY CONCEPT: '+(cs.key_point||''),
+        'VISUAL TYPE: '+(cs.visual_type||'custom'),
+        'VISUAL PARAMS: '+JSON.stringify(cs.visual_params||{}),
+        issues_from_prev ? 'PREVIOUS ATTEMPT FAILED WITH: '+issues_from_prev.join('; ') : '',
+        '',
+        'SVG TO EVALUATE:',
+        svg.substring(0,3000),
+      ].filter(Boolean).join('\n')}]
     })
   }).then(r=>r?.ok?r.json():null).catch(()=>null);
 
@@ -3737,17 +3876,47 @@ async function generateWithAgentLoop(cs, topic, subject, gradeStr) {
     try {
       const verdict1 = JSON.parse(raw1.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim());
       if (verdict1.pass) { console.log('Agent: PASS attempt 1 for', cs.title); return svg1; }
+      window._lastCriticIssues = verdict1.issues||[];
       console.log('Agent: FAIL attempt 1 for', cs.title, verdict1.issues);
-    } catch(e) { return svg1; } // Can't parse critic — trust the SVG
+    } catch(e) { window._lastCriticIssues = []; return svg1; }
   }
 
-  // Attempt 2 with critic feedback
-  await delay(1500);
-  const d2 = await callGenerator();
-  const svg2 = extractSVG(d2);
-  if (svg2) { console.log('Agent: using attempt 2 for', cs.title); return svg2; }
+  // Attempt 2 — give generator the specific issues to fix
+  const issuesFromAttempt1 = svg1 ? (() => {
+    // Re-extract issues from verdict1 if we have them
+    return [];
+  })() : [];
 
-  return svg1 || ''; // fallback to attempt 1 even if critic rejected
+  await delay(1500);
+  const retryPrompt = GENERATOR_SYSTEM + '\n\n---\n\n' + basePrompt +
+    '\n\nPREVIOUS ATTEMPT HAD THESE SPECIFIC PROBLEMS — FIX ALL OF THEM:\n' +
+    (window._lastCriticIssues||[]).map((iss,i)=>`${i+1}. ${iss}`).join('\n') +
+    '\n\nDo not reproduce the previous diagram. Fix every issue listed above.';
+
+  const d2 = await authFetch('/api/generate', {
+    method: 'POST',
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514', max_tokens:1800, call_type:'svg',
+      system: GENERATOR_SYSTEM,
+      messages:[{role:'user', content: retryPrompt}]
+    })
+  }).then(r=>r?.ok?r.json():null).catch(()=>null);
+  const svg2 = extractSVG(d2);
+
+  if (svg2) {
+    // Critique attempt 2 as well
+    const cr2 = await callCritic(svg2, window._lastCriticIssues||[]);
+    const raw2 = (cr2?.content||[]).map(b=>b.text||'').join('').trim();
+    try {
+      const verdict2 = JSON.parse(raw2.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim());
+      if (verdict2.pass) { console.log('Agent: PASS attempt 2 for', cs.title); return svg2; }
+      console.log('Agent: FAIL attempt 2 for', cs.title, verdict2.issues);
+      // Return whichever attempt had fewer issues
+      return svg2; // attempt 2 is always more targeted
+    } catch(e) { return svg2; }
+  }
+
+  return svg1 || '';
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -3805,10 +3974,10 @@ function openHTMLPresenter(sd, topic, subject, gradeStr) {
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   const TEAL='#3BBFAD', NAVY='#1D3461', YELLOW='#F5C842', GREY='#F4F3EF';
-  const HEADER_H=72;
+  const HEADER_H=76;
 
   function corners(a=YELLOW) { return `<circle cx="0" cy="0" r="80" fill="${a}" opacity=".18"/><circle cx="1200" cy="675" r="100" fill="${TEAL}" opacity=".14"/><circle cx="1200" cy="0" r="60" fill="#BDBDBD" opacity=".13"/>`; }
-  function headerBar(t,bg=TEAL) { return `<rect x="0" y="0" width="1200" height="${HEADER_H}" fill="${bg}"/><text x="48" y="46" font-family="'Arial Black',Arial,sans-serif" font-size="28" font-weight="900" fill="white">${esc(t)}</text>`; }
+  function headerBar(t,bg=TEAL) { return `<rect x="0" y="0" width="1200" height="${HEADER_H}" fill="${bg}"/><text x="48" y="${HEADER_H-22}" font-family="'Arial Black',Arial,sans-serif" font-size="26" font-weight="900" fill="white" textLength="${Math.min(esc(t).length*15,1080)}" lengthAdjust="spacingAndGlyphs">${esc(t)}</text>`; }
   function slideWrap(h,bg=GREY) { return `<div class="slide" style="background:${bg}">${h}</div>`; }
 
   // TITLE
@@ -3818,7 +3987,7 @@ function openHTMLPresenter(sd, topic, subject, gradeStr) {
     <rect x="0" y="550" width="1200" height="125" fill="rgba(0,0,0,.15)"/>
     <circle cx="1100" cy="80" r="200" fill="${TEAL}" opacity=".12"/>
     <circle cx="100" cy="600" r="150" fill="${YELLOW}" opacity=".1"/>
-    <text x="80" y="240" font-family="'Arial Black',Arial,sans-serif" font-size="58" font-weight="900" fill="white">${esc(topic)}</text>
+    <text x="80" y="240" font-family="'Arial Black',Arial,sans-serif" font-size="52" font-weight="900" fill="white" textLength="${Math.min(esc(topic).length*28,1040)}" lengthAdjust="spacingAndGlyphs">${esc(topic)}</text>
     <text x="82" y="308" font-family="Arial,sans-serif" font-size="24" fill="rgba(255,255,255,.65)">${esc(gradeStr?gradeStr+' · ':'')}${esc(subject||'')}</text>
     <rect x="80" y="336" width="120" height="4" rx="2" fill="${TEAL}"/>
     <text x="80" y="384" font-family="Arial,sans-serif" font-size="18" fill="rgba(255,255,255,.4)">${esc(date)}</text>
