@@ -309,7 +309,7 @@ async function runUnit(idx) {
   // Step 1: Structure call
   setStatusBar(`[${idx+1}/36] ${unit.grade} — ${unit.topic}: getting structure...`);
   const structureData = await apiFetch('/api/generate', {
-    model: MODEL, max_tokens: 4500,
+    model: MODEL, max_tokens: 5000,
     messages: [{role:'user', content: buildStructurePrompt(unit)}]
   });
 
@@ -327,7 +327,25 @@ async function runUnit(idx) {
       // Find outermost JSON object
       const s=raw.indexOf('{'), en=raw.lastIndexOf('}');
       if (s === -1) throw new Error('no JSON object found');
-      sd=JSON.parse(raw.slice(s,en+1));
+      let chunk = raw.slice(s, en+1);
+      try { sd = JSON.parse(chunk); }
+      catch(e3) {
+        // JSON truncated — try to repair by closing open structures
+        // Count unclosed brackets and strings
+        let repaired = chunk;
+        // Close any open array/object by appending closing brackets
+        const opens = (repaired.match(/[{[]/g)||[]).length;
+        const closes = (repaired.match(/[}\]]/g)||[]).length;
+        const diff = opens - closes;
+        // Ensure we end after a complete value — cut at last complete field
+        const lastComma = repaired.lastIndexOf(',');
+        const lastClose = repaired.lastIndexOf('}');
+        if (lastComma > lastClose) repaired = repaired.substring(0, lastComma);
+        // Close open structures
+        for(let i=0;i<diff;i++) repaired += (i===diff-1?'}':']');
+        sd = JSON.parse(repaired);
+        console.warn('Used JSON repair for', unit.topic);
+      }
     }
     catch(e2) {
       const errDetail = 'RAW['+raw.length+']: '+raw.substring(0,300);
