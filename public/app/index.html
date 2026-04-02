@@ -2021,7 +2021,7 @@ Use emoji headers. 4–6 varied activities. Start directly with the worksheet ti
   // Give the AI better guidance on which strand to prioritize based on topic keywords
   const topicLower = topic.toLowerCase();
   // Language strand guidance
-  const isWritingTopic = /writ|story|narrative|essay|paragraph|persuasive|report|journal|letter|poem|draft|composition/.test(topicLower);
+  const isWritingTopic = /writ|short story|story element|narrative|essay|paragraph|persuasive|report|journal|letter|poem|draft|composition|opinion writing|descriptive writing|procedural writing/.test(topicLower);
   const isReadingTopic = /read|comprehension|infer|main idea|text feature|author|visualiz|predict|connect|summar/.test(topicLower);
   const isOralTopic = /speak|listen|oral|present|discuss|debate|talk/.test(topicLower);
 
@@ -2040,14 +2040,16 @@ Use emoji headers. 4–6 varied activities. Start directly with the worksheet ti
     : isFinancialTopic ? 'PRIORITY: This is a FINANCIAL LITERACY topic. Lead with Strand F expectations (F1.x money and finances). Include at least 2 Strand F expectations.'
     : 'Select the 2-4 most relevant Ontario Math 2020 expectations across strands B, C, D, E, F that best match this topic.'
     : isWritingTopic
-    ? 'PRIORITY: This is a WRITING topic. Lead with Strand D expectations (writing process D1.x, writing forms D2.x, writing craft D2.3/D2.4). Include at least 2 Strand D expectations. Only add C or B strands if directly relevant.'
+    ? 'PRIORITY: This is a WRITING/COMPOSITION topic. You MUST select Strand D expectations (D1.x writing process, D2.x writing forms, D2.3/D2.4 writing craft). DO NOT select Strand C (comprehension) or B (oral/foundations) as the primary expectations for a writing topic. Include at least 2 Strand D expectations. Short Story, Narrative, and all writing genres are Strand D.'
     : isReadingTopic
     ? 'PRIORITY: This is a READING/COMPREHENSION topic. Lead with Strand C expectations (C2.x comprehension, C1.x knowledge about texts, C3.x critical thinking). Include at least 2 Strand C expectations.'
     : isOralTopic
     ? 'PRIORITY: This is an ORAL topic. Lead with Strand B expectations (B1.x oral communication). Include at least 1 Strand B expectation.'
     : 'Select the 2-4 most relevant expectations across strands that best match this specific topic.';
 
-  const splitExpNote = isSplit ? 'CRITICAL: Include a "grade" field (e.g. "Grade 5" or "Grade 6") on EVERY expectation so teachers know which grade it targets. Return 1-2 expectations per grade in the split.' : 'Return 2-5 most relevant expectations for this grade. '+strandGuidance;;
+  const splitExpNote = isSplit
+    ? 'CRITICAL: Include a "grade" field (e.g. "Grade 5" or "Grade 6") on EVERY expectation. Return 1-2 expectations per grade in the split. '+strandGuidance
+    : 'Return 2-5 most relevant expectations for this grade. '+strandGuidance;
 
   const prompt = `You are an expert Ontario elementary SSC teacher. Generate a classroom-ready lesson package.
 Grade(s): ${gradeDesc}
@@ -2950,9 +2952,20 @@ async function generateSlideData(callerBtn) {
       if (svg) { slides[i].svg_html = svg; console.log('Hardcoded: '+slides[i].visual_type); }
     }
 
-    // ── STEP 3: Open deck with visuals already embedded ────────────────────────
+    // ── STEP 3: Wait briefly for images then open deck ──────────────────────────
+    // Race image fetch against a 5s timeout — deck opens either way
+    if (callerBtn) callerBtn.textContent='⏳ Loading images...';
+    // Show elapsed time so teacher knows it's working (fal.ai takes 5-15s)
+    let imgLoadSecs = 0;
+    const imgLoadTimer = setInterval(() => {
+      imgLoadSecs++;
+      if (callerBtn) callerBtn.textContent=`⏳ Loading images... ${imgLoadSecs}s`;
+    }, 1000);
+    await Promise.race([imageFetchPromise, new Promise(r => setTimeout(r, 15000))]);
+    clearInterval(imgLoadTimer);
     if (callerBtn) { callerBtn.disabled=false; callerBtn.textContent='▶ Present'; }
-    const deckWindow = openHTMLPresenter(sd, topic, subject, gradeStr);
+    const {wikiImg=null, wikiTitle=null, wikiLicense=null, mindsonImg=null} = window._slideData;
+    const deckWindow = openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg);
 
     // ── STEP 4: Fire agent loop for any slides that didn't get a hardcoded visual ─
     const needsAgent = slides.slice(0,4).some(s=>!s.svg_html);
@@ -2964,6 +2977,7 @@ async function generateSlideData(callerBtn) {
 
   } catch(e) {
     alert('Error generating slides: '+e.message);
+    clearInterval(imgLoadTimer);
     if (callerBtn) { callerBtn.disabled=false; callerBtn.textContent='▶ Present'; }
     return false;
   }
@@ -4372,13 +4386,15 @@ const SVG_RENDERERS = {
     const connections = (p.connections || []).slice(0, 6);
     const accentColor = p.color || '#1D9E75';
 
-    const W = 500, H = 300;
-    const cx = W / 2, cy = H / 2;
-    const centerR = 46;
-    const orbitR = 105;
-
-    // Angles: spread connections evenly, starting from top
+    const W = 500, H = 310;
+    const cx = W / 2, cy = H / 2 + 4;
+    const centerR = 44;
+    // Scale orbit radius based on node count — more nodes need tighter orbit
     const count = connections.length || 1;
+    const orbitR = count <= 4 ? 108 : 100;
+    const nodeW = 100;  // wider nodes to fit longer labels
+    const nodeH = 52;   // taller nodes for wrapping text
+
     const angleStep = (2 * Math.PI) / count;
     const startAngle = -Math.PI / 2;
 
@@ -4388,37 +4404,38 @@ const SVG_RENDERERS = {
       const ny = cy + orbitR * Math.sin(angle);
       const label = conn.label || conn || '';
       const detail = conn.detail || '';
-      const nodeW = 88, nodeH = detail ? 44 : 32;
 
-      // Line from center to node
-      // Shorten line so it doesn't overlap the circles
-      const dx = nx - cx, dy = ny - cy;
-      const dist = Math.sqrt(dx*dx + dy*dy);
+      // Clamp node position to stay within viewBox with margin
+      const margin = nodeW / 2 + 4;
+      const clampedNx = Math.max(margin, Math.min(W - margin, nx));
+      const clampedNy = Math.max(nodeH / 2 + 4, Math.min(H - nodeH / 2 - 4, ny));
+
+      const dx = clampedNx - cx, dy = clampedNy - cy;
+      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
       const lx1 = cx + (dx/dist) * (centerR + 4);
       const ly1 = cy + (dy/dist) * (centerR + 4);
-      const lx2 = nx - (dx/dist) * (nodeH/2 + 4);
-      const ly2 = ny - (dy/dist) * (nodeH/2 + 4);
+      const lx2 = clampedNx - (dx/dist) * (nodeH/2 + 3);
+      const ly2 = clampedNy - (dy/dist) * (nodeH/2 + 3);
 
       return `
-        <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${accentColor}" stroke-width="2" opacity="0.5" stroke-dasharray="4,3"/>
-        <rect x="${nx - nodeW/2}" y="${ny - nodeH/2}" width="${nodeW}" height="${nodeH}" rx="8" fill="white" stroke="${accentColor}" stroke-width="2"/>
-        <foreignObject x="${nx - nodeW/2 + 4}" y="${ny - nodeH/2 + 2}" width="${nodeW - 8}" height="${nodeH - 4}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#1D3461;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;height:${nodeH - 4}px;word-wrap:break-word;line-height:1.3">
-            <span>${label}</span>
-            ${detail ? `<span style="font-weight:400;font-size:10px;color:#5F5E5A">${detail}</span>` : ''}
+        <line x1="${lx1.toFixed(1)}" y1="${ly1.toFixed(1)}" x2="${lx2.toFixed(1)}" y2="${ly2.toFixed(1)}" stroke="${accentColor}" stroke-width="2" opacity="0.5" stroke-dasharray="4,3"/>
+        <rect x="${(clampedNx - nodeW/2).toFixed(1)}" y="${(clampedNy - nodeH/2).toFixed(1)}" width="${nodeW}" height="${nodeH}" rx="8" fill="white" stroke="${accentColor}" stroke-width="2"/>
+        <foreignObject x="${(clampedNx - nodeW/2 + 4).toFixed(1)}" y="${(clampedNy - nodeH/2 + 3).toFixed(1)}" width="${nodeW - 8}" height="${nodeH - 6}">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;color:#1D3461;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;width:${nodeW-8}px;height:${nodeH-6}px;word-wrap:break-word;overflow:hidden;line-height:1.25">
+            <span style="display:block">${label}</span>
+            ${detail ? `<span style="font-weight:400;font-size:9px;color:#5F5E5A;display:block;margin-top:2px">${detail}</span>` : ''}
           </div>
         </foreignObject>`;
     }).join('');
 
-    // Center circle
     const centerSVG = `
       <circle cx="${cx}" cy="${cy}" r="${centerR}" fill="${accentColor}"/>
-      <foreignObject x="${cx - centerR + 4}" y="${cy - centerR + 4}" width="${(centerR - 4)*2}" height="${(centerR - 4)*2}">
-        <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'Arial Black',Arial,sans-serif;font-size:13px;font-weight:900;color:white;text-align:center;display:flex;align-items:center;justify-content:center;width:${(centerR-4)*2}px;height:${(centerR-4)*2}px;word-wrap:break-word;line-height:1.2">${centerWord}</div>
+      <foreignObject x="${cx - centerR + 3}" y="${cy - centerR + 3}" width="${(centerR-3)*2}" height="${(centerR-3)*2}">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'Arial Black',Arial,sans-serif;font-size:12px;font-weight:900;color:white;text-align:center;display:flex;align-items:center;justify-content:center;width:${(centerR-3)*2}px;height:${(centerR-3)*2}px;word-wrap:break-word;line-height:1.2">${centerWord}</div>
       </foreignObject>`;
 
     return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">
-      <rect width="${W}" height="${H}" fill="#F4F3EF" rx="0"/>
+      <rect width="${W}" height="${H}" fill="#F4F3EF"/>
       ${nodesSVG}${centerSVG}
     </svg>`;
   },
@@ -6075,6 +6092,8 @@ function renderExpInAssess() {
   const isMath = filteredLessons.some(l => l.subject === 'Mathematics');
   const strandNames = isMath ? {
     B:'Number', C:'Algebra', D:'Data', E:'Spatial Sense', F:'Financial Literacy'
+  } : subj.toLowerCase().includes('science') ? {
+    A:'STEM Skills', B:'Life Systems', C:'Matter and Energy', D:'Structures and Mechanisms', E:'Earth and Space Systems'
   } : {
     A:'Literacy Connections', B:'Foundations of Language', C:'Comprehension', D:'Composition'
   };
