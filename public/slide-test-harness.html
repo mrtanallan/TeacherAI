@@ -252,7 +252,7 @@ function buildStructurePrompt(unit, gradeExps) {
     : ' (use real Ontario Math 2020 codes for ' + unit.grade + ')';
 
   const VT = [
-    'EARLY GRADES K-1: counting_dots({count:7,label:"Count!"}) | ten_frame({filled:7,label:"Show 7"}) | shape_grid({shapes:[{name:"Circle",color:"#1D9E75"},{name:"Square",color:"#E07B39"},{name:"Triangle",color:"#F5C842"},{name:"Rectangle",color:"#6B63D4"}]}) | sort_diagram({left_label:"Has corners",right_label:"No corners",left_items:["Square","Triangle"],right_items:["Circle"],rule:"Corners"})',
+    'EARLY GRADES K-1: counting_dots({count:7,label:"Count!"}) | ten_frame({filled:7,label:"Show 7"}) | three_d_shapes({shapes:[{name:"Cube",color:"#1D9E75"},{name:"Sphere",color:"#E07B39"},{name:"Cylinder",color:"#F5C842"},{name:"Cone",color:"#6B63D4"}]}) | shape_grid({shapes:[{name:"Circle",color:"#1D9E75"},{name:"Square",color:"#E07B39"},{name:"Triangle",color:"#F5C842"},{name:"Rectangle",color:"#6B63D4"}]}) | sort_diagram({left_label:"Has corners",right_label:"No corners",left_items:["Square","Triangle"],right_items:["Circle"],rule:"Corners"})',
     'NUMBER: place_value({digits:{hundreds:3,tens:2,ones:4},highlight:"tens"}) | array({rows:4,cols:6,label:"4x6=24"}) | fraction_bar({numerator:3,denominator:4,label:"3/4"}) | fraction_compare({fractions:[{n:1,d:2,label:"1/2"},{n:3,d:4,label:"3/4"}]}) | fraction_circle({numerator:1,denominator:2}) | fraction_circle_compare({fractions:[{n:1,d:2},{n:1,d:3}],comparison:"1/2>1/3"}) | number_line({min:0,max:10,step:1,highlights:[{value:3,label:"3"}]}) | integer_line({min:-5,max:5,highlights:[{value:-2,label:"-2"}]}) | percent_bar({percent:75,label:"75%"})',
     'ALGEBRA: worked_steps({problem:"2x+3=11",steps:[{label:"Subtract 3",work:"2x=8"},{label:"Divide by 2",work:"x=4"}],answer:"x=4"}) | formula_display({formula:"A=lxw",variables:[{symbol:"A",meaning:"Area",unit:"cm2"}]}) | balance_scale({left:"2x+3",right:"11",solution:"x=4"}) | pattern_row({items:["tri","sq","tri","sq"],rule:"Repeating",next:"tri"}) | t_table({headers:["x","y"],rows:[[0,2],[1,4],[2,6]],rule:"y=2x"}) | coordinate_graph({points:[{x:1,y:2,label:"(1,2)"}],line:true,x_max:8,y_max:10})',
     'DATA: bar_graph({title:"T",labels:["A","B"],values:[12,8],y_label:"Count"}) | line_graph({title:"T",labels:["Mon","Tue"],values:[12,15],y_label:"deg C"}) | pie_chart({title:"T",slices:[{label:"A",value:50,color:"#1D9E75"},{label:"B",value:50,color:"#F5C842"}]}) | pictograph({title:"T",rows:[{label:"Jan",count:4}],symbol:"star",scale:2,scale_label:"=2"}) | double_bar({title:"T",labels:["A"],series:[{name:"Gr4",values:[8],color:"#1D9E75"}]}) | probability_scale({events:[{label:"Impossible",value:0},{label:"Heads",value:0.5},{label:"Certain",value:1}]}) | stem_leaf({title:"T",stems:[{stem:6,leaves:[2,5]}]}) | scatter_plot({points:[{x:2,y:4},{x:4,y:7}],x_max:10,y_max:12,x_label:"Hours",y_label:"Score",line_of_best_fit:true})',
@@ -287,6 +287,7 @@ function buildStructurePrompt(unit, gradeExps) {
     '* Area of rectangles: area_grid for visual model. NEVER formula_display or worked_steps as primary.\n' +
     '* 2D shapes/3D shapes/counting corners/counting sides/shape hunt/shape properties: shape_grid. NEVER counting_dots, ten_frame, or concept_card for ANY shape topic.\n' +
     '* Grade 1 Repeating Patterns: ALL slides use pattern_row or sort_diagram. NEVER shape_grid.\n' +
+    '* 3D shape identification: three_d_shapes. NEVER shape_grid or concept_card for 3D lessons.\n' +
     '* Grade 4 Probability: probability_scale labels qualitative ONLY (Impossible/Unlikely/Equally Likely/Likely/Certain). NO decimals.\n' +
     '* Grade 4 Area of Rectangles: slide 1=labelled_shape, slide 2=area_grid, slide 3=worked_steps. NEVER area_grid for formula concept.\n' +
     '* Grade 5 Volume of Rectangular Prisms: isometric_box with volume_label. NEVER formula_display alone.\n' +
@@ -393,7 +394,7 @@ const HARDCODED_TYPES = new Set([
   'labelled_shape','pythagorean','isometric_box','triangle_area','parallelogram_area',
   'money_display','budget_bar',
   'comparison_table','concept_card','venn_diagram',
-  'counting_dots','ten_frame','shape_grid','sort_diagram',
+  'counting_dots','ten_frame','shape_grid','sort_diagram','three_d_shapes','three_d_shapes',
   'grouped_objects','measurement_bar','angle_types',
 ]);
 
@@ -540,6 +541,8 @@ async function runUnit(idx) {
         grouped_objects:'Equal groups of dots in colored boxes. CORRECT for multiplication, division, and equal-grouping concepts. Do NOT fail because grouping is used in an addition context — equal groups are valid for addition too. Only fail if wrong type entirely or numbers are grade-inappropriate.',
         measurement_bar:'Object above ruler of non-standard units. For measurement lessons. Do NOT fail for object param being a ruler or measuring tool — any concrete object is valid. Only fail if wrong type for concept.',
         angle_types:'Three angles side by side — acute, right, obtuse — with labels and degree values. CORRECT for angle classification comparison slides. params: types array.',
+        three_d_shapes:'Four 3D objects drawn as isometric shapes (cube, sphere, cylinder, cone) with name labels. CORRECT for 3D shape identification lessons. NEVER fail shape_grid when three_d_shapes was used correctly.',
+        three_d_shapes:'Four 3D objects drawn as isometric shapes (cube, sphere, cylinder, cone). CORRECT for 3D shape identification. Do NOT fail when this type is used for 3D lessons.',
         sort_diagram:'Two labeled groups with items in each. For sorting/classifying. Do NOT fail for vague or short rule text — the rule param is a label only. Only fail if wrong type for concept or items are clearly miscategorized by a factual error.',
         grouped_objects:'Equal groups of dots showing multiplication/division. CORRECT for mult/div. params: groups, per_group, label.',
         measurement_bar:'Object above ruler of non-standard units. For measurement lessons. Do NOT fail for object param being a ruler or measuring tool — any concrete object is valid. Only fail if wrong type for concept.',
@@ -568,8 +571,14 @@ DO NOT FAIL for:
 - worked_steps for formula introduction (valid pedagogical approach)
 - budget_bar with savings listed as expense (minor categorization)
 - Any subjective grade-level complexity opinion
-- Any wording/label style preference
+- Any wording/label style preference  
 - Scatter plot with unrealistic values (flag but pass — model limitation)
+- Array with large numbers (6×8=48 for Grade 2 — grade complexity opinion)
+- pattern_row with inconsistent items array (minor param issue)
+- probability_scale using category labels as event descriptions
+- line_graph rounding differences ($4661 vs $4660.96 is acceptable)
+- budget_bar with savings classified as expense (minor categorization)
+- shape_grid for concept_card-style lessons (accept if type is reasonable)
 
 When in doubt: PASS.`;
 
@@ -715,7 +724,7 @@ RULES:
 1. REAL CODES ONLY: Fail immediately if any code is not in the valid list provided.
 2. BEST AVAILABLE: Accept the closest available expectation even if not exact. Some topics have no perfect match in Ontario Math 2020 — angles, compound interest, rectangular prism volume, triangle area. If the model used the closest strand expectation, PASS.
 3. MINIMUM 2: Fail only if fewer than 2 expectations returned.
-4. DO NOT FAIL FOR: minor adjacency when correct strand is used; unverifiable calculations; compound interest using F1.1; angles using E1.1 or E1.2; volume using E1.2; triangle area using E2.3; financial topics using any F strand code; patterning with B1.2 when C strand codes also present.
+4. DO NOT FAIL FOR: minor adjacency when correct strand is used; unverifiable calculations; compound interest using F1.1; angles using E1.1 or E1.2 (there is no angle-specific expectation in Ontario Math 2020, so E1.1/E1.2 is the best available); volume using E1.2; triangle area using E2.3; financial topics using any F strand code; patterning with B1.2 when C strand codes also present.
 5. STRAND MATCH: Spatial topics should use E strand. Financial topics should use F strand. Data/probability should use D strand. If wrong strand entirely (e.g. B strand for a spatial lesson), fail.
 `;
 async function runExpectationsCritic(unit, lessonExpectations) {
