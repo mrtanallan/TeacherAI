@@ -1927,6 +1927,7 @@ async function generate() {
   const filterB11 = e => {
     if (e.code === 'B1.1' && /whole number/i.test(e.desc) && !isWholeNumberTopic2) return false;
     if (e.code === 'B1.2' && /whole number/i.test(e.desc) && isFractionTopic2) return false;
+    if (isFractionTopic2 && e.strand === 'C') return false;
     return true;
   };
     const primaryExps2 = relevantExps.filter(e => e.strand === primaryStrand2).filter(filterB11);
@@ -2859,6 +2860,7 @@ async function generateSlideData(callerBtn) {
       '  * area_label in triangle_area: verify (base × height) ÷ 2 = stated answer',
       '  * array label: must show rows×cols=total (e.g. "3×4=12"). NEVER rows+cols. BEFORE SUBMITTING: verify label arithmetic. 6×8=48, 3×5=15, 4×4=16.',
       '  * volume_label in isometric_box: verify l × w × h = stated answer',
+      '  * pie_chart slice values: must sum to exactly 100 if using percentages. Verify: add up all value fields. If showing hours out of 24, calculate each as (hours/24×100) rounded correctly (8h=33%, 6h=25%, 2h=8%, 8h=33%).',
       '- Pure JSON only, no markdown, no comments'
     ].filter(Boolean).join('\n');
 
