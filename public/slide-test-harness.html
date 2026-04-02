@@ -285,7 +285,8 @@ function buildStructurePrompt(unit, gradeExps) {
     '* Measurement with non-standard units: measurement_bar. NEVER worked_steps or comparison_table.\n' +
     '* Angles Acute/Obtuse/Right comparison slide: angle_types. Individual angle: angle_diagram.\n' +
     '* Area of rectangles: area_grid for visual model. NEVER formula_display or worked_steps as primary.\n' +
-    '* 2D shapes/3D shapes/counting corners/counting sides/shape hunt/shape properties: shape_grid. NEVER counting_dots or ten_frame for ANY shape topic.\n' +
+    '* 2D shapes/3D shapes/counting corners/counting sides/shape hunt/shape properties: shape_grid. NEVER counting_dots, ten_frame, or concept_card for ANY shape topic.\n' +
+    '* Grade 1 Repeating Patterns: ALL slides use pattern_row or sort_diagram. NEVER shape_grid.\n' +
     '* Grade 4 Probability: probability_scale labels qualitative ONLY (Impossible/Unlikely/Equally Likely/Likely/Certain). NO decimals.\n' +
     '* Grade 4 Area of Rectangles: slide 1=labelled_shape, slide 2=area_grid, slide 3=worked_steps. NEVER area_grid for formula concept.\n' +
     '* Grade 5 Volume of Rectangular Prisms: isometric_box with volume_label. NEVER formula_display alone.\n' +
@@ -293,6 +294,8 @@ function buildStructurePrompt(unit, gradeExps) {
     '* Grade 2 Measurement: measurement_bar. NEVER comparison_table for measurement concepts.\n' +
     '* Grade 3 Fractions: fraction_circle, fraction_bar, fraction_compare. NEVER comparison_table.\n' +
     '* Compound interest: line_graph with both simple and compound series. NEVER budget_bar.\n' +
+    '* Simple interest total/repayment: worked_steps or bar_graph. NEVER budget_bar.\n' +
+    '* Grade 8 Linear Equations intro: coordinate_graph (straight line). NEVER formula_display alone.\n' +
     '* Sorting and classifying: sort_diagram. NEVER comparison_table for sorting concepts.\n' +
     '* Pythagorean theorem: pythagorean. NEVER worked_steps or concept_card.\n' +
     '* Circle area/circumference: circle_diagram. NEVER formula_display alone.\n' +
@@ -544,7 +547,31 @@ async function runUnit(idx) {
       };
 
       const typeDesc = HDESC[sr.type] || sr.type;
-      const HCRITIC = 'You are a veteran Ontario K-8 math teacher. Evaluate ONLY: (1) is this the right diagram type for the concept, (2) are the params complete and mathematically correct. Respond ONLY with JSON: {"pass":true,"issues":[]} or {"pass":false,"issues":["specific issue"]}.';
+      const HCRITIC = `You are a veteran Ontario K-8 math teacher evaluating slide diagram quality.
+Respond ONLY with JSON: {"pass":true,"issues":[]} or {"pass":false,"issues":["issue"]}.
+
+FAIL ONLY for these clear problems:
+1. COMPLETELY WRONG TYPE: e.g. ten_frame for a geometry lesson, concept_card for area, comparison_table for a spatial/geometric concept
+2. BROKEN PARAMS: params that would make the renderer fail entirely (e.g. ten_frame filled>10, fraction_compare with wrong operator like 1/4>1/2)
+3. OBVIOUS MATH ERRORS: clearly wrong arithmetic in answers (e.g. 3+4=8)
+
+DO NOT FAIL for:
+- shape_grid showing only 1 shape (still correct type)
+- shape_grid missing one specific shape (imperfect but passes)
+- pattern_row with ABC complexity (grade opinion, not type error)
+- pattern_row minor item inconsistency
+- fraction_circle showing unsimplified fractions (2/6 is valid)
+- number_line with large jumps or min not exactly 0
+- grouped_objects in addition context (equal groups ARE addition)
+- triangle_area showing one triangle (valid for showing the concept)
+- number_line for median (shows ordered values, valid approach)
+- worked_steps for formula introduction (valid pedagogical approach)
+- budget_bar with savings listed as expense (minor categorization)
+- Any subjective grade-level complexity opinion
+- Any wording/label style preference
+- Scatter plot with unrealistic values (flag but pass — model limitation)
+
+When in doubt: PASS.`;
 
       const hCriticData = await apiFetch('/api/generate', {
         model: MODEL, max_tokens: 500, call_type: 'svg',
