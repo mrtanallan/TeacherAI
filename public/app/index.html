@@ -1927,7 +1927,7 @@ async function generate() {
   const filterB11 = e => {
     if (e.code === 'B1.1' && /whole number/i.test(e.desc) && !isWholeNumberTopic2) return false;
     if (e.code === 'B1.2' && /whole number/i.test(e.desc) && isFractionTopic2) return false;
-    if (isFractionTopic2 && e.strand === 'C') return false;
+    // C strand kept for fractions (provides minimum 2 expectations)
     return true;
   };
     const primaryExps2 = relevantExps.filter(e => e.strand === primaryStrand2).filter(filterB11);
