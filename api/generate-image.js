@@ -1,20 +1,20 @@
-// api/generate-image.js — TeacherAI image generation endpoint
-// Handles two image types:
-//   type=ai        → fal.ai Flux Schnell (AI-generated contextual illustration)
-//   type=wikimedia → Wikimedia Commons (real photo/diagram for science)
+// api/generate-image.js — TeacherAI image generation
+// type=ai        → fal.ai Flux Schnell
+// type=wikimedia → Wikimedia Commons (free, no key)
 
-export const config = { runtime: 'edge' };
+// Node.js runtime — 30s timeout (edge only gets 10s, too tight for image gen)
+export const config = { maxDuration: 30 };
 
 const FAL_KEY = process.env.FAL_API_KEY;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-// ── Supabase image cache ──────────────────────────────────────────────────────
-async function getCachedImage(cacheKey) {
+// ── Cache ─────────────────────────────────────────────────────────────────────
+async function getCached(key) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return null;
   try {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/image_cache?cache_key=eq.${encodeURIComponent(cacheKey)}&select=image_url`,
+      `${SUPABASE_URL}/rest/v1/image_cache?cache_key=eq.${encodeURIComponent(key)}&select=image_url`,
       { headers: { apikey: SUPABASE_SERVICE_KEY, Authorization: `Bearer ${SUPABASE_SERVICE_KEY}` } }
     );
     const rows = await r.json();
@@ -22,7 +22,7 @@ async function getCachedImage(cacheKey) {
   } catch { return null; }
 }
 
-async function setCachedImage(cacheKey, imageUrl) {
+async function setCache(key, url) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return;
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/image_cache`, {
@@ -33,139 +33,119 @@ async function setCachedImage(cacheKey, imageUrl) {
         'Content-Type': 'application/json',
         Prefer: 'resolution=ignore-duplicates',
       },
-      body: JSON.stringify({ cache_key: cacheKey, image_url: imageUrl }),
+      body: JSON.stringify({ cache_key: key, image_url: url }),
     });
-  } catch { /* cache write failure is non-fatal */ }
+  } catch { /* non-fatal */ }
 }
 
-// ── AI image generation via fal.ai Flux Schnell ───────────────────────────────
+// ── fal.ai Flux Schnell ───────────────────────────────────────────────────────
 async function generateAIImage(topic, subject, grade, theme) {
-  if (!FAL_KEY) throw new Error('FAL_API_KEY not configured');
+  if (!FAL_KEY) throw new Error('FAL_API_KEY not set');
 
-  // Build a safe, educational, classroom-appropriate prompt
-  const gradeNum = grade ? grade.replace('Grade ', '') : '';
-  const themeContext = theme ? `, ${theme} themed` : '';
-  const subjectContext = (subject || '').toLowerCase();
+  const subjectLower = (subject || '').toLowerCase();
+  const themeStr = theme ? `, ${theme} themed` : '';
+  const gradeNum = (grade || '').replace('Grade ', '');
 
-  // Subject-specific style guidance
-  const styleGuide = subjectContext.includes('math')
-    ? 'flat vector illustration, geometric shapes, clean lines, educational poster style'
-    : subjectContext.includes('science')
-    ? 'scientific illustration, nature photography style, detailed, educational'
-    : subjectContext.includes('language') || subjectContext.includes('literacy')
-    ? 'warm illustration, storybook style, inviting, colorful'
-    : 'flat vector illustration, educational, bright colors';
+  const style = subjectLower.includes('science')
+    ? 'scientific illustration, educational, detailed, nature'
+    : subjectLower.includes('math')
+    ? 'flat vector illustration, geometric, clean, educational poster'
+    : 'warm colourful illustration, storybook style, inviting';
 
-  const prompt = [
-    `${styleGuide}`,
-    `topic: ${topic}${themeContext}`,
-    `for Grade ${gradeNum || 'K-8'} Ontario classroom`,
-    'child-friendly, age-appropriate, no text, no words, no letters',
-    'high quality, professional educational illustration',
-    'white background or soft gradient background',
-  ].join(', ');
+  const prompt = `${style}, ${topic}${themeStr}, Grade ${gradeNum || 'K-8'} Ontario classroom, child-friendly, no text, no letters, no words, professional educational illustration`;
 
-  const response = await fetch('https://fal.run/fal-ai/flux/schnell', {
+  // fal.ai REST API — params inside "input" wrapper
+  const res = await fetch('https://fal.run/fal-ai/flux/schnell', {
     method: 'POST',
     headers: {
       Authorization: `Key ${FAL_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      prompt,
-      image_size: 'landscape_4_3',  // 1024x768 — good for slide panels
-      num_inference_steps: 4,        // Schnell is fast at 4 steps
-      num_images: 1,
+      input: {
+        prompt,
+        image_size: 'landscape_4_3',
+        num_inference_steps: 4,
+        num_images: 1,
+        enable_safety_checker: true,
+      }
     }),
   });
 
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`fal.ai error ${response.status}: ${err.slice(0, 200)}`);
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`fal.ai ${res.status}: ${txt.slice(0, 300)}`);
   }
 
-  const data = await response.json();
-  const imageUrl = data?.images?.[0]?.url;
-  if (!imageUrl) throw new Error('No image URL in fal.ai response');
-  return imageUrl;
+  const data = await res.json();
+  const url = data?.images?.[0]?.url
+    || data?.image?.url
+    || data?.output?.images?.[0]?.url;
+  if (!url) throw new Error(`No URL in fal.ai response: ${JSON.stringify(data).slice(0, 200)}`);
+  return url;
 }
 
-// ── Wikimedia Commons image search ────────────────────────────────────────────
-// Returns a real CC-licensed photo/diagram suitable for science slides
-async function getWikimediaImage(topic, grade) {
-  // Build search query from topic — strip common words, focus on key terms
-  const cleanTopic = topic
+// ── Wikimedia Commons ─────────────────────────────────────────────────────────
+async function getWikimediaImage(topic) {
+  const query = topic
     .replace(/grade\s*\d+/gi, '')
     .replace(/ontario|curriculum|lesson|unit|introduction to/gi, '')
-    .replace(/[-–—:]/g, ' ')
+    .replace(/[-\u2013\u2014:]/g, ' ')
     .trim();
 
-  // Add educational context to improve results
-  const searchQuery = `${cleanTopic} science diagram`;
+  const url = new URL('https://commons.wikimedia.org/w/api.php');
+  url.searchParams.set('action', 'query');
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('generator', 'search');
+  url.searchParams.set('gsrnamespace', '6');
+  url.searchParams.set('gsrsearch', `${query} science`);
+  url.searchParams.set('gsrlimit', '12');
+  url.searchParams.set('prop', 'imageinfo');
+  url.searchParams.set('iiprop', 'url|size|mime|extmetadata');
+  url.searchParams.set('iiurlwidth', '800');
+  url.searchParams.set('origin', '*');
 
-  const apiUrl = new URL('https://commons.wikimedia.org/w/api.php');
-  apiUrl.searchParams.set('action', 'query');
-  apiUrl.searchParams.set('format', 'json');
-  apiUrl.searchParams.set('generator', 'search');
-  apiUrl.searchParams.set('gsrnamespace', '6'); // File namespace only
-  apiUrl.searchParams.set('gsrsearch', searchQuery);
-  apiUrl.searchParams.set('gsrlimit', '10');
-  apiUrl.searchParams.set('prop', 'imageinfo');
-  apiUrl.searchParams.set('iiprop', 'url|size|mime|extmetadata');
-  apiUrl.searchParams.set('iiurlwidth', '800');
-  apiUrl.searchParams.set('origin', '*');
-
-  const r = await fetch(apiUrl.toString(), {
-    headers: { 'User-Agent': 'TeacherAI/1.0 (teacherai.ca; educational tool)' }
+  const r = await fetch(url.toString(), {
+    headers: { 'User-Agent': 'TeacherAI/1.0 (teacherai.ca)' }
   });
+  if (!r.ok) throw new Error(`Wikimedia ${r.status}`);
 
-  if (!r.ok) throw new Error(`Wikimedia API error: ${r.status}`);
   const data = await r.json();
   const pages = Object.values(data?.query?.pages || {});
 
-  // Filter to good educational images
-  const candidates = pages
-    .map(p => {
-      const info = p.imageinfo?.[0];
-      if (!info) return null;
-      const mime = info.mime || '';
-      const w = info.width || 0;
-      const h = info.height || 0;
-      // Only images (not audio/video), minimum size, reasonable aspect ratio
-      if (!mime.startsWith('image/')) return null;
-      if (w < 200 || h < 200) return null;
-      if (w / h > 5 || h / w > 5) return null; // Skip very thin strips
-      // Skip SVG (rendering issues in slides), prefer JPG/PNG
-      if (mime === 'image/svg+xml') return null;
-
-      const meta = info.extmetadata || {};
-      const license = (meta.LicenseShortName?.value || '').toLowerCase();
-      // Only CC licenses and public domain
-      const isOpen = license.includes('cc') || license.includes('public domain') || license === '';
-
-      return isOpen ? {
-        url: info.thumburl || info.url,
-        title: p.title?.replace('File:', '') || '',
-        license: meta.LicenseShortName?.value || 'CC',
-        width: w,
-        height: h,
-      } : null;
-    })
-    .filter(Boolean);
+  const candidates = pages.map(p => {
+    const info = p.imageinfo?.[0];
+    if (!info) return null;
+    const mime = info.mime || '';
+    if (!mime.startsWith('image/jpeg') && !mime.startsWith('image/png')) return null;
+    if ((info.width || 0) < 300 || (info.height || 0) < 200) return null;
+    const ratio = (info.width || 1) / (info.height || 1);
+    if (ratio > 4 || ratio < 0.4) return null;
+    const license = (info.extmetadata?.LicenseShortName?.value || '').toLowerCase();
+    if (license && !license.includes('cc') && !license.includes('public domain')) return null;
+    return {
+      url: info.thumburl || info.url,
+      title: (p.title || '').replace('File:', ''),
+      license: info.extmetadata?.LicenseShortName?.value || 'CC',
+      score: (info.width > info.height ? 2 : 0) + (info.width > 500 ? 1 : 0),
+    };
+  }).filter(Boolean);
 
   if (!candidates.length) return null;
-
-  // Pick the best candidate — prefer landscape images with reasonable dimensions
-  const scored = candidates.map(c => ({
-    ...c,
-    score: (c.width > c.height ? 2 : 0) + (c.width > 400 ? 1 : 0),
-  }));
-  scored.sort((a, b) => b.score - a.score);
-  return scored[0];
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates[0];
 }
 
-// ── Main handler ──────────────────────────────────────────────────────────────
+// ── Handler ───────────────────────────────────────────────────────────────────
 export default async function handler(req) {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    }});
+  }
+
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'POST only' }), { status: 405 });
   }
@@ -175,54 +155,31 @@ export default async function handler(req) {
   catch { return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 }); }
 
   const { type = 'ai', topic, subject, grade, theme } = body;
+  if (!topic) return new Response(JSON.stringify({ error: 'topic required' }), { status: 400 });
 
-  if (!topic) {
-    return new Response(JSON.stringify({ error: 'topic required' }), { status: 400 });
-  }
-
-  // Cache key — deterministic per topic+grade+subject+type
   const cacheKey = `${type}:${(subject||'').slice(0,20)}:${(grade||'').slice(0,10)}:${topic.slice(0,60)}`;
+  const hdrs = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
   try {
-    // Check cache first
-    const cached = await getCachedImage(cacheKey);
-    if (cached) {
-      return new Response(JSON.stringify({ url: cached, cached: true }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      });
-    }
+    const cached = await getCached(cacheKey);
+    if (cached) return new Response(JSON.stringify({ url: cached, cached: true }), { status: 200, headers: hdrs });
 
-    let imageUrl, imageMeta = {};
+    let imageUrl, meta = {};
 
     if (type === 'wikimedia') {
-      const result = await getWikimediaImage(topic, grade);
-      if (!result) {
-        return new Response(JSON.stringify({ url: null, error: 'No suitable Wikimedia image found' }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        });
-      }
+      const result = await getWikimediaImage(topic);
+      if (!result) return new Response(JSON.stringify({ url: null, reason: 'no match' }), { status: 200, headers: hdrs });
       imageUrl = result.url;
-      imageMeta = { title: result.title, license: result.license };
+      meta = { title: result.title, license: result.license };
     } else {
-      // Default: AI generation via fal.ai
       imageUrl = await generateAIImage(topic, subject, grade, theme);
     }
 
-    // Cache the result
-    await setCachedImage(cacheKey, imageUrl);
-
-    return new Response(JSON.stringify({ url: imageUrl, cached: false, ...imageMeta }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    });
+    await setCache(cacheKey, imageUrl);
+    return new Response(JSON.stringify({ url: imageUrl, cached: false, ...meta }), { status: 200, headers: hdrs });
 
   } catch (err) {
-    console.error('generate-image error:', err.message);
-    return new Response(JSON.stringify({ url: null, error: err.message }), {
-      status: 200, // Return 200 so app can gracefully degrade
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    });
+    console.error('[generate-image]', type, topic, err.message);
+    return new Response(JSON.stringify({ url: null, error: err.message }), { status: 200, headers: hdrs });
   }
 }
