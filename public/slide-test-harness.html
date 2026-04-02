@@ -241,9 +241,12 @@ function buildStructurePrompt(unit, gradeExps) {
   var otherExps = (gradeExps||[]).filter(function(e){ return e.strand !== primaryStrand; });
   // Filter out B1.1 (whole numbers) for topics that are NOT about whole numbers
   var isWholeNumberTopic = /count|whole number|place value|composing|decomposing/.test(topicLower);
+  var isFractionTopic = /fraction|equal part|numerator|denominator/.test(topicLower);
   if (!isWholeNumberTopic) {
     primaryExps = primaryExps.filter(function(e){ return !(e.code === 'B1.1' && /whole number/i.test(e.desc)); });
+    primaryExps = primaryExps.filter(function(e){ return !(e.code === 'B1.2' && /whole number/i.test(e.desc) && isFractionTopic); });
     otherExps = otherExps.filter(function(e){ return !(e.code === 'B1.1' && /whole number/i.test(e.desc)); });
+    otherExps = otherExps.filter(function(e){ return !(e.code === 'B1.2' && /whole number/i.test(e.desc) && isFractionTopic); });
   }
   var sortedExps = primaryExps.concat(otherExps).slice(0,15);
 
@@ -290,13 +293,15 @@ function buildStructurePrompt(unit, gradeExps) {
     '* 3D shape identification: three_d_shapes. NEVER shape_grid or concept_card for 3D lessons.\n' +
     '* Grade 4 Probability: probability_scale labels qualitative ONLY (Impossible/Unlikely/Equally Likely/Likely/Certain). NO decimals.\n' +
     '* Grade 4 Area of Rectangles: slide 1=labelled_shape, slide 2=area_grid, slide 3=worked_steps. NEVER area_grid for formula concept.\n' +
-    '* Grade 5 Volume of Rectangular Prisms: isometric_box with volume_label. NEVER formula_display alone.\n' +
+    '* Grade 5 Volume: isometric_box for ALL slides. NEVER labelled_shape (2D only). NEVER formula_display alone.\n' +
     '* Grade 6 Triangle and Parallelogram Area: triangle_area and parallelogram_area. NEVER comparison_table or area_grid.\n' +
     '* Grade 2 Measurement: measurement_bar. NEVER comparison_table for measurement concepts.\n' +
     '* Grade 3 Fractions: fraction_circle, fraction_bar, fraction_compare. NEVER comparison_table.\n' +
     '* Compound interest: line_graph with both simple and compound series. NEVER budget_bar.\n' +
     '* Simple interest total/repayment: worked_steps or bar_graph. NEVER budget_bar.\n' +
     '* Grade 8 Linear Equations intro: coordinate_graph (straight line). NEVER formula_display alone.\n' +
+    '* Grade 7 Circle Area intro: circle_diagram. NEVER worked_steps as slide 1.\n' +
+    '* Grade 6 Triangle/Para comparison: triangle_area per triangle slide, parallelogram_area per para slide. One shape per slide IS correct.\n' +
     '* Sorting and classifying: sort_diagram. NEVER comparison_table for sorting concepts.\n' +
     '* Pythagorean theorem: pythagorean. NEVER worked_steps or concept_card.\n' +
     '* Circle area/circumference: circle_diagram. NEVER formula_display alone.\n' +
@@ -724,7 +729,7 @@ RULES:
 1. REAL CODES ONLY: Fail immediately if any code is not in the valid list provided.
 2. BEST AVAILABLE: Accept the closest available expectation even if not exact. Some topics have no perfect match in Ontario Math 2020 — angles, compound interest, rectangular prism volume, triangle area. If the model used the closest strand expectation, PASS.
 3. MINIMUM 2: Fail only if fewer than 2 expectations returned.
-4. DO NOT FAIL FOR: minor adjacency when correct strand is used; unverifiable calculations; compound interest using F1.1; angles using E1.1 or E1.2 (there is no angle-specific expectation in Ontario Math 2020, so E1.1/E1.2 is the best available); volume using E1.2; triangle area using E2.3; financial topics using any F strand code; patterning with B1.2 when C strand codes also present.
+4. DO NOT FAIL FOR: minor adjacency when correct strand is used; unverifiable calculations; compound interest using F1.1; angles using E1.1 or E1.2; volume of rectangular prisms using E1.2 (no rectangular prism volume expectation exists in Ontario Math 2020); circle graphs using D1.2 (D1.2 covers displaying data which includes circle graphs — D1.3 is wrong but D1.2 should pass); volume using E1.2; triangle area using E2.3; financial topics using any F strand code; patterning with B1.2 when C strand codes also present.
 5. STRAND MATCH: Spatial topics should use E strand. Financial topics should use F strand. Data/probability should use D strand. If wrong strand entirely (e.g. B strand for a spatial lesson), fail.
 `;
 async function runExpectationsCritic(unit, lessonExpectations) {
