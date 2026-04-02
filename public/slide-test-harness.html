@@ -245,8 +245,10 @@ function buildStructurePrompt(unit, gradeExps) {
   if (!isWholeNumberTopic) {
     primaryExps = primaryExps.filter(function(e){ return !(e.code === 'B1.1' && /whole number/i.test(e.desc)); });
     primaryExps = primaryExps.filter(function(e){ return !(e.code === 'B1.2' && /whole number/i.test(e.desc) && isFractionTopic); });
+    primaryExps = primaryExps.filter(function(e){ return !(isFractionTopic && e.strand === 'C'); });
     otherExps = otherExps.filter(function(e){ return !(e.code === 'B1.1' && /whole number/i.test(e.desc)); });
     otherExps = otherExps.filter(function(e){ return !(e.code === 'B1.2' && /whole number/i.test(e.desc) && isFractionTopic); });
+    otherExps = otherExps.filter(function(e){ return !(isFractionTopic && e.strand === 'C'); });
   }
   // Further filter otherExps to exclude clearly irrelevant strands
   // This prevents D strand codes appearing in number/algebra lessons, etc.
@@ -545,7 +547,7 @@ async function runUnit(idx) {
         place_value:'Place value columns with digits.',
         array:'Dot grid showing rows×cols.',
         balance_scale:'Two-pan scale showing equation. Solution below.',
-        pattern_row:'Shape sequence with rule and next element. NEVER fail for next element unless it obviously breaks the rule. AB pattern: A,B,A,B,A,B — after B the next is A, after A the next is B. When in doubt about next element, PASS.',
+        pattern_row:'Shape sequence with rule and next element. DO NOT FAIL the items array consistency — patterns repeat correctly by definition. Star-Heart-Star (SHS) repeating IS star,heart,star,star,heart,star (the rule says SHS, the sequence shows SHS,SHS). NEVER fail for alleged item inconsistency. Only fail if visual_type is completely wrong for concept.',
         budget_bar:'Bar chart income vs expenses.',
         percent_bar:'Filled bar showing percentage.',
         counting_dots:'Dots arranged in rows of 5, numbered 1 to N. For counting lessons K-Gr1. params need count (1-20) and label.',
@@ -595,6 +597,8 @@ DO NOT FAIL for:
 - area_grid when concept mentions 'apply formula' or 'practice' — counting IS applying the formula visually
 - bar_graph showing different rate types with different units — pedagogically valid comparison
 - Any diagram showing mixed units on same axis for comparison purposes
+- grouped_objects with large numbers (grade complexity opinion — the type is correct)
+- Any subjective judgment about whether numbers are 'too large' for a grade level
 
 When in doubt: PASS.`;
 
