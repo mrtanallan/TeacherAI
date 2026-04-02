@@ -1921,8 +1921,11 @@ async function generate() {
     const mappedStrand = strandMap[strands[0]];
     if (mappedStrand) primaryStrand2 = mappedStrand;
   }
-  const primaryExps2 = relevantExps.filter(e => e.strand === primaryStrand2);
-  const otherExps2 = relevantExps.filter(e => e.strand !== primaryStrand2);
+  // Filter B1.1 (whole numbers) from topics that aren't about whole numbers
+  const isWholeNumberTopic2 = /count|whole number|place value|composing|decomposing/.test(topicLower2);
+  const filterB11 = e => isWholeNumberTopic2 || !(e.code === 'B1.1' && /whole number/i.test(e.desc));
+  const primaryExps2 = relevantExps.filter(e => e.strand === primaryStrand2).filter(filterB11);
+  const otherExps2 = relevantExps.filter(e => e.strand !== primaryStrand2).filter(filterB11);
   const sortedExps2 = [...primaryExps2, ...otherExps2].slice(0,15);
   const expContext = sortedExps2.length
     ? (isMathSubj
