@@ -5157,13 +5157,30 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
   // Layout strategy: alternate between image-led and diagram-led slides
   // Complex SVGs (tables, chains, cycles) fill the full panel — no image overlay
   // Simple SVGs (concept_card, science_diagram) pair with image as right panel
-  const RICH_SVG_TYPES = new Set(['comparison_table','food_chain','cycle_diagram',
-    'worked_steps','fraction_bar','fraction_circle','fraction_compare','bar_graph',
-    'line_graph','pie_chart','scatter_plot','anchor_chart','reading_strategy',
-    'writing_process','story_map','area_grid','number_line','coordinate_graph',
-    'pictograph','percent_bar','integer_line','t_table','place_value','isometric_box',
+  // RICH_SVG_TYPES: diagrams that fill the visual panel well on their own
+  // These use diagram-led layout (full SVG, no AI image overlay)
+  // Everything else uses image-led layout (AI image on right, key point on left)
+  const RICH_SVG_TYPES = new Set([
+    // Data/comparison visuals — need full width
+    'comparison_table','anchor_chart','reading_strategy','story_map',
+    'writing_process','sentence_frames','venn_diagram',
+    // Math diagrams — precise, need full space
+    'worked_steps','fraction_bar','fraction_circle','fraction_compare',
+    'fraction_circle_compare','area_grid','number_line','coordinate_graph',
+    'bar_graph','line_graph','pie_chart','scatter_plot','pictograph',
+    'percent_bar','integer_line','t_table','place_value','isometric_box',
     'triangle_area','parallelogram_area','pythagorean','transform_overview',
-    'balance_scale','sentence_frames']);
+    'transform_reflect','transform_rotate','transform_translate',
+    'balance_scale','probability_scale','budget_bar','money_display',
+    'perimeter_shape','labelled_shape','formula_display',
+    // Science diagrams — need space
+    'food_chain','cycle_diagram','three_d_shapes',
+    // These are good enough to stand alone
+    'concept_card','word_web',
+    // K-early grade visuals
+    'ten_frame','counting_dots','shape_grid','sort_diagram',
+    'grouped_objects','measurement_bar','angle_types','pattern_row','array',
+  ]);
 
   const contentSlides=(sd.content_slides||[]).slice(0,4).map((cs,i)=>{
     const total=Math.min((sd.content_slides||[]).length,4);
