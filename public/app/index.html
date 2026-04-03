@@ -2409,6 +2409,8 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
 
     genC = {};
     window._slideData = null; // clear cached slides — new lesson generated
+    var pb2 = document.getElementById('pptxBtn');
+    if (pb2) { pb2.disabled = true; pb2.style.opacity = '.4'; pb2.style.cursor = 'not-allowed'; pb2.title = 'Generate slides first by clicking Present'; }
     outputKeys.forEach(k => { genC[k] = {orig:parsed[k]||'', cur:parsed[k]||''}; });
     answerKeyKeys.forEach(k => { if(parsed[k]) genC[k]={orig:parsed[k],cur:parsed[k]}; });
     const lessonExpectations = parsed.expectations || preMatchedExp || [];
@@ -2539,7 +2541,7 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations) {
 
     const slideBtns = k==='lesson_plan' ? `
       <button class="btn b-sage b-sm" onclick="presentSlides(event)" style="white-space:nowrap;">▶ Present</button>
-      <button class="btn b-out b-sm" onclick="downloadPPTX()" style="white-space:nowrap;" title="Download as PowerPoint for Google Slides">⬇ Download Slides</button>
+      <button class="btn b-out b-sm" id="pptxBtn" onclick="downloadPPTX()" style="white-space:nowrap;opacity:.4;cursor:not-allowed;" title="Generate slides first by clicking Present" disabled>⬇ Download Slides</button>
       <button class="btn b-out b-sm" id="gSlidesBtn" onclick="exportToGoogleSlides()" style="white-space:nowrap;display:none;" title="Export to Google Slides">🔗 Google Slides</button>` : '';
 
     const wsLinkBtns = isWS ? (k.match(/student_worksheet_[A-D]$/) ? `
@@ -3168,6 +3170,9 @@ async function generateSlideData(callerBtn) {
     const isScience = (subject||'').toLowerCase().includes('science');
 
     window._slideData = {sd, topic, subject, gradeStr, detectedTheme};
+    // Enable Download Slides button now that slide data exists
+    var pb = document.getElementById('pptxBtn');
+    if (pb) { pb.disabled = false; pb.style.opacity = '1'; pb.style.cursor = 'pointer'; pb.title = 'Download as PowerPoint for Google Slides'; }
 
     // ── STEP 1b: Fetch contextual image in parallel (non-blocking) ──
     // AI image for Minds On slide (all subjects)
