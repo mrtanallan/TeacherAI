@@ -1432,7 +1432,7 @@ function handleOAuthRedirect() {
     }, 1500);
   }
   if (params.get('upgrade') === 'cancel') {
-    showToast('Upgrade cancelled — you're still on the free plan.', 4000);
+    showToast("Upgrade cancelled — you're still on the free plan.", 4000);
     window.history.replaceState({}, '', window.location.pathname);
   }
 }
