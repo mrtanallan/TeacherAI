@@ -1672,6 +1672,7 @@ function toggleGradePill(btn) {
   btn.classList.toggle('selected');
   syncGradePillsToSelects();
   checkScienceSplitNote();
+  updateTopicSuggestions();  // Re-filter topics when grade changes
 }
 
 function checkScienceSplitNote() {
@@ -1738,7 +1739,7 @@ function addExtraGrade() {
 // ============================================================
 const TOPIC_SUGGESTIONS = {
   'Language / Literacy': [
-    'Making Inferences','Main Idea and Supporting Details','Author\'s Purpose',
+    'Making Inferences','Main Idea and Supporting Details','Author’s Purpose',
     'Text Features','Making Connections','Visualizing','Summarizing',
     'Cause and Effect','Compare and Contrast','Point of View',
     'Narrative Writing','Persuasive Writing','Procedural Writing',
@@ -1796,7 +1797,74 @@ function updateTopicSuggestions() {
   const list = document.getElementById('topicSuggestions');
   const placeholder = document.getElementById('topic');
   if (!list) return;
-  const suggestions = TOPIC_SUGGESTIONS[subj] || TOPIC_SUGGESTIONS['Language / Literacy'];
+
+  // For Science: filter topics by selected grades
+  let suggestions;
+  if (subj === 'Science & Technology') {
+    const selectedGrades = [...document.querySelectorAll('.grade-pill-btn.selected')]
+      .map(b => b.dataset.grade)
+      .filter(Boolean)
+      .map(g => g.replace('Grade ', '').replace('Kindergarten','K'));
+    const SCIENCE_BY_GRADE = {
+      '1': ['Living Things and Their Needs','Plants and Animals','Materials and Their Properties','Strong Structures','Daily and Seasonal Changes'],
+      '2': ['Growth and Changes in Plants','Properties of Materials','Changing Materials','Strong and Stable Structures','Air and Water'],
+      '3': ['Habitats and Communities','Food Chains','Soils','Magnets','Strong Structures'],
+      '4': ['Habitats and Communities','Animal Adaptations','Rocks and Minerals','Pulleys and Gears','Weather'],
+      '5': ['Biodiversity','Ecosystems','Properties of Matter','Simple Machines','Conservation of Energy','Space and Earth Systems'],
+      '6': ['Photosynthesis','Cells','Electricity','Flight','Space Systems'],
+      '7': ['Ecosystems and Biodiversity','Pure Substances and Mixtures','Mechanical Systems','Water Systems'],
+      '8': ['Cells and Human Body Systems','Properties of Fluids','Fluids and Technology','Light and Optical Systems','Climate Change'],
+      'K': ['Living and Non-Living Things','Seasonal Changes','Materials Around Us'],
+      'all': ['Scientific Method','Scientific Inquiry','Environmental Sustainability','Technology Design','Engineering Design','Experiments']
+    };
+    if (selectedGrades.length > 0) {
+      const gradeTopics = new Set(SCIENCE_BY_GRADE.all || []);
+      selectedGrades.forEach(g => { (SCIENCE_BY_GRADE[g]||[]).forEach(t => gradeTopics.add(t)); });
+      suggestions = [...gradeTopics].sort();
+    } else {
+      // No grade selected — show all science topics
+      suggestions = [...new Set(Object.values(SCIENCE_BY_GRADE).flat())].sort();
+    }
+  } else if (subj === 'Mathematics') {
+    const MATH_BY_GRADE = {
+      'K':  ['Counting','Number Sense','Shapes','Patterns','Sorting','Measurement'],
+      '1':  ['Addition to 20','Subtraction to 20','Number Sense','2D and 3D Shapes','Patterns','Measurement','Money'],
+      '2':  ['Addition and Subtraction to 100','Place Value','Fractions','Multiplication Intro','Patterning','Data and Graphs','Measurement'],
+      '3':  ['Multiplication','Division','Fractions','Place Value to 1000','Patterning','Data and Graphs','Area and Perimeter','Money'],
+      '4':  ['Multiplication and Division','Fractions','Decimals','Area of Rectangles','Angles','Probability','Patterns','Financial Literacy'],
+      '5':  ['Fractions','Decimals','Multiplication','Division','Area and Perimeter','Volume','Data and Graphs','Patterning','Financial Literacy'],
+      '6':  ['Fractions','Decimals','Percentages','Ratios','Area of Triangles and Parallelograms','Circle Graphs','Equations','Financial Literacy'],
+      '7':  ['Fractions','Decimals','Percentages','Integers','Ratios and Rates','Circle Area and Circumference','Linear Relations','Probability','Financial Literacy'],
+      '8':  ['Integers','Fractions','Percentages','Pythagorean Theorem','Linear Equations','Data Analysis','Scatter Plots','Financial Literacy - Compound Interest'],
+      'all': ['Addition','Subtraction','Multiplication','Division','Patterns','Data and Graphs','Measurement','Financial Literacy']
+    };
+    const LANG_BY_GRADE = {
+      'K':  ['Oral Communication','Phonological Awareness','Letter Recognition','Rhyming','Story Elements'],
+      '1':  ['Reading Comprehension','Phonics','Sight Words','Story Elements','Oral Communication','Sentence Structure'],
+      '2':  ['Reading Comprehension','Making Connections','Narrative Writing','Phonics','Vocabulary','Main Idea'],
+      '3':  ['Making Inferences','Main Idea','Narrative Writing','Procedural Writing','Vocabulary','Text Features'],
+      '4':  ['Making Inferences','Author’s Purpose','Persuasive Writing','Narrative Writing','Point of View','Figurative Language','Media Literacy'],
+      '5':  ['Making Inferences','Author’s Purpose','Persuasive Writing','Short Story','Descriptive Writing','Figurative Language','Media Literacy','Point of View'],
+      '6':  ['Making Inferences','Compare and Contrast','Persuasive Writing','Short Story','Research Writing','Figurative Language','Media Literacy'],
+      '7':  ['Making Inferences','Author’s Purpose','Argumentative Writing','Short Story','Research Writing','Figurative Language','Point of View','Media Literacy'],
+      '8':  ['Critical Analysis','Argumentative Writing','Literary Devices','Research Writing','Point of View','Media Literacy','Figurative Language'],
+      'all': ['Reading Comprehension','Vocabulary','Oral Communication','Spelling Strategies','Grammar','Punctuation']
+    };
+    const selectedGrades2 = [...document.querySelectorAll('.grade-pill-btn.selected')]
+      .map(b => b.dataset.grade).filter(Boolean)
+      .map(g => g.replace('Grade ', '').replace('Kindergarten','K'));
+    const gradeMap = subj === 'Mathematics' ? MATH_BY_GRADE : LANG_BY_GRADE;
+    if (selectedGrades2.length > 0) {
+      const gradeTopics = new Set(gradeMap.all || []);
+      selectedGrades2.forEach(g => { (gradeMap[g]||[]).forEach(t => gradeTopics.add(t)); });
+      suggestions = [...gradeTopics].sort();
+    } else {
+      suggestions = TOPIC_SUGGESTIONS[subj] || TOPIC_SUGGESTIONS['Language / Literacy'];
+    }
+  } else {
+    suggestions = TOPIC_SUGGESTIONS[subj] || TOPIC_SUGGESTIONS['Language / Literacy'];
+  }
+
   list.innerHTML = suggestions.map(s => `<option value="${s}">`).join('');
   // Update placeholder to be subject-specific
   const placeholders = {
@@ -1823,7 +1891,7 @@ function onSubjectChange() {
     if (rrChip) rrChip.checked=true;
   } else {
     if (strandSection) strandSection.style.display='none';
-    if (rrChip) rrChip.checked=false;
+    if (rrChip) rrChip.checked = !subj.toLowerCase().includes('math');
     const notes = {
       'Mathematics':'📐 Ontario Math 2020 — Strands: Number, Algebra, Data, Spatial Sense, Financial Literacy.',
       'Science & Technology':'🔬 Ontario Science 2022 curriculum.',
@@ -5057,11 +5125,11 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
   const sMindson = sd.minds_on ? slideWrap(`<svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
     <rect width="1200" height="675" fill="${GREY}"/>${corners('#E07B39')}${headerBar('Minds On!','#E07B39')}
   </svg>
-  ${mindsonImg ? `<div style="position:absolute;top:${HEADER_H}px;right:0;bottom:0;width:420px;z-index:1;overflow:hidden;">
-    <img src="${mindsonImg}" style="width:100%;height:100%;object-fit:cover;opacity:0.92" onerror="this.parentElement.style.display='none'" alt=""/>
-    <div style="position:absolute;inset:0;background:linear-gradient(to right, ${GREY} 0%, transparent 40%)"></div>
+  ${mindsonImg ? `<div style="position:absolute;top:${HEADER_H}px;right:0;bottom:0;width:400px;z-index:1;overflow:hidden;background:#e8e7e3">
+    <img src="${mindsonImg}" style="width:100%;height:100%;object-fit:cover;object-position:center;opacity:0.95;display:block" onerror="this.parentElement.style.display='none'" alt=""/>
+    <div style="position:absolute;top:0;left:0;bottom:0;width:40px;background:linear-gradient(to right,${GREY},transparent)"></div>
   </div>` : ''}
-  <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+24}px ${mindsonImg ? '460px' : '60px'} 24px 60px;display:flex;flex-direction:column;justify-content:center;">
+  <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+24}px ${mindsonImg ? '420px' : '60px'} 24px 60px;display:flex;flex-direction:column;justify-content:center;">
     <div style="background:white;border-radius:14px;padding:28px 32px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:22px">
       <p style="font-size:22px;color:${NAVY};line-height:1.6;font-weight:500;margin:0">${esc(sd.minds_on.hook||'')}</p>
     </div>
@@ -5092,11 +5160,11 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
     const existingSVG = cs.svg_html||'';
     const slideImg = slideImgs[i] || null;
 
-    // AI image panel — right side of slide, shows alongside SVG diagram
+    // AI image panel — right side of slide, properly contained
     const slideImgPanel = slideImg ? `
-      <div style="position:absolute;top:${HEADER_H}px;right:0;bottom:0;width:360px;z-index:3;overflow:hidden;border-left:3px solid rgba(255,255,255,0.3)">
-        <img src="${slideImg}" style="width:100%;height:100%;object-fit:cover" alt="" onerror="this.parentElement.style.display='none'"/>
-        <div style="position:absolute;inset:0;background:linear-gradient(to right, rgba(244,243,239,0.15) 0%, transparent 30%)"></div>
+      <div style="position:absolute;top:${HEADER_H}px;right:0;bottom:0;width:340px;z-index:3;overflow:hidden;border-left:4px solid white;background:#f0efeb">
+        <img src="${slideImg}" style="width:100%;height:100%;object-fit:cover;object-position:center;display:block" alt="" onerror="this.parentElement.style.display='none'"/>
+        <div style="position:absolute;top:0;left:0;bottom:0;width:24px;background:linear-gradient(to right,rgba(244,243,239,0.9),transparent)"></div>
       </div>` : '';
 
     return slideWrap(`
@@ -5106,7 +5174,7 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
         <text x="1152" y="46" text-anchor="end" font-family="'Courier New',monospace" font-size="14" fill="rgba(255,255,255,.55)">${i+1}/${total}</text>
       </svg>
       ${slideImgPanel}
-      <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+16}px ${slideImg?'380px':'48px'} 16px 48px;display:flex;flex-direction:row;gap:24px;align-items:center">
+      <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+16}px ${slideImg?'356px':'48px'} 16px 48px;display:flex;flex-direction:row;gap:24px;align-items:center">
         <div style="flex:0 0 34%;display:flex;flex-direction:column;justify-content:center;gap:12px">
           <div style="background:white;border-left:5px solid ${TEAL};border-radius:0 10px 10px 0;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,.06)">
             <p style="font-size:17px;color:${NAVY};line-height:1.6;font-weight:500;margin:0">${esc(cs.key_point||'')}</p>
