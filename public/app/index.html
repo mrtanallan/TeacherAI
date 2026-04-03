@@ -3025,7 +3025,7 @@ async function generateSlideData(callerBtn) {
     if (callerBtn) { callerBtn.disabled=false; callerBtn.textContent='▶ Present'; }
     const {wikiImg=null, wikiTitle=null, wikiLicense=null, mindsonImg=null} = window._slideData;
     console.log('[IMG] Opening presenter with wikiImg:', wikiImg ? wikiImg.slice(0,80) : 'NULL', 'mindsonImg:', mindsonImg ? mindsonImg.slice(0,80) : 'NULL');
-    const deckWindow = openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg);
+    const deckWindow = openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense);
 
     // ── STEP 4: Fire agent loop for any slides that didn't get a hardcoded visual ─
     const needsAgent = slides.slice(0,4).some(s=>!s.svg_html);
@@ -5014,14 +5014,14 @@ async function presentSlides(e) {
     if (btn) { btn.disabled=false; btn.textContent='▶ Present'; }
     if (!ok || !window._slideData) return;
   } else {
-    openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg);
+    openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense);
   }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
 // HTML PRESENTER — opens immediately, visuals injected via postMessage
 // ══════════════════════════════════════════════════════════════════════════════
-function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg) {
+function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense) {
   const date = new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -5251,7 +5251,7 @@ window.addEventListener('message',function(e){
 }
 function downloadSlidesHTML() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
-  openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg);
+  openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense);
   showToast('Slides opened — use browser File → Save Page As to download');
 }
 
