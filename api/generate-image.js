@@ -1,13 +1,10 @@
 // api/generate-image.js — TeacherAI image generation
-// Matches generate.js format exactly: Node.js API Routes (req, res)
-// type=ai        → fal.ai Flux Schnell (queue submit → poll)
-// type=wikimedia → Wikimedia Commons (free, no key)
+// Flux Schnell at 8 steps + strong negative prompt for text suppression
 
 const FAL_KEY = process.env.FAL_API_KEY;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-// ── Cache ─────────────────────────────────────────────────────────────────────
 async function getCached(key) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return null;
   try {
@@ -33,49 +30,50 @@ async function setCache(key, url) {
       },
       body: JSON.stringify({ cache_key: key, image_url: url }),
     });
-  } catch { /* non-fatal */ }
+  } catch {}
 }
 
-// ── fal.ai: submit to queue then poll ────────────────────────────────────────
 async function generateAIImage(topic, subject, grade, theme) {
   if (!FAL_KEY) throw new Error('FAL_API_KEY not set');
 
   const subjectLower = (subject || '').toLowerCase();
-  const themeStr = theme ? `, ${theme} themed` : '';
+  const themeStr = theme ? `, ${theme} theme` : '';
   const gradeNum = (grade || '').replace(/Grade\s*/i, '').replace(/Gr\.\s*/i, '');
 
   const style = subjectLower.includes('science')
-    ? 'watercolour nature illustration, soft colours, botanical style, educational'
+    ? 'soft watercolour nature painting, botanical illustration'
     : subjectLower.includes('math')
-    ? 'clean flat illustration, geometric shapes, bright primary colours, minimal'
-    : 'warm children\'s book illustration, soft colours, inviting, expressive';
-
-  // Strip topic down to visual concepts only — avoid words that appear in generated images
-  const visualTopic = topic
-    .replace(/types of|parts of|how|what are|introduction to|overview of/gi, '')
-    .trim();
+    ? 'clean flat vector illustration, geometric shapes, bright colours'
+    : 'warm children\'s book painting, cosy illustration';
 
   const prompt = [
     style,
-    visualTopic + themeStr,
-    'Ontario Grade ' + (gradeNum || 'K-8') + ' classroom',
-    'child-friendly illustration',
-    'painterly style, soft colours',
-    'NO TEXT of any kind',
-    'NO WORDS, NO LETTERS, NO LABELS, NO CAPTIONS, NO TITLES',
-    'NO diagrams with text',
-    'purely visual scene or illustration',
+    `${topic}${themeStr}`,
+    `Grade ${gradeNum || 'K-8'} classroom`,
+    'beautiful artwork',
+    'soft warm colours',
+    'high quality',
+    'no text anywhere in image',
   ].join(', ');
 
-  // Use synchronous endpoint — blocks until image is ready (2-6s for Schnell)
-  // This works within Vercel Hobby 10s limit for Flux Schnell (4 steps)
+  const negativePrompt = [
+    'text', 'letters', 'words', 'numbers', 'labels', 'captions',
+    'titles', 'headings', 'watermark', 'writing', 'typography',
+    'diagram', 'chart', 'infographic', 'ugly', 'blurry',
+    'distorted', 'low quality', 'bad art',
+  ].join(', ');
+
   const res = await fetch('https://fal.run/fal-ai/flux/schnell', {
     method: 'POST',
-    headers: { Authorization: `Key ${FAL_KEY}`, 'Content-Type': 'application/json' },
+    headers: {
+      Authorization: `Key ${FAL_KEY}`,
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({
       prompt,
+      negative_prompt: negativePrompt,
       image_size: 'portrait_4_3',
-      num_inference_steps: 4,
+      num_inference_steps: 8,
       num_images: 1,
       enable_safety_checker: true,
     }),
@@ -87,67 +85,11 @@ async function generateAIImage(topic, subject, grade, theme) {
   }
 
   const data = await res.json();
-  // Sync endpoint returns images directly at top level
   const url = data?.images?.[0]?.url;
-  if (!url) throw new Error(`No URL. Response keys: ${Object.keys(data).join(',')}`);
+  if (!url) throw new Error(`No URL in response`);
   return url;
 }
 
-// ── Wikimedia Commons ─────────────────────────────────────────────────────────
-async function getWikimediaImage(topic) {
-  const query = topic
-    .replace(/grade\s*\d+/gi, '')
-    .replace(/ontario|curriculum|lesson|unit|introduction to/gi, '')
-    .replace(/[-\u2013\u2014:]/g, ' ')
-    .trim();
-
-  const url = new URL('https://commons.wikimedia.org/w/api.php');
-  url.searchParams.set('action', 'query');
-  url.searchParams.set('format', 'json');
-  url.searchParams.set('generator', 'search');
-  url.searchParams.set('gsrnamespace', '6');
-  url.searchParams.set('gsrsearch', query);  // use topic directly, no extra keywords
-  url.searchParams.set('gsrlimit', '20');    // more candidates for better filtering
-  url.searchParams.set('prop', 'imageinfo');
-  url.searchParams.set('iiprop', 'url|size|mime|extmetadata');
-  url.searchParams.set('iiurlwidth', '800');
-  url.searchParams.set('origin', '*');
-
-  const r = await fetch(url.toString(), {
-    headers: { 'User-Agent': 'TeacherAI/1.0 (teacherai.ca)' }
-  });
-  if (!r.ok) throw new Error(`Wikimedia ${r.status}`);
-
-  const data = await r.json();
-  const pages = Object.values(data?.query?.pages || {});
-
-  const candidates = pages.map(p => {
-    const info = p.imageinfo?.[0];
-    if (!info) return null;
-    const mime = info.mime || '';
-    if (!mime.startsWith('image/jpeg') && !mime.startsWith('image/png')) return null;
-    if ((info.width || 0) < 300 || (info.height || 0) < 200) return null;
-    const ratio = (info.width || 1) / (info.height || 1);
-    if (ratio > 4 || ratio < 0.4) return null;
-    const license = (info.extmetadata?.LicenseShortName?.value || '').toLowerCase();
-    if (license && !license.includes('cc') && !license.includes('public domain')) return null;
-    const title = (p.title || '').replace('File:', '').toLowerCase();
-    const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 3);
-    const titleMatchScore = queryWords.filter(w => title.includes(w)).length * 3;
-    return {
-      url: info.thumburl || info.url,
-      title: (p.title || '').replace('File:', ''),
-      license: info.extmetadata?.LicenseShortName?.value || 'CC',
-      score: titleMatchScore + (info.width > info.height ? 2 : 0) + (info.width > 500 ? 1 : 0),
-    };
-  }).filter(Boolean);
-
-  if (!candidates.length) return null;
-  candidates.sort((a, b) => b.score - a.score);
-  return candidates[0];
-}
-
-// ── Handler — matches generate.js pattern exactly ─────────────────────────────
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -158,28 +100,19 @@ export default async function handler(req, res) {
   const { type = 'ai', topic, subject, grade, theme } = req.body || {};
   if (!topic) return res.status(400).json({ error: 'topic required' });
 
-  const cacheKey = `${type}:${(subject||'').slice(0,20)}:${(grade||'').slice(0,10)}:${topic.slice(0,60)}`;
+  // v3 cache key — forces regeneration of old cached images
+  const cacheKey = `v3:${(subject||'').slice(0,20)}:${(grade||'').slice(0,10)}:${topic.slice(0,60)}`;
 
   try {
     const cached = await getCached(cacheKey);
     if (cached) return res.status(200).json({ url: cached, cached: true });
 
-    let imageUrl, meta = {};
-
-    if (type === 'wikimedia') {
-      const result = await getWikimediaImage(topic);
-      if (!result) return res.status(200).json({ url: null, reason: 'no wikimedia match' });
-      imageUrl = result.url;
-      meta = { title: result.title, license: result.license };
-    } else {
-      imageUrl = await generateAIImage(topic, subject, grade, theme);
-    }
-
+    const imageUrl = await generateAIImage(topic, subject, grade, theme);
     await setCache(cacheKey, imageUrl);
-    return res.status(200).json({ url: imageUrl, cached: false, ...meta });
+    return res.status(200).json({ url: imageUrl, cached: false });
 
   } catch (err) {
-    console.error('[generate-image]', type, topic, err.message);
+    console.error('[generate-image]', topic, err.message);
     return res.status(200).json({ url: null, error: err.message });
   }
 }
