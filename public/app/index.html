@@ -2259,11 +2259,14 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations) {
 
   const _subj = curSess?.subject||'';
   const _isMath = _subj.toLowerCase().includes('math');
+  const _isScience = _subj.toLowerCase().includes('science');
   const strandNames = _isMath
     ? {B:'Number',C:'Algebra',D:'Data',E:'Spatial Sense',F:'Financial Literacy'}
+    : _isScience
+    ? {A:'STEM Skills',B:'Life Systems',C:'Matter and Energy',D:'Structures and Mechanisms',E:'Earth and Space Systems'}
     : {A:'Literacy Connections',B:'Foundations of Language',C:'Comprehension',D:'Composition'};
-  const strandColors = {A:'var(--blue)',B:'var(--amber)',C:'var(--sage)',D:'var(--rust)'};
-  const strandBgs   = {A:'var(--blue-l)',B:'var(--amber-l)',C:'var(--sage-l)',D:'var(--rust-l)'};
+  const strandColors = {A:'var(--blue)',B:'var(--amber)',C:'var(--sage)',D:'var(--rust)',E:'var(--blue)'};
+  const strandBgs   = {A:'var(--blue-l)',B:'var(--amber-l)',C:'var(--sage-l)',D:'var(--rust-l)',E:'var(--blue-l)'};
 
   // Deduplicate expectations by code (split-grade lessons can return same code twice)
   const seen = new Set();
@@ -2950,58 +2953,48 @@ async function generateSlideData(callerBtn) {
     const imagePromises = [];
 
     const fetchMindsonImage = async () => {
-      console.log('[IMG] Starting AI image fetch for:', topic, subject);
       try {
         const r = await authFetch('/api/generate-image', {
           method: 'POST',
           body: JSON.stringify({ type: 'ai', topic, subject, grade: gradeStr, theme: detectedTheme })
         });
-        console.log('[IMG] AI image response status:', r.status, r.ok);
         if (r.ok) {
           const d = await r.json();
-          console.log('[IMG] AI image response data:', JSON.stringify(d).slice(0,200));
-          if (d.url) {
-            window._slideData.mindsonImg = d.url;
-            console.log('[IMG] mindsonImg set to:', d.url.slice(0,80));
-          } else {
-            console.warn('[IMG] No URL in AI image response:', d);
-          }
-        } else {
-          const txt = await r.text();
-          console.error('[IMG] AI image fetch failed:', r.status, txt.slice(0,200));
+          if (d.url) { window._slideData.mindsonImg = d.url; console.log('[IMG] mindsonImg set'); }
         }
-      } catch(e) { console.error('[IMG] AI image exception:', e.message); }
+      } catch(e) { console.warn('[IMG] mindsonImg failed:', e.message); }
     };
 
-    const fetchWikiImage = async () => {
-      if (!isScience) { console.log('[IMG] Skipping wiki — not science, subject:', subject); return; }
-      console.log('[IMG] Starting Wikimedia fetch for:', topic);
-      try {
-        const r = await authFetch('/api/generate-image', {
-          method: 'POST',
-          body: JSON.stringify({ type: 'wikimedia', topic, subject, grade: gradeStr })
-        });
-        console.log('[IMG] Wiki response status:', r.status, r.ok);
-        if (r.ok) {
-          const d = await r.json();
-          console.log('[IMG] Wiki response data:', JSON.stringify(d).slice(0,200));
-          if (d.url) {
-            window._slideData.wikiImg = d.url;
-            window._slideData.wikiTitle = d.title;
-            window._slideData.wikiLicense = d.license;
-            console.log('[IMG] wikiImg set to:', d.url.slice(0,80));
-          } else {
-            console.warn('[IMG] No URL in wiki response:', d);
+    // Per-slide AI images — one per content slide using slide title as prompt
+    const fetchSlideImages = async () => {
+      const slides = (sd.content_slides||[]).slice(0,4);
+      if (!slides.length) return;
+      // Fire all 4 in parallel
+      const promises = slides.map(async (cs, i) => {
+        const slidePrompt = cs.title || topic;
+        try {
+          const r = await authFetch('/api/generate-image', {
+            method: 'POST',
+            body: JSON.stringify({ type: 'ai', topic: slidePrompt, subject, grade: gradeStr, theme: detectedTheme })
+          });
+          if (r.ok) {
+            const d = await r.json();
+            if (d.url) {
+              window._slideData.slideImgs = window._slideData.slideImgs || [];
+              window._slideData.slideImgs[i] = d.url;
+              console.log('[IMG] slide', i, 'image set');
+            }
           }
-        } else {
-          const txt = await r.text();
-          console.error('[IMG] Wiki fetch failed:', r.status, txt.slice(0,200));
-        }
-      } catch(e) { console.error('[IMG] Wiki exception:', e.message); }
+        } catch(e) { console.warn('[IMG] slide', i, 'image failed:', e.message); }
+      });
+      await Promise.all(promises);
     };
+
+    // Wikimedia removed — too unpredictable. Using AI images for all slides.
+    const fetchWikiImage = async () => { return; };
 
     // Fire both requests in parallel — don't await, they complete async
-    const imageFetchPromise = Promise.all([fetchMindsonImage(), fetchWikiImage()]);
+    const imageFetchPromise = Promise.all([fetchMindsonImage(), fetchWikiImage(), fetchSlideImages()]);
 
     // ── STEP 2: Generate hardcoded visuals synchronously (instant for 90%+ of slides) ──
     if (callerBtn) callerBtn.textContent='⏳ Drawing visuals...';
@@ -3023,9 +3016,9 @@ async function generateSlideData(callerBtn) {
     await Promise.race([imageFetchPromise, new Promise(r => setTimeout(r, 15000))]);
     clearInterval(imgLoadTimer);
     if (callerBtn) { callerBtn.disabled=false; callerBtn.textContent='▶ Present'; }
-    const {wikiImg=null, wikiTitle=null, wikiLicense=null, mindsonImg=null} = window._slideData;
-    console.log('[IMG] Opening presenter with wikiImg:', wikiImg ? wikiImg.slice(0,80) : 'NULL', 'mindsonImg:', mindsonImg ? mindsonImg.slice(0,80) : 'NULL');
-    const deckWindow = openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense);
+    const {wikiImg=null, wikiTitle=null, wikiLicense=null, mindsonImg=null, slideImgs=[]} = window._slideData;
+    console.log('[IMG] Opening presenter — mindsonImg:', !!mindsonImg, 'slideImgs:', slideImgs.filter(Boolean).length);
+    const deckWindow = openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs);
 
     // ── STEP 4: Fire agent loop for any slides that didn't get a hardcoded visual ─
     const needsAgent = slides.slice(0,4).some(s=>!s.svg_html);
@@ -5014,14 +5007,15 @@ async function presentSlides(e) {
     if (btn) { btn.disabled=false; btn.textContent='▶ Present'; }
     if (!ok || !window._slideData) return;
   } else {
-    openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense);
+    openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense, window._slideData.slideImgs||[]);
   }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
 // HTML PRESENTER — opens immediately, visuals injected via postMessage
 // ══════════════════════════════════════════════════════════════════════════════
-function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense) {
+function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs) {
+  slideImgs = slideImgs || [];
   const date = new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -5093,20 +5087,16 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
   </div>`) : null;
 
   // CONTENT SLIDES — skeleton loading state, visuals injected via postMessage
-  const isScience = (subject||'').toLowerCase().includes('science');
   const contentSlides=(sd.content_slides||[]).slice(0,4).map((cs,i)=>{
     const total=Math.min((sd.content_slides||[]).length,4);
     const existingSVG = cs.svg_html||'';
+    const slideImg = slideImgs[i] || null;
 
-    // Wikimedia corner image — show on ALL science slides when available
-    // Remove !existingSVG condition — always show alongside the SVG diagram
-    const showWikiCorner = isScience && i === 0 && wikiImg;  // slide 1 only
-
-    // Science slide 1: show wiki image as a prominent right-side panel
-    const wikiCornerImg = showWikiCorner ? `
-      <div style="position:absolute;top:${HEADER_H}px;right:0;bottom:0;width:380px;z-index:3;overflow:hidden;border-left:3px solid white">
-        <img src="${wikiImg}" style="width:100%;height:100%;object-fit:cover" alt="${wikiTitle||''}" onerror="this.parentElement.style.display='none'"/>
-        ${wikiTitle ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:white;font-size:9px;padding:4px 8px;line-height:1.3">${esc(wikiTitle.slice(0,60))}${wikiLicense?' · '+wikiLicense:''}</div>` : ''}
+    // AI image panel — right side of slide, shows alongside SVG diagram
+    const slideImgPanel = slideImg ? `
+      <div style="position:absolute;top:${HEADER_H}px;right:0;bottom:0;width:360px;z-index:3;overflow:hidden;border-left:3px solid rgba(255,255,255,0.3)">
+        <img src="${slideImg}" style="width:100%;height:100%;object-fit:cover" alt="" onerror="this.parentElement.style.display='none'"/>
+        <div style="position:absolute;inset:0;background:linear-gradient(to right, rgba(244,243,239,0.15) 0%, transparent 30%)"></div>
       </div>` : '';
 
     return slideWrap(`
@@ -5115,8 +5105,8 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
         ${headerBar(esc(cs.title||'Key Concept'))}
         <text x="1152" y="46" text-anchor="end" font-family="'Courier New',monospace" font-size="14" fill="rgba(255,255,255,.55)">${i+1}/${total}</text>
       </svg>
-      ${wikiCornerImg}
-      <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+16}px ${showWikiCorner?'400px':'48px'} 16px 48px;display:flex;flex-direction:row;gap:24px;align-items:center">
+      ${slideImgPanel}
+      <div style="position:absolute;inset:0;z-index:2;padding:${HEADER_H+16}px ${slideImg?'380px':'48px'} 16px 48px;display:flex;flex-direction:row;gap:24px;align-items:center">
         <div style="flex:0 0 34%;display:flex;flex-direction:column;justify-content:center;gap:12px">
           <div style="background:white;border-left:5px solid ${TEAL};border-radius:0 10px 10px 0;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,.06)">
             <p style="font-size:17px;color:${NAVY};line-height:1.6;font-weight:500;margin:0">${esc(cs.key_point||'')}</p>
@@ -5252,7 +5242,7 @@ window.addEventListener('message',function(e){
 }
 function downloadSlidesHTML() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
-  openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense);
+  openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense, window._slideData.slideImgs||[]);
   showToast('Slides opened — use browser File → Save Page As to download');
 }
 
