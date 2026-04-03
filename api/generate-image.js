@@ -45,10 +45,10 @@ async function generateAIImage(topic, subject, grade, theme) {
   const gradeNum = (grade || '').replace(/Grade\s*/i, '').replace(/Gr\.\s*/i, '');
 
   const style = subjectLower.includes('science')
-    ? 'scientific illustration, educational, nature'
+    ? 'watercolour nature illustration, soft colours, botanical style, educational'
     : subjectLower.includes('math')
-    ? 'flat vector illustration, geometric, educational'
-    : 'colourful illustration, storybook style, cheerful';
+    ? 'clean flat illustration, geometric shapes, bright primary colours, minimal'
+    : 'warm children\'s book illustration, soft colours, inviting, expressive';
 
   // Strip topic down to visual concepts only — avoid words that appear in generated images
   const visualTopic = topic
@@ -74,7 +74,7 @@ async function generateAIImage(topic, subject, grade, theme) {
     headers: { Authorization: `Key ${FAL_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       prompt,
-      image_size: 'landscape_4_3',
+      image_size: 'portrait_4_3',
       num_inference_steps: 4,
       num_images: 1,
       enable_safety_checker: true,
