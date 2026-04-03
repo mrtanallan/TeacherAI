@@ -5540,6 +5540,7 @@ async function svgToPng(svgHtml, w, h) {
   });
   if (!res.ok) throw new Error('svg-to-png failed: ' + res.status);
   var data = await res.json();
+  if (!data.png) throw new Error('svg-to-png returned no image: ' + (data.error || 'unknown'));
   return 'data:image/png;base64,' + data.png;
 }
 
