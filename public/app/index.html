@@ -1762,15 +1762,14 @@ const TOPIC_SUGGESTIONS = {
     'Pythagorean Theorem','Scatter Plots','Linear Relations',
   ],
   'Science & Technology': [
-    'Life Systems','Habitats and Communities','Animal Adaptations',
-    'Growth and Changes in Plants','Human Body Systems','Biodiversity',
-    'Matter','States of Matter','Physical and Chemical Changes',
-    'Forces and Motion','Structures and Mechanisms','Simple Machines',
-    'Energy Forms','Heat and Temperature','Sound and Light',
-    'Earth and Space','Weather','Rocks and Minerals','Soil',
-    'Space Systems','Ecosystems','Environmental Sustainability',
-    'Scientific Inquiry','Scientific Method','Experiments',
-    'Technology Design','Engineering Design',
+    'Habitats and Communities','Animal Adaptations','Biodiversity','Ecosystems',
+    'Food Chains and Food Webs','Growth and Changes in Plants','Human Body Systems',
+    'Properties of Matter','Physical and Chemical Changes','States of Matter',
+    'Simple Machines','Forces and Motion','Structures and Mechanisms',
+    'Electricity','Conservation of Energy','Heat and Temperature','Sound and Light',
+    'Space Exploration and Solar System','Weather','Rocks and Minerals','Soils',
+    'Water Systems','Environmental Sustainability',
+    'Scientific Method','Engineering Design','Experiments',
   ],
   'Social Studies': [
     'Canadian Communities','Indigenous Peoples of Canada',
@@ -1806,16 +1805,16 @@ function updateTopicSuggestions() {
       .filter(Boolean)
       .map(g => g.replace('Grade ', '').replace('Kindergarten','K'));
     const SCIENCE_BY_GRADE = {
-      '1': ['Living Things and Their Needs','Plants and Animals','Materials and Their Properties','Strong Structures','Daily and Seasonal Changes'],
-      '2': ['Growth and Changes in Plants','Properties of Materials','Changing Materials','Strong and Stable Structures','Air and Water'],
-      '3': ['Habitats and Communities','Food Chains','Soils','Magnets','Strong Structures'],
+      'K': ['Living and Non-Living Things','Seasonal Changes','Needs of Living Things'],
+      '1': ['Needs of Living Things','Plants and Animals','Properties of Materials','Strong Structures','Seasonal Changes'],
+      '2': ['Growth and Changes in Plants','Properties of Materials','Air and Water in the Environment','Strong and Stable Structures'],
+      '3': ['Habitats and Communities','Food Chains and Food Webs','Soils in the Environment','Magnets','Strong Structures'],
       '4': ['Habitats and Communities','Animal Adaptations','Rocks and Minerals','Pulleys and Gears','Weather'],
-      '5': ['Biodiversity','Ecosystems','Properties of Matter','Simple Machines','Conservation of Energy','Space and Earth Systems'],
-      '6': ['Photosynthesis','Cells','Electricity','Flight','Space Systems'],
-      '7': ['Ecosystems and Biodiversity','Pure Substances and Mixtures','Mechanical Systems','Water Systems'],
-      '8': ['Cells and Human Body Systems','Properties of Fluids','Fluids and Technology','Light and Optical Systems','Climate Change'],
-      'K': ['Living and Non-Living Things','Seasonal Changes','Materials Around Us'],
-      'all': ['Scientific Method','Scientific Inquiry','Environmental Sustainability','Technology Design','Engineering Design','Experiments']
+      '5': ['Biodiversity','Human Activity and Ecosystems','Properties of Matter','Simple Machines','Conservation of Energy'],
+      '6': ['Photosynthesis','Cells and Cell Functions','Electricity','Flight','Space Exploration and Solar System'],
+      '7': ['Interactions in the Environment','Pure Substances and Mixtures','Mechanical Systems','Water Systems on Earth'],
+      '8': ['Cells and Human Body Systems','Properties of Fluids','Optics and Light','Climate Change and Earth Systems'],
+      'all': ['Scientific Method','Scientific Inquiry','Environmental Sustainability','Engineering Design','Experiments']
     };
     if (selectedGrades.length > 0) {
       const gradeTopics = new Set(SCIENCE_BY_GRADE.all || []);
