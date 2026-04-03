@@ -1133,6 +1133,9 @@ const BLABELS = {
   Object.defineProperty(BLABELS, 'answer_key_'+g, {
     get() { const gr = (window._curSessGrades||[])[i]||('Grade '+g); return '📋 '+gr+' Answer Key'; }, configurable:true
   });
+  Object.defineProperty(BLABELS, 'reading_resource_'+g, {
+    get() { const gr = (window._curSessGrades||[])[i]||('Grade '+g); return '📄 Reading — '+gr.replace('Kindergarten','KG').replace('Grade ','Gr. '); }, configurable:true
+  });
 });
 
 const SHAREABLE = ['student_worksheet','reading_resource','assessment_rubric','student_worksheet_A','student_worksheet_B','student_worksheet_C','student_worksheet_D'];
@@ -1665,7 +1668,21 @@ function resetWorkflow() {
 // ============================================================
 // GRADE PILLS
 // ============================================================
-function toggleGradePill(btn) { btn.classList.toggle('selected'); syncGradePillsToSelects(); }
+function toggleGradePill(btn) {
+  btn.classList.toggle('selected');
+  syncGradePillsToSelects();
+  checkScienceSplitNote();
+}
+
+function checkScienceSplitNote() {
+  const subj = (document.getElementById('subj')||{}).value || '';
+  const isScience = subj.toLowerCase().includes('science');
+  const selectedGrades = [...document.querySelectorAll('.grade-pill-btn.selected')];
+  const isSplit = selectedGrades.length > 1;
+  const noteEl = document.getElementById('scienceSplitNote');
+  if (!noteEl) return;
+  noteEl.style.display = (isScience && isSplit) ? 'block' : 'none';
+}
 
 function syncGradePillsToSelects() {
   const selected = [...document.querySelectorAll('.grade-pill-btn.selected')].map(b => b.dataset.grade);
@@ -1816,6 +1833,7 @@ function onSubjectChange() {
     };
     // subjectNote removed — banner hidden to reduce UI clutter
   }
+  checkScienceSplitNote();
 }
 
 // ============================================================
@@ -1985,14 +2003,19 @@ async function generate() {
     : '';
   const splitNote = isSplit ? `IMPORTANT: MULTI-GRADE SPLIT CLASS: ${grades.join(', ')}. Differentiate content per grade.` : '';
 
+  const isScience = (subj||'').toLowerCase().includes('science');
   const wsOutputKeys = outputs.includes('student_worksheet') && isSplit
     ? grades.map((_,i) => `student_worksheet_${String.fromCharCode(65+i)}`)
     : outputs.includes('student_worksheet') ? ['student_worksheet'] : [];
   const wsKeyNote = isSplit && wsOutputKeys.length > 1
     ? `Generate one worksheet per grade: ${wsOutputKeys.map((k,i)=>`"${k}" for ${grades[i]}`).join(', ')}.`
     : '';
+  // For science splits: also generate separate reading passages per grade (different content)
+  const rdOutputKeys = outputs.includes('reading_resource') && isSplit && isScience
+    ? grades.map((_,i) => `reading_resource_${String.fromCharCode(65+i)}`)
+    : outputs.includes('reading_resource') ? ['reading_resource'] : [];
 
-  const outputKeys = [...outputs.filter(k=>k!=='student_worksheet'), ...wsOutputKeys];
+  const outputKeys = [...outputs.filter(k=>k!=='student_worksheet' && k!=='reading_resource'), ...rdOutputKeys, ...wsOutputKeys];
   const ORDER = ['lesson_plan','reading_resource','student_worksheet','assessment_rubric','answer_key','differentiation_tips'];
   outputKeys.sort((a,b) => {
     const ai=ORDER.findIndex(o=>a===o||a.startsWith(o+'_')); const bi=ORDER.findIndex(o=>b===o||b.startsWith(o+'_'));
@@ -2107,7 +2130,7 @@ Each value is a markdown string except "expectations" (JSON array).
 **Level 3 looks like:** "[Proficient answer — 1 line]"
 **Collect via:** [worksheet / sticky note / verbal — pick one]
 ${wsLines}
-- reading_resource: original 200–300 word passage appropriate for the grade(s)
+${isSplit && isScience && rdOutputKeys.length > 1 ? rdOutputKeys.map((k,i)=>`- ${k}: original 200-300 word reading passage specifically for ${grades[i]} on their grade-level science content`).join('\n') : '- reading_resource: original 200–300 word passage appropriate for the grade(s)'}
 - assessment_rubric: Ontario Achievement Chart. Use ## for each category, ### Level 1–4 under each.${iepStudents.length?' Include modified criteria for IEP students.':''}
 - differentiation_tips: per-grade and per-student strategies
 ${akLines}
