@@ -477,6 +477,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   </div>
   <div class="nav-user">
     <span class="nav-email" id="navEmail"></span>
+    <span id="planBadge" onclick="showUpgradeModal()" style="display:none;font-size:.65rem;font-weight:600;padding:3px 8px;border-radius:20px;cursor:pointer;background:rgba(196,123,42,.25);color:#F5C842;border:1px solid rgba(196,123,42,.4);white-space:nowrap;"></span>
     <button id="gConnectBtn" onclick="connectGoogleSlides()" style="display:none;background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);border-radius:6px;padding:3px 9px;font-size:.7rem;cursor:pointer;font-family:'DM Sans',sans-serif;" title="Connect Google Slides">🔗 Connect Google</button>
     <label class="tab" for="tr-account" style="padding:5px 10px;font-size:.75rem;color:#9CA3AF;" title="Account">👤</label>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
@@ -780,32 +781,96 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
      UNITS TAB
      ══════════════════════════════════════════════════════════ -->
 <div class="page" id="pg-units">
-  <div class="ph"><h1>Unit <em>Plans</em></h1><p>Generate 2–4 week units with curriculum-mapped lesson sequences. Each lesson can be expanded into a full plan with one click.</p></div>
-  <div class="ban ban-b" style="margin-bottom:20px;">
-    <span>🚧</span>
-    <span><strong>Coming soon</strong> — Unit plan generation is in development. Units will thread directly into the Plan tab so each lesson in a unit can be one-click expanded. Check back in the next update.</span>
-  </div>
-  <div class="card" style="opacity:.6;pointer-events:none;">
-    <div class="ct" style="margin-bottom:14px;">📋 Unit Plan Setup</div>
+  <div class="ph"><h1>Unit <em>Plans</em></h1><p>Generate 2–4 week curriculum-mapped unit plans. Each lesson links directly to the Plan tab — one click to expand any lesson into a full package.</p></div>
+
+  <!-- Setup card -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="ct" style="margin-bottom:14px;">📋 Unit Setup</div>
     <div class="fg" style="margin-bottom:14px;">
       <div class="fi">
         <label>Subject</label>
-        <select disabled><option>Language / Literacy</option><option>Mathematics</option><option>Science &amp; Technology</option></select>
+        <select id="u-subj" onchange="unitSubjChange()">
+          <option value="Language / Literacy">Language / Literacy</option>
+          <option value="Mathematics">Mathematics</option>
+          <option value="Science &amp; Technology">Science &amp; Technology</option>
+        </select>
       </div>
       <div class="fi">
-        <label>Grade(s)</label>
-        <select disabled><option>Grade 4</option></select>
+        <label>Grade</label>
+        <select id="u-grade">
+          <option value="1">Grade 1</option>
+          <option value="2">Grade 2</option>
+          <option value="3">Grade 3</option>
+          <option value="4" selected>Grade 4</option>
+          <option value="5">Grade 5</option>
+          <option value="6">Grade 6</option>
+          <option value="7">Grade 7</option>
+          <option value="8">Grade 8</option>
+        </select>
       </div>
       <div class="fi">
         <label>Duration</label>
-        <select disabled><option>2 weeks (6 lessons)</option><option>3 weeks (9 lessons)</option><option>4 weeks (12 lessons)</option></select>
+        <select id="u-duration">
+          <option value="6">2 weeks — 6 lessons</option>
+          <option value="9" selected>3 weeks — 9 lessons</option>
+          <option value="12">4 weeks — 12 lessons</option>
+        </select>
       </div>
       <div class="fi full">
         <label>Unit Focus / Big Idea</label>
-        <input type="text" disabled placeholder="e.g. Persuasive Writing, Fractions and Decimals...">
+        <input type="text" id="u-topic" placeholder="e.g. Persuasive Writing, Fractions and Decimals, Habitats...">
+      </div>
+      <div class="fi full">
+        <label>Class Context <span style="font-weight:400;color:var(--muted);font-size:.78rem;">(optional)</span></label>
+        <input type="text" id="u-ctx" placeholder="e.g. Grade 4/5 split, 22 students, some IEPs for reading">
       </div>
     </div>
-    <button class="btn b-ink b-full" disabled>📋 Generate Unit Plan</button>
+    <button class="btn b-sage b-full" id="u-genBtn" onclick="generateUnit()" style="font-size:.95rem;padding:12px;">📋 Generate Unit Plan</button>
+  </div>
+
+  <!-- Loading state -->
+  <div id="u-loading" style="display:none;text-align:center;padding:32px 16px;">
+    <div style="font-size:1.5rem;margin-bottom:10px;">📋</div>
+    <div style="font-weight:600;margin-bottom:6px;" id="u-loadingMsg">Building your unit plan...</div>
+    <div style="font-size:.8rem;color:var(--muted);">This takes about 15–20 seconds</div>
+    <div style="width:200px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin:14px auto 0;">
+      <div id="u-progressBar" style="height:100%;background:var(--sage);border-radius:2px;width:0%;transition:width 0.6s ease;"></div>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div id="u-output" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div id="u-outputTitle" style="font-family:Fraunces,serif;font-size:1.1rem;font-weight:700;"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn b-out b-sm" onclick="copyUnitPlan()">📋 Copy</button>
+        <button class="btn b-out b-sm" onclick="resetUnit()">↩ New Unit</button>
+      </div>
+    </div>
+
+    <!-- Overview card -->
+    <div class="card" style="margin-bottom:14px;background:var(--sage-l);border-color:var(--sage);">
+      <div class="ct" style="color:var(--sage);margin-bottom:10px;">📌 Unit Overview</div>
+      <div id="u-overview" style="font-size:.85rem;line-height:1.7;"></div>
+    </div>
+
+    <!-- Curriculum expectations card -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="ct" style="margin-bottom:10px;">📚 Curriculum Expectations Covered</div>
+      <div id="u-expectations" style="font-size:.82rem;line-height:1.8;color:var(--muted);"></div>
+    </div>
+
+    <!-- Lesson sequence -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="ct" style="margin-bottom:14px;">🗓 Lesson Sequence</div>
+      <div id="u-lessons"></div>
+    </div>
+
+    <!-- Assessment plan -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="ct" style="margin-bottom:10px;">📏 Assessment Plan</div>
+      <div id="u-assessment" style="font-size:.85rem;line-height:1.7;"></div>
+    </div>
   </div>
 </div>
 
@@ -1004,6 +1069,46 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   </span>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════
+     UPGRADE MODAL
+     ══════════════════════════════════════════════════════════ -->
+<div id="upgradeModal" style="display:none;position:fixed;inset:0;background:rgba(22,18,14,.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--paper);border-radius:18px;max-width:420px;width:100%;padding:36px 32px;box-shadow:0 8px 40px rgba(0,0,0,.18);border:1px solid var(--border);position:relative;">
+    <button onclick="closeUpgradeModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted);">✕</button>
+    <div style="font-size:2rem;margin-bottom:8px;">✨</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;margin-bottom:6px;">You've used all 5 free lessons</h2>
+    <p style="color:var(--muted);font-size:.87rem;line-height:1.6;margin-bottom:24px;">Upgrade to Pro for unlimited lessons, slides, worksheets, and report card comments — built for Ontario K–8 teachers.</p>
+    <div style="background:var(--cream);border-radius:12px;padding:18px;margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div>
+          <div style="font-weight:700;font-size:1rem;">Monthly</div>
+          <div style="font-size:.78rem;color:var(--muted);">Cancel any time</div>
+        </div>
+        <div style="font-size:1.4rem;font-weight:700;color:var(--sage);">$14<span style="font-size:.8rem;font-weight:400;color:var(--muted);">/mo</span></div>
+      </div>
+      <button onclick="startCheckout('monthly')" id="upgradeMonthlyBtn" class="btn b-sage b-full" style="font-size:.95rem;padding:12px;">Upgrade to Pro — $14/month →</button>
+    </div>
+    <div style="background:var(--amber-l);border:1px solid var(--amber);border-radius:12px;padding:18px;margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div>
+          <div style="font-weight:700;font-size:1rem;">Annual <span style="background:var(--amber);color:#fff;font-size:.65rem;padding:2px 7px;border-radius:20px;margin-left:4px;vertical-align:middle;">BEST VALUE</span></div>
+          <div style="font-size:.78rem;color:var(--muted);">2 months free — $10/mo</div>
+        </div>
+        <div style="font-size:1.4rem;font-weight:700;color:var(--amber);">$120<span style="font-size:.8rem;font-weight:400;color:var(--muted);">/yr</span></div>
+      </div>
+      <button onclick="startCheckout('annual')" id="upgradeAnnualBtn" class="btn b-full" style="font-size:.95rem;padding:12px;background:var(--amber);color:#fff;border:none;">Upgrade to Pro — $120/year →</button>
+    </div>
+    <ul style="font-size:.8rem;color:var(--muted);line-height:1.9;padding-left:16px;margin-bottom:16px;">
+      <li>✅ Unlimited lesson generation</li>
+      <li>✅ AI-powered slide presentations</li>
+      <li>✅ Worksheets, rubrics & reading passages</li>
+      <li>✅ Report card comments</li>
+      <li>✅ Ontario curriculum aligned — all 3 subjects</li>
+    </ul>
+    <div style="font-size:.72rem;color:var(--muted);text-align:center;">🔒 Secure payment via Stripe · Cancel any time · 🍁 Built for Ontario teachers</div>
+  </div>
+</div>
+
 </div><!-- end #appScreen -->
 <script>
 
@@ -1115,6 +1220,11 @@ let savedLessons = [];
 let _rcAllStudents = [];
 let wsN = 0;
 
+
+let userPlan = 'free';          // 'free' | 'pro' | 'beta'
+let userLessonsThisMonth = 0;
+let userPeriodResetAt = null;
+const FREE_LESSON_LIMIT = 5;
 const AVCOLORS = ['#4A7C59','#2A5FA5','#C47B2A','#B54B2A','#6B46C1','#0F766E','#7C4A6E','#4A6E7C'];
 
 // Block labels — per-grade worksheet labels resolve dynamically
@@ -1308,6 +1418,24 @@ function handleOAuthRedirect() {
       window.history.replaceState({}, '', window.location.pathname);
     }, 1500);
   }
+  if (params.get('upgrade') === 'success') {
+    // Reload plan from DB — webhook may have already updated it
+    setTimeout(async () => {
+      const { data:profile } = await db.from('profiles').select('plan, lessons_this_month, period_reset_at').eq('id',currentUser.id).single();
+      if (profile) {
+        userPlan = profile.plan || 'free';
+        userLessonsThisMonth = profile.lessons_this_month || 0;
+        userPeriodResetAt = profile.period_reset_at || null;
+        updatePlanBadge();
+      }
+      showToast('🎉 Welcome to Pro! Unlimited lessons unlocked.', 5000);
+      window.history.replaceState({}, '', window.location.pathname);
+    }, 1500);
+  }
+  if (params.get('upgrade') === 'cancel') {
+    showToast('Upgrade cancelled — you're still on the free plan.', 4000);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
 }
 
 function showApp() {
@@ -1371,8 +1499,15 @@ async function loadUserData() {
     marks: Object.fromEntries((sess.student_marks||[]).map(m => [m.student_id,{level:m.level,notes:m.notes}]))
   }));
   try {
-    const { data:profile } = await db.from('profiles').select('class_context').eq('id',currentUser.id).single();
+    const { data:profile } = await db.from('profiles').select('class_context, plan, lessons_this_month, period_reset_at').eq('id',currentUser.id).single();
     if (profile?.class_context) { const el=document.getElementById('ctx'); if(el&&!el.value) el.value=profile.class_context; }
+    // Load subscription state into globals
+    if (profile) {
+      userPlan = profile.plan || 'free';
+      userLessonsThisMonth = profile.lessons_this_month || 0;
+      userPeriodResetAt = profile.period_reset_at || null;
+      updatePlanBadge();
+    }
   } catch(e) {}
   if (activeClassId && students.length > 0) autoFillGradesFromClass();
 }
@@ -1963,6 +2098,19 @@ async function generate() {
   const topic = document.getElementById('topic').value.trim();
   if (!gA||!topic) { alert('Select a grade and enter a topic.'); return; }
 
+  // ── Subscription gate ──────────────────────────────────────
+  if (userPlan === 'free') {
+    // Reset counter if past period end
+    if (userPeriodResetAt && new Date() > new Date(userPeriodResetAt)) {
+      userLessonsThisMonth = 0;
+    }
+    if (userLessonsThisMonth >= FREE_LESSON_LIMIT) {
+      showUpgradeModal();
+      return;
+    }
+  }
+  // ────────────────────────────────────────────────────────────
+
   const grades = ['gA','gB','gC','gD','gE','gF'].map(id => document.getElementById(id)?.value||'').filter(g => g&&g!=='');
   const isSplit = grades.length > 1;
   const gradeDesc = isSplit ? grades.join(' / ')+' multi-grade split class' : grades[0];
@@ -2302,6 +2450,12 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
         if (insertErr2) showToast('⚠️ Lesson not saved — '+insertErr2.message, 6000);
         else { await renderLessonsList(); dismissWelcomeBanner(true); showToast('✅ Lesson saved to My Lessons'); }
       } else { await renderLessonsList(); dismissWelcomeBanner(true); showToast('✅ Lesson saved to My Lessons'); }
+      // Increment lesson counter for free users
+      if (userPlan === 'free') {
+        userLessonsThisMonth++;
+        await db.from('profiles').update({ lessons_this_month: userLessonsThisMonth }).eq('id', currentUser.id);
+        updatePlanBadge();
+      }
     }
   } catch(e) {
     clearInterval(progInterval);
@@ -6735,6 +6889,274 @@ function copyAllRCComments() {
 // ============================================================
 // ACCOUNT PAGE
 // ============================================================
+// ============================================================
+// UNIT PLANS
+// ============================================================
+
+function unitSubjChange() {
+  // Could filter topic suggestions in future — for now just a hook
+}
+
+function resetUnit() {
+  document.getElementById('u-output').style.display = 'none';
+  document.getElementById('u-loading').style.display = 'none';
+  document.getElementById('u-genBtn').disabled = false;
+  document.getElementById('u-genBtn').textContent = '📋 Generate Unit Plan';
+  document.getElementById('u-topic').value = '';
+}
+
+function copyUnitPlan() {
+  const title = document.getElementById('u-outputTitle')?.textContent || '';
+  const overview = document.getElementById('u-overview')?.innerText || '';
+  const expectations = document.getElementById('u-expectations')?.innerText || '';
+  const lessons = document.getElementById('u-lessons')?.innerText || '';
+  const assessment = document.getElementById('u-assessment')?.innerText || '';
+  const text = `${title}\n\nUNIT OVERVIEW\n${overview}\n\nCURRICULUM EXPECTATIONS\n${expectations}\n\nLESSON SEQUENCE\n${lessons}\n\nASSESSMENT PLAN\n${assessment}`;
+  navigator.clipboard.writeText(text).then(() => showToast('📋 Unit plan copied to clipboard'));
+}
+
+async function generateUnit() {
+  const subj = document.getElementById('u-subj').value;
+  const grade = document.getElementById('u-grade').value;
+  const duration = document.getElementById('u-duration').value;
+  const topic = document.getElementById('u-topic').value.trim();
+  const ctx = document.getElementById('u-ctx').value.trim();
+
+  if (!topic) { alert('Enter a unit focus or big idea.'); return; }
+
+  const btn = document.getElementById('u-genBtn');
+  btn.disabled = true; btn.textContent = '⏳ Generating...';
+  document.getElementById('u-output').style.display = 'none';
+  document.getElementById('u-loading').style.display = 'block';
+
+  // Animate progress bar
+  let prog = 0;
+  const progBar = document.getElementById('u-progressBar');
+  const loadingMsg = document.getElementById('u-loadingMsg');
+  const msgs = ['Building unit overview...', 'Mapping curriculum expectations...', 'Sequencing lessons...', 'Designing assessment plan...'];
+  let msgIdx = 0;
+  const progInterval = setInterval(() => {
+    prog = Math.min(prog + 1.2, 88);
+    progBar.style.width = prog + '%';
+    const newMsgIdx = Math.floor((prog / 88) * msgs.length);
+    if (newMsgIdx !== msgIdx && newMsgIdx < msgs.length) {
+      msgIdx = newMsgIdx;
+      loadingMsg.textContent = msgs[msgIdx];
+    }
+  }, 300);
+
+  // Load curriculum for expectations
+  await loadCurriculum(subj);
+
+  const numLessons = parseInt(duration);
+  const weeks = numLessons === 6 ? 2 : numLessons === 9 ? 3 : 4;
+  const gradeExpectations = getExpectationsForGrade(subj, [grade]);
+
+  const prompt = `You are an expert Ontario K-8 curriculum specialist. Generate a complete ${weeks}-week unit plan for Grade ${grade} ${subj}.
+
+UNIT: "${topic}"
+LESSONS: ${numLessons} lessons total (1 per day, ~60 min each)
+${ctx ? `CLASS CONTEXT: ${ctx}` : ''}
+
+Return ONLY valid JSON in this exact structure — no markdown, no extra text:
+{
+  "unit_title": "string",
+  "big_idea": "string (1-2 sentences — the enduring understanding)",
+  "essential_questions": ["question 1", "question 2", "question 3"],
+  "curriculum_expectations": ["expectation code + description", "..."],
+  "lesson_sequence": [
+    {
+      "lesson_num": 1,
+      "title": "string",
+      "type": "Minds On | Exploration | Practice | Consolidation | Assessment",
+      "learning_goal": "string (We are learning to...)",
+      "success_criteria": ["I can...", "I can..."],
+      "activities": "string (2-3 sentences describing the lesson activities)",
+      "materials": "string",
+      "assessment": "string or null"
+    }
+  ],
+  "assessment_plan": {
+    "diagnostic": "string (assessment FOR learning at unit start)",
+    "formative": "string (ongoing assessment during unit)",
+    "summative": "string (final assessment task)",
+    "success_criteria_overview": "string"
+  },
+  "differentiation": "string (2-3 sentences on how to differentiate for diverse learners)"
+}
+
+IMPORTANT:
+- lesson_sequence must have exactly ${numLessons} lessons
+- Sequence must flow: Minds On (1-2 lessons) → Exploration/Practice (most lessons) → Consolidation → Assessment (last 1-2)
+- All expectations must be from Ontario ${subj} Grade ${grade} curriculum
+- learning_goals must use "We are learning to..." format
+- success_criteria must use "I can..." format
+${gradeExpectations.length > 0 ? `- Draw from these Ontario expectations: ${gradeExpectations.slice(0,12).map(e => e.code + ': ' + e.description).join(' | ')}` : ''}`;
+
+  try {
+    const res = await retryAuthFetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    clearInterval(progInterval);
+    progBar.style.width = '100%';
+
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '';
+
+    let unit;
+    try {
+      const cleaned = raw.replace(/```json|```/g, '').trim();
+      unit = JSON.parse(cleaned);
+    } catch(e) {
+      throw new Error('Could not parse unit plan response. Please try again.');
+    }
+
+    renderUnitPlan(unit, subj, grade, numLessons, topic);
+
+    document.getElementById('u-loading').style.display = 'none';
+    document.getElementById('u-output').style.display = 'block';
+    document.getElementById('u-outputTitle').textContent = unit.unit_title || topic;
+
+  } catch(e) {
+    clearInterval(progInterval);
+    document.getElementById('u-loading').style.display = 'none';
+    btn.disabled = false;
+    btn.textContent = '📋 Generate Unit Plan';
+    alert('Error generating unit plan: ' + e.message);
+  }
+}
+
+function getExpectationsForGrade(subj, grades) {
+  // Pull from loaded curriculum globals
+  try {
+    const subjKey = subj.toLowerCase().includes('math') ? 'math'
+      : subj.toLowerCase().includes('science') ? 'science'
+      : 'language';
+    const currData = window._curriculumCache?.[subjKey];
+    if (!currData) return [];
+    const grade = grades[0];
+    const gradeData = currData.grades?.[grade] || currData[grade] || [];
+    if (Array.isArray(gradeData)) return gradeData.slice(0, 12);
+    // object format
+    return Object.values(gradeData).flat().slice(0, 12);
+  } catch(e) { return []; }
+}
+
+function renderUnitPlan(unit, subj, grade, numLessons, topic) {
+  // Overview
+  const overviewEl = document.getElementById('u-overview');
+  overviewEl.innerHTML = `
+    <div style="margin-bottom:10px;"><strong>Big Idea:</strong> ${unit.big_idea || ''}</div>
+    <div style="margin-bottom:8px;"><strong>Essential Questions:</strong></div>
+    <ul style="margin:0 0 0 16px;padding:0;">
+      ${(unit.essential_questions || []).map(q => `<li style="margin-bottom:4px;">${q}</li>`).join('')}
+    </ul>
+    ${unit.differentiation ? `<div style="margin-top:10px;font-size:.8rem;color:var(--muted);"><strong>Differentiation:</strong> ${unit.differentiation}</div>` : ''}
+  `;
+
+  // Expectations
+  const expEl = document.getElementById('u-expectations');
+  expEl.innerHTML = (unit.curriculum_expectations || [])
+    .map(e => `<div style="padding:3px 0;border-bottom:1px solid var(--border);">📎 ${e}</div>`)
+    .join('');
+
+  // Lesson sequence
+  const lessonsEl = document.getElementById('u-lessons');
+  const typeColors = {
+    'Minds On': 'var(--amber)', 'Exploration': 'var(--sage)', 'Practice': 'var(--blue)',
+    'Consolidation': '#6B46C1', 'Assessment': 'var(--rust)'
+  };
+  const typeIcons = {
+    'Minds On': '🔥', 'Exploration': '🔬', 'Practice': '✏️',
+    'Consolidation': '💡', 'Assessment': '📏'
+  };
+
+  lessonsEl.innerHTML = (unit.lesson_sequence || []).map((lesson, i) => {
+    const color = typeColors[lesson.type] || 'var(--muted)';
+    const icon = typeIcons[lesson.type] || '📌';
+    return `
+    <div style="border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--cream);border-bottom:1px solid var(--border);">
+        <div style="font-family:DM Mono,monospace;font-size:.65rem;background:${color};color:#fff;padding:2px 8px;border-radius:20px;white-space:nowrap;">Lesson ${lesson.lesson_num}</div>
+        <div style="font-size:.7rem;color:${color};font-weight:600;">${icon} ${lesson.type}</div>
+        <div style="font-weight:600;font-size:.88rem;flex:1;">${lesson.title}</div>
+        <button onclick="loadUnitLesson(${i})" style="background:var(--sage);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:.72rem;cursor:pointer;font-family:DM Sans,sans-serif;white-space:nowrap;flex-shrink:0;">✨ Full Lesson →</button>
+      </div>
+      <div style="padding:10px 14px;">
+        <div style="font-size:.82rem;margin-bottom:6px;"><strong>📍 Learning Goal:</strong> ${lesson.learning_goal}</div>
+        ${(lesson.success_criteria||[]).length > 0 ? `<div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">
+          <strong>Success Criteria:</strong> ${lesson.success_criteria.join(' · ')}
+        </div>` : ''}
+        <div style="font-size:.8rem;color:var(--muted);margin-bottom:4px;">${lesson.activities}</div>
+        ${lesson.materials ? `<div style="font-size:.75rem;color:var(--muted);opacity:.8;">📦 ${lesson.materials}</div>` : ''}
+        ${lesson.assessment ? `<div style="font-size:.75rem;color:var(--amber);margin-top:4px;">📊 ${lesson.assessment}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Store unit data for "Full Lesson" button
+  window._currentUnit = { unit, subj, grade, topic };
+
+  // Assessment plan
+  const assessEl = document.getElementById('u-assessment');
+  const ap = unit.assessment_plan || {};
+  assessEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+      <div style="background:var(--blue-l);border-radius:8px;padding:12px;">
+        <div style="font-size:.7rem;font-weight:700;color:var(--blue);margin-bottom:5px;">DIAGNOSTIC (Before)</div>
+        <div style="font-size:.82rem;">${ap.diagnostic || '—'}</div>
+      </div>
+      <div style="background:var(--amber-l);border-radius:8px;padding:12px;">
+        <div style="font-size:.7rem;font-weight:700;color:var(--amber);margin-bottom:5px;">FORMATIVE (During)</div>
+        <div style="font-size:.82rem;">${ap.formative || '—'}</div>
+      </div>
+      <div style="background:var(--sage-l);border-radius:8px;padding:12px;">
+        <div style="font-size:.7rem;font-weight:700;color:var(--sage);margin-bottom:5px;">SUMMATIVE (End)</div>
+        <div style="font-size:.82rem;">${ap.summative || '—'}</div>
+      </div>
+    </div>
+    ${ap.success_criteria_overview ? `<div style="font-size:.8rem;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">${ap.success_criteria_overview}</div>` : ''}
+  `;
+}
+
+function loadUnitLesson(lessonIdx) {
+  const u = window._currentUnit;
+  if (!u) return;
+  const lesson = u.unit.lesson_sequence[lessonIdx];
+  if (!lesson) return;
+
+  // Switch to Plan tab and pre-fill the form
+  const planTab = document.getElementById('tr-plan');
+  if (planTab) planTab.checked = true;
+
+  setTimeout(() => {
+    // Pre-fill subject
+    const subjEl = document.getElementById('subj');
+    if (subjEl) { subjEl.value = u.subj; subjEl.dispatchEvent(new Event('change')); }
+
+    // Pre-fill grade
+    const gradeEl = document.getElementById('gA');
+    if (gradeEl) { gradeEl.value = u.grade; gradeEl.dispatchEvent(new Event('change')); }
+
+    // Pre-fill topic with lesson title as context
+    const topicEl = document.getElementById('topic');
+    if (topicEl) topicEl.value = lesson.title;
+
+    // Scroll to generate button
+    const genBtn = document.getElementById('genBtn') || document.querySelector('[onclick="generate()"]');
+    if (genBtn) genBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    showToast(`✅ Loaded: ${lesson.title} — review and click Generate`);
+  }, 300);
+}
+
 async function loadAccountPage() {
   if (!currentUser) { const{data:{user}}=await db.auth.getUser(); if(user)currentUser=user; }
   if (!currentUser) return;
