@@ -33,10 +33,21 @@ function svgToPng(svgHtml, w, h) {
 async function downloadPPTX() {
   if (!window._slideData) {
     var btn2 = document.querySelector('[onclick="downloadPPTX()"]');
-    if (btn2) { btn2.disabled = true; btn2.textContent = 'Building...'; }
-    var ok = await generateSlideData(null);
-    if (btn2) { btn2.disabled = false; btn2.textContent = 'Download Slides'; }
-    if (!ok || !window._slideData) return;
+    if (btn2) { btn2.disabled = true; btn2.textContent = 'Building slides...'; }
+    showToast('Building slides first — this takes about 15 seconds...');
+    try {
+      var ok = await generateSlideData(null);
+      if (!ok || !window._slideData) {
+        if (btn2) { btn2.disabled = false; btn2.textContent = 'Download Slides'; }
+        showToast('Could not generate slides — try clicking Present first');
+        return;
+      }
+    } catch(e) {
+      if (btn2) { btn2.disabled = false; btn2.textContent = 'Download Slides'; }
+      showToast('Error building slides: ' + e.message);
+      return;
+    }
+    if (btn2) { btn2.disabled = false; }
   }
 
   var btn = document.querySelector('[onclick="downloadPPTX()"]');
