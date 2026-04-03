@@ -30,6 +30,21 @@ function svgToPng(svgHtml, w, h) {
   });
 }
 
+function loadPptxGen() {
+  return new Promise(function(resolve, reject) {
+    if (window._PptxGenJS) { resolve(window._PptxGenJS); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
+    s.onload = function() {
+      // pptxgenjs sets window.PptxGenJS — save it to our own key
+      window._PptxGenJS = window.PptxGenJS;
+      resolve(window._PptxGenJS);
+    };
+    s.onerror = function() { reject(new Error('Failed to load pptxgenjs')); };
+    document.head.appendChild(s);
+  });
+}
+
 async function downloadPPTX() {
   console.log('[PPTX] start, _slideData:', !!window._slideData);
   if (!window._slideData) {
@@ -75,8 +90,10 @@ async function downloadPPTX() {
     return String(s || '').replace(/[^\x20-\x7E]/g, '').trim();
   }
 
+  console.log('[PPTX] loading pptxgenjs...');
+  var PptxGen = await loadPptxGen();
   console.log('[PPTX] creating pptx instance');
-  var pptx = new PptxGenJS();
+  var pptx = new PptxGen();
   pptx.layout = 'LAYOUT_WIDE';
 
   try {
