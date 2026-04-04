@@ -108,6 +108,25 @@ module.exports = async function handler(req, res) {
     });
 
     const sharp = require('sharp');
+    // Read font file and embed in SVG so sharp/libvips can render text
+    let fontB64 = '';
+    try {
+      const fs = require('fs');
+      const fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
+      const fontBuf = fs.readFileSync(fontPath);
+      fontB64 = fontBuf.toString('base64');
+    } catch(fe) {
+      console.log('font read failed:', fe.message);
+    }
+
+    // Inject font-face into SVG if we have the font
+    if (fontB64) {
+      const fontFace = '<defs><style>@font-face{font-family:"DejaVu Sans";src:url("data:font/truetype;base64,' + fontB64 + '")}</style></defs>';
+      svgStr = svgStr.replace(/<svg([^>]*)>/, '<svg$1>' + fontFace);
+      // Update text elements to use the embedded font
+      svgStr = svgStr.replace(/font-family="[^"]*"/g, 'font-family="DejaVu Sans"');
+    }
+
     const pngBuffer = await sharp(Buffer.from(svgStr))
       .resize(w, h, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
       .png()
