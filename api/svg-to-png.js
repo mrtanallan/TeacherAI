@@ -18,9 +18,9 @@ module.exports = async function handler(req, res) {
       const { execSync } = require('child_process');
       let fontInfo = {};
       try { fontInfo.fcList = execSync('fc-list | head -20').toString(); } catch(e) { fontInfo.fcList = e.message; }
-      try { fontInfo.bundledFont = fs.existsSync('/var/task/fonts/Poppins-Regular.ttf'); } catch(e) {}
-      try { fontInfo.bundledFontTff = fs.existsSync('/var/task/fonts/Poppins-Regular.tff'); } catch(e) {}
-      try { fontInfo.varTaskFonts = fs.readdirSync('/var/task/fonts').join(','); } catch(e) { fontInfo.varTaskFonts = e.message; }
+      try { fontInfo.apiFontTtf = fs.existsSync('/var/task/api/Poppins-Regular.ttf'); } catch(e) {}
+      try { fontInfo.apiFontTff = fs.existsSync('/var/task/api/Poppins-Regular.tff'); } catch(e) {}
+      try { fontInfo.varTaskApi = fs.readdirSync('/var/task/api').join(','); } catch(e) { fontInfo.varTaskApi = e.message; }
       try { fontInfo.varTask = fs.readdirSync('/var/task').join(','); } catch(e) { fontInfo.varTask = e.message; }
       return res.status(200).json(fontInfo);
     }
@@ -97,10 +97,10 @@ module.exports = async function handler(req, res) {
     // Try to load a font from disk
     const fs = require('fs');
     const fontCandidates = [
+      '/var/task/api/Poppins-Regular.ttf',
+      '/var/task/api/Poppins-Regular.tff',
       '/var/task/fonts/Poppins-Regular.ttf',
       '/var/task/fonts/Poppins-Regular.tff',
-      '/usr/share/fonts/truetype/google-fonts/Poppins-Regular.ttf',
-      '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
     ];
     let fontB64 = null;
     for(var i=0;i<fontCandidates.length;i++){
