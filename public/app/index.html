@@ -1367,6 +1367,7 @@ function showApp() {
   resetWorkflow();
   renderClassTabs();
   renderClassSelector();
+  renderUnitClassSelector();
   renderAssessClassTabs();
   renderR();
   initMoreOptions();
@@ -1376,6 +1377,8 @@ function showApp() {
   });
   loadSubmissions();
   updateWelcomeBanner();
+  // If units tab was the last active tab, load unit plans on startup
+  if (savedTab === 'tr-units') renderUnitPlansList();
 }
 
 // ============================================================
@@ -1443,10 +1446,7 @@ async function saveClassEdit() {
   const cls = classes.find(c => c.id===activeClassId);
   if (cls) { cls.name=name; cls.subject_focus=subject||null; cls.context=context||null; }
   document.getElementById('editClassForm').style.display = 'none';
-  renderClassTabs(); renderClassSelector();
-}
-
-async function createClass() {
+  renderClassTabs(); renderClassSelector(); renderUnitClassSelector();
   const name = document.getElementById('newClassName').value.trim();
   if (!name) { alert('Enter a class name.'); return; }
   const subject = document.getElementById('newClassSubject').value.trim();
@@ -1466,10 +1466,7 @@ async function createClass() {
   if (document.getElementById('newClassContext')) document.getElementById('newClassContext').value = '';
   document.getElementById('newClassForm').style.display = 'none';
   await loadUserData();
-  renderClassTabs(); renderClassSelector(); renderR(); renderTracker();
-}
-
-async function switchClass(classId) {
+  renderClassTabs(); renderClassSelector(); renderUnitClassSelector(); renderR(); renderTracker();
   activeClassId = classId || null;
   let stuQ = db.from('students').select('*').eq('teacher_id',currentUser.id).order('created_at');
   if (activeClassId) stuQ = stuQ.eq('class_id', activeClassId);
@@ -1487,7 +1484,7 @@ async function switchClass(classId) {
     grades:sess.grades, task:sess.task, classId:sess.class_id||null,
     marks: Object.fromEntries((sess.student_marks||[]).map(m => [m.student_id,{level:m.level,notes:m.notes}]))
   }));
-  renderClassTabs(); renderClassSelector();
+  renderClassTabs(); renderClassSelector(); renderUnitClassSelector();
   autoFillGradesFromClass();
   renderR(); renderTracker(); updateWelcomeBanner();
 }
@@ -1514,10 +1511,7 @@ async function deleteClass(classId) {
     await loadUserData();
   } catch(e) { alert('Error: '+e.message); }
   hideLoading();
-  renderClassTabs(); renderClassSelector(); renderR(); renderTracker();
-}
-
-function renderClassTabs() {
+  renderClassTabs(); renderClassSelector(); renderUnitClassSelector(); renderR(); renderTracker();
   const el = document.getElementById('classTabs');
   if (!el) return;
   if (!classes.length) {
@@ -6915,6 +6909,7 @@ function renderUnitClassSelector() {
   row.style.display = 'flex';
   sel.innerHTML = `<option value="">✏️ Custom / no class</option>` +
     classes.map(c => `<option value="${c.id}" ${c.id===activeClassId?'selected':''}>${c.name}${c.subject_focus?' · '+c.subject_focus:''}</option>`).join('');
+  // Auto-fill grade pills if a class is active
   if (activeClassId) autoFillUnitGradesFromClass();
 }
 
