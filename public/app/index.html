@@ -785,8 +785,14 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <!-- Generate form -->
   <div class="card" id="unitFormCard" style="margin-bottom:20px;">
     <div class="ct" style="margin-bottom:14px;">📋 New Unit Plan</div>
-    <div class="fg" style="margin-bottom:14px;">
-      <div class="fi">
+
+    <!-- Row 1: Class · Subject · Duration -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+      <div class="fi" id="unitClassSelectorRow" style="display:none;flex:1.5;min-width:140px;">
+        <label>Class</label>
+        <select id="unitClassSelector" onchange="onUnitClassSelect()"></select>
+      </div>
+      <div class="fi" style="flex:1.5;min-width:140px;">
         <label>Subject</label>
         <select id="unit-subj">
           <option>Language / Literacy</option>
@@ -794,15 +800,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
           <option>Science &amp; Technology</option>
         </select>
       </div>
-      <div class="fi">
-        <label>Grade</label>
-        <select id="unit-grade">
-          <option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option>
-          <option>Grade 3</option><option>Grade 4</option><option>Grade 5</option>
-          <option>Grade 6</option><option>Grade 7</option><option>Grade 8</option>
-        </select>
-      </div>
-      <div class="fi">
+      <div class="fi" style="flex:1;min-width:120px;">
         <label>Duration</label>
         <select id="unit-duration">
           <option value="2 weeks (6 lessons)">2 weeks — 6 lessons</option>
@@ -810,11 +808,32 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
           <option value="4 weeks (12 lessons)">4 weeks — 12 lessons</option>
         </select>
       </div>
-      <div class="fi full">
-        <label>Unit Topic / Big Idea <span style="color:var(--rust);">✱</span></label>
-        <input type="text" id="unit-topic" placeholder="e.g. Persuasive Writing, Fractions, Habitats and Ecosystems..." autocapitalize="sentences">
+    </div>
+
+    <!-- Row 2: Grade pills -->
+    <div style="margin-bottom:18px;">
+      <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px;">Grade <span style="color:var(--rust);">✱</span></label>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;" id="unitGradePillContainer">
+        <button type="button" class="grade-pill-btn" data-grade="Kindergarten" onclick="toggleUnitGradePill(this)">K</button>
+        <button type="button" class="grade-pill-btn" data-grade="Grade 1" onclick="toggleUnitGradePill(this)">Gr. 1</button>
+        <button type="button" class="grade-pill-btn" data-grade="Grade 2" onclick="toggleUnitGradePill(this)">Gr. 2</button>
+        <button type="button" class="grade-pill-btn" data-grade="Grade 3" onclick="toggleUnitGradePill(this)">Gr. 3</button>
+        <button type="button" class="grade-pill-btn" data-grade="Grade 4" onclick="toggleUnitGradePill(this)">Gr. 4</button>
+        <button type="button" class="grade-pill-btn" data-grade="Grade 5" onclick="toggleUnitGradePill(this)">Gr. 5</button>
+        <button type="button" class="grade-pill-btn" data-grade="Grade 6" onclick="toggleUnitGradePill(this)">Gr. 6</button>
+        <button type="button" class="grade-pill-btn" data-grade="Grade 7" onclick="toggleUnitGradePill(this)">Gr. 7</button>
+        <button type="button" class="grade-pill-btn" data-grade="Grade 8" onclick="toggleUnitGradePill(this)">Gr. 8</button>
       </div>
     </div>
+
+    <!-- Row 3: Topic -->
+    <div style="margin-bottom:16px;">
+      <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px;">Unit Topic / Big Idea <span style="color:var(--rust);">✱</span></label>
+      <input type="text" id="unit-topic" placeholder="e.g. Persuasive Writing, Fractions, Habitats and Ecosystems..." autocapitalize="sentences"
+        style="width:100%;font-family:'DM Sans',sans-serif;font-size:1rem;padding:13px 16px;border:2px solid var(--border);border-radius:10px;background:var(--cream);color:var(--ink);outline:none;transition:border-color .15s;"
+        onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+
     <button class="btn b-ink b-full" id="unitGenBtn" onclick="generateUnitPlan()">📋 Generate Unit Plan</button>
   </div>
 
@@ -1342,7 +1361,7 @@ function showApp() {
       if (this.id==='tr-account') { loadAccountPage(); }
       if (this.id==='tr-roster')  { renderClassTabs(); renderR(); }
       if (this.id==='tr-lessons') { renderLessonsList(); }
-      if (this.id==='tr-units')   { renderUnitPlansList(); }
+      if (this.id==='tr-units')   { renderUnitClassSelector(); renderUnitPlansList(); }
     });
   });
   resetWorkflow();
@@ -6888,23 +6907,74 @@ function skipTour(){document.getElementById('tourOverlay').style.display='none';
 // ============================================================
 let savedUnitPlans = [];
 
+function renderUnitClassSelector() {
+  const sel = document.getElementById('unitClassSelector');
+  const row = document.getElementById('unitClassSelectorRow');
+  if (!sel || !row) return;
+  if (!classes.length) { row.style.display = 'none'; return; }
+  row.style.display = 'flex';
+  sel.innerHTML = `<option value="">✏️ Custom / no class</option>` +
+    classes.map(c => `<option value="${c.id}" ${c.id===activeClassId?'selected':''}>${c.name}${c.subject_focus?' · '+c.subject_focus:''}</option>`).join('');
+  if (activeClassId) autoFillUnitGradesFromClass();
+}
+
+function onUnitClassSelect() {
+  const sel = document.getElementById('unitClassSelector');
+  if (!sel) return;
+  if (!sel.value) {
+    document.querySelectorAll('#unitGradePillContainer .grade-pill-btn').forEach(b => b.classList.remove('selected'));
+    return;
+  }
+  // Auto-fill grade pills from the selected class's students
+  const classStudents = students.filter(s => s.classId === sel.value);
+  const gradeOrder = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
+  const uniqueGrades = [...new Set(classStudents.map(s => s.grade))].filter(Boolean)
+    .sort((a,b) => gradeOrder.indexOf(a) - gradeOrder.indexOf(b));
+  document.querySelectorAll('#unitGradePillContainer .grade-pill-btn').forEach(b => {
+    b.classList.toggle('selected', uniqueGrades.includes(b.dataset.grade));
+  });
+}
+
+function autoFillUnitGradesFromClass() {
+  const classStudents = activeClassId ? students.filter(s => s.classId === activeClassId) : [];
+  if (!classStudents.length) return;
+  const gradeOrder = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
+  const uniqueGrades = [...new Set(classStudents.map(s => s.grade))].filter(Boolean)
+    .sort((a,b) => gradeOrder.indexOf(a) - gradeOrder.indexOf(b));
+  document.querySelectorAll('#unitGradePillContainer .grade-pill-btn').forEach(b => {
+    b.classList.toggle('selected', uniqueGrades.includes(b.dataset.grade));
+  });
+}
+
+function toggleUnitGradePill(btn) {
+  btn.classList.toggle('selected');
+}
+
+function getUnitSelectedGrades() {
+  return [...document.querySelectorAll('#unitGradePillContainer .grade-pill-btn.selected')]
+    .map(b => b.dataset.grade).filter(Boolean);
+}
+
 async function generateUnitPlan() {
   const topic = document.getElementById('unit-topic')?.value.trim();
   const subj  = document.getElementById('unit-subj')?.value;
-  const grade = document.getElementById('unit-grade')?.value;
   const duration = document.getElementById('unit-duration')?.value;
+  const grades = getUnitSelectedGrades();
+
   if (!topic) { alert('Enter a unit topic.'); return; }
+  if (!grades.length) { alert('Select at least one grade.'); return; }
+
+  const gradeDesc = grades.length > 1 ? grades.join(' / ') + ' split class' : grades[0];
+  const lessonCount = duration.includes('6') ? 6 : duration.includes('9') ? 9 : 12;
 
   const btn = document.getElementById('unitGenBtn');
   btn.disabled = true; btn.textContent = '⏳ Generating unit...';
   showLoading('Generating unit plan...', true);
   setProgress(10, 'Building lesson sequence...');
 
-  const lessonCount = parseInt(duration) || 6;
-
   const prompt = `You are an expert Ontario K–8 curriculum planner. Generate a unit plan for:
 Subject: ${subj}
-Grade: ${grade}
+Grade: ${gradeDesc}
 Duration: ${duration}
 Topic: ${topic}
 
@@ -6926,14 +6996,15 @@ Rules:
 - Each lesson builds logically on the previous
 - Titles must be specific and Ontario-curriculum aligned
 - Types should flow: Introduction early, Assessment near end
-- Focus on the actual lesson activity, not meta-descriptions`;
+- Focus on the actual lesson activity, not meta-descriptions
+- If split grade (${grades.join('/')}), note grade differentiation where relevant`;
 
   try {
     const res = await authFetch('/api/generate', {
       method: 'POST',
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1200,
+        max_tokens: 1400,
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -6957,12 +7028,11 @@ Rules:
 
     setProgress(90, 'Saving...');
 
-    // Save to Supabase
     const { data: saved, error } = await db.from('unit_plans').insert({
       teacher_id: currentUser.id,
       topic,
       subject: subj,
-      grades: [grade],
+      grades,
       duration,
       big_idea: parsed.big_idea || '',
       lessons: parsed.lessons || []
@@ -6973,8 +7043,8 @@ Rules:
     hideLoading();
     showToast('✅ Unit plan saved!');
     document.getElementById('unit-topic').value = '';
+    document.querySelectorAll('#unitGradePillContainer .grade-pill-btn').forEach(b => b.classList.remove('selected'));
     await renderUnitPlansList();
-    // Scroll to the new unit
     setTimeout(() => {
       document.getElementById('unit-'+saved.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 200);
@@ -7009,7 +7079,6 @@ async function renderUnitPlansList() {
     return;
   }
 
-  // Fetch linked lessons for all unit plans in one query
   const unitIds = savedUnitPlans.map(u => u.id);
   const { data: linkedLessons } = await db.from('lessons')
     .select('id, topic, created_at, unit_plan_id')
@@ -7041,7 +7110,10 @@ function renderUnitCard(u, linkedLessons) {
 
   const lessonRows = lessons.map((l, i) => {
     const typeColor = typeColors[l.type] || '#7A726A';
-    const linked = linkedLessons.find(ll => ll.topic === l.title || ll.topic?.includes(l.title?.split(' ')[0]));
+    const linked = linkedLessons.find(ll =>
+      ll.topic === l.title ||
+      (l.title && ll.topic && ll.topic.toLowerCase().includes(l.title.split(' ')[0].toLowerCase()))
+    );
     const isExpanded = !!linked;
 
     return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);background:${isExpanded ? 'var(--sage-l)' : 'var(--paper)'};">
@@ -7053,7 +7125,7 @@ function renderUnitCard(u, linkedLessons) {
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
         <span style="font-family:'DM Mono',monospace;font-size:.6rem;padding:2px 7px;border-radius:10px;background:${typeColor}20;color:${typeColor};font-weight:600;">${l.type||''}</span>
-        ${!isExpanded ? `<button class="btn b-sage b-sm" onclick="expandUnitLesson('${u.id}','${u.subject}','${(u.grades||[]).join(',')}','${(l.title||'').replace(/'/g,"\\'")}','${(l.focus||'').replace(/'/g,"\\'")}',${i})" style="font-size:.7rem;padding:3px 9px;">✨ Expand</button>` : ''}
+        ${!isExpanded ? `<button class="btn b-sage b-sm" onclick="expandUnitLesson('${u.id}','${u.subject}','${(u.grades||[]).join(',')}','${(l.title||'').replace(/'/g,"\\'")}',${i})" style="font-size:.7rem;padding:3px 9px;">✨ Expand</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -7065,8 +7137,8 @@ function renderUnitCard(u, linkedLessons) {
         <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:#9CA3AF;">${gradesStr} · ${subj} · ${u.duration} · ${date}</div>
         ${u.big_idea ? `<div style="font-size:.8rem;color:rgba(255,255,255,.7);margin-top:6px;line-height:1.5;font-style:italic;">${u.big_idea}</div>` : ''}
       </div>
-      <div style="display:flex;gap:6px;flex-shrink:0;">
-        <span style="font-family:'DM Mono',monospace;font-size:.65rem;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.1);color:#9CA3AF;">${expandedCount}/${lessons.length} expanded</span>
+      <div style="display:flex;gap:6px;flex-shrink:0;align-items:flex-start;">
+        <span style="font-family:'DM Mono',monospace;font-size:.65rem;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.1);color:#9CA3AF;white-space:nowrap;">${expandedCount}/${lessons.length} expanded</span>
         <button onclick="deleteUnitPlan('${u.id}')" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.8rem;padding:2px 4px;" title="Delete unit plan">🗑</button>
       </div>
     </div>
@@ -7074,42 +7146,39 @@ function renderUnitCard(u, linkedLessons) {
   </div>`;
 }
 
-async function expandUnitLesson(unitId, subject, gradesStr, title, focus, lessonIndex) {
+async function expandUnitLesson(unitId, subject, gradesStr, title, lessonIndex) {
   const grades = gradesStr.split(',').filter(Boolean);
   const grade = grades[0] || 'Grade 4';
 
-  // Pre-fill the Plan tab and trigger generation
-  showToast('Opening Plan tab — generating full lesson...', 4000);
+  showToast('Opening Plan tab — pre-filled and ready to generate...', 4000);
 
-  // Switch to Plan tab
   const planTab = document.getElementById('tr-plan');
   if (planTab) { planTab.checked = true; renderClassSelector(); resetWorkflow(); }
 
-  // Set subject
   const subjEl = document.getElementById('subj');
   if (subjEl) { subjEl.value = subject; onSubjectChange(); }
 
-  // Set grade pill
   await new Promise(r => setTimeout(r, 100));
-  document.querySelectorAll('.grade-pill-btn').forEach(btn => {
+
+  // Set grade pills in Plan tab
+  document.querySelectorAll('#gradePillContainer .grade-pill-btn').forEach(btn => {
     btn.classList.remove('selected');
-    const el = document.getElementById('gA');
-    if (btn.dataset.grade === grade) {
+  });
+  grades.forEach(g => {
+    const btn = document.querySelector(`#gradePillContainer .grade-pill-btn[data-grade="${g}"]`);
+    if (btn) {
       btn.classList.add('selected');
-      if (el) el.value = grade;
+      btn.click(); // trigger pill toggle logic
     }
   });
 
-  // Set topic to lesson title + focus as context
   const topicEl = document.getElementById('topic');
   if (topicEl) topicEl.value = title;
 
-  // Store unit plan context for saving after generation
   window._pendingUnitPlanId = unitId;
   window._pendingUnitLessonIndex = lessonIndex;
   window._pendingUnitLessonTitle = title;
 
-  // Scroll to generate button and click it
   await new Promise(r => setTimeout(r, 150));
   const genBtn = document.getElementById('genBtn');
   if (genBtn) {
@@ -7120,7 +7189,6 @@ async function expandUnitLesson(unitId, subject, gradesStr, title, focus, lesson
 }
 
 async function loadLessonById(lessonId) {
-  // Load from savedLessons if available, else fetch
   let lesson = savedLessons.find(l => l.id === lessonId);
   if (!lesson) {
     const { data } = await db.from('lessons').select('*').eq('id', lessonId).single();
