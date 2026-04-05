@@ -2617,20 +2617,34 @@ function buildShareCards(outputs) {
 // ============================================================
 function renderMD(text) {
   if (!text) return '';
-  text = text.replace(/([.!?])(\s+)(\*\*(?:Think.pair.share|Listen for|Model|Check|Core concept|Differentiation|Scaffold|Extension)[:\s])/gi, '$1\n$3');
-  return text
-    .replace(/^# (.+)$/gm,'<h2 style="font-family:Fraunces,serif;font-size:1.05rem;font-weight:600;margin:16px 0 6px;padding:8px 12px;background:var(--sage-l);border-left:3px solid var(--sage);border-radius:0 5px 5px 0;">$1</h2>')
-    .replace(/^## (.+)$/gm,'<h2 style="font-family:Fraunces,serif;font-size:.96rem;font-weight:600;margin:14px 0 5px;padding:7px 12px;background:var(--sage-l);border-left:3px solid var(--sage);border-radius:0 5px 5px 0;">$1</h2>')
-    .replace(/^### (.+)$/gm,'<h3 style="font-size:.78rem;font-weight:600;color:var(--sage);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 4px;">$1</h3>')
-    .replace(/^#### (.+)$/gm,'<h4 style="font-size:.82rem;font-weight:600;color:var(--ink);margin:8px 0 3px;">$1</h4>')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/^✓ (.+)$/gm,'<div style="display:flex;align-items:flex-start;gap:7px;margin:6px 0;padding:6px 10px;background:var(--sage-l);border-radius:6px;border-left:3px solid var(--sage);"><span style="color:var(--sage);font-weight:700;flex-shrink:0;">✓</span><span>$1</span></div>')
-    .replace(/^↳ (.+)$/gm,'<div style="display:flex;align-items:flex-start;gap:6px;margin:3px 0 3px 16px;font-size:.82rem;color:var(--muted);"><span style="flex-shrink:0;">↳</span><span><em>$1</em></span></div>')
-    .replace(/^→ (.+)$/gm,'<div style="display:flex;align-items:center;gap:6px;margin:4px 0;font-weight:600;color:var(--blue);"><span>→</span><span>$1</span></div>')
-    .replace(/^(\d+)\. (.+)$/gm,'<div style="display:flex;gap:8px;margin-bottom:3px;"><span style="font-family:\'DM Mono\',monospace;font-size:.75rem;color:var(--sage);min-width:18px;">$1.</span><span>$2</span></div>')
-    .replace(/^- (.+)$/gm,'<li style="margin-bottom:3px;line-height:1.6;">$1</li>')
-    .replace(/(<li[^>]*>.*?<\/li>\n?)+/gs, m=>`<ul style="padding-left:17px;margin:4px 0;">${m}</ul>`)
-    .replace(/\n\n/g,'<div style="height:9px;"></div>');
+  const lines = text.split('\n');
+  let html = '';
+  const esc = s => s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  lines.forEach(line => {
+    if (/^#{1,2} /.test(line)) {
+      html += '<h2 style="font-family:Fraunces,serif;font-size:.96rem;font-weight:600;margin:14px 0 8px;padding:8px 12px;background:var(--sage-l);border-left:3px solid var(--sage);border-radius:0 5px 5px 0;">'+esc(line.replace(/^#+\s*/,''))+'</h2>';
+    } else if (/^### /.test(line)) {
+      html += '<h3 style="font-size:.78rem;font-weight:600;color:var(--sage);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 4px;">'+esc(line.slice(4))+'</h3>';
+    } else if (/^#### /.test(line)) {
+      html += '<h4 style="font-size:.82rem;font-weight:600;color:var(--ink);margin:8px 0 3px;">'+esc(line.slice(5))+'</h4>';
+    } else if (/^✓ /.test(line)) {
+      html += '<div style="display:flex;align-items:flex-start;gap:7px;margin:5px 0;padding:6px 10px;background:var(--sage-l);border-radius:6px;border-left:3px solid var(--sage);"><span style="color:var(--sage);font-weight:700;flex-shrink:0;">✓</span><span>'+esc(line.slice(2))+'</span></div>';
+    } else if (/^↳ /.test(line)) {
+      html += '<div style="display:flex;align-items:flex-start;gap:6px;margin:3px 0 3px 16px;font-size:.82rem;color:var(--muted);"><span style="flex-shrink:0;">↳</span><span><em>'+esc(line.slice(2))+'</em></span></div>';
+    } else if (/^→ /.test(line)) {
+      html += '<div style="display:flex;align-items:center;gap:6px;margin:5px 0;padding:5px 10px;background:var(--blue-l);border-radius:6px;border-left:3px solid var(--blue);font-weight:600;color:var(--blue);"><span>→</span><span>'+esc(line.slice(2))+'</span></div>';
+    } else if (/^- /.test(line)) {
+      html += '<li style="margin-bottom:3px;line-height:1.6;margin-left:16px;">'+esc(line.slice(2))+'</li>';
+    } else if (/^\d+\. /.test(line)) {
+      const num=line.match(/^(\d+)/)[1]; const cont=line.replace(/^\d+\.\s*/,'');
+      html += '<div style="display:flex;gap:8px;margin-bottom:4px;"><span style="font-family:\'DM Mono\',monospace;font-size:.75rem;color:var(--sage);min-width:18px;flex-shrink:0;padding-top:2px;">'+num+'.</span><span>'+esc(cont)+'</span></div>';
+    } else if (line.trim() === '') {
+      html += '<div style="height:6px;"></div>';
+    } else {
+      html += '<div style="margin:2px 0;line-height:1.75;">'+esc(line)+'</div>';
+    }
+  });
+  return html;
 }
 
 // ============================================================
@@ -4955,10 +4969,24 @@ const SVG_RENDERERS = {
 // VISUAL ROUTING — hardcoded first, agent loop fallback
 // ══════════════════════════════════════════════════════════════════════════════
 function renderHardcoded(visual_type, visual_params) {
-  const fn = SVG_RENDERERS[visual_type];
+  const TYPE_ALIASES = {
+    'sentence_frame':'sentence_frames','discussion_frames':'sentence_frames',
+    'discussion_sentence_frames':'sentence_frames','sentence_starter':'sentence_frames',
+    'sentence_starters':'sentence_frames','anchor_charts':'anchor_chart',
+    'story_maps':'story_map','word_webs':'word_web','reading_strategies':'reading_strategy',
+    'concept_cards':'concept_card','comparison_tables':'comparison_table',
+    'venn_diagrams':'venn_diagram','writing_processes':'writing_process',
+    'cycle_diagrams':'cycle_diagram','food_chains':'food_chain',
+    'science_diagrams':'science_diagram','worked_step':'worked_steps',
+    'fraction_bars':'fraction_bar','number_lines':'number_line',
+    'bar_graphs':'bar_graph','line_graphs':'line_graph',
+    'pie_charts':'pie_chart','scatter_plots':'scatter_plot',
+  };
+  const resolvedType = TYPE_ALIASES[visual_type] || visual_type;
+  const fn = SVG_RENDERERS[resolvedType];
   if (!fn) return null;
   try { return fn(visual_params||{}); }
-  catch(e) { console.warn('Hardcoded renderer error for '+visual_type+':', e); return null; }
+  catch(e) { console.warn('Hardcoded renderer error for '+resolvedType+':', e); return null; }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -5171,11 +5199,12 @@ async function generateAndPushVisuals(contentSlides, topic, subject, gradeStr, d
     }
 
     // Push to deck window
+    const cleanSvg = svg && svg.length > 200 && svg.includes('<svg') ? svg : null;
     if (deckWindow && !deckWindow.closed) {
-      deckWindow.postMessage({type:'VISUAL_READY', slideIndex:i, svg:svg||''}, '*');
+      deckWindow.postMessage({type:'VISUAL_READY', slideIndex:i, svg:cleanSvg||''}, '*');
     }
     // Also store on sd for Save Slides
-    contentSlides[i].svg_html = svg||'';
+    contentSlides[i].svg_html = cleanSvg||'';
   });
 
   // Run all tasks concurrently
@@ -5450,7 +5479,51 @@ window.addEventListener('message',function(e){
   } else {
     panel.innerHTML='<p style="font-size:14px;color:#888780;text-align:center;padding:20px">Visual unavailable</p>';
   }
-});`;
+});
+function dlPPTX(){
+  var btn=document.getElementById('pptxbtn');
+  if(!window.PptxGenJS){alert('PPTX library loading, please wait a moment and try again.');return;}
+  if(btn){btn.textContent='Building...';btn.disabled=true;}
+  try{
+    var pptx=new PptxGenJS();
+    pptx.layout='LAYOUT_WIDE';
+    var slides=document.querySelectorAll('.slide');
+    slides.forEach(function(el,i){
+      var s=pptx.addSlide();
+      var isTitleSlide=(i===0);
+      s.background={color:isTitleSlide?'1D3461':'F4F3EF'};
+      var svgs=el.querySelectorAll('svg');
+      if(svgs.length){
+        try{
+          var serializer=new XMLSerializer();
+          var svgStr=serializer.serializeToString(svgs[0]);
+          var b64=btoa(unescape(encodeURIComponent(svgStr)));
+          s.addImage({data:'data:image/svg+xml;base64,'+b64,x:0,y:0,w:'100%',h:'100%'});
+        }catch(e2){console.warn('SVG encode err',e2);}
+      }
+      var textNodes=el.querySelectorAll('h1,h2,h3,p,[style*="font-size"]');
+      var collected=[];
+      textNodes.forEach(function(n){
+        var t=(n.innerText||n.textContent||'').trim();
+        if(t&&t.length>2&&t.length<500&&!collected.some(function(c){return c.includes(t.slice(0,20));}))
+          collected.push(t);
+      });
+      if(collected.length){
+        var combined=collected.slice(0,6).join('\n');
+        s.addText(combined,{x:0.3,y:0.3,w:12.7,h:6.8,fontSize:14,color:isTitleSlide?'FFFFFF':'1D3461',wrap:true,valign:'top',transparent:true});
+      }
+    });
+    pptx.writeFile({fileName:'TeacherAI_Slides.pptx'}).then(function(){
+      if(btn){btn.textContent='\u2B07 PPTX';btn.disabled=false;}
+    }).catch(function(err){
+      alert('Download failed: '+err.message);
+      if(btn){btn.textContent='\u2B07 PPTX';btn.disabled=false;}
+    });
+  }catch(err){
+    alert('PPTX error: '+err.message);
+    if(btn){btn.textContent='\u2B07 PPTX';btn.disabled=false;}
+  }
+}`;
 
   const html=`<!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5463,7 +5536,9 @@ window.addEventListener('message',function(e){
   <span id="snum">1/${total}</span>
   <button onclick="go(1)">&#8250;</button>
   <button id="fsb" onclick="fs()">&#x26F6; Full</button>
+  <button id="pptxbtn" onclick="dlPPTX()" style="border-radius:8px!important;width:auto!important;padding:.3rem .85rem!important;font-size:.7rem!important;font-family:monospace;background:#3BBFAD!important;color:white!important;">&#11015; PPTX</button>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"><\/script>
 <script>${JS}<\/script>
 </body></html>`;
 
