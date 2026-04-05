@@ -791,7 +791,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       </div>
       <div class="fi" style="flex:1.5;min-width:140px;">
         <label>Subject</label>
-        <select id="unit-subj">
+        <select id="unit-subj" onchange="updateUnitTopicPlaceholder()">
           <option>Language / Literacy</option>
           <option>Mathematics</option>
           <option>Science &amp; Technology</option>
@@ -6448,9 +6448,10 @@ function renderExpInAssess() {
     l.expectations.forEach(e => { if(!allCovered[e.code]) allCovered[e.code]={exp:e,count:0,lessons:[]}; allCovered[e.code].count++; allCovered[e.code].lessons.push(l.topic||'Untitled'); });
   });
   const isMath = filteredLessons.some(l => l.subject === 'Mathematics');
+  const isScience = filteredLessons.some(l => (l.subject||'').toLowerCase().includes('science'));
   const strandNames = isMath ? {
     B:'Number', C:'Algebra', D:'Data', E:'Spatial Sense', F:'Financial Literacy'
-  } : subj.toLowerCase().includes('science') ? {
+  } : isScience ? {
     A:'STEM Skills', B:'Life Systems', C:'Matter and Energy', D:'Structures and Mechanisms', E:'Earth and Space Systems'
   } : {
     A:'Literacy Connections', B:'Foundations of Language', C:'Comprehension', D:'Composition'
@@ -7038,6 +7039,7 @@ function requestAccountDeletion(){if(!confirm('Are you sure you want to delete y
 let savedUnitPlans = [];
 
 function renderUnitClassSelector() {
+  updateUnitTopicPlaceholder();
   const sel = document.getElementById('unitClassSelector');
   const row = document.getElementById('unitClassSelectorRow');
   if (!sel || !row) return;
@@ -7075,6 +7077,17 @@ function autoFillUnitGradesFromClass() {
   });
 }
 
+function updateUnitTopicPlaceholder() {
+  const subj = document.getElementById('unit-subj')?.value || '';
+  const input = document.getElementById('unit-topic');
+  if (!input) return;
+  const ph = {
+    'Language / Literacy': 'e.g. Persuasive Writing, Short Story, Poetry, Making Inferences...',
+    'Mathematics': 'e.g. Fractions, Multiplication, Area and Perimeter, Data and Graphs...',
+    'Science & Technology': 'e.g. Habitats, States of Matter, Simple Machines, Ecosystems...',
+  };
+  input.placeholder = ph[subj] || 'e.g. Enter your unit topic...';
+}
 function toggleUnitGradePill(btn) { btn.classList.toggle('selected'); }
 
 function getUnitSelectedGrades() {
@@ -7173,7 +7186,7 @@ function renderUnitCard(u, linkedLessons) {
   const typeColors = { 'Introduction':'#2A5FA5','Practice':'#4A7C59','Application':'#C47B2A','Assessment':'#B54B2A' };
   const lessonRows = lessons.map((l, i) => {
     const typeColor = typeColors[l.type] || '#7A726A';
-    const linked = linkedLessons.find(ll => ll.topic === l.title || (l.title && ll.topic && ll.topic.toLowerCase().includes(l.title.split(' ')[0].toLowerCase())));
+    const linked = linkedLessons.find(ll => ll.topic === l.title || (l.title && ll.topic && ll.topic.toLowerCase() === l.title.toLowerCase()));
     const isExpanded = !!linked;
     return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);background:${isExpanded?'var(--sage-l)':'var(--paper)'};">
       <div style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:${isExpanded?'var(--sage)':'var(--border)'};color:${isExpanded?'white':'var(--muted)'};display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:700;margin-top:1px;">${l.lesson_number}</div>
@@ -7188,20 +7201,31 @@ function renderUnitCard(u, linkedLessons) {
       </div>
     </div>`;
   }).join('');
-  return `<div class="card" id="unit-${u.id}" style="padding:0;overflow:hidden;margin-bottom:16px;">
-    <div style="padding:14px 16px;background:var(--ink);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
-      <div>
+  const uid = u.id;
+  return `<div class="card" id="unit-${uid}" style="padding:0;overflow:hidden;margin-bottom:16px;">
+    <div style="padding:14px 16px;background:var(--ink);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;" onclick="toggleUnitCard('${uid}')">
+      <div style="flex:1;min-width:0;">
         <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--cream);margin-bottom:3px;">${u.topic}</div>
         <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:#9CA3AF;">${gradesStr} · ${subj} · ${u.duration} · ${date}</div>
         ${u.big_idea?`<div style="font-size:.8rem;color:rgba(255,255,255,.7);margin-top:6px;line-height:1.5;font-style:italic;">${u.big_idea}</div>`:''}
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;align-items:flex-start;">
         <span style="font-family:'DM Mono',monospace;font-size:.65rem;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.1);color:#9CA3AF;white-space:nowrap;">${expandedCount}/${lessons.length} expanded</span>
-        <button onclick="deleteUnitPlan('${u.id}')" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.8rem;padding:2px 4px;" title="Delete unit plan">🗑</button>
+        <span id="unit-chevron-${uid}" style="color:rgba(255,255,255,.5);font-size:.8rem;margin-top:2px;">▾</span>
+        <button onclick="event.stopPropagation();deleteUnitPlan('${uid}')" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.8rem;padding:2px 4px;" title="Delete">🗑</button>
       </div>
     </div>
-    ${lessonRows}
+    <div id="unit-lessons-${uid}">${lessonRows}</div>
   </div>`;
+}
+
+function toggleUnitCard(uid) {
+  const body = document.getElementById('unit-lessons-'+uid);
+  const chevron = document.getElementById('unit-chevron-'+uid);
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (chevron) chevron.textContent = isOpen ? '▸' : '▾';
 }
 
 async function expandUnitLesson(unitId, subject, gradesStr, title, lessonIndex) {
