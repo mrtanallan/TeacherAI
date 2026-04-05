@@ -713,7 +713,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <div id="newClassForm" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:12px;">
       <div style="font-family:DM Mono,monospace;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">New Class</div>
       <div class="fg" style="margin-bottom:10px;">
-        <div class="fi s2"><label>Class Name</label><input type="text" id="newClassName" placeholder="e.g. Grade 6/7 Morning..." autocapitalize="words"></div>
+        <div class="fi"><label>Class Name</label><input type="text" id="newClassName" placeholder="e.g. Grade 6/7 Morning..." autocapitalize="words"></div>
         <div class="fi"><label>Subject Focus <span style="font-weight:400;color:var(--muted);font-size:.75rem;">(optional)</span></label><input type="text" id="newClassSubject" placeholder="e.g. Language, Math..."></div>
         <div class="fi full"><label>Class Context <span style="font-weight:400;color:var(--muted);font-size:.75rem;">(used by AI)</span></label>
           <textarea id="newClassContext" style="min-height:56px;" placeholder="e.g. 24 students, 4 ELL, Chromebooks available..."></textarea>
@@ -730,7 +730,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         <div id="editClassLabel" style="font-family:DM Mono,monospace;font-size:.65rem;font-weight:600;color:var(--sage);"></div>
       </div>
       <div class="fg" style="margin-bottom:10px;">
-        <div class="fi s2"><label>Class Name</label><input type="text" id="editClassName" placeholder="Class name"></div>
+        <div class="fi"><label>Class Name</label><input type="text" id="editClassName" placeholder="Class name"></div>
         <div class="fi"><label>Subject Focus</label><input type="text" id="editClassSubject" placeholder="e.g. Language, Math..."></div>
         <div class="fi full"><label>Class Context</label>
           <textarea id="editClassContext" style="min-height:56px;" placeholder="e.g. 24 students, 4 ELL, Chromebooks available..."></textarea>
@@ -2076,7 +2076,12 @@ async function generate() {
         ? 'ONTARIO SCIENCE & TECHNOLOGY 2022 EXPECTATIONS FOR GRADE '+grades.join('/')+' — choose 2-4 from '+primaryStrand2+' strand ('+({'B':'Life Systems','C':'Matter and Energy','D':'Structures and Mechanisms','E':'Earth and Space Systems'})[primaryStrand2]+') first. Do NOT use language or math expectations:\n'
           + sortedExps2.map(e=>e.code+' ['+e.strand+': '+({'B':'Life Systems','C':'Matter and Energy','D':'Structures and Mechanisms','E':'Earth and Space Systems'})[e.strand]+'] '+e.desc).join('\n')
         : 'ONTARIO LANGUAGE CURRICULUM EXPECTATIONS (choose 2-4 most relevant):\n'
-          + relevantExps.slice(0,15).map(e=>e.code+' '+e.desc).join('\n'))
+          + (isSplit
+            ? relevantExps.slice(0,20).map(e=>{
+                const bandLabel = e.band==='1-3'?'[Gr.1-3]':e.band==='4-6'?'[Gr.4-6]':e.band==='7-8'?'[Gr.7-8]':'';
+                return e.code+' '+bandLabel+' '+e.desc;
+              }).join('\n')
+            : relevantExps.slice(0,15).map(e=>e.code+' '+e.desc).join('\n')))
     : '';
 
   const expHint = preMatchedExp.length
@@ -2084,7 +2089,10 @@ async function generate() {
       ? 'CRITICAL — PINNED EXPECTATIONS: Return ONLY these. Build lesson around them:\n'+preMatchedExp.map(e=>`${e.code} — ${e.desc}`).join('\n')
       : 'CRITICAL — REQUIRED EXPECTATIONS: Include ALL of these:\n'+preMatchedExp.map(e=>`${e.code} — ${e.desc}`).join('\n'))
     : expContext
-      ? 'CRITICAL — You MUST choose expectations ONLY from this list. Do NOT invent codes.\n'+expContext+'\n\nReturn 2-4 of these codes in the expectations array. Pick the ones most relevant to: '+topic
+      ? 'CRITICAL — You MUST choose expectations ONLY from this list. Do NOT invent codes.\n'+expContext+'\n\n'
+        + (isSplit && !isMathSubj && !(subj||'').toLowerCase().includes('science')
+          ? `SPLIT CLASS REQUIREMENT: This is a ${grades.join('/')} split class. You MUST include at least one expectation from EACH grade band present (e.g. one [Gr.1-3] expectation AND one [Gr.4-6] expectation). Return 2-4 codes total. Each returned expectation must include the grade field set to the specific grade it applies to.`
+          : 'Return 2-4 of these codes in the expectations array. Pick the ones most relevant to: '+topic)
       : (isMathSubj
           ? 'EXPECTATIONS: Return 2-4 Ontario Math 2020 expectations most relevant to this topic and grade.'
           : 'EXPECTATIONS: Return 2-4 Ontario 2023 Language expectations most relevant to this topic and grade.');
