@@ -5005,10 +5005,67 @@ const SVG_RENDERERS = {
 // ══════════════════════════════════════════════════════════════════════════════
 // VISUAL ROUTING — hardcoded first, agent loop fallback
 // ══════════════════════════════════════════════════════════════════════════════
+// SVG text helper — replaces foreignObject with native <text> elements (canvg compatible)
+function svgTextWrap(text, x, y, width, opts) {
+  opts = opts || {};
+  var fontSize = opts.fontSize || 12;
+  var fill = opts.fill || '#333';
+  var bold = opts.bold ? ' font-weight="bold"' : '';
+  var align = opts.align || 'left'; // left, middle
+  var lineH = fontSize * 1.35;
+  var charsPerLine = Math.max(1, Math.floor(width / (fontSize * 0.58)));
+  var words = String(text).split(' ');
+  var lines = [], line = '';
+  words.forEach(function(w) {
+    if (line.length + w.length + 1 > charsPerLine && line.length > 0) { lines.push(line); line = w; }
+    else { line = line ? line + ' ' + w : w; }
+  });
+  if (line) lines.push(line);
+  var tx = align === 'middle' ? x + width/2 : x;
+  var anchor = align === 'middle' ? 'middle' : 'start';
+  return lines.map(function(l, i) {
+    var esc = l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return '<text x="'+tx+'" y="'+(y + i*lineH + fontSize*0.85)+'" font-size="'+fontSize+'"'+bold+' fill="'+fill+'" text-anchor="'+anchor+'" font-family="Arial,sans-serif">'+esc+'</text>';
+  }).join('');
+}
+
+// Converts foreignObject blocks to native SVG text (for canvg compatibility)
+function stripForeignObject(svg) {
+  return svg.replace(/<foreignObject\s+([^>]*)>([\s\S]*?)<\/foreignObject>/gi, function(match, attrs, inner) {
+    var getA = function(n) { var m = attrs.match(new RegExp(n+'=[\"\']([^\"\']+)[\"\']')); return m ? parseFloat(m[1]) : 0; };
+    var fx=getA('x'), fy=getA('y'), fw=getA('width')||100, fh=getA('height')||20;
+    var rawText = inner.replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+    if (!rawText) return '';
+    var color = (inner.match(/color:\s*([#\w]+)/) || [])[1] || '#333';
+    var isBold = /font-weight:\s*(bold|[6-9]\d\d)/.test(inner);
+    var sizeM = inner.match(/font-size:\s*(\d+)px/);
+    var fontSize = sizeM ? parseInt(sizeM[1]) : 12;
+    var alignM = inner.match(/text-align:\s*(\w+)/);
+    var align = alignM && alignM[1] === 'center' ? 'middle' : 'left';
+    var lineH = fontSize * 1.35;
+    var charsPerLine = Math.max(1, Math.floor(fw / (fontSize * 0.58)));
+    var words = rawText.split(' '), lines = [], line = '';
+    words.forEach(function(w) { if (line.length+w.length+1>charsPerLine&&line.length>0){lines.push(line);line=w;}else{line=line?line+' '+w:w;} });
+    if (line) lines.push(line);
+    var totalH = lines.length * lineH;
+    var startY = fy + (fh - totalH) / 2;
+    var tx = align === 'middle' ? fx + fw/2 : fx + 4;
+    var anchor = align === 'middle' ? 'middle' : 'start';
+    return lines.map(function(l,i) {
+      var esc = l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return '<text x="'+tx+'" y="'+(startY+i*lineH+fontSize*0.85).toFixed(1)+'" font-size="'+fontSize+'"'+(isBold?' font-weight="bold"':'')+' fill="'+color+'" text-anchor="'+anchor+'" font-family="Arial,sans-serif">'+esc+'</text>';
+    }).join('\n');
+  });
+}
+
 function renderHardcoded(visual_type, visual_params) {
   const fn = SVG_RENDERERS[visual_type];
   if (!fn) return null;
-  try { return fn(visual_params||{}); }
+  try {
+    var svg = fn(visual_params||{});
+    // Convert foreignObject to native SVG text (canvg doesn't support foreignObject)
+    return svg ? stripForeignObject(svg) : null;
+  }
   catch(e) { console.warn('Hardcoded renderer error for '+visual_type+':', e); return null; }
 }
 
