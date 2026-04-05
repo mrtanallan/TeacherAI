@@ -780,33 +780,46 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
      UNITS TAB
      ══════════════════════════════════════════════════════════ -->
 <div class="page" id="pg-units">
-  <div class="ph"><h1>Unit <em>Plans</em></h1><p>Generate 2–4 week units with curriculum-mapped lesson sequences. Each lesson can be expanded into a full plan with one click.</p></div>
-  <div class="ban ban-b" style="margin-bottom:20px;">
-    <span>🚧</span>
-    <span><strong>Coming soon</strong> — Unit plan generation is in development. Units will thread directly into the Plan tab so each lesson in a unit can be one-click expanded. Check back in the next update.</span>
-  </div>
-  <div class="card" style="opacity:.6;pointer-events:none;">
-    <div class="ct" style="margin-bottom:14px;">📋 Unit Plan Setup</div>
+  <div class="ph"><h1>Unit <em>Plans</em></h1><p>Generate a 2–4 week curriculum-mapped unit. Each lesson can be expanded into a full plan with one click.</p></div>
+
+  <!-- Generate form -->
+  <div class="card" id="unitFormCard" style="margin-bottom:20px;">
+    <div class="ct" style="margin-bottom:14px;">📋 New Unit Plan</div>
     <div class="fg" style="margin-bottom:14px;">
       <div class="fi">
         <label>Subject</label>
-        <select disabled><option>Language / Literacy</option><option>Mathematics</option><option>Science &amp; Technology</option></select>
+        <select id="unit-subj">
+          <option>Language / Literacy</option>
+          <option>Mathematics</option>
+          <option>Science &amp; Technology</option>
+        </select>
       </div>
       <div class="fi">
-        <label>Grade(s)</label>
-        <select disabled><option>Grade 4</option></select>
+        <label>Grade</label>
+        <select id="unit-grade">
+          <option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option>
+          <option>Grade 3</option><option>Grade 4</option><option>Grade 5</option>
+          <option>Grade 6</option><option>Grade 7</option><option>Grade 8</option>
+        </select>
       </div>
       <div class="fi">
         <label>Duration</label>
-        <select disabled><option>2 weeks (6 lessons)</option><option>3 weeks (9 lessons)</option><option>4 weeks (12 lessons)</option></select>
+        <select id="unit-duration">
+          <option value="2 weeks (6 lessons)">2 weeks — 6 lessons</option>
+          <option value="3 weeks (9 lessons)">3 weeks — 9 lessons</option>
+          <option value="4 weeks (12 lessons)">4 weeks — 12 lessons</option>
+        </select>
       </div>
       <div class="fi full">
-        <label>Unit Focus / Big Idea</label>
-        <input type="text" disabled placeholder="e.g. Persuasive Writing, Fractions and Decimals...">
+        <label>Unit Topic / Big Idea <span style="color:var(--rust);">✱</span></label>
+        <input type="text" id="unit-topic" placeholder="e.g. Persuasive Writing, Fractions, Habitats and Ecosystems..." autocapitalize="sentences">
       </div>
     </div>
-    <button class="btn b-ink b-full" disabled>📋 Generate Unit Plan</button>
+    <button class="btn b-ink b-full" id="unitGenBtn" onclick="generateUnitPlan()">📋 Generate Unit Plan</button>
   </div>
+
+  <!-- Saved unit plans list -->
+  <div id="unitPlansList"></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -1329,6 +1342,7 @@ function showApp() {
       if (this.id==='tr-account') { loadAccountPage(); }
       if (this.id==='tr-roster')  { renderClassTabs(); renderR(); }
       if (this.id==='tr-lessons') { renderLessonsList(); }
+      if (this.id==='tr-units')   { renderUnitPlansList(); }
     });
   });
   resetWorkflow();
@@ -2293,9 +2307,17 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
     unlock(); gs(2);
 
     if (currentUser) {
+      const _unitPlanId = window._pendingUnitPlanId || null;
+      const _unitLessonTitle = window._pendingUnitLessonTitle || null;
+      // Clear pending unit context
+      window._pendingUnitPlanId = null;
+      window._pendingUnitLessonIndex = null;
+      window._pendingUnitLessonTitle = null;
+
       const { data:insertData, error:insertErr } = await db.from('lessons').insert({
         teacher_id:currentUser.id, topic, grades, subject:subj,
-        content:parsed, expectations:lessonExpectations, class_id:activeClassId||null
+        content:parsed, expectations:lessonExpectations, class_id:activeClassId||null,
+        unit_plan_id: _unitPlanId || null
       }).select();
       if (insertErr) {
         const { error:insertErr2 } = await db.from('lessons').insert({ teacher_id:currentUser.id, topic, grades, subject:subj, content:parsed, expectations:lessonExpectations });
@@ -6860,6 +6882,262 @@ function startTour(){_tourIndex=0;renderTourStep();document.getElementById('tour
 function renderTourStep(){const step=TOUR_STEPS[_tourIndex];document.getElementById('tourEmoji').textContent=step.emoji;document.getElementById('tourTitle').textContent=step.title;document.getElementById('tourBody').innerHTML=step.body;document.getElementById('tourStep').textContent=`Step ${_tourIndex+1} of ${TOUR_STEPS.length}`;const nextBtn=document.getElementById('tourNext');nextBtn.textContent=_tourIndex===TOUR_STEPS.length-1?"Let's go! →":'Next →';const dots=document.getElementById('tourDots');dots.innerHTML=TOUR_STEPS.map((_,i)=>`<div class="tour-dot ${i===_tourIndex?'on':''}"></div>`).join('');}
 function tourNext(){if(_tourIndex<TOUR_STEPS.length-1){_tourIndex++;renderTourStep();}else{skipTour();}}
 function skipTour(){document.getElementById('tourOverlay').style.display='none';localStorage.setItem('teacherai_tour_done','1');}
+
+// ============================================================
+// UNIT PLANS
+// ============================================================
+let savedUnitPlans = [];
+
+async function generateUnitPlan() {
+  const topic = document.getElementById('unit-topic')?.value.trim();
+  const subj  = document.getElementById('unit-subj')?.value;
+  const grade = document.getElementById('unit-grade')?.value;
+  const duration = document.getElementById('unit-duration')?.value;
+  if (!topic) { alert('Enter a unit topic.'); return; }
+
+  const btn = document.getElementById('unitGenBtn');
+  btn.disabled = true; btn.textContent = '⏳ Generating unit...';
+  showLoading('Generating unit plan...', true);
+  setProgress(10, 'Building lesson sequence...');
+
+  const lessonCount = parseInt(duration) || 6;
+
+  const prompt = `You are an expert Ontario K–8 curriculum planner. Generate a unit plan for:
+Subject: ${subj}
+Grade: ${grade}
+Duration: ${duration}
+Topic: ${topic}
+
+Return ONLY valid JSON — no markdown, no explanation:
+{
+  "big_idea": "One sentence describing the overarching understanding students will develop",
+  "lessons": [
+    {
+      "lesson_number": 1,
+      "title": "Short lesson title (4-6 words)",
+      "focus": "One sentence describing what students will do and learn",
+      "type": "Introduction | Practice | Application | Assessment"
+    }
+  ]
+}
+
+Rules:
+- Generate exactly ${lessonCount} lessons
+- Each lesson builds logically on the previous
+- Titles must be specific and Ontario-curriculum aligned
+- Types should flow: Introduction early, Assessment near end
+- Focus on the actual lesson activity, not meta-descriptions`;
+
+  try {
+    const res = await authFetch('/api/generate', {
+      method: 'POST',
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    setProgress(70, 'Parsing unit...');
+
+    if (!res || !res.ok) {
+      const err = await res?.json().catch(() => ({}));
+      throw new Error(err?.error || 'Generation failed');
+    }
+
+    const data = await res.json();
+    const raw = data.content.map(i => i.text || '').join('');
+    let parsed;
+    try {
+      parsed = JSON.parse(raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim());
+    } catch(e) {
+      const s = raw.indexOf('{'), end = raw.lastIndexOf('}');
+      parsed = JSON.parse(raw.slice(s, end + 1));
+    }
+
+    setProgress(90, 'Saving...');
+
+    // Save to Supabase
+    const { data: saved, error } = await db.from('unit_plans').insert({
+      teacher_id: currentUser.id,
+      topic,
+      subject: subj,
+      grades: [grade],
+      duration,
+      big_idea: parsed.big_idea || '',
+      lessons: parsed.lessons || []
+    }).select().single();
+
+    if (error) throw new Error(error.message);
+
+    hideLoading();
+    showToast('✅ Unit plan saved!');
+    document.getElementById('unit-topic').value = '';
+    await renderUnitPlansList();
+    // Scroll to the new unit
+    setTimeout(() => {
+      document.getElementById('unit-'+saved.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+
+  } catch(e) {
+    hideLoading();
+    alert('Error generating unit plan: ' + e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '📋 Generate Unit Plan';
+}
+
+async function renderUnitPlansList() {
+  const el = document.getElementById('unitPlansList');
+  if (!el || !currentUser) return;
+
+  const { data } = await db.from('unit_plans')
+    .select('*')
+    .eq('teacher_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  savedUnitPlans = data || [];
+
+  if (!savedUnitPlans.length) {
+    el.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--muted);">
+      <div style="font-size:2rem;margin-bottom:10px;">📋</div>
+      <div style="font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:6px;">No unit plans yet</div>
+      <div style="font-size:.82rem;">Generate your first unit above — each lesson can be expanded into a full plan.</div>
+    </div>`;
+    return;
+  }
+
+  // Fetch linked lessons for all unit plans in one query
+  const unitIds = savedUnitPlans.map(u => u.id);
+  const { data: linkedLessons } = await db.from('lessons')
+    .select('id, topic, created_at, unit_plan_id')
+    .in('unit_plan_id', unitIds)
+    .order('created_at', { ascending: true });
+
+  const lessonsByUnit = {};
+  (linkedLessons || []).forEach(l => {
+    if (!lessonsByUnit[l.unit_plan_id]) lessonsByUnit[l.unit_plan_id] = [];
+    lessonsByUnit[l.unit_plan_id].push(l);
+  });
+
+  el.innerHTML = savedUnitPlans.map(u => renderUnitCard(u, lessonsByUnit[u.id] || [])).join('');
+}
+
+function renderUnitCard(u, linkedLessons) {
+  const date = u.created_at ? new Date(u.created_at).toLocaleDateString('en-CA') : '';
+  const gradesStr = (u.grades || []).join(' / ');
+  const subj = (u.subject || '').replace('Language / Literacy', 'Language');
+  const lessons = u.lessons || [];
+  const expandedCount = linkedLessons.length;
+
+  const typeColors = {
+    'Introduction': '#2A5FA5',
+    'Practice':     '#4A7C59',
+    'Application':  '#C47B2A',
+    'Assessment':   '#B54B2A'
+  };
+
+  const lessonRows = lessons.map((l, i) => {
+    const typeColor = typeColors[l.type] || '#7A726A';
+    const linked = linkedLessons.find(ll => ll.topic === l.title || ll.topic?.includes(l.title?.split(' ')[0]));
+    const isExpanded = !!linked;
+
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);background:${isExpanded ? 'var(--sage-l)' : 'var(--paper)'};">
+      <div style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:${isExpanded ? 'var(--sage)' : 'var(--border)'};color:${isExpanded ? 'white' : 'var(--muted)'};display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:700;margin-top:1px;">${l.lesson_number}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">${l.title || 'Lesson '+l.lesson_number}</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">${l.focus || ''}</div>
+        ${isExpanded ? `<div style="margin-top:5px;font-size:.72rem;color:var(--sage);font-weight:600;">✅ Expanded · <button onclick="loadLessonById('${linked.id}')" style="background:none;border:none;color:var(--sage);cursor:pointer;font-size:.72rem;font-weight:600;text-decoration:underline;padding:0;">Open lesson →</button></div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+        <span style="font-family:'DM Mono',monospace;font-size:.6rem;padding:2px 7px;border-radius:10px;background:${typeColor}20;color:${typeColor};font-weight:600;">${l.type||''}</span>
+        ${!isExpanded ? `<button class="btn b-sage b-sm" onclick="expandUnitLesson('${u.id}','${u.subject}','${(u.grades||[]).join(',')}','${(l.title||'').replace(/'/g,"\\'")}','${(l.focus||'').replace(/'/g,"\\'")}',${i})" style="font-size:.7rem;padding:3px 9px;">✨ Expand</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="card" id="unit-${u.id}" style="padding:0;overflow:hidden;margin-bottom:16px;">
+    <div style="padding:14px 16px;background:var(--ink);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+      <div>
+        <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--cream);margin-bottom:3px;">${u.topic}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:#9CA3AF;">${gradesStr} · ${subj} · ${u.duration} · ${date}</div>
+        ${u.big_idea ? `<div style="font-size:.8rem;color:rgba(255,255,255,.7);margin-top:6px;line-height:1.5;font-style:italic;">${u.big_idea}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <span style="font-family:'DM Mono',monospace;font-size:.65rem;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.1);color:#9CA3AF;">${expandedCount}/${lessons.length} expanded</span>
+        <button onclick="deleteUnitPlan('${u.id}')" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.8rem;padding:2px 4px;" title="Delete unit plan">🗑</button>
+      </div>
+    </div>
+    ${lessonRows}
+  </div>`;
+}
+
+async function expandUnitLesson(unitId, subject, gradesStr, title, focus, lessonIndex) {
+  const grades = gradesStr.split(',').filter(Boolean);
+  const grade = grades[0] || 'Grade 4';
+
+  // Pre-fill the Plan tab and trigger generation
+  showToast('Opening Plan tab — generating full lesson...', 4000);
+
+  // Switch to Plan tab
+  const planTab = document.getElementById('tr-plan');
+  if (planTab) { planTab.checked = true; renderClassSelector(); resetWorkflow(); }
+
+  // Set subject
+  const subjEl = document.getElementById('subj');
+  if (subjEl) { subjEl.value = subject; onSubjectChange(); }
+
+  // Set grade pill
+  await new Promise(r => setTimeout(r, 100));
+  document.querySelectorAll('.grade-pill-btn').forEach(btn => {
+    btn.classList.remove('selected');
+    const el = document.getElementById('gA');
+    if (btn.dataset.grade === grade) {
+      btn.classList.add('selected');
+      if (el) el.value = grade;
+    }
+  });
+
+  // Set topic to lesson title + focus as context
+  const topicEl = document.getElementById('topic');
+  if (topicEl) topicEl.value = title;
+
+  // Store unit plan context for saving after generation
+  window._pendingUnitPlanId = unitId;
+  window._pendingUnitLessonIndex = lessonIndex;
+  window._pendingUnitLessonTitle = title;
+
+  // Scroll to generate button and click it
+  await new Promise(r => setTimeout(r, 150));
+  const genBtn = document.getElementById('genBtn');
+  if (genBtn) {
+    genBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await new Promise(r => setTimeout(r, 300));
+    generate();
+  }
+}
+
+async function loadLessonById(lessonId) {
+  // Load from savedLessons if available, else fetch
+  let lesson = savedLessons.find(l => l.id === lessonId);
+  if (!lesson) {
+    const { data } = await db.from('lessons').select('*').eq('id', lessonId).single();
+    lesson = data;
+    if (lesson && !savedLessons.find(l => l.id === lesson.id)) savedLessons.push(lesson);
+  }
+  if (lesson) loadLesson(lesson.id);
+}
+
+async function deleteUnitPlan(id) {
+  if (!confirm('Delete this unit plan? Lessons generated from it will not be deleted.')) return;
+  const { error } = await db.from('unit_plans').delete().eq('id', id);
+  if (error) { alert('Error: ' + error.message); return; }
+  savedUnitPlans = savedUnitPlans.filter(u => u.id !== id);
+  showToast('✅ Unit plan deleted.');
+  renderUnitPlansList();
+}
 
 // ============================================================
 // BOOT
