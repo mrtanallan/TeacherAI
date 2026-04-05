@@ -801,11 +801,19 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         </select>
       </div>
       <div class="fi" style="flex:1;min-width:120px;">
-        <label>Duration</label>
+        <label>Lessons in Unit</label>
         <select id="unit-duration">
-          <option value="2 weeks (6 lessons)">2 weeks — 6 lessons</option>
-          <option value="3 weeks (9 lessons)">3 weeks — 9 lessons</option>
-          <option value="4 weeks (12 lessons)">4 weeks — 12 lessons</option>
+          <option value="2 lessons">2 lessons</option>
+          <option value="3 lessons">3 lessons</option>
+          <option value="4 lessons">4 lessons</option>
+          <option value="5 lessons">5 lessons</option>
+          <option value="6 lessons" selected>6 lessons</option>
+          <option value="7 lessons">7 lessons</option>
+          <option value="8 lessons">8 lessons</option>
+          <option value="9 lessons">9 lessons</option>
+          <option value="10 lessons">10 lessons</option>
+          <option value="11 lessons">11 lessons</option>
+          <option value="12 lessons">12 lessons</option>
         </select>
       </div>
     </div>
@@ -6960,7 +6968,7 @@ async function generateUnitPlan() {
   if (!grades.length) { alert('Select at least one grade.'); return; }
 
   const gradeDesc = grades.length > 1 ? grades.join(' / ') + ' split class' : grades[0];
-  const lessonCount = duration.includes('6') ? 6 : duration.includes('9') ? 9 : 12;
+  const lessonCount = parseInt(duration) || 6;
 
   const btn = document.getElementById('unitGenBtn');
   btn.disabled = true; btn.textContent = '⏳ Generating unit...';
