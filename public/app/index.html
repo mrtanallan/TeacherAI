@@ -478,6 +478,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <div class="nav-user">
     <span class="nav-email" id="navEmail"></span>
     <button id="gConnectBtn" onclick="connectGoogleSlides()" style="display:none;background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);border-radius:6px;padding:3px 9px;font-size:.7rem;cursor:pointer;font-family:'DM Sans',sans-serif;" title="Connect Google Slides">🔗 Connect Google</button>
+    <button id="upgradeBtn" onclick="startUpgrade()" style="display:none;padding:5px 11px;background:#F59E0B;border:none;color:#1C1C1C;border-radius:5px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">⚡ Upgrade</button>
     <label class="tab" for="tr-account" style="padding:5px 10px;font-size:.75rem;color:#9CA3AF;" title="Account">👤</label>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
   </div>
@@ -781,12 +782,8 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
      ══════════════════════════════════════════════════════════ -->
 <div class="page" id="pg-units">
   <div class="ph"><h1>Unit <em>Plans</em></h1><p>Generate a 2–4 week curriculum-mapped unit. Each lesson can be expanded into a full plan with one click.</p></div>
-
-  <!-- Generate form -->
   <div class="card" id="unitFormCard" style="margin-bottom:20px;">
     <div class="ct" style="margin-bottom:14px;">📋 New Unit Plan</div>
-
-    <!-- Row 1: Class · Subject · Duration -->
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
       <div class="fi" id="unitClassSelectorRow" style="display:none;flex:1.5;min-width:140px;">
         <label>Class</label>
@@ -817,8 +814,6 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         </select>
       </div>
     </div>
-
-    <!-- Row 2: Grade pills -->
     <div style="margin-bottom:18px;">
       <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px;">Grade <span style="color:var(--rust);">✱</span></label>
       <div style="display:flex;flex-wrap:wrap;gap:5px;" id="unitGradePillContainer">
@@ -833,19 +828,14 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         <button type="button" class="grade-pill-btn" data-grade="Grade 8" onclick="toggleUnitGradePill(this)">Gr. 8</button>
       </div>
     </div>
-
-    <!-- Row 3: Topic -->
     <div style="margin-bottom:16px;">
       <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px;">Unit Topic / Big Idea <span style="color:var(--rust);">✱</span></label>
       <input type="text" id="unit-topic" placeholder="e.g. Persuasive Writing, Fractions, Habitats and Ecosystems..." autocapitalize="sentences"
         style="width:100%;font-family:'DM Sans',sans-serif;font-size:1rem;padding:13px 16px;border:2px solid var(--border);border-radius:10px;background:var(--cream);color:var(--ink);outline:none;transition:border-color .15s;"
         onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
     </div>
-
     <button class="btn b-ink b-full" id="unitGenBtn" onclick="generateUnitPlan()">📋 Generate Unit Plan</button>
   </div>
-
-  <!-- Saved unit plans list -->
   <div id="unitPlansList"></div>
 </div>
 
@@ -1348,6 +1338,14 @@ function handleOAuthRedirect() {
       window.history.replaceState({}, '', window.location.pathname);
     }, 1500);
   }
+  if (params.get('upgrade') === 'success') {
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => { loadUsageMeter(); showToast('🎉 Welcome to Pro! Unlimited lessons unlocked.', 6000); }, 1000);
+  }
+  if (params.get('upgrade') === 'cancel') {
+    window.history.replaceState({}, '', window.location.pathname);
+    showToast('Upgrade cancelled — you're still on the free plan.', 4000);
+  }
 }
 
 function showApp() {
@@ -1385,7 +1383,6 @@ function showApp() {
   });
   loadSubmissions();
   updateWelcomeBanner();
-  // If units tab was the last active tab, load unit plans on startup
   if (savedTab === 'tr-units') renderUnitPlansList();
 }
 
@@ -1455,6 +1452,9 @@ async function saveClassEdit() {
   if (cls) { cls.name=name; cls.subject_focus=subject||null; cls.context=context||null; }
   document.getElementById('editClassForm').style.display = 'none';
   renderClassTabs(); renderClassSelector(); renderUnitClassSelector();
+}
+
+async function createClass() {
   const name = document.getElementById('newClassName').value.trim();
   if (!name) { alert('Enter a class name.'); return; }
   const subject = document.getElementById('newClassSubject').value.trim();
@@ -1475,6 +1475,9 @@ async function saveClassEdit() {
   document.getElementById('newClassForm').style.display = 'none';
   await loadUserData();
   renderClassTabs(); renderClassSelector(); renderUnitClassSelector(); renderR(); renderTracker();
+}
+
+async function switchClass(classId) {
   activeClassId = classId || null;
   let stuQ = db.from('students').select('*').eq('teacher_id',currentUser.id).order('created_at');
   if (activeClassId) stuQ = stuQ.eq('class_id', activeClassId);
@@ -1520,6 +1523,9 @@ async function deleteClass(classId) {
   } catch(e) { alert('Error: '+e.message); }
   hideLoading();
   renderClassTabs(); renderClassSelector(); renderUnitClassSelector(); renderR(); renderTracker();
+}
+
+function renderClassTabs() {
   const el = document.getElementById('classTabs');
   if (!el) return;
   if (!classes.length) {
@@ -1653,19 +1659,61 @@ function dismissWelcomeBanner(permanent) {
 // ============================================================
 // USAGE METER
 // ============================================================
+
+// ============================================================
+// PLAN / STRIPE UI
+// ============================================================
 async function loadUsageMeter() {
   try {
     const meter = document.getElementById('usageMeter');
     const countEl = document.getElementById('usageCount');
     const noteEl = document.getElementById('usageNote');
+    const upgradeBtn = document.getElementById('upgradeBtn');
+    const killSwitch = true;
     if (!meter||!countEl) return;
-    const { count } = await db.from('lessons').select('*',{count:'exact',head:true}).eq('teacher_id',currentUser.id);
-    const used = count||0;
-    meter.style.display='block';
-    countEl.textContent = used+' lesson'+(used!==1?'s':'')+' generated all time';
-    if (noteEl) { noteEl.textContent='Unlimited — beta access'; noteEl.style.color='var(--sage)'; }
-  } catch(e) {}
+    const { data: profile } = await db.from('profiles').select('plan, lessons_this_month').eq('id', currentUser.id).single();
+    const plan = profile?.plan || 'free';
+    const used = profile?.lessons_this_month || 0;
+    const FREE_LIMIT = 5;
+    meter.style.display = 'block';
+    if (killSwitch || plan === 'beta' || plan === 'pro') {
+      const { count } = await db.from('lessons').select('*',{count:'exact',head:true}).eq('teacher_id',currentUser.id);
+      countEl.textContent = (count||0)+' lesson'+((count||0)!==1?'s':'')+' generated';
+      if (noteEl) { noteEl.textContent = plan==='pro' ? 'Pro — unlimited' : 'Unlimited — beta access'; noteEl.style.color='var(--sage)'; }
+      if (upgradeBtn) upgradeBtn.style.display = 'none';
+    } else {
+      countEl.textContent = used+' / '+FREE_LIMIT+' lessons this month';
+      const remaining = FREE_LIMIT - used;
+      if (noteEl) { noteEl.textContent = remaining > 0 ? remaining+' remaining — upgrade for unlimited' : 'Limit reached — upgrade to continue'; noteEl.style.color = remaining > 0 ? 'var(--muted)' : '#EF4444'; }
+      if (upgradeBtn) upgradeBtn.style.display = 'inline-block';
+    }
+  } catch(e) { console.warn('loadUsageMeter error', e); }
 }
+
+async function startUpgrade() {
+  try {
+    showToast('Opening checkout...');
+    const res = await authFetch('/api/create-checkout', { method: 'POST' });
+    const data = await res.json();
+    if (data.url) { window.location.href = data.url; }
+    else showToast('Could not start upgrade: ' + (data.error || 'Unknown error'), 5000);
+  } catch(e) { showToast('Upgrade failed: ' + e.message, 5000); }
+}
+
+function showUpgradePrompt(message) {
+  const killSwitch = true;
+  if (killSwitch) { showToast('⚠️ ' + message, 5000); return; }
+  const existing = document.getElementById('upgradeModal');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'upgradeModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML = `<div style="background:white;border-radius:16px;padding:32px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);"><div style="font-size:2rem;margin-bottom:12px;">⚡</div><div style="font-weight:700;font-size:1.1rem;color:#1C1C1C;margin-bottom:8px;">You've hit your free limit</div><div style="font-size:.88rem;color:#6B7280;margin-bottom:24px;line-height:1.5;">${message}</div><button onclick="startUpgrade()" style="width:100%;padding:12px;background:#F59E0B;border:none;border-radius:10px;font-weight:700;font-size:.95rem;color:#1C1C1C;cursor:pointer;margin-bottom:10px;">⚡ Upgrade to Pro — Unlimited</button><button onclick="document.getElementById('upgradeModal').remove()" style="width:100%;padding:10px;background:none;border:1px solid #E5E7EB;border-radius:10px;font-size:.85rem;color:#6B7280;cursor:pointer;">Maybe later</button></div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+
 
 // ============================================================
 // WORKFLOW STEPS
@@ -2091,7 +2139,7 @@ async function generate() {
     : expContext
       ? 'CRITICAL — You MUST choose expectations ONLY from this list. Do NOT invent codes.\n'+expContext+'\n\n'
         + (isSplit && !isMathSubj && !(subj||'').toLowerCase().includes('science')
-          ? `SPLIT CLASS REQUIREMENT: This is a ${grades.join('/')} split class. You MUST include at least one expectation from EACH grade band present (e.g. one [Gr.1-3] expectation AND one [Gr.4-6] expectation). Return 2-4 codes total. Each returned expectation must include the grade field set to the specific grade it applies to.`
+          ? `SPLIT CLASS REQUIREMENT: This is a ${grades.join('/')} split class. You MUST include at least one expectation from EACH grade band present. Return 2-4 codes total.`
           : 'Return 2-4 of these codes in the expectations array. Pick the ones most relevant to: '+topic)
       : (isMathSubj
           ? 'EXPECTATIONS: Return 2-4 Ontario Math 2020 expectations most relevant to this topic and grade.'
@@ -2279,8 +2327,11 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
       const status = res?.status||0;
       const errData = res ? await res.json().catch(()=>({})) : {};
       if (status===529) throw new Error('AI service is at capacity. Please try again in a minute.');
-      if (errData?.error==='monthly_limit_reached') throw new Error(errData.message||'Monthly lesson limit reached.');
-      throw new Error(errData?.error?.message||'Server error '+status);
+      if (status===402 || errData?.code==='PLAN_LIMIT_REACHED') {
+        showUpgradePrompt(errData?.error || 'You\'ve reached your free plan limit.');
+        throw new Error('__PLAN_LIMIT__');
+      }
+      throw new Error(errData?.error?.message||errData?.error||'Server error '+status);
     }
 
     const data = await res.json();
@@ -2337,12 +2388,9 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
 
     if (currentUser) {
       const _unitPlanId = window._pendingUnitPlanId || null;
-      const _unitLessonTitle = window._pendingUnitLessonTitle || null;
-      // Clear pending unit context
       window._pendingUnitPlanId = null;
       window._pendingUnitLessonIndex = null;
       window._pendingUnitLessonTitle = null;
-
       const { data:insertData, error:insertErr } = await db.from('lessons').insert({
         teacher_id:currentUser.id, topic, grades, subject:subj,
         content:parsed, expectations:lessonExpectations, class_id:activeClassId||null,
@@ -2357,7 +2405,7 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
   } catch(e) {
     clearInterval(progInterval);
     hideLoading();
-    alert('Error: '+e.message);
+    if (e.message !== '__PLAN_LIMIT__') alert('Error: '+e.message);
   }
   clearInterval(progInterval);
   hideLoading();
@@ -2435,7 +2483,7 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations) {
 
     const slideBtns = k==='lesson_plan' ? `
       <button class="btn b-sage b-sm" onclick="presentSlides(event)" style="white-space:nowrap;">▶ Present</button>
-      <button class="btn b-out b-sm" onclick="downloadSlidesPPTX()" style="white-space:nowrap;" title="Download as PPTX">⬇ Download PPTX</button>
+      <button class="btn b-out b-sm" onclick="downloadSlidesPPTX()" style="white-space:nowrap;" title="Download PPTX">⬇ Download PPTX</button>
       <button class="btn b-out b-sm" id="gSlidesBtn" onclick="exportToGoogleSlides()" style="white-space:nowrap;display:none;" title="Export to Google Slides">🔗 Google Slides</button>` : '';
 
     const wsLinkBtns = isWS ? (k.match(/student_worksheet_[A-D]$/) ? `
@@ -2665,13 +2713,12 @@ function renderWS(text) {
   if (!text) return '';
   wsN = 0;
   const lines = text.split('\n');
-  // Pre-process: merge circle-one options that end up on separate lines
+  // Pre-process: normalise emoji numbers and merge circle-one options
   const mergedLines = [];
   for (let i=0; i<lines.length; i++) {
     let line = lines[i]; const nextLine = lines[i+1]||'';
-    // Normalise emoji number prefixes (1️⃣ 2️⃣ etc) → plain "1. " format
+    // Normalise emoji number prefixes (1️⃣ etc) and boxed numbers [1]
     line = line.replace(/^([1-9]|1[0-2])️⃣\s*/,'$1. ');
-    // Normalise boxed number prefixes [1] [2] etc
     line = line.replace(/^\[(\d+)\]\s*/,'$1. ');
     if (line.includes('[CIRCLE ONE]') && nextLine.match(/^[A-E]\)/)) {
       const opts = [];
@@ -2689,12 +2736,10 @@ function renderWS(text) {
 
   let h = '<div class="wsw">';
   mergedLines.forEach(line => {
-    if (line.startsWith('# '))  { h+=`<h2>${line.slice(2)}</h2>`; return; }
     if (line.startsWith('## ')) { h+=`<h2>${line.slice(3)}</h2>`; return; }
     if (line.startsWith('### ')) { h+=`<h3>${line.slice(4)}</h3>`; return; }
-    // Interactive elements — check BEFORE numbered list, so they always get rendered as inputs
     if (/\[TEXT BOX\]/i.test(line)) { const l=line.replace(/\[TEXT BOX\]/gi,'').replace(/^[-*\d.]+\s*/,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\[[^\]]*\]/g,'').trim(); wsN++; h+=`${l?`<div style="font-size:.86rem;margin-bottom:2px;">${l}</div>`:''}<input class="wsi" type="text" placeholder="Write your answer here...">`;return;}
-    if (/\[LARGE BOX\]/i.test(line)) { const l=line.replace(/\[LARGE BOX\]/gi,'').replace(/^[-*\d.]+\s*/,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').trim(); wsN++; h+=`${l?`<div style="font-size:.86rem;margin-bottom:2px;">${l}</div>`:''}<textarea class="wst" placeholder="Write your answer here..."></textarea>`; return; }
+    if (line.includes('[LARGE BOX]')) { const l=line.replace('[LARGE BOX]','').replace(/^[-*\d.]+\s*/,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').trim(); wsN++; h+=`${l?`<div style="font-size:.86rem;margin-bottom:2px;">${l}</div>`:''}<textarea class="wst" placeholder="Write your answer here..."></textarea>`; return; }
     if (line.includes('[CIRCLE ONE:')) { const m=line.match(/\[CIRCLE ONE: (.+?)\]/); const pre=line.split('[CIRCLE ONE:')[0].replace(/^[-*\d.]+\s*/,'').trim(); if(m){wsN++;const nm='r'+wsN;h+=`${pre?`<div style="font-size:.86rem;margin-bottom:4px;">${pre}</div>`:''}<div class="wsc">${(m[1].includes(' / ')?m[1].split(' / '):m[1].split('/')).map(o=>`<label class="wscho"><input type="radio" name="${nm}"> ${o.trim()}</label>`).join('')}</div>`;return;} }
     if (line.includes('[CHECK ALL THAT APPLY:')) { const m=line.match(/\[CHECK ALL THAT APPLY: (.+?)\]/); const pre=line.split('[CHECK ALL THAT APPLY:')[0].replace(/^[-*\d.]+\s*/,'').trim(); if(m){wsN++;h+=`${pre?`<div style="font-size:.86rem;margin-bottom:4px;">${pre}</div>`:''}<div class="wsc">${(m[1].includes(' / ')?m[1].split(' / '):m[1].split('/')).map((o,oi)=>`<label class="wscho"><input type="checkbox" id="wc${wsN}-${oi}"> ${o.trim()}</label>`).join('')}</div>`;return;} }
     if (line.includes('[WORD BANK:')) { const m=line.match(/\[WORD BANK: (.+?)\]/); if(m){h+=`<div class="wswb"><div class="wswbt">📚 Word Bank</div><div class="wswbw">${m[1].split(',').map(w=>`<span class="wswbwd">${w.trim()}</span>`).join('')}</div></div>`;return;} }
@@ -2703,7 +2748,6 @@ function renderWS(text) {
       const cont=line.replace(/^\d+\.\s*/,''); const num=line.match(/^(\d+)/)[1];
       if(cont.includes('[LARGE BOX]')){wsN++;h+=`<div style="margin:7px 0;"><div style="font-size:.86rem;margin-bottom:2px;"><strong>${num}.</strong> ${cont.replace('[LARGE BOX]','').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').trim()}</div><textarea class="wst" placeholder="Write your answer here..."></textarea></div>`;return;}
       if(cont.includes('[TEXT BOX]')){wsN++;h+=`<div style="margin:5px 0;display:flex;align-items:flex-start;gap:6px;"><span style="font-weight:600;flex-shrink:0;">${num}.</span><div style="flex:1;"><div style="font-size:.86rem;margin-bottom:2px;">${cont.replace('[TEXT BOX]','').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').trim()}</div><input class="wsi" type="text" placeholder="Your answer..."></div></div>`;return;}
-      if(cont.includes('[CIRCLE ONE:')){const m=cont.match(/\[CIRCLE ONE: (.+?)\]/);const pre=cont.split('[CIRCLE ONE:')[0].replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').trim();if(m){wsN++;const nm='r'+wsN;h+=`<div style="margin:5px 0;"><span style="font-weight:600;">${num}.</span> ${pre?`<span>${pre}</span> `:''}<div class="wsc" style="margin-top:4px;">${(m[1].includes(' / ')?m[1].split(' / '):m[1].split('/')).map(o=>`<label class="wscho"><input type="radio" name="${nm}"> ${o.trim()}</label>`).join('')}</div></div>`;return;}}
       h+=`<div style="margin:4px 0;"><strong>${num}.</strong> ${cont.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</div>`; return;
     }
     if (line.match(/^[-*] /)) { h+=`<li style="margin-bottom:2px;">${line.slice(2).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</li>`; return; }
@@ -2735,42 +2779,32 @@ function downloadPDF(k) {
   const rawText = genC[k]?.cur || document.getElementById('cbb-'+k)?.innerText || '';
   const topic = document.getElementById('topic')?.value || 'Lesson';
   const label = (BLABELS[k]||k).replace(/^[^\s]+\s/,'');
-
-  // Convert markdown to HTML for readable PDF
   const htmlContent = rawText
     .replace(/^# (.+)$/gm, '<h2 class="sec">$1</h2>')
     .replace(/^## (.+)$/gm, '<h2 class="sec">$1</h2>')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/^✓ (.+)$/gm, '<div class="check">✓ $1</div>')
-    .replace(/^↳ (.+)$/gm, '<div class="indent">↳ $1</div>')
-    .replace(/^→ (.+)$/gm, '<div class="arrow">→ $1</div>')
+    .replace(/^↳ (.+)$/gm, '<div class="sub">↳ $1</div>')
+    .replace(/^→ (.+)$/gm, '<div class="arr">→ $1</div>')
     .replace(/^[-*] (.+)$/gm, '<li>$1</li>')
     .replace(/^(\d+)\. (.+)$/gm, '<div class="num"><span>$1.</span><span>$2</span></div>')
     .replace(/\n\n+/g, '</p><p>')
     .replace(/\n/g, '<br>');
-
   const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${topic} — ${label}</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;}
+<style>*{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:white;color:#16120E;padding:32px 40px;max-width:820px;margin:0 auto;font-size:13px;line-height:1.7;}
 h1{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:600;border-bottom:3px solid #4A7C59;padding-bottom:10px;margin-bottom:20px;}
 h2.sec{font-family:'Fraunces',serif;font-size:.95rem;font-weight:600;background:#EAF0EA;border-left:4px solid #4A7C59;padding:7px 12px;margin:18px 0 8px;border-radius:0 5px 5px 0;}
 h3{font-size:.78rem;font-weight:700;color:#4A7C59;text-transform:uppercase;letter-spacing:.8px;margin:14px 0 4px;}
-h4{font-size:.85rem;font-weight:600;color:#16120E;margin:10px 0 3px;}
-p{margin:4px 0;line-height:1.7;}
-li{margin-bottom:3px;line-height:1.65;margin-left:18px;list-style:disc;}
-strong{font-weight:600;}
-.check{display:flex;align-items:flex-start;gap:8px;margin:5px 0;padding:5px 10px;background:#EAF0EA;border-radius:5px;border-left:3px solid #4A7C59;}
-.indent{margin:3px 0 3px 20px;font-size:.85rem;color:#7A726A;font-style:italic;}
-.arrow{margin:5px 0;font-weight:600;color:#2A5FA5;}
-.num{display:flex;gap:8px;margin:4px 0;}
-.num span:first-child{font-weight:600;min-width:20px;color:#4A7C59;}
+p{margin:4px 0;}li{margin-bottom:3px;margin-left:18px;list-style:disc;}strong{font-weight:600;}
+.check{display:flex;gap:8px;margin:5px 0;padding:5px 10px;background:#EAF0EA;border-radius:5px;border-left:3px solid #4A7C59;}
+.sub{margin:3px 0 3px 20px;font-size:.85rem;color:#7A726A;font-style:italic;}
+.arr{margin:5px 0;font-weight:600;color:#2A5FA5;}
+.num{display:flex;gap:8px;margin:4px 0;}.num span:first-child{font-weight:600;min-width:20px;color:#4A7C59;}
 .meta{font-size:.7rem;color:#9CA3AF;margin-top:24px;border-top:1px solid #E0D8CC;padding-top:8px;}
-button{display:none;}
-@media print{body{padding:16px 20px;}}
+button{display:none;}@media print{body{padding:16px 20px;}}
 </style></head><body>
 <h1>${topic} — ${label}</h1>
 <div>${htmlContent}</div>
@@ -4333,14 +4367,15 @@ const SVG_RENDERERS = {
     const cols=Math.max(hdrs.length,...rows.map(r=>r.length));
     const cw=Math.floor(460/cols);
 
+    // Use foreignObject for proper text wrapping in cells
     const fo = (x,y,w,h,text,bold,color) => {
       const fw=bold?'700':'400';
       return `<foreignObject x="${x}" y="${y}" width="${w}" height="${h}">
-        <div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:center;text-align:center;font-family:Arial,sans-serif;font-size:12px;font-weight:${fw};color:${color};padding:2px 6px;box-sizing:border-box;overflow:visible;word-wrap:break-word;line-height:1.35">${String(text)}</div>
+        <div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:center;text-align:center;font-family:Arial,sans-serif;font-size:12px;font-weight:${fw};color:${color};padding:2px 4px;box-sizing:border-box;overflow:visible;word-wrap:break-word;line-height:1.35">${String(text)}</div>
       </foreignObject>`;
     };
 
-    const hdrH=40, oy=8;
+    const hdrH=38, oy=8;
     const thCells=hdrs.map((h,i)=>`
       <rect x="${20+i*cw}" y="${oy}" width="${cw-3}" height="${hdrH}" rx="4" fill="#1D9E75"/>
       ${fo(20+i*cw, oy, cw-3, hdrH, h, true, 'white')}`).join('');
@@ -4348,7 +4383,7 @@ const SVG_RENDERERS = {
     // Dynamic row height based on content length
     const getRowH = (row) => {
       const maxLen = Math.max(...row.map(c=>String(c).length));
-      return maxLen > 40 ? 64 : maxLen > 25 ? 52 : maxLen > 15 ? 44 : 38;
+      return maxLen > 25 ? 56 : maxLen > 15 ? 48 : 40;
     };
 
     let curY = oy + hdrH + 4;
@@ -4362,20 +4397,18 @@ const SVG_RENDERERS = {
     }).join('');
 
     const totalH = curY + 16;
-    return `<svg viewBox="0 0 500 ${totalH}" width="100%" height="100%">${thCells}${dataRows}</svg>`;
+    return `<svg viewBox="0 0 500 ${Math.min(totalH, 320)}" width="100%" height="100%">${thCells}${dataRows}</svg>`;
   },
 
   concept_card(p) {
     const items=(p.items||[]).slice(0,5);
-    const rh=52, oy=60, totalH=oy+items.length*rh+30;
+    const rh=46, oy=60, totalH=oy+items.length*rh+30;
     const rows=items.map((item,i)=>`
       <rect x="10" y="${oy+i*rh}" width="480" height="${rh-4}" rx="8" fill="${i%2===0?'#E8F5E9':'#F4F3EF'}"/>
       <rect x="10" y="${oy+i*rh}" width="6" height="${rh-4}" rx="3" fill="#1D9E75"/>
       <text x="26" y="${oy+i*rh+18}" font-size="13" font-weight="700" fill="#1D3461" font-family="Arial,sans-serif">${item.name||''}</text>
-      <foreignObject x="26" y="${oy+i*rh+22}" width="450" height="${rh-26}">
-        <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:12px;color:#5F5E5A;line-height:1.4;word-wrap:break-word;overflow:visible">${item.detail||''}</div>
-      </foreignObject>`).join('');
-    return `<svg viewBox="0 0 500 ${Math.min(totalH,320)}" width="100%" height="100%">
+      <foreignObject x="26" y="${oy+i*rh+22}" width="450" height="${rh-26}"><div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:12px;color:#5F5E5A;line-height:1.4;word-wrap:break-word;overflow:visible">${item.detail||''}</div></foreignObject>`).join('');
+    return `<svg viewBox="0 0 500 ${Math.min(totalH,300)}" width="100%" height="100%">
       <text x="250" y="38" text-anchor="middle" font-size="18" font-weight="900" fill="#1D3461" font-family="Arial,sans-serif">${p.title||''}</text>
       ${rows}
     </svg>`;
@@ -4411,10 +4444,10 @@ const SVG_RENDERERS = {
 
     const W = 500, titleH = 44, headerH = 36, oy = titleH + 8;
     const colW = Math.floor((W - 20) / 2);
-    const itemH = 38;
+    const itemH = 34;
     const maxItems = Math.max(leftItems.length, rightItems.length, 1);
     const bodyH = maxItems * itemH + 12;
-    const totalH = oy + headerH + bodyH + 16;
+    const totalH = Math.min(oy + headerH + bodyH + 16, 310);
 
     // Title bar
     const titleSVG = title
@@ -4444,10 +4477,10 @@ const SVG_RENDERERS = {
         <rect x="10" y="${rowY + 2}" width="${colW}" height="${itemH - 2}" fill="${bg}" rx="2"/>
         <rect x="${10 + colW + 4}" y="${rowY + 2}" width="${colW}" height="${itemH - 2}" fill="${bg}" rx="2"/>
         <foreignObject x="14" y="${rowY + 2}" width="${colW - 8}" height="${itemH - 2}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="height:${itemH - 2}px;display:flex;align-items:center;font-family:Arial,sans-serif;font-size:12px;color:#1D3461;padding:0 4px;line-height:1.4;word-wrap:break-word;overflow:visible">${lText}</div>
+          <div xmlns="http://www.w3.org/1999/xhtml" style="height:${itemH - 2}px;display:flex;align-items:center;font-family:Arial,sans-serif;font-size:12px;color:#1D3461;padding:0 4px;line-height:1.3;word-wrap:break-word">${lText}</div>
         </foreignObject>
         <foreignObject x="${10 + colW + 8}" y="${rowY + 2}" width="${colW - 8}" height="${itemH - 2}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="height:${itemH - 2}px;display:flex;align-items:center;font-family:Arial,sans-serif;font-size:12px;color:#1D3461;padding:0 4px;line-height:1.4;word-wrap:break-word;overflow:visible">${rText}</div>
+          <div xmlns="http://www.w3.org/1999/xhtml" style="height:${itemH - 2}px;display:flex;align-items:center;font-family:Arial,sans-serif;font-size:12px;color:#1D3461;padding:0 4px;line-height:1.3;word-wrap:break-word">${rText}</div>
         </foreignObject>`;
     }
 
@@ -4473,8 +4506,7 @@ const SVG_RENDERERS = {
     const W = 500, titleH = 40;
     const cols = 2, rows = Math.ceil(elements.length / cols);
     const boxW = Math.floor((W - 30) / cols);
-    // Dynamic boxH based on longest content
-    const maxContentLen = Math.max(...elements.map(e => (e.content || '').length));
+    const maxContentLen = Math.max(...elements.map(e => (e.content||'').length));
     const boxH = maxContentLen > 80 ? 120 : maxContentLen > 40 ? 106 : 96;
     const gap = 10;
     const totalH = titleH + rows * (boxH + gap) + gap + 10;
@@ -4490,18 +4522,17 @@ const SVG_RENDERERS = {
       const by = titleH + gap + row * (boxH + gap);
       const labelColor = el.color || '#1D9E75';
       const isDark = labelColor === '#1D3461' || labelColor === '#6B63D4';
-      const contentH = boxH - 36;
       return `
         <rect x="${bx}" y="${by}" width="${boxW}" height="${boxH}" rx="8" fill="white" stroke="${labelColor}" stroke-width="2.5"/>
         <rect x="${bx}" y="${by}" width="${boxW}" height="28" rx="8" fill="${labelColor}"/>
         <rect x="${bx}" y="${by + 18}" width="${boxW}" height="10" fill="${labelColor}"/>
         <text x="${bx + boxW/2}" y="${by + 19}" text-anchor="middle" font-size="13" font-weight="700" fill="${isDark ? 'white' : '#1D3461'}" font-family="Arial,sans-serif">${el.label}</text>
-        <foreignObject x="${bx + 6}" y="${by + 30}" width="${boxW - 12}" height="${contentH}">
+        <foreignObject x="${bx + 6}" y="${by + 30}" width="${boxW - 12}" height="${boxH - 36}">
           <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:12px;color:#1D3461;line-height:1.45;word-wrap:break-word;overflow:visible">${el.content}</div>
         </foreignObject>`;
     }).join('');
 
-    return `<svg viewBox="0 0 ${W} ${totalH}" width="100%" height="100%">
+    return `<svg viewBox="0 0 ${W} ${Math.min(totalH, 310)}" width="100%" height="100%">
       ${titleSVG}${boxes}
     </svg>`;
   },
@@ -4517,7 +4548,6 @@ const SVG_RENDERERS = {
     ];
 
     const W = 500, titleH = 40, colW = Math.floor((W - 28) / 3), gap = 6;
-    // Use taller item rows — 38px gives room for two-line text
     const itemH = 38;
     const maxItems = Math.max(...sections.map(s => s.items.length), 1);
     const bodyH = 36 + maxItems * itemH + 16;
@@ -4531,16 +4561,18 @@ const SVG_RENDERERS = {
       const cx = 8 + i * (colW + gap);
       const cy = titleH + 8;
 
+      // Column header
       const header = `
         <rect x="${cx}" y="${cy}" width="${colW}" height="32" rx="6" fill="${sec.color}"/>
-        <text x="${cx + colW/2}" y="${cy + 21}" text-anchor="middle" font-size="12" font-weight="700" fill="white" font-family="Arial,sans-serif">${sec.icon} ${sec.label}</text>`;
+        <text x="${cx + colW/2}" y="${cy + 21}" text-anchor="middle" font-size="13" font-weight="700" fill="white" font-family="Arial,sans-serif">${sec.icon} ${sec.label}</text>`;
 
+      // Items
       const items = sec.items.map((item, j) => {
         const iy = cy + 36 + j * itemH;
         return `
           <rect x="${cx}" y="${iy}" width="${colW}" height="${itemH - 2}" rx="4" fill="${j % 2 === 0 ? '#F4F3EF' : 'white'}"/>
           <foreignObject x="${cx + 4}" y="${iy + 2}" width="${colW - 8}" height="${itemH - 4}">
-            <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:11px;color:#1D3461;line-height:1.4;word-wrap:break-word;padding:2px 2px;overflow:visible">${item}</div>
+            <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:11px;color:#1D3461;line-height:1.4;word-wrap:break-word;padding:2px;overflow:visible">${item}</div>
           </foreignObject>`;
       }).join('');
 
@@ -4556,43 +4588,33 @@ const SVG_RENDERERS = {
   // params: title, frames[{stem, example}], color
   sentence_frames(p) {
     const title = p.title || 'Sentence Frames';
-    const frames = (p.frames || []).slice(0, 4);
+    const frames = (p.frames || []).slice(0, 5);
     const accentColor = p.color || '#6B63D4';
 
     const W = 500, titleH = 40, gap = 8;
-    // Dynamically size each frame based on content length
-    const getFrameH = (f) => {
-      const stemLen = (f.stem || f || '').length;
-      const exLen = (f.example || '').length;
-      const stemH = stemLen > 60 ? 40 : stemLen > 30 ? 30 : 22;
-      const exH = exLen > 80 ? 36 : exLen > 40 ? 28 : exLen > 0 ? 22 : 0;
-      return stemH + exH + 20;
-    };
+    const getFrameH = (f) => { const sl=(f.stem||f||'').length,el=(f.example||'').length; return (sl>60?40:sl>30?30:22)+(el>80?36:el>40?28:el>0?22:0)+20; };
 
-    let curY = titleH + 10;
+    const titleSVG = `
+      <rect x="0" y="0" width="${W}" height="${titleH}" fill="${accentColor}"/>
+      <text x="${W/2}" y="${titleH - 10}" text-anchor="middle" font-size="15" font-weight="900" fill="white" font-family="Arial,sans-serif">${title}</text>`;
+
     const framesSVG = frames.map((f, i) => {
+      const fy = titleH + 8 + i * (frameH + gap);
       const stem = f.stem || f || '';
       const example = f.example || '';
-      const fh = getFrameH(f);
-      const stemH = fh - (example ? 28 : 10) - 10;
-      const fy = curY;
-      curY += fh + gap;
       return `
-        <rect x="10" y="${fy}" width="${W - 20}" height="${fh}" rx="8" fill="white" stroke="${accentColor}" stroke-width="1.5"/>
-        <rect x="10" y="${fy}" width="6" height="${fh}" rx="4" fill="${accentColor}"/>
-        <foreignObject x="22" y="${fy + 6}" width="${W - 36}" height="${stemH + 8}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1D3461;line-height:1.45;word-wrap:break-word;overflow:visible">${stem}</div>
+        <rect x="10" y="${fy}" width="${W - 20}" height="${frameH}" rx="8" fill="white" stroke="${accentColor}" stroke-width="1.5" opacity="${0.5 + i * 0.1}"/>
+        <rect x="10" y="${fy}" width="6" height="${frameH}" rx="4" fill="${accentColor}"/>
+        <foreignObject x="22" y="${fy + 4}" width="${W - 36}" height="${example ? 28 : frameH - 8}">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1D3461;line-height:1.4;word-wrap:break-word">${stem}</div>
         </foreignObject>
-        ${example ? `<foreignObject x="22" y="${fy + stemH + 10}" width="${W - 36}" height="36">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:11px;color:#5F5E5A;font-style:italic;line-height:1.45;word-wrap:break-word;overflow:visible">${example}</div>
+        ${example ? `<foreignObject x="22" y="${fy + 30}" width="${W - 36}" height="20">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:11px;color:#5F5E5A;font-style:italic;line-height:1.3">${example}</div>
         </foreignObject>` : ''}`;
     }).join('');
 
-    const totalH = curY + 8;
     return `<svg viewBox="0 0 ${W} ${totalH}" width="100%" height="100%">
-      <rect x="0" y="0" width="${W}" height="${titleH}" fill="${accentColor}"/>
-      <text x="${W/2}" y="${titleH - 10}" text-anchor="middle" font-size="15" font-weight="900" fill="white" font-family="Arial,sans-serif">${title}</text>
-      ${framesSVG}
+      ${titleSVG}${framesSVG}
     </svg>`;
   },
 
@@ -4674,7 +4696,7 @@ const SVG_RENDERERS = {
 
     const W = 500, titleH = 38;
     const stepW = Math.floor((W - 20 - (count - 1) * 8) / count);
-    const stepH = 110;
+    const stepH = 100;
     const oy = titleH + 12;
     const totalH = oy + stepH + 16;
 
@@ -4689,6 +4711,7 @@ const SVG_RENDERERS = {
       const desc = step.description || step.desc || '';
       const isDark = color === '#1D3461';
 
+      // Arrow connector (not on last step)
       const arrow = i < count - 1
         ? `<polygon points="${sx + stepW + 1},${oy + stepH/2 - 8} ${sx + stepW + 7},${oy + stepH/2} ${sx + stepW + 1},${oy + stepH/2 + 8}" fill="${color}" opacity="0.7"/>`
         : '';
@@ -4696,16 +4719,16 @@ const SVG_RENDERERS = {
       return `
         <rect x="${sx}" y="${oy}" width="${stepW}" height="${stepH}" rx="8" fill="${color}"/>
         <text x="${sx + stepW/2}" y="${oy + 22}" text-anchor="middle" font-size="20" font-family="Arial,sans-serif">${i + 1}</text>
-        <foreignObject x="${sx + 3}" y="${oy + 28}" width="${stepW - 6}" height="42">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'Arial Black',Arial,sans-serif;font-size:11px;font-weight:900;color:${isDark ? 'white' : '#1D3461'};text-align:center;word-wrap:break-word;line-height:1.35;overflow:visible">${label}</div>
+        <foreignObject x="${sx + 4}" y="${oy + 28}" width="${stepW - 8}" height="38">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'Arial Black',Arial,sans-serif;font-size:11px;font-weight:900;color:${isDark ? 'white' : '#1D3461'};text-align:center;word-wrap:break-word;line-height:1.3">${label}</div>
         </foreignObject>
-        <foreignObject x="${sx + 3}" y="${oy + 70}" width="${stepW - 6}" height="36">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:10px;color:${isDark ? 'rgba(255,255,255,0.85)' : 'rgba(29,52,97,0.8)'};text-align:center;word-wrap:break-word;line-height:1.35;overflow:visible">${desc}</div>
+        <foreignObject x="${sx + 4}" y="${oy + 64}" width="${stepW - 8}" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:10px;color:${isDark ? 'rgba(255,255,255,0.85)' : 'rgba(29,52,97,0.8)'};text-align:center;word-wrap:break-word;line-height:1.3">${desc}</div>
         </foreignObject>
         ${arrow}`;
     }).join('');
 
-    return `<svg viewBox="0 0 ${W} ${totalH}" width="100%" height="100%">
+    return `<svg viewBox="0 0 ${W} ${Math.min(totalH, 210)}" width="100%" height="100%">
       ${titleSVG}${stepsSVG}
     </svg>`;
   },
@@ -4772,9 +4795,9 @@ const SVG_RENDERERS = {
       return `
         <circle cx="${x}" cy="${y}" r="${nodeR}" fill="${color}"/>
         <foreignObject x="${x - nodeR + 4}" y="${y - nodeR + 4}" width="${(nodeR-4)*2}" height="${(nodeR-4)*2}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="width:${(nodeR-4)*2}px;height:${(nodeR-4)*2}px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:Arial,sans-serif;color:white;line-height:1.3;overflow:visible">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="width:${(nodeR-4)*2}px;height:${(nodeR-4)*2}px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:Arial,sans-serif;color:white;line-height:1.25">
             <div style="font-size:11px;font-weight:900;word-wrap:break-word">${label}</div>
-            ${desc ? `<div style="font-size:9px;opacity:0.9;margin-top:2px;word-wrap:break-word">${desc}</div>` : ''}
+            ${desc ? `<div style="font-size:9px;opacity:0.85;margin-top:2px;word-wrap:break-word">${desc}</div>` : ''}
           </div>
         </foreignObject>`;
     }).join('');
@@ -4809,12 +4832,12 @@ const SVG_RENDERERS = {
     const organisms = (p.organisms || defaultOrganisms).slice(0, 6);
     const count = organisms.length;
 
-    const W = 500, H = 290;
+    const W = 500, H = 280;
     const nodeW = Math.min(Math.floor((W - 20) / count) - 8, 82);
-    const nodeH = 120;
+    const nodeH = 110;
     const gap = Math.floor((W - 20 - count * nodeW) / (count - 1));
-    const oy = (H - nodeH) / 2 + 16;
-    const titleY = 18;
+    const oy = (H - nodeH) / 2 + 20;
+    const titleY = 20;
 
     const titleSVG = `<text x="${W/2}" y="${titleY}" text-anchor="middle" font-size="14" font-weight="900" fill="#1D3461" font-family="Arial,sans-serif">${title}</text>`;
 
@@ -4839,11 +4862,11 @@ const SVG_RENDERERS = {
         <rect x="${nx}" y="${oy}" width="${nodeW}" height="32" rx="10" fill="${color}"/>
         <rect x="${nx}" y="${oy + 22}" width="${nodeW}" height="10" fill="${color}"/>
         <text x="${nx + nodeW/2}" y="${oy + 22}" text-anchor="middle" font-size="20" font-family="Arial,sans-serif">${emoji}</text>
-        <foreignObject x="${nx + 3}" y="${oy + 34}" width="${nodeW - 6}" height="42">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:11px;font-weight:900;color:#1D3461;text-align:center;word-wrap:break-word;line-height:1.35;overflow:visible">${name}</div>
+        <foreignObject x="${nx + 3}" y="${oy + 34}" width="${nodeW - 6}" height="36">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:11px;font-weight:900;color:#1D3461;text-align:center;word-wrap:break-word;line-height:1.3">${name}</div>
         </foreignObject>
-        <foreignObject x="${nx + 3}" y="${oy + 76}" width="${nodeW - 6}" height="40">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:10px;color:#5F5E5A;text-align:center;word-wrap:break-word;line-height:1.35;font-style:italic;overflow:visible">${role}</div>
+        <foreignObject x="${nx + 3}" y="${oy + 70}" width="${nodeW - 6}" height="36">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:10px;color:#5F5E5A;text-align:center;word-wrap:break-word;line-height:1.3;font-style:italic">${role}</div>
         </foreignObject>
         ${arrow}`;
     }).join('');
@@ -4898,7 +4921,7 @@ const SVG_RENDERERS = {
       const lx2 = pos.x - (dx/dist) * 22;
       const ly2 = pos.y - (dy/dist) * 14;
 
-      const labelW = 100, labelH = 32;
+      const labelW = 90, labelH = 28;
       const lbx = pos.x - labelW/2;
       const lby = pos.y - labelH/2;
 
@@ -4906,8 +4929,8 @@ const SVG_RENDERERS = {
         <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${accentColor}" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7"/>
         <circle cx="${lx2}" cy="${ly2}" r="3" fill="${accentColor}" opacity="0.7"/>
         <rect x="${lbx}" y="${lby}" width="${labelW}" height="${labelH}" rx="5" fill="${accentColor}" opacity="0.9"/>
-        <foreignObject x="${lbx + 3}" y="${lby + 2}" width="${labelW - 6}" height="${labelH - 4}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:white;text-align:center;display:flex;align-items:center;justify-content:center;height:${labelH - 4}px;word-wrap:break-word;line-height:1.3;overflow:visible">${text}</div>
+        <foreignObject x="${lbx + 4}" y="${lby + 2}" width="${labelW - 8}" height="${labelH - 4}">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:white;text-align:center;display:flex;align-items:center;justify-content:center;height:${labelH - 4}px;word-wrap:break-word;line-height:1.2">${text}</div>
         </foreignObject>`;
     }).join('');
 
@@ -5453,16 +5476,13 @@ window.addEventListener('message',function(e){
 }
 function downloadSlidesPPTX() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
-  // Open the presenter, then trigger PPTX download inside it
-  const w = openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense, window._slideData.slideImgs||[]);
-  // Give the presenter window time to load, then click its PPTX button
-  showToast('Opening slides — click "Download PPTX" in the presenter window', 5000);
+  openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense, window._slideData.slideImgs||[]);
+  showToast('Slides opened — click Download PPTX in the presenter window', 5000);
 }
-
 function downloadSlidesHTML() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
   openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense, window._slideData.slideImgs||[]);
-  showToast('Slides opened — use the Download PPTX button in the presenter');
+  showToast('Slides opened — click Download PPTX in the presenter window', 5000);
 }
 
 // ============================================================
@@ -6936,22 +6956,6 @@ function requestAccountDeletion() {
 }
 function requestAccountDeletion(){if(!confirm('Are you sure you want to delete your account? All your lessons, assessments, and student data will be permanently removed. This cannot be undone.'))return;if(!confirm('Last chance — this will permanently delete everything. Continue?'))return;const email=currentUser.email;window.open('mailto:teacheraicanada@gmail.com?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20TeacherAI%20account.%0A%0AEmail%3A%20'+encodeURIComponent(email)+'%0AUser%20ID%3A%20'+currentUser.id,'_blank');alert('A deletion request email has been opened. Send it to confirm. We will remove your account and all data within 30 days.');}
 
-// ============================================================
-// GUIDED TOUR
-// ============================================================
-const TOUR_STEPS = [
-  {emoji:'👋',title:'Welcome to TeacherAI',body:'Built for Ontario K–8 teachers. This quick tour shows you exactly how to use it — takes 60 seconds.'},
-  {emoji:'🏫',title:'Step 1: Set up your class',body:'Go to <strong>Class Roster</strong> → create a class → add your students. TeacherAI uses this to personalize every lesson for your grade(s) and IEP students.'},
-  {emoji:'✨',title:'Step 2: Generate a lesson',body:"Go to <strong>Plan</strong> → pick your class, subject, and topic → click Generate. You'll get a lesson plan, worksheet, reading resource, and rubric in one shot."},
-  {emoji:'📊',title:'Step 3: Assess your class',body:'After teaching, tap a level (1–4) for each student in the <strong>Assess</strong> step. Students can submit worksheets via the digital link — auto-mark them all at once.'},
-  {emoji:'📝',title:'Step 4: Report Cards',body:'Go to <strong>Report Cards</strong> → select your class and term → generate Ontario-style PowerSchool comments for every student in seconds.'}
-];
-let _tourIndex = 0;
-
-function startTour(){_tourIndex=0;renderTourStep();document.getElementById('tourOverlay').style.display='flex';}
-function renderTourStep(){const step=TOUR_STEPS[_tourIndex];document.getElementById('tourEmoji').textContent=step.emoji;document.getElementById('tourTitle').textContent=step.title;document.getElementById('tourBody').innerHTML=step.body;document.getElementById('tourStep').textContent=`Step ${_tourIndex+1} of ${TOUR_STEPS.length}`;const nextBtn=document.getElementById('tourNext');nextBtn.textContent=_tourIndex===TOUR_STEPS.length-1?"Let's go! →":'Next →';const dots=document.getElementById('tourDots');dots.innerHTML=TOUR_STEPS.map((_,i)=>`<div class="tour-dot ${i===_tourIndex?'on':''}"></div>`).join('');}
-function tourNext(){if(_tourIndex<TOUR_STEPS.length-1){_tourIndex++;renderTourStep();}else{skipTour();}}
-function skipTour(){document.getElementById('tourOverlay').style.display='none';localStorage.setItem('teacherai_tour_done','1');}
 
 // ============================================================
 // UNIT PLANS
@@ -6966,7 +6970,6 @@ function renderUnitClassSelector() {
   row.style.display = 'flex';
   sel.innerHTML = `<option value="">✏️ Custom / no class</option>` +
     classes.map(c => `<option value="${c.id}" ${c.id===activeClassId?'selected':''}>${c.name}${c.subject_focus?' · '+c.subject_focus:''}</option>`).join('');
-  // Auto-fill grade pills if a class is active
   if (activeClassId) autoFillUnitGradesFromClass();
 }
 
@@ -6977,7 +6980,6 @@ function onUnitClassSelect() {
     document.querySelectorAll('#unitGradePillContainer .grade-pill-btn').forEach(b => b.classList.remove('selected'));
     return;
   }
-  // Auto-fill grade pills from the selected class's students
   const classStudents = students.filter(s => s.classId === sel.value);
   const gradeOrder = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
   const uniqueGrades = [...new Set(classStudents.map(s => s.grade))].filter(Boolean)
@@ -6998,9 +7000,7 @@ function autoFillUnitGradesFromClass() {
   });
 }
 
-function toggleUnitGradePill(btn) {
-  btn.classList.toggle('selected');
-}
+function toggleUnitGradePill(btn) { btn.classList.toggle('selected'); }
 
 function getUnitSelectedGrades() {
   return [...document.querySelectorAll('#unitGradePillContainer .grade-pill-btn.selected')]
@@ -7012,18 +7012,14 @@ async function generateUnitPlan() {
   const subj  = document.getElementById('unit-subj')?.value;
   const duration = document.getElementById('unit-duration')?.value;
   const grades = getUnitSelectedGrades();
-
   if (!topic) { alert('Enter a unit topic.'); return; }
   if (!grades.length) { alert('Select at least one grade.'); return; }
-
   const gradeDesc = grades.length > 1 ? grades.join(' / ') + ' split class' : grades[0];
   const lessonCount = parseInt(duration) || 6;
-
   const btn = document.getElementById('unitGenBtn');
   btn.disabled = true; btn.textContent = '⏳ Generating unit...';
   showLoading('Generating unit plan...', true);
   setProgress(10, 'Building lesson sequence...');
-
   const prompt = `You are an expert Ontario K–8 curriculum planner. Generate a unit plan for:
 Subject: ${subj}
 Grade: ${gradeDesc}
@@ -7047,102 +7043,49 @@ Rules:
 - Generate exactly ${lessonCount} lessons
 - Each lesson builds logically on the previous
 - Titles must be specific and Ontario-curriculum aligned
-- Types should flow: Introduction early, Assessment near end
-- Focus on the actual lesson activity, not meta-descriptions
-- If split grade (${grades.join('/')}), note grade differentiation where relevant`;
+- Types should flow: Introduction early, Assessment near end`;
 
   try {
     const res = await authFetch('/api/generate', {
       method: 'POST',
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1400,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1400, messages: [{ role: 'user', content: prompt }] })
     });
-
     setProgress(70, 'Parsing unit...');
-
-    if (!res || !res.ok) {
-      const err = await res?.json().catch(() => ({}));
-      throw new Error(err?.error || 'Generation failed');
-    }
-
+    if (!res || !res.ok) { const err = await res?.json().catch(()=>({})); throw new Error(err?.error || 'Generation failed'); }
     const data = await res.json();
     const raw = data.content.map(i => i.text || '').join('');
     let parsed;
-    try {
-      parsed = JSON.parse(raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim());
-    } catch(e) {
-      const s = raw.indexOf('{'), end = raw.lastIndexOf('}');
-      parsed = JSON.parse(raw.slice(s, end + 1));
-    }
-
+    try { parsed = JSON.parse(raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim()); }
+    catch(e) { const s=raw.indexOf('{'),end=raw.lastIndexOf('}'); parsed=JSON.parse(raw.slice(s,end+1)); }
     setProgress(90, 'Saving...');
-
     const { data: saved, error } = await db.from('unit_plans').insert({
-      teacher_id: currentUser.id,
-      topic,
-      subject: subj,
-      grades,
-      duration,
-      big_idea: parsed.big_idea || '',
-      lessons: parsed.lessons || []
+      teacher_id: currentUser.id, topic, subject: subj, grades, duration,
+      big_idea: parsed.big_idea || '', lessons: parsed.lessons || []
     }).select().single();
-
     if (error) throw new Error(error.message);
-
     hideLoading();
     showToast('✅ Unit plan saved!');
     document.getElementById('unit-topic').value = '';
     document.querySelectorAll('#unitGradePillContainer .grade-pill-btn').forEach(b => b.classList.remove('selected'));
     await renderUnitPlansList();
-    setTimeout(() => {
-      document.getElementById('unit-'+saved.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 200);
-
-  } catch(e) {
-    hideLoading();
-    alert('Error generating unit plan: ' + e.message);
-  }
-
-  btn.disabled = false;
-  btn.textContent = '📋 Generate Unit Plan';
+    setTimeout(() => { document.getElementById('unit-'+saved.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+  } catch(e) { hideLoading(); alert('Error generating unit plan: ' + e.message); }
+  btn.disabled = false; btn.textContent = '📋 Generate Unit Plan';
 }
 
 async function renderUnitPlansList() {
   const el = document.getElementById('unitPlansList');
   if (!el || !currentUser) return;
-
-  const { data } = await db.from('unit_plans')
-    .select('*')
-    .eq('teacher_id', currentUser.id)
-    .order('created_at', { ascending: false })
-    .limit(30);
-
+  const { data } = await db.from('unit_plans').select('*').eq('teacher_id', currentUser.id).order('created_at', { ascending: false }).limit(30);
   savedUnitPlans = data || [];
-
   if (!savedUnitPlans.length) {
-    el.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--muted);">
-      <div style="font-size:2rem;margin-bottom:10px;">📋</div>
-      <div style="font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:6px;">No unit plans yet</div>
-      <div style="font-size:.82rem;">Generate your first unit above — each lesson can be expanded into a full plan.</div>
-    </div>`;
+    el.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--muted);"><div style="font-size:2rem;margin-bottom:10px;">📋</div><div style="font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:6px;">No unit plans yet</div><div style="font-size:.82rem;">Generate your first unit above — each lesson can be expanded into a full plan.</div></div>`;
     return;
   }
-
   const unitIds = savedUnitPlans.map(u => u.id);
-  const { data: linkedLessons } = await db.from('lessons')
-    .select('id, topic, created_at, unit_plan_id')
-    .in('unit_plan_id', unitIds)
-    .order('created_at', { ascending: true });
-
+  const { data: linkedLessons } = await db.from('lessons').select('id, topic, created_at, unit_plan_id').in('unit_plan_id', unitIds).order('created_at', { ascending: true });
   const lessonsByUnit = {};
-  (linkedLessons || []).forEach(l => {
-    if (!lessonsByUnit[l.unit_plan_id]) lessonsByUnit[l.unit_plan_id] = [];
-    lessonsByUnit[l.unit_plan_id].push(l);
-  });
-
+  (linkedLessons || []).forEach(l => { if (!lessonsByUnit[l.unit_plan_id]) lessonsByUnit[l.unit_plan_id] = []; lessonsByUnit[l.unit_plan_id].push(l); });
   el.innerHTML = savedUnitPlans.map(u => renderUnitCard(u, lessonsByUnit[u.id] || [])).join('');
 }
 
@@ -7152,42 +7095,30 @@ function renderUnitCard(u, linkedLessons) {
   const subj = (u.subject || '').replace('Language / Literacy', 'Language');
   const lessons = u.lessons || [];
   const expandedCount = linkedLessons.length;
-
-  const typeColors = {
-    'Introduction': '#2A5FA5',
-    'Practice':     '#4A7C59',
-    'Application':  '#C47B2A',
-    'Assessment':   '#B54B2A'
-  };
-
+  const typeColors = { 'Introduction':'#2A5FA5','Practice':'#4A7C59','Application':'#C47B2A','Assessment':'#B54B2A' };
   const lessonRows = lessons.map((l, i) => {
     const typeColor = typeColors[l.type] || '#7A726A';
-    const linked = linkedLessons.find(ll =>
-      ll.topic === l.title ||
-      (l.title && ll.topic && ll.topic.toLowerCase().includes(l.title.split(' ')[0].toLowerCase()))
-    );
+    const linked = linkedLessons.find(ll => ll.topic === l.title || (l.title && ll.topic && ll.topic.toLowerCase().includes(l.title.split(' ')[0].toLowerCase())));
     const isExpanded = !!linked;
-
-    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);background:${isExpanded ? 'var(--sage-l)' : 'var(--paper)'};">
-      <div style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:${isExpanded ? 'var(--sage)' : 'var(--border)'};color:${isExpanded ? 'white' : 'var(--muted)'};display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:700;margin-top:1px;">${l.lesson_number}</div>
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);background:${isExpanded?'var(--sage-l)':'var(--paper)'};">
+      <div style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:${isExpanded?'var(--sage)':'var(--border)'};color:${isExpanded?'white':'var(--muted)'};display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:700;margin-top:1px;">${l.lesson_number}</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">${l.title || 'Lesson '+l.lesson_number}</div>
-        <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">${l.focus || ''}</div>
-        ${isExpanded ? `<div style="margin-top:5px;font-size:.72rem;color:var(--sage);font-weight:600;">✅ Expanded · <button onclick="loadLessonById('${linked.id}')" style="background:none;border:none;color:var(--sage);cursor:pointer;font-size:.72rem;font-weight:600;text-decoration:underline;padding:0;">Open lesson →</button></div>` : ''}
+        <div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">${l.title||'Lesson '+l.lesson_number}</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">${l.focus||''}</div>
+        ${isExpanded?`<div style="margin-top:5px;font-size:.72rem;color:var(--sage);font-weight:600;">✅ Expanded · <button onclick="loadLessonById('${linked.id}')" style="background:none;border:none;color:var(--sage);cursor:pointer;font-size:.72rem;font-weight:600;text-decoration:underline;padding:0;">Open lesson →</button></div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
         <span style="font-family:'DM Mono',monospace;font-size:.6rem;padding:2px 7px;border-radius:10px;background:${typeColor}20;color:${typeColor};font-weight:600;">${l.type||''}</span>
-        ${!isExpanded ? `<button class="btn b-sage b-sm" onclick="expandUnitLesson('${u.id}','${u.subject}','${(u.grades||[]).join(',')}','${(l.title||'').replace(/'/g,"\\'")}',${i})" style="font-size:.7rem;padding:3px 9px;">✨ Expand</button>` : ''}
+        ${!isExpanded?`<button class="btn b-sage b-sm" onclick="expandUnitLesson('${u.id}','${u.subject}','${(u.grades||[]).join(',')}','${(l.title||'').replace(/'/g,"\'")}',${i})" style="font-size:.7rem;padding:3px 9px;">✨ Expand</button>`:''}
       </div>
     </div>`;
   }).join('');
-
   return `<div class="card" id="unit-${u.id}" style="padding:0;overflow:hidden;margin-bottom:16px;">
     <div style="padding:14px 16px;background:var(--ink);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
       <div>
         <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--cream);margin-bottom:3px;">${u.topic}</div>
         <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:#9CA3AF;">${gradesStr} · ${subj} · ${u.duration} · ${date}</div>
-        ${u.big_idea ? `<div style="font-size:.8rem;color:rgba(255,255,255,.7);margin-top:6px;line-height:1.5;font-style:italic;">${u.big_idea}</div>` : ''}
+        ${u.big_idea?`<div style="font-size:.8rem;color:rgba(255,255,255,.7);margin-top:6px;line-height:1.5;font-style:italic;">${u.big_idea}</div>`:''}
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;align-items:flex-start;">
         <span style="font-family:'DM Mono',monospace;font-size:.65rem;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.1);color:#9CA3AF;white-space:nowrap;">${expandedCount}/${lessons.length} expanded</span>
@@ -7200,44 +7131,25 @@ function renderUnitCard(u, linkedLessons) {
 
 async function expandUnitLesson(unitId, subject, gradesStr, title, lessonIndex) {
   const grades = gradesStr.split(',').filter(Boolean);
-  const grade = grades[0] || 'Grade 4';
-
   showToast('Opening Plan tab — pre-filled and ready to generate...', 4000);
-
   const planTab = document.getElementById('tr-plan');
   if (planTab) { planTab.checked = true; renderClassSelector(); resetWorkflow(); }
-
   const subjEl = document.getElementById('subj');
   if (subjEl) { subjEl.value = subject; onSubjectChange(); }
-
   await new Promise(r => setTimeout(r, 100));
-
-  // Set grade pills in Plan tab
-  document.querySelectorAll('#gradePillContainer .grade-pill-btn').forEach(btn => {
-    btn.classList.remove('selected');
-  });
+  document.querySelectorAll('#gradePillContainer .grade-pill-btn').forEach(btn => btn.classList.remove('selected'));
   grades.forEach(g => {
     const btn = document.querySelector(`#gradePillContainer .grade-pill-btn[data-grade="${g}"]`);
-    if (btn) {
-      btn.classList.add('selected');
-      btn.click(); // trigger pill toggle logic
-    }
+    if (btn) { btn.classList.add('selected'); btn.click(); }
   });
-
   const topicEl = document.getElementById('topic');
   if (topicEl) topicEl.value = title;
-
   window._pendingUnitPlanId = unitId;
   window._pendingUnitLessonIndex = lessonIndex;
   window._pendingUnitLessonTitle = title;
-
   await new Promise(r => setTimeout(r, 150));
   const genBtn = document.getElementById('genBtn');
-  if (genBtn) {
-    genBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    await new Promise(r => setTimeout(r, 300));
-    generate();
-  }
+  if (genBtn) { genBtn.scrollIntoView({ behavior: 'smooth', block: 'center' }); await new Promise(r => setTimeout(r, 300)); generate(); }
 }
 
 async function loadLessonById(lessonId) {
@@ -7258,6 +7170,24 @@ async function deleteUnitPlan(id) {
   showToast('✅ Unit plan deleted.');
   renderUnitPlansList();
 }
+
+// ============================================================
+// GUIDED TOUR
+
+// ============================================================
+const TOUR_STEPS = [
+  {emoji:'👋',title:'Welcome to TeacherAI',body:'Built for Ontario K–8 teachers. This quick tour shows you exactly how to use it — takes 60 seconds.'},
+  {emoji:'🏫',title:'Step 1: Set up your class',body:'Go to <strong>Class Roster</strong> → create a class → add your students. TeacherAI uses this to personalize every lesson for your grade(s) and IEP students.'},
+  {emoji:'✨',title:'Step 2: Generate a lesson',body:"Go to <strong>Plan</strong> → pick your class, subject, and topic → click Generate. You'll get a lesson plan, worksheet, reading resource, and rubric in one shot."},
+  {emoji:'📊',title:'Step 3: Assess your class',body:'After teaching, tap a level (1–4) for each student in the <strong>Assess</strong> step. Students can submit worksheets via the digital link — auto-mark them all at once.'},
+  {emoji:'📝',title:'Step 4: Report Cards',body:'Go to <strong>Report Cards</strong> → select your class and term → generate Ontario-style PowerSchool comments for every student in seconds.'}
+];
+let _tourIndex = 0;
+
+function startTour(){_tourIndex=0;renderTourStep();document.getElementById('tourOverlay').style.display='flex';}
+function renderTourStep(){const step=TOUR_STEPS[_tourIndex];document.getElementById('tourEmoji').textContent=step.emoji;document.getElementById('tourTitle').textContent=step.title;document.getElementById('tourBody').innerHTML=step.body;document.getElementById('tourStep').textContent=`Step ${_tourIndex+1} of ${TOUR_STEPS.length}`;const nextBtn=document.getElementById('tourNext');nextBtn.textContent=_tourIndex===TOUR_STEPS.length-1?"Let's go! →":'Next →';const dots=document.getElementById('tourDots');dots.innerHTML=TOUR_STEPS.map((_,i)=>`<div class="tour-dot ${i===_tourIndex?'on':''}"></div>`).join('');}
+function tourNext(){if(_tourIndex<TOUR_STEPS.length-1){_tourIndex++;renderTourStep();}else{skipTour();}}
+function skipTour(){document.getElementById('tourOverlay').style.display='none';localStorage.setItem('teacherai_tour_done','1');}
 
 // ============================================================
 // BOOT
