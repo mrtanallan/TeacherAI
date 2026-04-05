@@ -1,4 +1,4 @@
-// api/generate.js — TeacherAI v5.2
+// api/generate.js — TeacherAI v5.2 (maxDuration:60, AbortController 55s)
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -9,14 +9,20 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // Health check
+  if (req.body?.ping) return res.status(200).json({ pong: true, version: 'v5.2' });
+
   try {
     const body = req.body;
     const { model, max_tokens, messages, system } = body;
 
+    if (!model || !messages) {
+      return res.status(400).json({ error: 'Missing required fields: model, messages' });
+    }
+
     const anthropicPayload = { model, max_tokens, messages };
     if (system) anthropicPayload.system = system;
 
-    // Timeout: abort Anthropic call after 55s (leaves 5s buffer before Vercel kills at 60s)
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 55000);
 
@@ -35,7 +41,7 @@ module.exports = async function handler(req, res) {
     } catch (fetchErr) {
       clearTimeout(timer);
       if (fetchErr.name === 'AbortError') {
-        return res.status(504).json({ error: 'Generation timed out — the lesson was too large. Try fewer outputs or a shorter duration.' });
+        return res.status(504).json({ error: 'Generation timed out after 55s. Try again or reduce outputs selected.' });
       }
       throw fetchErr;
     }
@@ -48,14 +54,14 @@ module.exports = async function handler(req, res) {
     const data = await anthropicRes.json();
 
     if (!anthropicRes.ok) {
-      console.error('Anthropic error:', data);
-      return res.status(anthropicRes.status).json({ error: data.error || 'AI generation failed' });
+      console.error('Anthropic error:', JSON.stringify(data));
+      return res.status(anthropicRes.status).json({ error: data?.error?.message || data?.error || 'AI generation failed' });
     }
 
     return res.status(200).json(data);
 
   } catch (err) {
-    console.error('generate.js error:', err);
+    console.error('generate.js error:', err.message);
     return res.status(500).json({ error: 'Server error: ' + err.message });
   }
 };
