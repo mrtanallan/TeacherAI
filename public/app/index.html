@@ -2564,7 +2564,7 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations) {
 
     const slideBtns = k==='lesson_plan' ? `
       <button class="btn b-sage b-sm" onclick="presentSlides(event)" style="white-space:nowrap;">▶ Present</button>
-      <button class="btn b-out b-sm" onclick="downloadSlidesPPTX()" style="white-space:nowrap;" title="Download PPTX">⬇ Download PPTX</button>
+      <button class="btn b-out b-sm" onclick="downloadSlidesPPTX()" style="white-space:nowrap;" title="Open slides">⬇ Slides</button>
       <button class="btn b-out b-sm" id="gSlidesBtn" onclick="exportToGoogleSlides()" style="white-space:nowrap;display:none;" title="Export to Google Slides">🔗 Google Slides</button>` : '';
 
     const wsLinkBtns = isWS ? (k.match(/student_worksheet_[A-D]$/) ? `
@@ -5717,12 +5717,10 @@ function closeSlidePresenter() {
 function downloadSlidesPPTX() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
   openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense, window._slideData.slideImgs||[]);
-  showToast('Slides opened — click Download PPTX in the presenter window', 5000);
 }
 function downloadSlidesHTML() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
   openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense, window._slideData.slideImgs||[]);
-  showToast('Slides opened — click Download PPTX in the presenter window', 5000);
 }
 
 // ============================================================
