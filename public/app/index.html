@@ -1398,6 +1398,8 @@ function showApp() {
   loadSubmissions();
   updateWelcomeBanner();
   if (savedTab === 'tr-units') renderUnitPlansList();
+  if (savedTab === 'tr-lessons') renderLessonsList();
+  if (savedTab === 'tr-assess') { loadUnitTestResults(); }
 }
 
 // ============================================================
@@ -6837,6 +6839,9 @@ let _lessonsFilterText = '';
 
 async function renderLessonsList() {
   if (!currentUser) return;
+  // Show loading state immediately so there's no blank flash
+  const el = document.getElementById('lessonsList');
+  if (el && !savedLessons.length) el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:.85rem;">Loading lessons...</div>';
   const { data } = await db.from('lessons').select('*').eq('teacher_id',currentUser.id).order('created_at',{ascending:false}).limit(50);
   savedLessons = data || [];
   _renderLessonsUI();
