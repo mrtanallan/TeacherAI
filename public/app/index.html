@@ -910,6 +910,14 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       <span>🔒 Data stored securely in Canada · Never deleted automatically</span>
       <button class="btn b-out b-sm" onclick="exportAllData()" style="font-size:.72rem;">⬇️ Export All Data</button>
     </div>
+    <!-- Unit Test Results -->
+    <div class="card" id="unitTestResultsCard" style="margin-top:20px;display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="ct" style="margin-bottom:0;">📝 Unit Test Results</div>
+        <button class="btn b-out b-sm" id="unitTestRefreshBtn" onclick="loadUnitTestResults()" style="font-size:.72rem;">↻ Refresh</button>
+      </div>
+      <div id="unitTestResultsList"><div style="color:var(--muted);font-size:.83rem;font-style:italic;">Loading...</div></div>
+    </div>
   </div>
 
   <!-- Expectations Tracker -->
@@ -1069,12 +1077,7 @@ async function loadCurriculum(subject) {
     return;
   }
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 8000);
-    let res;
-    try { res = await fetch(`/data/curriculum_${key}.json`, {signal: ctrl.signal}); }
-    catch(fe) { clearTimeout(t); console.warn('Curriculum fetch failed:', key, fe.message); return; }
-    clearTimeout(t);
+    const res = await fetch(`/data/curriculum_${key}.json`);
     if (!res.ok) { console.warn('Curriculum not found:', key); return; }
     const data = await res.json();
     _curriculumCache[key] = data;
@@ -1221,38 +1224,18 @@ async function authFetch(url, options={}) {
     }
   } catch(e) { /* use whatever session we have */ }
   const token = session?.access_token || '';
-  // Timeout: 90s for generate calls, 20s for others
-  const isGenerate = url.includes('/api/generate');
-  const timeoutMs = isGenerate ? 90000 : 20000;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-      headers: { 'Content-Type':'application/json', ...(options.headers||{}), ...(token?{'Authorization':'Bearer '+token}:{}) }
-    });
-    clearTimeout(timer);
-    return res;
-  } catch(e) {
-    clearTimeout(timer);
-    if (e.name === 'AbortError') throw new Error('Request timed out after '+Math.round(timeoutMs/1000)+'s. The server may be busy — please try again.');
-    throw e;
-  }
+  return fetch(url, {
+    ...options,
+    headers: { 'Content-Type':'application/json', ...(options.headers||{}), ...(token?{'Authorization':'Bearer '+token}:{}) }
+  });
 }
 
-async function retryAuthFetch(url, options, maxRetries=2) {
+async function retryAuthFetch(url, options, maxRetries=3) {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    let res;
-    try { res = await authFetch(url, options); }
-    catch(e) {
-      // Don't retry on timeout — surface immediately
-      if (e.message && e.message.includes('timed out')) throw e;
-      if (attempt === maxRetries) throw e;
-      await new Promise(r => setTimeout(r, 2000));
-      continue;
-    }
-    if (res.status !== 529 || attempt === maxRetries) return res;
+    const res = await authFetch(url, options);
+    if (res.status !== 529) return res;
+    const data = await res.clone().json().catch(() => ({}));
+    if (!data?.error?.type === 'overloaded_error' || attempt === maxRetries) return res;
     const wait = [3000,6000,12000][attempt] || 12000;
     setProgress(null,'High demand — retrying shortly...');
     await new Promise(r => setTimeout(r, wait));
@@ -1387,7 +1370,7 @@ function showApp() {
       if (!this.checked) return;
       localStorage.setItem('teacherai_tab', this.id);
       if (this.id==='tr-plan')    { renderClassSelector(); updateWelcomeBanner(); resetWorkflow(); }
-      if (this.id==='tr-assess')  { loadUserData().then(() => { renderTracker(); loadSubmissions(); renderAssessClassTabs(); const v=localStorage.getItem('teacherai_tracker_view')||'grade'; switchTrackerView(v); }); }
+      if (this.id==='tr-assess')  { loadUserData().then(() => { renderTracker(); loadSubmissions(); renderAssessClassTabs(); loadUnitTestResults(); const v=localStorage.getItem('teacherai_tracker_view')||'grade'; switchTrackerView(v); }); }
       if (this.id==='tr-rc')      { populateRCFilters().then(() => loadSavedRCPage()); }
       if (this.id==='tr-account') { loadAccountPage(); }
       if (this.id==='tr-roster')  { renderClassTabs(); renderR(); }
@@ -2197,7 +2180,7 @@ async function generate() {
     const priorLessons = allLessons.slice(0, _pendingIdx);
     const laterLessons = allLessons.slice(_pendingIdx + 1);
     const priorLines = priorLessons.map(l => `  ✅ Lesson ${l.lesson_number}: ${l.title} — ${l.focus}`).join('\n');
-    const currentLine = `  → Lesson ${allLessons[_pendingIdx]?.lesson_number||_pendingIdx+1}: ${title} ← YOU ARE GENERATING THIS`;
+    const currentLine = `  → Lesson ${allLessons[_pendingIdx]?.lesson_number||_pendingIdx+1}: ${topic} ← YOU ARE GENERATING THIS`;
     const laterLines = laterLessons.map(l => `  ○ Lesson ${l.lesson_number}: ${l.title} — ${l.focus}`).join('\n');
     unitContext = `
 UNIT CONTEXT — this lesson is part of a planned unit:
@@ -2461,13 +2444,7 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
   } catch(e) {
     clearInterval(progInterval);
     hideLoading();
-    if (e.message === '__PLAN_LIMIT__') return;
-    if (e.message && e.message.includes('timed out')) {
-      const retry = confirm('Generation timed out — the server took too long.\n\nThis sometimes happens with split-class lessons. Try again?');
-      if (retry) { setTimeout(generate, 500); return; }
-    } else {
-      alert('Error: '+e.message);
-    }
+    if (e.message !== '__PLAN_LIMIT__') alert('Error: '+e.message);
   }
   clearInterval(progInterval);
   hideLoading();
@@ -6273,6 +6250,107 @@ async function saveOneStu(sid, btn) {
 // ============================================================
 async function loadSubmissions() {}
 
+async function loadUnitTestResults() {
+  const card = document.getElementById('unitTestResultsCard');
+  const list = document.getElementById('unitTestResultsList');
+  if (!card || !list) return;
+
+  // Find worksheets with " — Unit Test" in topic
+  const { data: unitTests } = await db.from('worksheets')
+    .select('id, topic, grades, content, created_at')
+    .eq('teacher_id', currentUser.id)
+    .ilike('topic', '% — Unit Test')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (!unitTests || !unitTests.length) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+
+  let html = '';
+  for (const ws of unitTests) {
+    const { data: subs } = await db.from('worksheet_submissions')
+      .select('*').eq('worksheet_id', ws.id);
+    const subCount = (subs || []).length;
+    const content = (() => { try { return JSON.parse(ws.content); } catch(e) { return {}; } })();
+    const wsText = content.worksheet || '';
+    const akText = content.answer_key || '';
+    const date = new Date(ws.created_at).toLocaleDateString('en-CA');
+    const gradesStr = (ws.grades || []).join(' / ');
+
+    html += `<div style="border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden;">
+      <div style="padding:10px 14px;background:var(--sage-l);display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div>
+          <div style="font-weight:600;font-size:.88rem;color:var(--ink);">${ws.topic}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);">${gradesStr} · ${date} · ${subCount} submission${subCount!==1?'s':''}</div>
+        </div>
+        ${akText ? `<button class="btn b-sage b-sm" onclick="autoMarkUnitTest('${ws.id}')" style="font-size:.72rem;white-space:nowrap;">🤖 Auto-mark All</button>` : ''}
+      </div>
+      <div style="padding:8px 14px;">
+        ${subCount === 0
+          ? '<div style="color:var(--muted);font-size:.82rem;font-style:italic;padding:8px 0;">No submissions yet.</div>'
+          : (subs||[]).map(sub => {
+              const name = sub.student_name || 'Unknown student';
+              const submittedAt = sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+              const answered = Object.values(sub.responses||{}).filter(v => v && v !== '—' && v !== '').length;
+              return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);gap:10px;" id="utr-${ws.id}-${sub.id}">
+                <div>
+                  <div style="font-weight:500;font-size:.84rem;">${name}</div>
+                  <div style="font-size:.72rem;color:var(--muted);">${submittedAt} · ${answered} answered</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span id="utr-level-${sub.id}" style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);"></span>
+                  ${akText ? `<button class="btn b-out b-sm" onclick="autoMarkOneUnitSub('${ws.id}','${sub.id}',this)" style="font-size:.68rem;">🤖 Mark</button>` : ''}
+                </div>
+              </div>`;
+            }).join('')
+        }
+      </div>
+    </div>`;
+  }
+  list.innerHTML = html;
+  // Store ws data for marking
+  window._unitTestData = {};
+  unitTests.forEach(ws => {
+    const content = (() => { try { return JSON.parse(ws.content); } catch(e) { return {}; } })();
+    window._unitTestData[ws.id] = { wsText: content.worksheet||'', akText: content.answer_key||'' };
+  });
+}
+
+async function autoMarkOneUnitSub(wsId, subId, btn) {
+  const { data: sub } = await db.from('worksheet_submissions').select('*').eq('id', subId).single();
+  if (!sub) return;
+  const d = window._unitTestData?.[wsId] || {};
+  if (!d.akText) { alert('No answer key found for this test.'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+  const totalQ = extractWSQuestions(d.wsText);
+  const totalQuestions = Object.keys(totalQ).length;
+  const studentObj = { first: sub.student_name || 'Student', last: '', id: sub.student_id || subId, grade: '' };
+  await autoMarkStudent(sub.student_id || subId, studentObj, sub.responses||{}, d.akText, '', btn, totalQuestions);
+  const levelEl = document.getElementById('utr-level-'+subId);
+  if (levelEl) levelEl.textContent = 'Marked ✓';
+  if (btn) { btn.textContent = '✓ Marked'; }
+}
+
+async function autoMarkUnitTest(wsId) {
+  const { data: subs } = await db.from('worksheet_submissions').select('*').eq('worksheet_id', wsId);
+  if (!subs || !subs.length) { showToast('No submissions to mark.'); return; }
+  const d = window._unitTestData?.[wsId] || {};
+  if (!d.akText) { alert('No answer key found for this test.'); return; }
+  showToast('Auto-marking ' + subs.length + ' submissions...', 4000);
+  const totalQ = extractWSQuestions(d.wsText);
+  const totalQuestions = Object.keys(totalQ).length;
+  for (const sub of subs) {
+    const studentObj = { first: sub.student_name || 'Student', last: '', id: sub.student_id || sub.id, grade: '' };
+    const btn = document.querySelector(`button[onclick*="autoMarkOneUnitSub('${wsId}','${sub.id}"]`);
+    await autoMarkStudent(sub.student_id || sub.id, studentObj, sub.responses||{}, d.akText, '', btn, totalQuestions);
+  }
+  showToast('✅ All submissions marked — check Trackers for results.');
+  loadUnitTestResults();
+}
+
 async function renderTracker() {
   // Stats
   const lvN={L1:1,'L1-':.7,'L1+':1.3,L2:2,'L2-':1.7,'L2+':2.3,L3:3,'L3-':2.7,'L3+':3.3,L4:4,'L4-':3.7,'L4+':4.3};
@@ -7515,7 +7593,9 @@ async function createUnitTestLink() {
         <button onclick="const i=document.getElementById('unitTestLinkInput');i.select();navigator.clipboard.writeText(i.value);showToast('Link copied!')" class="btn b-sage b-sm">Copy</button>
       </div>
       <div style="font-size:.72rem;color:var(--muted);margin-top:6px;">Students submit answers online · Auto-marked · Results appear in Trackers</div>`;
-    modal.querySelector('div[style*="max-width:760px"]').appendChild(linkDiv);
+    const assessText = document.getElementById('unitAssessText');
+    const container = modal.querySelector('div[style*="max-width:760px"]');
+    container.insertBefore(linkDiv, assessText);
     if (btn) { btn.textContent = '✅ Link created'; }
   } catch(e) {
     alert('Error creating link: ' + e.message);
