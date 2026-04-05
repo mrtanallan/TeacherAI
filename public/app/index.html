@@ -2125,9 +2125,11 @@ async function generate() {
           + sortedExps2.map(e=>e.code+' ['+e.strand+': '+({'B':'Life Systems','C':'Matter and Energy','D':'Structures and Mechanisms','E':'Earth and Space Systems'})[e.strand]+'] '+e.desc).join('\n')
         : 'ONTARIO LANGUAGE CURRICULUM EXPECTATIONS (choose 2-4 most relevant):\n'
           + (isSplit
-            ? relevantExps.slice(0,20).map(e=>{
+            ? relevantExps.slice(0,24).map(e=>{
                 const bandLabel = e.band==='1-3'?'[Gr.1-3]':e.band==='4-6'?'[Gr.4-6]':e.band==='7-8'?'[Gr.7-8]':'';
-                return e.code+' '+bandLabel+' '+e.desc;
+                // Make code unique per band so AI knows these are distinct expectations
+                const uniqueCode = e.code + (bandLabel ? '-'+bandLabel.replace(/[\[\]]/g,'') : '');
+                return uniqueCode+' '+bandLabel+' '+e.desc;
               }).join('\n')
             : relevantExps.slice(0,15).map(e=>e.code+' '+e.desc).join('\n')))
     : '';
@@ -2139,7 +2141,7 @@ async function generate() {
     : expContext
       ? 'CRITICAL — You MUST choose expectations ONLY from this list. Do NOT invent codes.\n'+expContext+'\n\n'
         + (isSplit && !isMathSubj && !(subj||'').toLowerCase().includes('science')
-          ? `SPLIT CLASS REQUIREMENT: This is a ${grades.join('/')} split class. You MUST include at least one expectation from EACH grade band present. Return 2-4 codes total.`
+          ? `SPLIT CLASS REQUIREMENT: This is a ${grades.join('/')} split class. The expectations list above uses codes like C2.3-[Gr.1-3] and C2.3-[Gr.4-6] to show the SAME CODE applies to DIFFERENT GRADES. You MUST pick at least one from EACH grade band. In your JSON output, use the original code (e.g. C2.3) but set the "grade" field to the specific grade (e.g. "Grade 3" or "Grade 4"). Return 3-4 expectations total, covering ALL grades.`
           : 'Return 2-4 of these codes in the expectations array. Pick the ones most relevant to: '+topic)
       : (isMathSubj
           ? 'EXPECTATIONS: Return 2-4 Ontario Math 2020 expectations most relevant to this topic and grade.'
@@ -2241,7 +2243,7 @@ Use emoji headers. 4–6 varied activities. Start directly with the worksheet ti
     : 'Select the 2-4 most relevant expectations across strands that best match this specific topic.';
 
   const splitExpNote = isSplit
-    ? 'CRITICAL: Include a "grade" field (e.g. "Grade 5" or "Grade 6") on EVERY expectation. Return 1-2 expectations per grade in the split. '+strandGuidance
+    ? `CRITICAL SPLIT CLASS RULE: You MUST return expectations for EVERY grade in this split (${grades.join(' AND ')}). Return 1-2 expectations per grade. Each expectation MUST have a "grade" field set to the specific grade it applies to (e.g. "Grade 3" or "Grade 4"). The same curriculum code can appear twice if it covers different grade bands — this is correct and required. ${strandGuidance}`
     : 'Return 2-5 most relevant expectations for this grade. '+strandGuidance;
 
   const prompt = `You are an expert Ontario elementary SSC teacher. Generate a classroom-ready lesson package.
@@ -2292,7 +2294,7 @@ ${isSplit && isScience && rdOutputKeys.length > 1 ? rdOutputKeys.map((k,i)=>`- $
 - assessment_rubric: Ontario Achievement Chart. Use ## for each category, ### Level 1–4 under each.${iepStudents.length?' Include modified criteria for IEP students.':''}
 - differentiation_tips: per-grade and per-student strategies
 ${akLines}
-- expectations: JSON array. Ontario 2023 Language curriculum. Each object: "code" (e.g. "C2.3"), "desc", "strand" (A/B/C/D), "band" ("1-3","4-6","7-8"). ${splitExpNote} NEVER return the same code twice.
+- expectations: JSON array. Ontario 2023 Language curriculum. Each object: "code" (e.g. "C2.3"), "desc", "strand" (A/B/C/D), "band" ("1-3","4-6","7-8"), "grade" (e.g. "Grade 3" or "Grade 4"). ${splitExpNote}
 CRITICAL: Return ONLY valid JSON. No markdown fences.`;
 
   let progInterval = null;
@@ -5465,7 +5467,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#111;font-family:Ari
 function show(n){if(sl[c])sl[c].classList.remove('active');c=Math.max(0,Math.min(n,t-1));if(sl[c])sl[c].classList.add('active');nm.textContent=(c+1)+'/'+t;pr.style.width=((c+1)/t*100)+'%';}
 function go(d){show(c+d);}
 function fs(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.();}
-document.addEventListener('DOMContentLoaded',function(){sl=document.querySelectorAll('.slide');pr=document.getElementById('progress');nm=document.getElementById('snum');show(0);});
+function init(){sl=document.querySelectorAll('.slide');pr=document.getElementById('progress');nm=document.getElementById('snum');if(sl.length)show(0);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
 document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();go(1);}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}if(e.key==='f'||e.key==='F')fs();});
 document.addEventListener('click',function(e){if(e.target.closest('#ctrl'))return;e.clientX>window.innerWidth/2?go(1):go(-1);});
 window.addEventListener('message',function(e){
