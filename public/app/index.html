@@ -2349,7 +2349,11 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
 
   let progInterval = null;
   try {
-    const maxTok = grades.length >= 4 ? 7000 : isSplit && grades.length >= 2 ? 5000 : 3200;
+    const outputCount = outputs.length;
+    // Cap tokens based on complexity — more outputs = less per output to stay under timeout
+    const maxTok = grades.length >= 4 ? Math.min(7000, 2000 + outputCount * 800)
+      : isSplit ? Math.min(5000, 1800 + outputCount * 700)
+      : Math.min(3200, 1200 + outputCount * 600);
     setProgress(15,'Reading curriculum expectations...');
     let progVal = 15;
     progInterval = setInterval(() => {
