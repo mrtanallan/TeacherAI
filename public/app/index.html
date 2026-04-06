@@ -5648,7 +5648,7 @@ function dlPPTX(){
 <title>${esc(topic)} — TeacherAI</title>
 <style>${CSS}</style></head><body>
 <div id="progress"></div>
-<div id="deck">${allSlides.join('\n')}</div>
+<div id="deck">${allSlides.map((s,i)=>i===0?s.replace('<div class="slide"','<div class="slide active"'):s).join('\n')}</div>
 <div id="ctrl">
   <button onclick="go(-1)">&#8249;</button>
   <span id="snum">1/${total}</span>
