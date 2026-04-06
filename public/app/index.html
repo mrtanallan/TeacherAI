@@ -2410,37 +2410,33 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
     answerKeyKeys.forEach(k => { if(parsed[k]) genC[k]={orig:parsed[k],cur:parsed[k]}; });
     let lessonExpectations = parsed.expectations || preMatchedExp || [];
 
-    // POST-PARSE VALIDATOR: For split classes, enforce one expectation per grade
+    // SPLIT CLASS: Always rebuild expectations from curriculum JSON — AI is unreliable for this
     if (isSplit) {
       const gradeOrder2 = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
       const bandForGrade2 = g => gradeOrder2.indexOf(g) <= 3 ? '1-3' : gradeOrder2.indexOf(g) <= 6 ? '4-6' : '7-8';
+      await loadCurriculum(subj);
+      const subjKey = (subj||'').toLowerCase().includes('science') ? 'science'
+        : (subj||'').toLowerCase().includes('math') ? 'math' : 'language';
 
-      // Step 1: Assign grade field to every expectation based on band if missing
-      lessonExpectations = lessonExpectations.map(e => {
-        if (e.grade) return e;
-        // Assign to the first grade whose band matches
-        const matchingGrade = grades.find(g => bandForGrade2(g) === e.band);
-        return matchingGrade ? {...e, grade: matchingGrade} : e;
+      // For each grade, find the best matching expectation from curriculum
+      // Try to match AI's suggestions first, then fall back to any relevant one
+      const builtExps = [];
+      grades.forEach(g => {
+        const band = bandForGrade2(g);
+        const pool = (EXPECTATIONS[subjKey] || []).filter(e => e.band === band);
+
+        // Try to find one the AI mentioned (by code)
+        const aiCodes = (parsed.expectations || []).map(e => e.code);
+        let pick = pool.find(e => aiCodes.includes(e.code));
+
+        // If AI didn't suggest one from this band, just take first from pool
+        if (!pick) pick = pool[0];
+
+        if (pick) builtExps.push({...pick, grade: g});
       });
 
-      // Step 2: Check which grades still have no expectation assigned
-      const missingGrades = grades.filter(g =>
-        !lessonExpectations.some(e => e.grade === g)
-      );
-
-      // Step 3: For missing grades, pull from curriculum JSON
-      if (missingGrades.length > 0) {
-        console.warn('Patching missing expectations for:', missingGrades);
-        await loadCurriculum(subj);
-        const subjKey = (subj||'').toLowerCase().includes('science') ? 'science'
-          : (subj||'').toLowerCase().includes('math') ? 'math' : 'language';
-        missingGrades.forEach(g => {
-          const band = bandForGrade2(g);
-          const pool = (EXPECTATIONS[subjKey] || []).filter(e => e.band === band);
-          // Pick an expectation not already in the list
-          const pick = pool.find(e => !lessonExpectations.find(x => x.code === e.code));
-          if (pick) lessonExpectations.push({...pick, grade: g});
-        });
+      if (builtExps.length === grades.length) {
+        lessonExpectations = builtExps;
       }
     }
     genC['_expectations'] = lessonExpectations;
