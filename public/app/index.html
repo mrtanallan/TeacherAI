@@ -5583,7 +5583,7 @@ function show(n){
 function go(d){show(c+d);}
 function fs(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.();}
 document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();go(1);}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}if(e.key==='f'||e.key==='F')fs();});
-document.addEventListener('click',function(e){if(e.target.closest('#ctrl'))return;e.clientX>window.innerWidth/2?go(1):go(-1);});
+
 window.addEventListener('message',function(e){
   if(!e.data||e.data.type!=='VISUAL_READY')return;
   var idx=e.data.slideIndex, svg=e.data.svg||'';
