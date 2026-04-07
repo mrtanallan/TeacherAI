@@ -5651,7 +5651,6 @@ window.addEventListener('message',function(e){
 // Convert <foreignObject> blocks to native SVG <text> so canvg can render them
 // Preserves position and wraps text within the foreignObject width using tspan
 function stripForeignObject(svgStr) {
-  let clipId = 0;
   return svgStr.replace(/<foreignObject([^>]*)>([\s\S]*?)<\/foreignObject>/gi, function(match, attrs, inner) {
     const xm = attrs.match(/\bx=["']([\d.]+)["']/);
     const ym = attrs.match(/\by=["']([\d.]+)["']/);
@@ -5678,14 +5677,34 @@ function stripForeignObject(svgStr) {
     const cid = 'fo_clip_' + (clipId++);
     const fs = Math.min(13, Math.floor(h / Math.max(lines.length, 1) / 1.4));
     const lh = fs * 1.4;
-    const textEls = lines.slice(0, Math.floor(h / lh)).map((line, i) => {
-      // Truncate line to fit width (approx 6px per char at font-size 13)
-      const maxChars = Math.floor(w / (fs * 0.6));
-      const truncated = line.length > maxChars ? line.slice(0, maxChars - 1) + '…' : line;
-      return '<text x="' + (x + 4) + '" y="' + (y + fs + i * lh) + '" font-size="' + fs + '" font-family="Arial,sans-serif" fill="#1D3461" clip-path="url(#' + cid + ')">' +
-        truncated.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</text>';
+    // Word-wrap each line to fit within the box width, no truncation
+    const charsPerLine = Math.max(10, Math.floor(w / (fs * 0.58)));
+    const wrappedLines = [];
+    lines.forEach(line => {
+      if (line.length <= charsPerLine) {
+        wrappedLines.push(line);
+      } else {
+        // Break on word boundaries
+        const words = line.split(' ');
+        let cur = '';
+        words.forEach(word => {
+          if ((cur + ' ' + word).trim().length <= charsPerLine) {
+            cur = (cur + ' ' + word).trim();
+          } else {
+            if (cur) wrappedLines.push(cur);
+            cur = word;
+          }
+        });
+        if (cur) wrappedLines.push(cur);
+      }
+    });
+    // Use enough height to show all wrapped lines
+    const totalH = Math.max(h, wrappedLines.length * lh + 8);
+    const textEls = wrappedLines.map((line, i) => {
+      return '<text x="' + (x + 4) + '" y="' + (y + fs + i * lh) + '" font-size="' + fs + '" font-family="Arial,sans-serif" fill="#1D3461">' +
+        line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</text>';
     }).join('');
-    return '<clipPath id="' + cid + '"><rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '"/></clipPath>' + textEls;
+    return textEls;
   });
 }
 
