@@ -5367,7 +5367,7 @@ async function presentSlides(e) {
 // ══════════════════════════════════════════════════════════════════════════════
 // HTML PRESENTER — opens immediately, visuals injected via postMessage
 // ══════════════════════════════════════════════════════════════════════════════
-function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs) {
+function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs, _downloadOnly) {
   slideImgs = slideImgs || [];
   const date = new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -5634,6 +5634,7 @@ window.addEventListener('message',function(e){
 <script>${JS}<\/script>
 </body></html>`;
 
+  if (_downloadOnly) return html;
   const b=new Blob([html],{type:'text/html'});
   const blobUrl=URL.createObjectURL(b);
   const w=window.open(blobUrl,'_blank');
@@ -5643,7 +5644,17 @@ window.addEventListener('message',function(e){
 }
 function downloadSlidesPPTX() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
-  openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense, window._slideData.slideImgs||[]);
+  const {sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs} = window._slideData;
+  const html = openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs||[], true);
+  if (!html) return;
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (topic||'TeacherAI_Slides').replace(/[^a-z0-9]/gi,'_') + '.html';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  showToast('✅ Slides downloaded — open the file in your browser to present');
 }
 function downloadSlidesHTML() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
