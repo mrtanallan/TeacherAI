@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { sd, topic, subject, gradeStr } = req.body;
+    const { sd, topic, subject, gradeStr, mindsonImg, slideImgs } = req.body;
     // Safe string conversion — AI sometimes returns arrays instead of strings
     const str = (v) => Array.isArray(v) ? v.join(' ') : String(v || '');
     if (!sd) return res.status(400).json({ error: 'Missing slide data (sd)' });
@@ -40,6 +40,18 @@ module.exports = async function handler(req, res) {
     function addAccents(slide) {
       slide.addShape(pres.shapes.OVAL, { x: -0.5, y: -0.5, w: 1.5, h: 1.5, fill: { color: YELLOW, transparency: 75 } });
       slide.addShape(pres.shapes.OVAL, { x: W - 1.5, y: H - 1.5, w: 2, h: 2, fill: { color: TEAL, transparency: 80 } });
+    }
+
+    // Image fetch helper
+    async function fetchImg(url) {
+      if (!url) return null;
+      try {
+        const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+        if (!r.ok) return null;
+        const buf = Buffer.from(await r.arrayBuffer());
+        const ct = (r.headers.get('content-type') || 'image/jpeg').split(';')[0];
+        return ct + ';base64,' + buf.toString('base64');
+      } catch(e) { return null; }
     }
 
     // Title slide
@@ -73,6 +85,8 @@ module.exports = async function handler(req, res) {
       s3.background = { color: GREY };
       addAccents(s3);
       addHeader(s3, 'Minds On');
+      const mindsonB64 = await fetchImg(mindsonImg);
+      if (mindsonB64) s3.addImage({ data: mindsonB64, x: 6.8, y: HEADER_H + 0.2, w: 6.1, h: H - HEADER_H - 0.4, sizing: { type: 'cover', w: 6.1, h: H - HEADER_H - 0.4 } });
       if (sd.minds_on.hook) {
         s3.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: HEADER_H + 0.4, w: W - 1, h: 1.8, fill: { color: WHITE }, shadow: { type: 'outer', blur: 6, offset: 2, angle: 135, color: '000000', opacity: 0.08 } });
         s3.addText(str(sd.minds_on.hook), { x: 0.7, y: HEADER_H + 0.4, w: W - 1.4, h: 1.8, fontSize: 20, color: NAVY, fontFace: 'Arial', valign: 'middle', wrap: true });
@@ -105,18 +119,25 @@ module.exports = async function handler(req, res) {
     }
 
     // Content slides
-    (sd.content_slides || []).slice(0, 6).forEach(function(cs, i) {
+    const csArr = (sd.content_slides || []).slice(0, 6);
+    for (let i = 0; i < csArr.length; i++) {
+      const cs = csArr[i];
       const s = pres.addSlide();
       s.background = { color: GREY };
       addAccents(s);
       addHeader(s, cs.title || 'Key Concept');
       s.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: HEADER_H + 0.3, w: 0.07, h: 4.5, fill: { color: TEAL } });
-      s.addShape(pres.shapes.RECTANGLE, { x: 0.7, y: HEADER_H + 0.3, w: 5.8, h: 2.6, fill: { color: WHITE }, shadow: { type: 'outer', blur: 5, offset: 2, angle: 135, color: '000000', opacity: 0.07 } });
+      s.addShape(pres.shapes.RECTANGLE, { x: 0.7, y: HEADER_H + 0.3, w: 5.8, h: 2.6, fill: { color: WHITE }, shadow: mkShadow(0.07) });
       s.addText(str(cs.key_point), { x: 0.9, y: HEADER_H + 0.3, w: 5.4, h: 2.6, fontSize: 17, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
       if (cs.example) s.addText('Example: ' + str(cs.example), { x: 0.9, y: HEADER_H + 3.1, w: 5.6, h: 1.1, fontSize: 13, color: '5F5E5A', fontFace: 'Arial', wrap: true, italic: true });
-      s.addShape(pres.shapes.RECTANGLE, { x: 6.8, y: HEADER_H + 0.3, w: 6.0, h: 5.5, fill: { color: 'E8E7E3' } });
-      s.addText('[ Visual ]', { x: 6.8, y: HEADER_H + 2.8, w: 6.0, h: 0.5, fontSize: 12, color: 'BBBBBB', fontFace: 'Arial', align: 'center' });
-    });
+      const imgB64 = await fetchImg((slideImgs || [])[i]);
+      if (imgB64) {
+        s.addImage({ data: imgB64, x: 6.6, y: HEADER_H + 0.2, w: 6.3, h: 5.6, sizing: { type: 'cover', w: 6.3, h: 5.6 } });
+      } else {
+        s.addShape(pres.shapes.RECTANGLE, { x: 6.8, y: HEADER_H + 0.3, w: 6.0, h: 5.5, fill: { color: 'E8E7E3' } });
+        s.addText('[ Visual ]', { x: 6.8, y: HEADER_H + 2.8, w: 6.0, h: 0.5, fontSize: 12, color: 'BBBBBB', fontFace: 'Arial', align: 'center' });
+      }
+    }
 
     // Discussion
     const dqs = (sd.discussion_questions || []).slice(0, 3);
@@ -137,14 +158,19 @@ module.exports = async function handler(req, res) {
     }
 
     // Exit Ticket
-    if (sd.exit_ticket) {
+    const etText = sd.exit_ticket
+      ? (typeof sd.exit_ticket === 'object'
+          ? str(sd.exit_ticket.question || sd.exit_ticket.prompt || '')
+          : str(sd.exit_ticket))
+      : null;
+    if (etText) {
       const se = pres.addSlide();
       se.background = { color: GREY };
       addAccents(se);
       addHeader(se, 'Exit Ticket');
       se.addShape(pres.shapes.RECTANGLE, { x: 1.5, y: HEADER_H + 0.8, w: W - 3, h: 3.8, fill: { color: WHITE }, shadow: { type: 'outer', blur: 8, offset: 3, angle: 135, color: '000000', opacity: 0.1 } });
       se.addShape(pres.shapes.RECTANGLE, { x: 1.5, y: HEADER_H + 0.8, w: W - 3, h: 0.08, fill: { color: TEAL } });
-      se.addText(str(sd.exit_ticket), { x: 1.7, y: HEADER_H + 1.1, w: W - 3.4, h: 3.2, fontSize: 22, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle', align: 'center' });
+      se.addText(etText, { x: 1.7, y: HEADER_H + 1.1, w: W - 3.4, h: 3.2, fontSize: 22, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle', align: 'center' });
     }
 
     // Write and return
