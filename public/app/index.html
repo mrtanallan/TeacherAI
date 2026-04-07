@@ -5647,13 +5647,31 @@ window.addEventListener('message',function(e){
 // ============================================================
 
 // Convert <foreignObject> blocks to native SVG <text> so canvg can render them
+// Preserves position from foreignObject x/y attributes so text lands in the right place
 function stripForeignObject(svgStr) {
-  return svgStr.replace(/<foreignObject[^>]*>([\s\S]*?)<\/foreignObject>/gi, function(match, inner) {
-    // Extract text content from HTML inside foreignObject
-    const text = inner.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
-    if (!text) return '';
-    // Place as SVG text at a reasonable position
-    return '<text x="50%" y="50%" text-anchor="middle" font-size="14" font-family="Arial" fill="#1D3461">' + text + '</text>';
+  return svgStr.replace(/<foreignObject([^>]*)>([\s\S]*?)<\/foreignObject>/gi, function(match, attrs, inner) {
+    const xm = attrs.match(/\bx=["\']([\d.]+)["\']/) ;
+    const ym = attrs.match(/\by=["\']([\d.]+)["\']/) ;
+    const x = xm ? parseFloat(xm[1]) : 0;
+    const y = ym ? parseFloat(ym[1]) : 0;
+    // Extract text from each div/span/p element separately to preserve lines
+    const lines = [];
+    const divRe = /<(?:div|p|span)[^>]*>([^<]*)<\/(?:div|p|span)>/gi;
+    let dm;
+    while ((dm = divRe.exec(inner)) !== null) {
+      const t = dm[1].trim();
+      if (t) lines.push(t);
+    }
+    if (!lines.length) {
+      const t = inner.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (t) lines.push(t);
+    }
+    if (!lines.length) return '';
+    const fs = 13, lh = fs * 1.4;
+    return lines.slice(0, 6).map((line, i) =>
+      '<text x="' + (x + 4) + '" y="' + (y + fs + i * lh) + '" font-size="' + fs + '" font-family="Arial,sans-serif" fill="#1D3461">' +
+      line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</text>'
+    ).join('');
   });
 }
 
@@ -5770,20 +5788,29 @@ async function downloadSlidesPPTX() {
       addHeader(s3, 'Minds On');
       if (btn) btn.textContent = '⏳ Fetching images...';
       const mImg = await urlToPng(mindsonImg);
-      if (mImg) s3.addImage({ data: mImg, x: 6.8, y: HEADER_H + 0.2, w: 6.1, h: H - HEADER_H - 0.4, sizing: { type: 'cover', w: 6.1, h: H - HEADER_H - 0.4 } });
-      const hookW = mImg ? 5.9 : W - 1;
-      if (sd.minds_on.hook) {
-        s3.addShape(pptx.shapes.RECTANGLE, { x: 0.5, y: HEADER_H + 0.3, w: hookW, h: 1.8, fill: { color: WHITE }, shadow: mkShadow() });
-        s3.addText(String(sd.minds_on.hook || ''), { x: 0.7, y: HEADER_H + 0.3, w: hookW - 0.4, h: 1.8, fontSize: 19, color: NAVY, fontFace: 'Arial', valign: 'middle', wrap: true });
+      // Layout: left text panel (0.5 to 6.5), right image panel (6.6 to 13.1)
+      const imgX = 6.6, imgW = W - imgX - 0.2;
+      const textW = mImg ? 5.7 : W - 1;
+      if (mImg) {
+        s3.addImage({ data: mImg, x: imgX, y: HEADER_H + 0.2, w: imgW, h: H - HEADER_H - 0.4,
+          sizing: { type: 'cover', w: imgW, h: H - HEADER_H - 0.4 } });
       }
+      // Hook question box — top of left panel
+      if (sd.minds_on.hook) {
+        s3.addShape(pptx.shapes.RECTANGLE, { x: 0.5, y: HEADER_H + 0.3, w: textW, h: 2.0, fill: { color: WHITE }, shadow: mkShadow() });
+        s3.addText(String(sd.minds_on.hook || ''), { x: 0.7, y: HEADER_H + 0.3, w: textW - 0.4, h: 2.0, fontSize: 19, color: NAVY, fontFace: 'Arial', valign: 'middle', wrap: true });
+      }
+      // TPS buttons + prompt — bottom of left panel, well within textW
       if (sd.minds_on.prompt) {
         const tps = ['Think', 'Pair', 'Share'];
         const tpsColors = [YELLOW, TEAL, 'E07B39'];
+        const btnW = Math.min(1.7, (textW - 0.4) / 3);
+        const tpsY = H - 2.5;
         tps.forEach((t, i) => {
-          s3.addShape(pptx.shapes.RECTANGLE, { x: 0.5 + i * 2.4, y: H - 2.6, w: 2.2, h: 0.55, fill: { color: tpsColors[i] } });
-          s3.addText(t, { x: 0.5 + i * 2.4, y: H - 2.6, w: 2.2, h: 0.55, fontSize: 15, bold: true, color: i === 0 ? '2C2C2A' : WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
+          s3.addShape(pptx.shapes.RECTANGLE, { x: 0.5 + i * (btnW + 0.1), y: tpsY, w: btnW, h: 0.5, fill: { color: tpsColors[i] } });
+          s3.addText(t, { x: 0.5 + i * (btnW + 0.1), y: tpsY, w: btnW, h: 0.5, fontSize: 13, bold: true, color: i === 0 ? '2C2C2A' : WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
         });
-        s3.addText(String(sd.minds_on.prompt || ''), { x: 0.5, y: H - 1.9, w: hookW, h: 1.2, fontSize: 15, color: '5F5E5A', fontFace: 'Arial', wrap: true });
+        s3.addText(String(sd.minds_on.prompt || ''), { x: 0.5, y: tpsY + 0.6, w: textW, h: 1.2, fontSize: 14, color: '5F5E5A', fontFace: 'Arial', wrap: true });
       }
     }
 
