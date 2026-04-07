@@ -1037,13 +1037,13 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <span style="margin-top:6px;display:inline-block;">
     <a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
     <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a> &nbsp;·&nbsp;
-    <a href="/cdn-cgi/l/email-protection#384c5d595b505d4a59515b5956595c59785f55595154165b5755" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
+    <a href="mailto:teacheraicanada@gmail.com" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
     <span style="font-family:'DM Mono',monospace;font-size:.65rem;">v5.0 · Mar 31 2026</span>
   </span>
 </div>
 
 </div><!-- end #appScreen -->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 
 // ============================================================
 // SUPABASE + GOOGLE
@@ -2349,7 +2349,11 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
 
   let progInterval = null;
   try {
-    const maxTok = grades.length >= 4 ? 7000 : isSplit && grades.length >= 2 ? 5000 : 3200;
+    const outputCount = outputs.length;
+    // Cap tokens based on complexity — more outputs = less per output to stay under timeout
+    const maxTok = grades.length >= 4 ? Math.min(7000, 2000 + outputCount * 800)
+      : isSplit ? Math.min(5000, 1800 + outputCount * 700)
+      : Math.min(3200, 1200 + outputCount * 600);
     setProgress(15,'Reading curriculum expectations...');
     let progVal = 15;
     progInterval = setInterval(() => {
@@ -2409,49 +2413,45 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
     outputKeys.forEach(k => { genC[k] = {orig:parsed[k]||'', cur:parsed[k]||''}; });
     answerKeyKeys.forEach(k => { if(parsed[k]) genC[k]={orig:parsed[k],cur:parsed[k]}; });
     let lessonExpectations = parsed.expectations || preMatchedExp || [];
-    if (isSplit && lessonExpectations.length > 0) {
-      const _go = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
-      const _bf = g => _go.indexOf(g) <= 3 ? '1-3' : _go.indexOf(g) <= 6 ? '4-6' : '7-8';
-      const _assigned = [];
-      grades.forEach(g => {
-        const band = _bf(g);
-        const pick = lessonExpectations.find(e => e.band === band && !_assigned.find(a => a.code===e.code && a.grade===g));
-        if (pick) _assigned.push({...pick, grade: g});
-      });
-      if (_assigned.length === grades.length) {
-        lessonExpectations = _assigned;
-      } else {
-        lessonExpectations = lessonExpectations.map(e => {
-          if (e.grade) return e;
-          const g = grades.find(gr => _bf(gr) === e.band);
-          return g ? {...e, grade: g} : e;
-        });
-      }
-    }
 
-    // POST-PARSE VALIDATOR: For split classes, ensure all grades have expectations
-    if (isSplit && lessonExpectations.length > 0 && !isMathSubj) {
+    // SPLIT CLASS: Fix grade assignments — trust AI's expectation choices, just fix the grade field
+    if (isSplit) {
       const gradeOrder2 = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
       const bandForGrade2 = g => gradeOrder2.indexOf(g) <= 3 ? '1-3' : gradeOrder2.indexOf(g) <= 6 ? '4-6' : '7-8';
-      const missingGrades = grades.filter(g => {
+      await loadCurriculum(subj);
+      const subjKey = (subj||'').toLowerCase().includes('science') ? 'science'
+        : (subj||'').toLowerCase().includes('math') ? 'math' : 'language';
+      const allCurrExp = EXPECTATIONS[subjKey] || [];
+
+      // Step 1: For each grade, find the best AI-suggested expectation from that grade's band
+      const builtExps = [];
+      grades.forEach(g => {
         const band = bandForGrade2(g);
-        return !lessonExpectations.some(e =>
-          (e.grade && e.grade === g) ||
-          (e.band && e.band === band)
-        );
+        const bandPool = allCurrExp.filter(e => e.band === band);
+        const aiExp = (parsed.expectations || []);
+
+        // Find an AI expectation whose code exists in this grade's band
+        const aiCodesForBand = aiExp.map(e => e.code);
+        let pick = bandPool.find(e => aiCodesForBand.includes(e.code));
+
+        // Fallback: find any expectation in this band that matches the topic keywords
+        if (!pick) {
+          const topicWords = topic.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+          pick = bandPool.find(e =>
+            topicWords.some(w => (e.desc||'').toLowerCase().includes(w))
+          );
+        }
+
+        // Last resort: use strand D (Composition/Writing) for language, otherwise first in band
+        if (!pick) {
+          pick = bandPool.find(e => e.strand === 'D') || bandPool[0];
+        }
+
+        if (pick) builtExps.push({...pick, grade: g});
       });
-      if (missingGrades.length > 0) {
-        console.warn('Missing expectations for grades:', missingGrades, '— patching from curriculum');
-        await loadCurriculum(subj);
-        missingGrades.forEach(g => {
-          const band = bandForGrade2(g);
-          const fallback = (EXPECTATIONS['language'] || []).filter(e => e.band === band).slice(0,2);
-          fallback.forEach(e => {
-            if (!lessonExpectations.find(x => x.code === e.code && x.band === e.band)) {
-              lessonExpectations.push({...e, grade: g});
-            }
-          });
-        });
+
+      if (builtExps.length === grades.length) {
+        lessonExpectations = builtExps;
       }
     }
     genC['_expectations'] = lessonExpectations;
@@ -2532,7 +2532,7 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations) {
   const strandColors = {A:'var(--blue)',B:'var(--amber)',C:'var(--sage)',D:'var(--rust)',E:'var(--blue)'};
   const strandBgs   = {A:'var(--blue-l)',B:'var(--amber-l)',C:'var(--sage-l)',D:'var(--rust-l)',E:'var(--blue-l)'};
 
-  // Deduplicate expectations by code (split-grade lessons can return same code twice)
+  // Deduplicate by code+grade (same code can appear for different grades in split classes)
   const seen = new Set();
   const uniqueExpectations = (expectations||[]).filter(e => {
     const key = e.code + '|' + (e.grade||'');
@@ -5351,8 +5351,6 @@ async function presentSlides(e) {
 function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs) {
   slideImgs = slideImgs || [];
   const date = new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
-  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
   const TEAL='#3BBFAD', NAVY='#1D3461', YELLOW='#F5C842', GREY='#F4F3EF';
   const HEADER_H=76;
 
@@ -5565,6 +5563,8 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
   const allSlides=[sTitle,sGoals,sMindson,sVocab,...contentSlides,sPractice,sDiscuss,sExit].filter(Boolean);
   const total=allSlides.length;
 
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/`/g,'&#96;').replace(/\$/g,'&#36;'); }
+
   const CSS=`*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:#111;font-family:Arial,'Helvetica Neue',sans-serif}
 #deck{width:100%;height:100vh;position:relative}
@@ -5577,39 +5577,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#111;font-family:Ari
 #ctrl button:hover{background:rgba(255,255,255,.28)}
 #snum{color:rgba(255,255,255,.55);font-size:.72rem;min-width:3.2rem;text-align:center;font-family:monospace}
 #fsb{border-radius:8px!important;width:auto!important;padding:.3rem .85rem!important;font-size:.7rem!important;font-family:monospace}
+#pptxbtn{border-radius:8px!important;width:auto!important;padding:.3rem .85rem!important;font-size:.7rem!important;font-family:monospace;background:#3BBFAD!important;color:white!important;}
 @keyframes spin{to{transform:rotate(360deg)}}`;
 
-  // The deck JS listens for postMessage and injects visuals
   const JS=`var c=0,t=${total},sl,pr,nm;
-function show(n){
-  if(sl&&sl[c])sl[c].classList.remove('active');
-  c=Math.max(0,Math.min(n,t-1));
-  if(sl&&sl[c]){
-    sl[c].classList.add('active');
-    sl[c].style.opacity='1';
-  }
-  if(nm)nm.textContent=(c+1)+'/'+t;
-  if(pr)pr.style.width=((c+1)/t*100)+'%';
-}
+function show(n){if(sl[c])sl[c].classList.remove('active');c=Math.max(0,Math.min(n,t-1));if(sl[c])sl[c].classList.add('active');nm.textContent=(c+1)+'/'+t;pr.style.width=((c+1)/t*100)+'%';}
 function go(d){show(c+d);}
 function fs(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.();}
-function init(){
-  sl=document.querySelectorAll('.slide');
-  pr=document.getElementById('progress');
-  nm=document.getElementById('snum');
-  if(sl.length){
-    // Force first slide visible regardless of CSS
-    sl[0].style.opacity='1';
-    sl[0].style.pointerEvents='all';
-    sl[0].classList.add('active');
-    c=0;
-    if(nm)nm.textContent='1/'+t;
-    if(pr)pr.style.width=(1/t*100)+'%';
-  } else {
-    setTimeout(init, 100);
-  }
-}
-setTimeout(init, 0);
+document.addEventListener('DOMContentLoaded',function(){sl=document.querySelectorAll('.slide');pr=document.getElementById('progress');nm=document.getElementById('snum');show(0);});
 document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();go(1);}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}if(e.key==='f'||e.key==='F')fs();});
 document.addEventListener('click',function(e){if(e.target.closest('#ctrl'))return;e.clientX>window.innerWidth/2?go(1):go(-1);});
 window.addEventListener('message',function(e){
@@ -5617,34 +5592,62 @@ window.addEventListener('message',function(e){
   var idx=e.data.slideIndex, svg=e.data.svg||'';
   var panel=document.getElementById('vis-'+idx);
   if(!panel)return;
-  if(svg&&svg.length>20){
-    panel.innerHTML=svg;
-    panel.style.padding='16px';
-  } else {
-    panel.innerHTML='<p style="font-size:14px;color:#888780;text-align:center;padding:20px">Visual unavailable</p>';
-  }
+  if(svg&&svg.length>20){panel.innerHTML=svg;panel.style.padding='16px';}
+  else{panel.innerHTML='<p style="font-size:14px;color:#888780;text-align:center;padding:20px">Visual unavailable</p>';}
 });
-`;
+function dlPPTX(){
+  var btn=document.getElementById('pptxbtn');
+  if(!window.PptxGenJS){
+    if(btn){btn.textContent='Loading...';btn.disabled=true;}
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
+    s.onload=function(){if(btn){btn.textContent='&#11015; PPTX';btn.disabled=false;}dlPPTX();};
+    s.onerror=function(){alert('Could not load PPTX library.');if(btn){btn.textContent='&#11015; PPTX';btn.disabled=false;}};
+    document.head.appendChild(s);return;
+  }
+  if(btn){btn.textContent='Building...';btn.disabled=true;}
+  try{
+    var pptx=new PptxGenJS();pptx.layout='LAYOUT_WIDE';
+    var slides=document.querySelectorAll('.slide');
+    slides.forEach(function(el,i){
+      var s=pptx.addSlide();
+      s.background={color:i===0?'1D3461':'F4F3EF'};
+      var svgs=el.querySelectorAll('svg');
+      if(svgs.length){try{var sr=new XMLSerializer();var ss=sr.serializeToString(svgs[0]);var b64=btoa(unescape(encodeURIComponent(ss)));s.addImage({data:'data:image/svg+xml;base64,'+b64,x:0,y:0,w:'100%',h:'100%'});}catch(e2){}}
+      var tn=el.querySelectorAll('h1,h2,h3,p,[style*="font-size"]');var col=[];
+      tn.forEach(function(n){var t=(n.innerText||n.textContent||'').trim();if(t&&t.length>2&&t.length<500&&!col.some(function(c){return c.includes(t.slice(0,20));}))col.push(t);});
+      if(col.length)s.addText(col.slice(0,6).join('\n'),{x:0.3,y:0.3,w:12.7,h:6.8,fontSize:14,color:i===0?'FFFFFF':'1D3461',wrap:true,valign:'top',transparent:true});
+    });
+    pptx.writeFile({fileName:'TeacherAI_Slides.pptx'}).then(function(){if(btn){btn.textContent='&#11015; PPTX';btn.disabled=false;}}).catch(function(err){alert('Download failed: '+err.message);if(btn){btn.textContent='&#11015; PPTX';btn.disabled=false;}});
+  }catch(err){alert('PPTX error: '+err.message);if(btn){btn.textContent='&#11015; PPTX';btn.disabled=false;}}
+}`;
 
-  const _deckEncoded = JSON.stringify(allSlides.map((s,i)=>i===0?s.replace('<div class="slide"','<div class="slide active"'):s).join('\n'));
+  // Build deck - first slide gets 'active' class baked in so it shows immediately
+  const deckHtml = allSlides.map((s,i) => i===0 ? s.replace('<div class="slide"','<div class="slide active"') : s).join('\n');
+  // Use JSON.stringify for deck content so NO lesson content can break the script
+  const deckJson = JSON.stringify(deckHtml);
+  const titleSafe = JSON.stringify(esc(topic) + ' \u2014 TeacherAI');
+  const cssSafe = JSON.stringify(CSS);
+  const jsSafe = JSON.stringify(JS);
+  const totalSafe = total;
   const html = '<!DOCTYPE html><html lang="en"><head>'
     + '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-    + '<title>' + esc(topic) + ' — TeacherAI</title>'
+    + '<title>' + esc(topic) + ' \u2014 TeacherAI</title>'
     + '<style>' + CSS + '</style></head><body>'
-    + '<div id="progress"></div>'
-    + '<div id="deck"></div>'
+    + '<div id="progress"></div><div id="deck"></div>'
     + '<div id="ctrl">'
     + '<button onclick="go(-1)">&#8249;</button>'
     + '<span id="snum">1/' + total + '</span>'
     + '<button onclick="go(1)">&#8250;</button>'
     + '<button id="fsb" onclick="fs()">&#x26F6; Full</button>'
+    + '<button id="pptxbtn" onclick="dlPPTX()">&#11015; PPTX</button>'
     + '</div>'
     + '<script>'
-    + 'document.getElementById("deck").innerHTML=JSON.parse(' + _deckEncoded + ');'
+    + 'var _d=' + deckJson + ';'
+    + 'document.getElementById("deck").innerHTML=_d;'
     + JS
     + '<\/script>'
-    + '</body></html>';
-
+    + '</body></html>'
   const b=new Blob([html],{type:'text/html'});
   const blobUrl=URL.createObjectURL(b);
   const w=window.open(blobUrl,'_blank');
@@ -7794,4 +7797,11 @@ function renderTourStep(){const step=TOUR_STEPS[_tourIndex];document.getElementB
 function tourNext(){if(_tourIndex<TOUR_STEPS.length-1){_tourIndex++;renderTourStep();}else{skipTour();}}
 function skipTour(){document.getElementById('tourOverlay').style.display='none';localStorage.setItem('teacherai_tour_done','1');}
 
-// ===============
+// ============================================================
+// BOOT
+// ============================================================
+initApp();
+
+</script>
+</body>
+</html>
