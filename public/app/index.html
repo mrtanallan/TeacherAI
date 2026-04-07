@@ -1037,13 +1037,13 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <span style="margin-top:6px;display:inline-block;">
     <a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
     <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a> &nbsp;·&nbsp;
-    <a href="mailto:teacheraicanada@gmail.com" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
+    <a href="/cdn-cgi/l/email-protection#384c5d595b505d4a59515b5956595c59785f55595154165b5755" style="color:var(--muted);text-decoration:underline;">Contact</a> &nbsp;·&nbsp;
     <span style="font-family:'DM Mono',monospace;font-size:.65rem;">v5.0 · Mar 31 2026</span>
   </span>
 </div>
 
 </div><!-- end #appScreen -->
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 
 // ============================================================
 // SUPABASE + GOOGLE
@@ -2409,6 +2409,25 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
     outputKeys.forEach(k => { genC[k] = {orig:parsed[k]||'', cur:parsed[k]||''}; });
     answerKeyKeys.forEach(k => { if(parsed[k]) genC[k]={orig:parsed[k],cur:parsed[k]}; });
     let lessonExpectations = parsed.expectations || preMatchedExp || [];
+    if (isSplit && lessonExpectations.length > 0) {
+      const _go = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
+      const _bf = g => _go.indexOf(g) <= 3 ? '1-3' : _go.indexOf(g) <= 6 ? '4-6' : '7-8';
+      const _assigned = [];
+      grades.forEach(g => {
+        const band = _bf(g);
+        const pick = lessonExpectations.find(e => e.band === band && !_assigned.find(a => a.code===e.code && a.grade===g));
+        if (pick) _assigned.push({...pick, grade: g});
+      });
+      if (_assigned.length === grades.length) {
+        lessonExpectations = _assigned;
+      } else {
+        lessonExpectations = lessonExpectations.map(e => {
+          if (e.grade) return e;
+          const g = grades.find(gr => _bf(gr) === e.band);
+          return g ? {...e, grade: g} : e;
+        });
+      }
+    }
 
     // POST-PARSE VALIDATOR: For split classes, ensure all grades have expectations
     if (isSplit && lessonExpectations.length > 0 && !isMathSubj) {
@@ -2516,8 +2535,9 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations) {
   // Deduplicate expectations by code (split-grade lessons can return same code twice)
   const seen = new Set();
   const uniqueExpectations = (expectations||[]).filter(e => {
-    if (seen.has(e.code)) return false;
-    seen.add(e.code); return true;
+    const key = e.code + '|' + (e.grade||'');
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
   });
   const expHtml = uniqueExpectations.length ? `
     <div style="background:var(--sage-l);border:1px solid #A8C4AB;border-radius:8px;padding:11px 14px;margin-bottom:14px;">
@@ -5606,20 +5626,24 @@ window.addEventListener('message',function(e){
 });
 `;
 
-  const html=`<!DOCTYPE html><html lang="en"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(topic)} — TeacherAI</title>
-<style>${CSS}</style></head><body>
-<div id="progress"></div>
-<div id="deck">${allSlides.join('\n')}</div>
-<div id="ctrl">
-  <button onclick="go(-1)">&#8249;</button>
-  <span id="snum">1/${total}</span>
-  <button onclick="go(1)">&#8250;</button>
-  <button id="fsb" onclick="fs()">&#x26F6; Full</button>
-</div>
-<script>${JS}<\/script>
-</body></html>`;
+  const _deckEncoded = JSON.stringify(allSlides.map((s,i)=>i===0?s.replace('<div class="slide"','<div class="slide active"'):s).join('\n'));
+  const html = '<!DOCTYPE html><html lang="en"><head>'
+    + '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<title>' + esc(topic) + ' — TeacherAI</title>'
+    + '<style>' + CSS + '</style></head><body>'
+    + '<div id="progress"></div>'
+    + '<div id="deck"></div>'
+    + '<div id="ctrl">'
+    + '<button onclick="go(-1)">&#8249;</button>'
+    + '<span id="snum">1/' + total + '</span>'
+    + '<button onclick="go(1)">&#8250;</button>'
+    + '<button id="fsb" onclick="fs()">&#x26F6; Full</button>'
+    + '</div>'
+    + '<script>'
+    + 'document.getElementById("deck").innerHTML=JSON.parse(' + _deckEncoded + ');'
+    + JS
+    + '<\/script>'
+    + '</body></html>';
 
   const b=new Blob([html],{type:'text/html'});
   const blobUrl=URL.createObjectURL(b);
@@ -7770,11 +7794,4 @@ function renderTourStep(){const step=TOUR_STEPS[_tourIndex];document.getElementB
 function tourNext(){if(_tourIndex<TOUR_STEPS.length-1){_tourIndex++;renderTourStep();}else{skipTour();}}
 function skipTour(){document.getElementById('tourOverlay').style.display='none';localStorage.setItem('teacherai_tour_done','1');}
 
-// ============================================================
-// BOOT
-// ============================================================
-initApp();
-
-</script>
-</body>
-</html>
+// ===============
