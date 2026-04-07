@@ -5641,37 +5641,265 @@ window.addEventListener('message',function(e){
   setTimeout(()=>URL.revokeObjectURL(blobUrl),120000);
   return w;
 }
+// ============================================================
+// PPTX EXPORT — client-side using canvg + pptxgenjs
+// All runs in main app window. Presenter is NOT touched.
+// ============================================================
+
+// Convert <foreignObject> blocks to native SVG <text> so canvg can render them
+function stripForeignObject(svgStr) {
+  return svgStr.replace(/<foreignObject[^>]*>([\s\S]*?)<\/foreignObject>/gi, function(match, inner) {
+    // Extract text content from HTML inside foreignObject
+    const text = inner.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
+    if (!text) return '';
+    // Place as SVG text at a reasonable position
+    return '<text x="50%" y="50%" text-anchor="middle" font-size="14" font-family="Arial" fill="#1D3461">' + text + '</text>';
+  });
+}
+
+// Render an SVG string to PNG base64 using canvg
+async function svgToPng(svgStr, width, height) {
+  try {
+    // canvg is at /canvg.js (self-hosted)
+    if (!window.canvg) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = '/canvg.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = width || 1200;
+    canvas.height = height || 675;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#F4F3EF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const cleaned = stripForeignObject(svgStr);
+    const v = await canvg.Canvg.from(ctx, cleaned, { ignoreAnimation: true, ignoreMouse: true });
+    await v.render();
+    return canvas.toDataURL('image/png');
+  } catch(e) {
+    console.warn('svgToPng failed:', e.message);
+    return null;
+  }
+}
+
+// Fetch a remote image URL via server proxy (avoids CORS)
+async function urlToPng(imageUrl) {
+  if (!imageUrl) return null;
+  try {
+    const res = await authFetch('/api/svg-to-png', {
+      method: 'POST',
+      body: JSON.stringify({ imageUrl })
+    });
+    const data = await res.json();
+    if (data.png) return 'data:' + (data.mime || 'image/jpeg') + ';base64,' + data.png;
+    return null;
+  } catch(e) {
+    console.warn('urlToPng failed:', e.message);
+    return null;
+  }
+}
+
 async function downloadSlidesPPTX() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
   const btn = document.querySelector('[onclick="downloadSlidesPPTX()"]');
   if (btn) { btn.textContent = '⏳ Building...'; btn.disabled = true; }
   try {
-    const res = await authFetch('/api/download-slides', {
-      method: 'POST',
-      body: JSON.stringify({
-        sd: window._slideData.sd,
-        topic: window._slideData.topic,
-        subject: window._slideData.subject,
-        gradeStr: window._slideData.gradeStr,
-        mindsonImg: window._slideData.mindsonImg || null,
-        slideImgs: window._slideData.slideImgs || []
-      })
-    });
-    if (!res.ok) throw new Error('Server error: ' + res.status);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (window._slideData.topic||'TeacherAI_Slides').replace(/[^a-z0-9]/gi,'_') + '.pptx';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    // Load pptxgenjs if not already loaded
+    if (!window.PptxGenJS) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('Could not load pptxgenjs'));
+        document.head.appendChild(s);
+      });
+    }
+
+    const { sd, topic, subject, gradeStr, mindsonImg, slideImgs } = window._slideData;
+    const pptx = new PptxGenJS();
+    pptx.layout = 'LAYOUT_WIDE';
+    pptx.title = topic || 'TeacherAI Lesson';
+
+    const W = 13.3, H = 7.5, HEADER_H = 0.85;
+    const TEAL = '3BBFAD', NAVY = '1D3461', YELLOW = 'F5C842', GREY = 'F4F3EF', WHITE = 'FFFFFF';
+    const mkShadow = () => ({ type: 'outer', blur: 5, offset: 2, angle: 135, color: '000000', opacity: 0.07 });
+
+    function addHeader(slide, text, color) {
+      slide.addShape(pptx.shapes.RECTANGLE, { x: 0, y: 0, w: W, h: HEADER_H, fill: { color: color || TEAL } });
+      slide.addText(text, { x: 0.4, y: 0, w: W - 0.8, h: HEADER_H, fontSize: 22, bold: true, color: WHITE, fontFace: 'Arial', valign: 'middle', margin: 0 });
+    }
+    function addAccents(slide) {
+      slide.addShape(pptx.shapes.OVAL, { x: -0.4, y: -0.4, w: 1.2, h: 1.2, fill: { color: YELLOW, transparency: 75 } });
+      slide.addShape(pptx.shapes.OVAL, { x: W - 1.8, y: H - 1.8, w: 2.2, h: 2.2, fill: { color: TEAL, transparency: 80 } });
+    }
+
+    // ── Title slide ──
+    const s1 = pptx.addSlide();
+    s1.background = { color: NAVY };
+    s1.addShape(pptx.shapes.RECTANGLE, { x: 0, y: 0, w: 0.12, h: H, fill: { color: TEAL } });
+    s1.addText(topic || 'Lesson', { x: 0.8, y: 2.0, w: W - 2, h: 1.6, fontSize: 40, bold: true, color: WHITE, fontFace: 'Arial', wrap: true });
+    s1.addText((gradeStr || '') + (subject ? '  ·  ' + subject : ''), { x: 0.8, y: 3.7, w: W - 2, h: 0.6, fontSize: 18, color: 'AAAAAA', fontFace: 'Arial' });
+    s1.addText('TEACHERAI  ·  ONTARIO CURRICULUM', { x: 0.8, y: H - 0.6, w: W - 1.6, h: 0.4, fontSize: 10, color: '555555', fontFace: 'Arial', charSpacing: 3 });
+
+    // ── Learning Goals ──
+    const goals = (sd.learning_goals || []).slice(0, 3);
+    if (goals.length) {
+      const s2 = pptx.addSlide();
+      s2.background = { color: GREY };
+      addAccents(s2);
+      addHeader(s2, 'Learning Goals');
+      const colors = [YELLOW, TEAL, 'E07B39'];
+      goals.forEach((g, i) => {
+        const y = HEADER_H + 0.8 + i * 1.5;
+        s2.addShape(pptx.shapes.RECTANGLE, { x: 0.5, y, w: 0.8, h: 0.8, fill: { color: colors[i] } });
+        s2.addText(String(i + 1), { x: 0.5, y, w: 0.8, h: 0.8, fontSize: 22, bold: true, color: i === 0 ? '2C2C2A' : WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
+        s2.addShape(pptx.shapes.RECTANGLE, { x: 1.5, y, w: W - 2, h: 0.8, fill: { color: WHITE }, shadow: mkShadow() });
+        s2.addText(String(g || ''), { x: 1.7, y, w: W - 2.2, h: 0.8, fontSize: 17, color: NAVY, fontFace: 'Arial', valign: 'middle', wrap: true, margin: 0 });
+      });
+    }
+
+    // ── Minds On (with AI image if available) ──
+    if (sd.minds_on) {
+      const s3 = pptx.addSlide();
+      s3.background = { color: GREY };
+      addAccents(s3);
+      addHeader(s3, 'Minds On');
+      if (btn) btn.textContent = '⏳ Fetching images...';
+      const mImg = await urlToPng(mindsonImg);
+      if (mImg) s3.addImage({ data: mImg, x: 6.8, y: HEADER_H + 0.2, w: 6.1, h: H - HEADER_H - 0.4, sizing: { type: 'cover', w: 6.1, h: H - HEADER_H - 0.4 } });
+      const hookW = mImg ? 5.9 : W - 1;
+      if (sd.minds_on.hook) {
+        s3.addShape(pptx.shapes.RECTANGLE, { x: 0.5, y: HEADER_H + 0.3, w: hookW, h: 1.8, fill: { color: WHITE }, shadow: mkShadow() });
+        s3.addText(String(sd.minds_on.hook || ''), { x: 0.7, y: HEADER_H + 0.3, w: hookW - 0.4, h: 1.8, fontSize: 19, color: NAVY, fontFace: 'Arial', valign: 'middle', wrap: true });
+      }
+      if (sd.minds_on.prompt) {
+        const tps = ['Think', 'Pair', 'Share'];
+        const tpsColors = [YELLOW, TEAL, 'E07B39'];
+        tps.forEach((t, i) => {
+          s3.addShape(pptx.shapes.RECTANGLE, { x: 0.5 + i * 2.4, y: H - 2.6, w: 2.2, h: 0.55, fill: { color: tpsColors[i] } });
+          s3.addText(t, { x: 0.5 + i * 2.4, y: H - 2.6, w: 2.2, h: 0.55, fontSize: 15, bold: true, color: i === 0 ? '2C2C2A' : WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
+        });
+        s3.addText(String(sd.minds_on.prompt || ''), { x: 0.5, y: H - 1.9, w: hookW, h: 1.2, fontSize: 15, color: '5F5E5A', fontFace: 'Arial', wrap: true });
+      }
+    }
+
+    // ── Vocabulary ──
+    const vocab = (sd.vocabulary || []).slice(0, 4);
+    if (vocab.length) {
+      const s4 = pptx.addSlide();
+      s4.background = { color: GREY };
+      addAccents(s4);
+      addHeader(s4, 'Key Vocabulary', '6B63D4');
+      const vColors = [TEAL, YELLOW, 'E07B39', '6B63D4'];
+      const cols = vocab.length <= 2 ? 1 : 2;
+      const colW = (W - 1) / cols;
+      vocab.forEach((v, i) => {
+        const col = i % cols, row = Math.floor(i / cols);
+        const x = 0.5 + col * (colW + 0.1), y = HEADER_H + 0.3 + row * 2.2;
+        s4.addShape(pptx.shapes.RECTANGLE, { x, y, w: colW - 0.1, h: 2.0, fill: { color: WHITE }, shadow: mkShadow() });
+        s4.addShape(pptx.shapes.RECTANGLE, { x, y, w: colW - 0.1, h: 0.07, fill: { color: vColors[i % 4] } });
+        s4.addText(String(v.word || ''), { x: x + 0.15, y: y + 0.15, w: colW - 0.4, h: 0.55, fontSize: 20, bold: true, color: NAVY, fontFace: 'Arial' });
+        s4.addText(String(v.definition || ''), { x: x + 0.15, y: y + 0.7, w: colW - 0.4, h: 0.85, fontSize: 13, color: '5F5E5A', fontFace: 'Arial', wrap: true });
+        if (v.example) s4.addText('"' + v.example + '"', { x: x + 0.15, y: y + 1.55, w: colW - 0.4, h: 0.4, fontSize: 11, color: '888780', fontFace: 'Arial', italic: true, wrap: true });
+      });
+    }
+
+    // ── Content slides (with SVG diagrams via canvg + AI images) ──
+    const DIAGRAM_TYPES = new Set(['concept_card','word_web','anchor_chart','story_map','reading_strategy',
+      'sentence_frames','writing_process','comparison_table','venn_diagram','cycle_diagram',
+      'food_chain','science_diagram','fraction_bar','fraction_circle','number_line','bar_graph',
+      'line_graph','pie_chart','t_table','place_value','worked_steps','balance_scale']);
+
+    const csArr = (sd.content_slides || []).slice(0, 6);
+    for (let i = 0; i < csArr.length; i++) {
+      const cs = csArr[i];
+      if (btn) btn.textContent = '⏳ Slide ' + (i + 1) + '/' + csArr.length + '...';
+      const s = pptx.addSlide();
+      s.background = { color: GREY };
+      addAccents(s);
+      addHeader(s, cs.title || 'Key Concept');
+      s.addShape(pptx.shapes.RECTANGLE, { x: 0.5, y: HEADER_H + 0.3, w: 0.07, h: 4.5, fill: { color: TEAL } });
+      s.addShape(pptx.shapes.RECTANGLE, { x: 0.7, y: HEADER_H + 0.3, w: 5.8, h: 2.6, fill: { color: WHITE }, shadow: mkShadow() });
+      s.addText(String(cs.key_point || ''), { x: 0.9, y: HEADER_H + 0.3, w: 5.4, h: 2.6, fontSize: 17, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
+      if (cs.example) s.addText('Example: ' + String(cs.example), { x: 0.9, y: HEADER_H + 3.1, w: 5.6, h: 1.1, fontSize: 13, color: '5F5E5A', fontFace: 'Arial', wrap: true, italic: true });
+
+      // Right panel: SVG diagram if available, else AI image, else placeholder
+      let rightImg = null;
+      if (cs.svg_html) {
+        rightImg = await svgToPng(cs.svg_html, 744, 495);
+      }
+      if (!rightImg && !DIAGRAM_TYPES.has(cs.visual_type)) {
+        rightImg = await urlToPng((slideImgs || [])[i]);
+      }
+      if (rightImg) {
+        s.addImage({ data: rightImg, x: 6.8, y: HEADER_H + 0.3, w: 6.1, h: 5.5, sizing: { type: 'cover', w: 6.1, h: 5.5 } });
+      } else {
+        s.addShape(pptx.shapes.RECTANGLE, { x: 6.8, y: HEADER_H + 0.3, w: 6.1, h: 5.5, fill: { color: 'E8E7E3' } });
+        s.addText('[ Visual ]', { x: 6.8, y: HEADER_H + 2.8, w: 6.1, h: 0.5, fontSize: 12, color: 'BBBBBB', fontFace: 'Arial', align: 'center' });
+      }
+    }
+
+    // ── Practice ──
+    if (sd.practice_problem) {
+      const sp = pptx.addSlide();
+      sp.background = { color: GREY };
+      addAccents(sp);
+      addHeader(sp, 'Practice', NAVY);
+      sp.addShape(pptx.shapes.RECTANGLE, { x: 0.5, y: HEADER_H + 0.3, w: W - 1, h: 1.8, fill: { color: NAVY } });
+      sp.addText(String(sd.practice_problem.question || ''), { x: 0.7, y: HEADER_H + 0.5, w: W - 1.4, h: 1.4, fontSize: 18, color: WHITE, fontFace: 'Arial', wrap: true });
+      const hints = (sd.practice_problem.hints || []);
+      if (hints.length) {
+        sp.addText(hints.map((h, i) => (i + 1) + '. ' + (typeof h === 'object' ? h.hint || h.text || '' : String(h))).join('\n'), { x: 0.7, y: HEADER_H + 2.3, w: W - 1.4, h: 2.5, fontSize: 14, color: '5F5E5A', fontFace: 'Arial', wrap: true });
+      }
+    }
+
+    // ── Discussion ──
+    const dqs = (sd.discussion_questions || []).slice(0, 3);
+    if (dqs.length) {
+      const sd2 = pptx.addSlide();
+      sd2.background = { color: GREY };
+      addAccents(sd2);
+      addHeader(sd2, 'Discussion');
+      const labels = ['Think', 'Pair', 'Share'];
+      const dColors = [YELLOW, TEAL, 'E07B39'];
+      dqs.forEach((q, i) => {
+        const y = HEADER_H + 0.3 + i * 1.9;
+        sd2.addShape(pptx.shapes.RECTANGLE, { x: 0.5, y, w: 1.3, h: 0.55, fill: { color: dColors[i] } });
+        sd2.addText(labels[i], { x: 0.5, y, w: 1.3, h: 0.55, fontSize: 13, bold: true, color: i === 0 ? '2C2C2A' : WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
+        sd2.addShape(pptx.shapes.RECTANGLE, { x: 2.0, y, w: W - 2.5, h: 1.3, fill: { color: WHITE }, shadow: mkShadow() });
+        sd2.addText(String(q || ''), { x: 2.2, y: y + 0.1, w: W - 2.9, h: 1.2, fontSize: 16, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
+      });
+    }
+
+    // ── Exit Ticket ──
+    const et = sd.exit_ticket;
+    const etText = et ? (typeof et === 'object' ? String(et.question || et.prompt || '') : String(et)) : null;
+    if (etText) {
+      const se = pptx.addSlide();
+      se.background = { color: GREY };
+      addAccents(se);
+      addHeader(se, 'Exit Ticket 🎟️');
+      se.addShape(pptx.shapes.RECTANGLE, { x: 1.5, y: HEADER_H + 0.8, w: W - 3, h: 3.8, fill: { color: WHITE }, shadow: mkShadow() });
+      se.addShape(pptx.shapes.RECTANGLE, { x: 1.5, y: HEADER_H + 0.8, w: W - 3, h: 0.08, fill: { color: TEAL } });
+      se.addText(etText, { x: 1.7, y: HEADER_H + 1.1, w: W - 3.4, h: 3.2, fontSize: 22, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle', align: 'center' });
+    }
+
+    // ── Write file ──
+    const filename = (topic || 'TeacherAI_Slides').replace(/[^a-z0-9]/gi, '_') + '.pptx';
+    await pptx.writeFile({ fileName: filename });
     showToast('✅ PPTX downloaded — open in PowerPoint or import to Google Slides');
   } catch(e) {
-    showToast('⚠️ Download failed: ' + e.message, 5000);
+    showToast('⚠️ PPTX download failed: ' + e.message, 5000);
+    console.error('downloadSlidesPPTX error:', e);
   } finally {
     if (btn) { btn.textContent = '⬇ Slides'; btn.disabled = false; }
   }
 }
+
 function downloadSlidesHTML() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
   openHTMLPresenter(window._slideData.sd, window._slideData.topic, window._slideData.subject, window._slideData.gradeStr, window._slideData.wikiImg, window._slideData.mindsonImg, window._slideData.wikiTitle, window._slideData.wikiLicense, window._slideData.slideImgs||[]);
