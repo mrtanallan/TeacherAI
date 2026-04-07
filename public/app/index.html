@@ -5884,97 +5884,19 @@ async function downloadSlidesPPTX() {
         s.addText('Example: ' + String(cs.example), { x: 0.8, y: exY, w: leftW, h: H - exY - 0.3, fontSize: 13, color: '5F5E5A', fontFace: 'Arial', wrap: true, italic: true });
       }
 
-      // Right panel — native pptxgenjs shapes for complex types, canvg for geometric ones
+      // Right panel: render SVG via canvg at high resolution so boxes are large enough
       if (hasSvg) {
-        const vt = cs.visual_type || '';
-        const vp = cs.visual_params || {};
         const rY = HEADER_H + 0.2, rH = H - HEADER_H - 0.4;
-
-        if (vt === 'word_web') {
-          // Native word web: center oval + surrounding node boxes
-          const center = vp.center || cs.title || '';
-          const nodes = (vp.nodes || vp.connected || []).slice(0, 6);
-          const cx = rightX + rightW / 2, cy = rY + rH / 2;
-          const radius = Math.min(rightW, rH) * 0.32;
-          s.addShape(pptx.shapes.OVAL, { x: cx - 0.7, y: cy - 0.45, w: 1.4, h: 0.9, fill: { color: TEAL } });
-          s.addText(String(center), { x: cx - 0.7, y: cy - 0.45, w: 1.4, h: 0.9, fontSize: 12, bold: true, color: WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
-          const angles = nodes.length <= 4 ? [0, 90, 180, 270] : [0, 60, 120, 180, 240, 300];
-          nodes.forEach((node, ni) => {
-            const ang = (angles[ni] || ni * (360 / nodes.length)) * Math.PI / 180;
-            const nx = cx + Math.cos(ang) * radius - 0.85;
-            const ny = cy + Math.sin(ang) * radius - 0.4;
-            s.addShape(pptx.shapes.RECTANGLE, { x: nx, y: ny, w: 1.7, h: 0.8, fill: { color: WHITE }, line: { color: TEAL, width: 1.5 } });
-            s.addText(String(typeof node === 'object' ? node.label || node.text || node : node), { x: nx + 0.05, y: ny, w: 1.6, h: 0.8, fontSize: 11, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle', align: 'center' });
-          });
-
-        } else if (vt === 'concept_card') {
-          // Native concept card: term + definition + examples
-          const term = vp.term || vp.word || '';
-          const definition = vp.definition || '';
-          const examples = (vp.examples || []).slice(0, 3);
-          s.addShape(pptx.shapes.RECTANGLE, { x: rightX, y: rY, w: rightW, h: 1.0, fill: { color: NAVY } });
-          s.addText(String(term), { x: rightX + 0.1, y: rY, w: rightW - 0.2, h: 1.0, fontSize: 22, bold: true, color: WHITE, fontFace: 'Arial', valign: 'middle', align: 'center' });
-          s.addShape(pptx.shapes.RECTANGLE, { x: rightX, y: rY + 1.1, w: rightW, h: 1.4, fill: { color: WHITE }, shadow: mkShadow() });
-          s.addText(String(definition), { x: rightX + 0.15, y: rY + 1.1, w: rightW - 0.3, h: 1.4, fontSize: 14, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
-          examples.forEach((ex, ei) => {
-            const ey = rY + 2.7 + ei * 0.85;
-            s.addShape(pptx.shapes.RECTANGLE, { x: rightX, y: ey, w: 0.06, h: 0.7, fill: { color: TEAL } });
-            s.addText(String(ex), { x: rightX + 0.2, y: ey, w: rightW - 0.3, h: 0.7, fontSize: 13, color: '5F5E5A', fontFace: 'Arial', wrap: true, valign: 'middle', italic: true });
-          });
-
-        } else if (vt === 'comparison_table' || vt === 'venn_diagram') {
-          // Native comparison: two-column table
-          const items = vp.items || vp.rows || [];
-          const col1 = vp.col1 || vp.left || 'Column 1';
-          const col2 = vp.col2 || vp.right || 'Column 2';
-          const colW2 = rightW / 2 - 0.1;
-          s.addShape(pptx.shapes.RECTANGLE, { x: rightX, y: rY, w: colW2, h: 0.55, fill: { color: TEAL } });
-          s.addText(String(col1), { x: rightX, y: rY, w: colW2, h: 0.55, fontSize: 13, bold: true, color: WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
-          s.addShape(pptx.shapes.RECTANGLE, { x: rightX + colW2 + 0.1, y: rY, w: colW2, h: 0.55, fill: { color: NAVY } });
-          s.addText(String(col2), { x: rightX + colW2 + 0.1, y: rY, w: colW2, h: 0.55, fontSize: 13, bold: true, color: WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
-          items.slice(0, 5).forEach((row, ri) => {
-            const ry2 = rY + 0.65 + ri * 0.72;
-            const v1 = typeof row === 'object' ? String(row.col1 || row.left || row[0] || '') : String(row);
-            const v2 = typeof row === 'object' ? String(row.col2 || row.right || row[1] || '') : '';
-            s.addShape(pptx.shapes.RECTANGLE, { x: rightX, y: ry2, w: colW2, h: 0.65, fill: { color: ri % 2 === 0 ? WHITE : 'F4F3EF' } });
-            s.addText(v1, { x: rightX + 0.1, y: ry2, w: colW2 - 0.2, h: 0.65, fontSize: 12, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
-            s.addShape(pptx.shapes.RECTANGLE, { x: rightX + colW2 + 0.1, y: ry2, w: colW2, h: 0.65, fill: { color: ri % 2 === 0 ? WHITE : 'F4F3EF' } });
-            s.addText(v2, { x: rightX + colW2 + 0.2, y: ry2, w: colW2 - 0.2, h: 0.65, fontSize: 12, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
-          });
-
-        } else if (CANVG_SAFE.has(vt)) {
-          // Pure geometric — canvg renders cleanly
-          const geoImg = await svgToPng(cs.svg_html, 900, 600);
-          if (geoImg) {
-            s.addImage({ data: geoImg, x: rightX, y: rY, w: rightW, h: rH, sizing: { type: 'contain', w: rightW, h: rH } });
-          }
+        const rightImg = await svgToPng(cs.svg_html, 1600, 1000);
+        if (rightImg) {
+          s.addImage({ data: rightImg, x: rightX, y: rY, w: rightW, h: rH,
+            sizing: { type: 'contain', w: rightW, h: rH } });
         } else {
-          // All other complex types (reading_strategy, story_map, anchor_chart, etc.)
-          // Build a clean text-based summary from visual_params
-          const panelTitle = vt.replace(/_/g, ' ').replace(/\w/g, c => c.toUpperCase());
-          s.addShape(pptx.shapes.RECTANGLE, { x: rightX, y: rY, w: rightW, h: rH, fill: { color: WHITE }, shadow: mkShadow() });
-          s.addShape(pptx.shapes.RECTANGLE, { x: rightX, y: rY, w: rightW, h: 0.5, fill: { color: TEAL } });
-          s.addText(panelTitle, { x: rightX, y: rY, w: rightW, h: 0.5, fontSize: 13, bold: true, color: WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
-          // Extract readable text from visual_params and display as bullet points
-          const lines = [];
-          const flatten = (obj, depth) => {
-            if (depth > 2) return;
-            if (typeof obj === 'string' && obj.trim()) { lines.push(obj.trim()); return; }
-            if (Array.isArray(obj)) { obj.slice(0, 8).forEach(v => flatten(v, depth + 1)); return; }
-            if (typeof obj === 'object' && obj) { Object.values(obj).forEach(v => flatten(v, depth + 1)); }
-          };
-          flatten(vp, 0);
-          if (lines.length) {
-            s.addText(lines.slice(0, 10).map(l => l.length > 60 ? l.slice(0, 57) + '...' : l).join('\n'), {
-              x: rightX + 0.2, y: rY + 0.6, w: rightW - 0.4, h: rH - 0.7,
-              fontSize: 13, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'top',
-              bullet: { type: 'bullet' }
-            });
-          }
+          s.addShape(pptx.shapes.RECTANGLE, { x: rightX, y: rY, w: rightW, h: rH, fill: { color: 'E8E7E3' } });
+          s.addText('[ See diagram in lesson ]', { x: rightX, y: rY + rH/2 - 0.2, w: rightW, h: 0.4, fontSize: 11, color: 'BBBBBB', fontFace: 'Arial', align: 'center' });
         }
       }
     }
-
     // ── Practice ──
     if (sd.practice_problem) {
       const sp = pptx.addSlide();
