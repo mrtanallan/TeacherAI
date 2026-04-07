@@ -37,6 +37,8 @@ module.exports = async function handler(req, res) {
       slide.addText(text, { x: 0.4, y: 0, w: W - 0.8, h: HEADER_H, fontSize: 22, bold: true, color: WHITE, fontFace: 'Arial', valign: 'middle', margin: 0 });
     }
 
+    function mkShadow(opacity) { return { type: 'outer', blur: 5, offset: 2, angle: 135, color: '000000', opacity: opacity || 0.07 }; }
+
     function addAccents(slide) {
       slide.addShape(pres.shapes.OVAL, { x: -0.5, y: -0.5, w: 1.5, h: 1.5, fill: { color: YELLOW, transparency: 75 } });
       slide.addShape(pres.shapes.OVAL, { x: W - 1.5, y: H - 1.5, w: 2, h: 2, fill: { color: TEAL, transparency: 80 } });
