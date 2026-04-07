@@ -142,12 +142,18 @@ module.exports = async function handler(req, res) {
       s.addShape(pres.shapes.RECTANGLE, { x: 0.7, y: HEADER_H + 0.3, w: 5.8, h: 2.6, fill: { color: WHITE }, shadow: mkShadow(0.07) });
       s.addText(str(cs.key_point), { x: 0.9, y: HEADER_H + 0.3, w: 5.4, h: 2.6, fontSize: 17, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
       if (cs.example) s.addText('Example: ' + str(cs.example), { x: 0.9, y: HEADER_H + 3.1, w: 5.6, h: 1.1, fontSize: 13, color: '5F5E5A', fontFace: 'Arial', wrap: true, italic: true });
-      const imgB64 = await fetchImg((slideImgs || [])[i]);
+      // Only use AI image if slide has no hardcoded diagram type
+      const DIAGRAM_TYPES = ['concept_card','word_web','anchor_chart','story_map','reading_strategy',
+        'sentence_frames','writing_process','comparison_table','venn_diagram','cycle_diagram',
+        'food_chain','science_diagram','fraction_bar','fraction_circle','number_line','bar_graph',
+        'line_graph','pie_chart','t_table','place_value','worked_steps','balance_scale'];
+      const hasDiagram = cs.visual_type && DIAGRAM_TYPES.includes(cs.visual_type);
+      const imgB64 = hasDiagram ? null : await fetchImg((slideImgs || [])[i]);
       if (imgB64) {
         s.addImage({ data: imgB64, x: 6.6, y: HEADER_H + 0.2, w: 6.3, h: 5.6, sizing: { type: 'cover', w: 6.3, h: 5.6 } });
       } else {
         s.addShape(pres.shapes.RECTANGLE, { x: 6.8, y: HEADER_H + 0.3, w: 6.0, h: 5.5, fill: { color: 'E8E7E3' } });
-        s.addText('[ Visual ]', { x: 6.8, y: HEADER_H + 2.8, w: 6.0, h: 0.5, fontSize: 12, color: 'BBBBBB', fontFace: 'Arial', align: 'center' });
+        s.addText(hasDiagram ? '[ See diagram in lesson ]' : '[ Visual ]', { x: 6.8, y: HEADER_H + 2.8, w: 6.0, h: 0.5, fontSize: 12, color: 'BBBBBB', fontFace: 'Arial', align: 'center' });
       }
     }
 
