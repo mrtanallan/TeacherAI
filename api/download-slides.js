@@ -19,6 +19,8 @@ module.exports = async function handler(req, res) {
 
   try {
     const { sd, topic, subject, gradeStr } = req.body;
+    // Safe string conversion — AI sometimes returns arrays instead of strings
+    const str = (v) => Array.isArray(v) ? v.join(' ') : String(v || '');
     if (!sd) return res.status(400).json({ error: 'Missing slide data (sd)' });
 
     const TEAL = '3BBFAD', NAVY = '1D3461', YELLOW = 'F5C842';
@@ -61,7 +63,7 @@ module.exports = async function handler(req, res) {
         s2.addShape(pres.shapes.RECTANGLE, { x: 0.5, y, w: 0.8, h: 0.8, fill: { color: colors[i] } });
         s2.addText(String(i + 1), { x: 0.5, y, w: 0.8, h: 0.8, fontSize: 22, bold: true, color: i === 0 ? '2C2C2A' : WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
         s2.addShape(pres.shapes.RECTANGLE, { x: 1.5, y, w: W - 2.0, h: 0.8, fill: { color: WHITE }, shadow: { type: 'outer', blur: 4, offset: 2, angle: 135, color: '000000', opacity: 0.06 } });
-        s2.addText(g, { x: 1.7, y, w: W - 2.4, h: 0.8, fontSize: 17, color: NAVY, fontFace: 'Arial', valign: 'middle', wrap: true, margin: 0 });
+        s2.addText(str(g), { x: 1.7, y, w: W - 2.4, h: 0.8, fontSize: 17, color: NAVY, fontFace: 'Arial', valign: 'middle', wrap: true, margin: 0 });
       });
     }
 
@@ -73,10 +75,10 @@ module.exports = async function handler(req, res) {
       addHeader(s3, 'Minds On');
       if (sd.minds_on.hook) {
         s3.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: HEADER_H + 0.4, w: W - 1, h: 1.8, fill: { color: WHITE }, shadow: { type: 'outer', blur: 6, offset: 2, angle: 135, color: '000000', opacity: 0.08 } });
-        s3.addText(sd.minds_on.hook, { x: 0.7, y: HEADER_H + 0.4, w: W - 1.4, h: 1.8, fontSize: 20, color: NAVY, fontFace: 'Arial', valign: 'middle', wrap: true });
+        s3.addText(str(sd.minds_on.hook), { x: 0.7, y: HEADER_H + 0.4, w: W - 1.4, h: 1.8, fontSize: 20, color: NAVY, fontFace: 'Arial', valign: 'middle', wrap: true });
       }
       if (sd.minds_on.prompt) {
-        s3.addText(sd.minds_on.prompt, { x: 0.5, y: H - 2.0, w: W - 1, h: 1.5, fontSize: 16, color: '5F5E5A', fontFace: 'Arial', wrap: true });
+        s3.addText(str(sd.minds_on.prompt), { x: 0.5, y: H - 2.0, w: W - 1, h: 1.5, fontSize: 16, color: '5F5E5A', fontFace: 'Arial', wrap: true });
       }
     }
 
@@ -96,9 +98,9 @@ module.exports = async function handler(req, res) {
         const y = HEADER_H + 0.3 + row * 2.3;
         s4.addShape(pres.shapes.RECTANGLE, { x, y, w: colW, h: 2.1, fill: { color: WHITE }, shadow: { type: 'outer', blur: 4, offset: 2, angle: 135, color: '000000', opacity: 0.07 } });
         s4.addShape(pres.shapes.RECTANGLE, { x, y, w: colW, h: 0.07, fill: { color: vColors[i % 4] } });
-        s4.addText(v.word || '', { x: x + 0.15, y: y + 0.15, w: colW - 0.3, h: 0.55, fontSize: 20, bold: true, color: NAVY, fontFace: 'Arial' });
-        s4.addText(v.definition || '', { x: x + 0.15, y: y + 0.7, w: colW - 0.3, h: 0.9, fontSize: 13, color: '5F5E5A', fontFace: 'Arial', wrap: true });
-        if (v.example) s4.addText('"' + v.example + '"', { x: x + 0.15, y: y + 1.6, w: colW - 0.3, h: 0.4, fontSize: 11, color: MUTED, fontFace: 'Arial', italic: true, wrap: true });
+        s4.addText(str(v.word), { x: x + 0.15, y: y + 0.15, w: colW - 0.3, h: 0.55, fontSize: 20, bold: true, color: NAVY, fontFace: 'Arial' });
+        s4.addText(str(v.definition), { x: x + 0.15, y: y + 0.7, w: colW - 0.3, h: 0.9, fontSize: 13, color: '5F5E5A', fontFace: 'Arial', wrap: true });
+        if (v.example) s4.addText('"' + str(v.example) + '"', { x: x + 0.15, y: y + 1.6, w: colW - 0.3, h: 0.4, fontSize: 11, color: MUTED, fontFace: 'Arial', italic: true, wrap: true });
       });
     }
 
@@ -110,8 +112,8 @@ module.exports = async function handler(req, res) {
       addHeader(s, cs.title || 'Key Concept');
       s.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: HEADER_H + 0.3, w: 0.07, h: 4.5, fill: { color: TEAL } });
       s.addShape(pres.shapes.RECTANGLE, { x: 0.7, y: HEADER_H + 0.3, w: 5.8, h: 2.6, fill: { color: WHITE }, shadow: { type: 'outer', blur: 5, offset: 2, angle: 135, color: '000000', opacity: 0.07 } });
-      s.addText(cs.key_point || '', { x: 0.9, y: HEADER_H + 0.3, w: 5.4, h: 2.6, fontSize: 17, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
-      if (cs.example) s.addText('Example: ' + cs.example, { x: 0.9, y: HEADER_H + 3.1, w: 5.6, h: 1.1, fontSize: 13, color: '5F5E5A', fontFace: 'Arial', wrap: true, italic: true });
+      s.addText(str(cs.key_point), { x: 0.9, y: HEADER_H + 0.3, w: 5.4, h: 2.6, fontSize: 17, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
+      if (cs.example) s.addText('Example: ' + str(cs.example), { x: 0.9, y: HEADER_H + 3.1, w: 5.6, h: 1.1, fontSize: 13, color: '5F5E5A', fontFace: 'Arial', wrap: true, italic: true });
       s.addShape(pres.shapes.RECTANGLE, { x: 6.8, y: HEADER_H + 0.3, w: 6.0, h: 5.5, fill: { color: 'E8E7E3' } });
       s.addText('[ Visual ]', { x: 6.8, y: HEADER_H + 2.8, w: 6.0, h: 0.5, fontSize: 12, color: 'BBBBBB', fontFace: 'Arial', align: 'center' });
     });
@@ -130,7 +132,7 @@ module.exports = async function handler(req, res) {
         sdSlide.addShape(pres.shapes.RECTANGLE, { x: 0.5, y, w: 1.3, h: 0.55, fill: { color: dColors[i] } });
         sdSlide.addText(labels[i], { x: 0.5, y, w: 1.3, h: 0.55, fontSize: 13, bold: true, color: i === 0 ? '2C2C2A' : WHITE, fontFace: 'Arial', align: 'center', valign: 'middle', margin: 0 });
         sdSlide.addShape(pres.shapes.RECTANGLE, { x: 2.0, y, w: W - 2.5, h: 1.4, fill: { color: WHITE }, shadow: { type: 'outer', blur: 4, offset: 2, angle: 135, color: '000000', opacity: 0.06 } });
-        sdSlide.addText(q, { x: 2.2, y: y + 0.1, w: W - 2.9, h: 1.2, fontSize: 16, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
+        sdSlide.addText(str(q), { x: 2.2, y: y + 0.1, w: W - 2.9, h: 1.2, fontSize: 16, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle' });
       });
     }
 
@@ -142,7 +144,7 @@ module.exports = async function handler(req, res) {
       addHeader(se, 'Exit Ticket');
       se.addShape(pres.shapes.RECTANGLE, { x: 1.5, y: HEADER_H + 0.8, w: W - 3, h: 3.8, fill: { color: WHITE }, shadow: { type: 'outer', blur: 8, offset: 3, angle: 135, color: '000000', opacity: 0.1 } });
       se.addShape(pres.shapes.RECTANGLE, { x: 1.5, y: HEADER_H + 0.8, w: W - 3, h: 0.08, fill: { color: TEAL } });
-      se.addText(sd.exit_ticket, { x: 1.7, y: HEADER_H + 1.1, w: W - 3.4, h: 3.2, fontSize: 22, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle', align: 'center' });
+      se.addText(str(sd.exit_ticket), { x: 1.7, y: HEADER_H + 1.1, w: W - 3.4, h: 3.2, fontSize: 22, color: NAVY, fontFace: 'Arial', wrap: true, valign: 'middle', align: 'center' });
     }
 
     // Write and return
