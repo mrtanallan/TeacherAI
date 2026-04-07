@@ -4,6 +4,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "node-fetch": "^2.7.0",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "pptxgenjs": "^3.12.0"
   }
 }
