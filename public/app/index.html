@@ -2414,27 +2414,38 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
     answerKeyKeys.forEach(k => { if(parsed[k]) genC[k]={orig:parsed[k],cur:parsed[k]}; });
     let lessonExpectations = parsed.expectations || preMatchedExp || [];
 
-    // SPLIT CLASS: Always rebuild expectations from curriculum JSON — AI is unreliable for this
+    // SPLIT CLASS: Fix grade assignments — trust AI's expectation choices, just fix the grade field
     if (isSplit) {
       const gradeOrder2 = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
       const bandForGrade2 = g => gradeOrder2.indexOf(g) <= 3 ? '1-3' : gradeOrder2.indexOf(g) <= 6 ? '4-6' : '7-8';
       await loadCurriculum(subj);
       const subjKey = (subj||'').toLowerCase().includes('science') ? 'science'
         : (subj||'').toLowerCase().includes('math') ? 'math' : 'language';
+      const allCurrExp = EXPECTATIONS[subjKey] || [];
 
-      // For each grade, find the best matching expectation from curriculum
-      // Try to match AI's suggestions first, then fall back to any relevant one
+      // Step 1: For each grade, find the best AI-suggested expectation from that grade's band
       const builtExps = [];
       grades.forEach(g => {
         const band = bandForGrade2(g);
-        const pool = (EXPECTATIONS[subjKey] || []).filter(e => e.band === band);
+        const bandPool = allCurrExp.filter(e => e.band === band);
+        const aiExp = (parsed.expectations || []);
 
-        // Try to find one the AI mentioned (by code)
-        const aiCodes = (parsed.expectations || []).map(e => e.code);
-        let pick = pool.find(e => aiCodes.includes(e.code));
+        // Find an AI expectation whose code exists in this grade's band
+        const aiCodesForBand = aiExp.map(e => e.code);
+        let pick = bandPool.find(e => aiCodesForBand.includes(e.code));
 
-        // If AI didn't suggest one from this band, just take first from pool
-        if (!pick) pick = pool[0];
+        // Fallback: find any expectation in this band that matches the topic keywords
+        if (!pick) {
+          const topicWords = topic.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+          pick = bandPool.find(e =>
+            topicWords.some(w => (e.desc||'').toLowerCase().includes(w))
+          );
+        }
+
+        // Last resort: use strand D (Composition/Writing) for language, otherwise first in band
+        if (!pick) {
+          pick = bandPool.find(e => e.strand === 'D') || bandPool[0];
+        }
 
         if (pick) builtExps.push({...pick, grade: g});
       });
@@ -5613,20 +5624,29 @@ function dlPPTX(){
 
   // Build deck - first slide gets 'active' class baked in so it shows immediately
   const deckHtml = allSlides.map((s,i) => i===0 ? s.replace('<div class="slide"','<div class="slide active"') : s).join('\n');
+  // Use JSON.stringify for deck content so NO lesson content can break the script
+  const deckJson = JSON.stringify(deckHtml);
+  const titleSafe = JSON.stringify(esc(topic) + ' \u2014 TeacherAI');
+  const cssSafe = JSON.stringify(CSS);
+  const jsSafe = JSON.stringify(JS);
+  const totalSafe = total;
   const html = '<!DOCTYPE html><html lang="en"><head>'
     + '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
     + '<title>' + esc(topic) + ' \u2014 TeacherAI</title>'
     + '<style>' + CSS + '</style></head><body>'
-    + '<div id="progress"></div>'
-    + '<div id="deck">' + deckHtml + '</div>'
+    + '<div id="progress"></div><div id="deck"></div>'
     + '<div id="ctrl">'
-    + '  <button onclick="go(-1)">&#8249;</button>'
-    + '  <span id="snum">1/' + total + '</span>'
-    + '  <button onclick="go(1)">&#8250;</button>'
-    + '  <button id="fsb" onclick="fs()">&#x26F6; Full</button>'
-    + '  <button id="pptxbtn" onclick="dlPPTX()">&#11015; PPTX</button>'
+    + '<button onclick="go(-1)">&#8249;</button>'
+    + '<span id="snum">1/' + total + '</span>'
+    + '<button onclick="go(1)">&#8250;</button>'
+    + '<button id="fsb" onclick="fs()">&#x26F6; Full</button>'
+    + '<button id="pptxbtn" onclick="dlPPTX()">&#11015; PPTX</button>'
     + '</div>'
-    + '<script>' + JS + '<\/script>'
+    + '<script>'
+    + 'var _d=' + deckJson + ';'
+    + 'document.getElementById("deck").innerHTML=_d;'
+    + JS
+    + '<\/script>'
     + '</body></html>'
   const b=new Blob([html],{type:'text/html'});
   const blobUrl=URL.createObjectURL(b);
