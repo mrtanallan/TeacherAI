@@ -5367,7 +5367,7 @@ async function presentSlides(e) {
 // ══════════════════════════════════════════════════════════════════════════════
 // HTML PRESENTER — opens immediately, visuals injected via postMessage
 // ══════════════════════════════════════════════════════════════════════════════
-function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs, _downloadOnly) {
+function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs) {
   slideImgs = slideImgs || [];
   const date = new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -5634,7 +5634,6 @@ window.addEventListener('message',function(e){
 <script>${JS}<\/script>
 </body></html>`;
 
-  if (_downloadOnly) return html;
   const b=new Blob([html],{type:'text/html'});
   const blobUrl=URL.createObjectURL(b);
   const w=window.open(blobUrl,'_blank');
@@ -5642,19 +5641,34 @@ window.addEventListener('message',function(e){
   setTimeout(()=>URL.revokeObjectURL(blobUrl),120000);
   return w;
 }
-function downloadSlidesPPTX() {
+async function downloadSlidesPPTX() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
-  const {sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs} = window._slideData;
-  const html = openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wikiTitle, wikiLicense, slideImgs||[], true);
-  if (!html) return;
-  const blob = new Blob([html], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = (topic||'TeacherAI_Slides').replace(/[^a-z0-9]/gi,'_') + '.html';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
-  showToast('✅ Slides downloaded — open the file in your browser to present');
+  const btn = document.querySelector('[onclick="downloadSlidesPPTX()"]');
+  if (btn) { btn.textContent = '⏳ Building...'; btn.disabled = true; }
+  try {
+    const res = await authFetch('/api/download-slides', {
+      method: 'POST',
+      body: JSON.stringify({
+        sd: window._slideData.sd,
+        topic: window._slideData.topic,
+        subject: window._slideData.subject,
+        gradeStr: window._slideData.gradeStr
+      })
+    });
+    if (!res.ok) throw new Error('Server error: ' + res.status);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (window._slideData.topic||'TeacherAI_Slides').replace(/[^a-z0-9]/gi,'_') + '.pptx';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    showToast('✅ PPTX downloaded — open in PowerPoint or import to Google Slides');
+  } catch(e) {
+    showToast('⚠️ Download failed: ' + e.message, 5000);
+  } finally {
+    if (btn) { btn.textContent = '⬇ Slides'; btn.disabled = false; }
+  }
 }
 function downloadSlidesHTML() {
   if (!window._slideData) { showToast('Generate slides first — click ▶ Present'); return; }
