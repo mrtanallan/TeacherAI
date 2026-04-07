@@ -46,11 +46,21 @@ module.exports = async function handler(req, res) {
     async function fetchImg(url) {
       if (!url) return null;
       try {
-        const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
-        if (!r.ok) return null;
-        const buf = Buffer.from(await r.arrayBuffer());
-        const ct = (r.headers.get('content-type') || 'image/jpeg').split(';')[0];
-        return ct + ';base64,' + buf.toString('base64');
+        const https = require('https');
+        const http = require('http');
+        return await new Promise((resolve) => {
+          const lib = url.startsWith('https') ? https : http;
+          const req2 = lib.get(url, { timeout: 8000 }, (r) => {
+            if (r.statusCode !== 200) { r.resume(); return resolve(null); }
+            const ct = (r.headers['content-type'] || 'image/jpeg').split(';')[0];
+            const chunks = [];
+            r.on('data', c => chunks.push(c));
+            r.on('end', () => resolve(ct + ';base64,' + Buffer.concat(chunks).toString('base64')));
+            r.on('error', () => resolve(null));
+          });
+          req2.on('error', () => resolve(null));
+          req2.on('timeout', () => { req2.destroy(); resolve(null); });
+        });
       } catch(e) { return null; }
     }
 
