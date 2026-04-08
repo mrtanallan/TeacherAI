@@ -1,4 +1,4 @@
-// api/generate.js — TeacherAI v8 (open beta + opt-in streaming)
+// api/generate.js — TeacherAI v9 (auth gate + opt-in streaming)
 //
 // STREAMING: opt-in via { stream: true } in request body.
 //   - When stream is true, proxy streams Anthropic SSE back to client.
@@ -6,10 +6,75 @@
 //     accumulates text and returns a shape matching non-streaming responses.
 //   - When stream is false/absent, behaves IDENTICALLY to non-streaming v8.
 //
-// TO REVERT: delete the `if (req.body && req.body.stream === true)` block.
-//            Non-streaming path below is byte-identical to the pre-streaming v8.
+// AUTH GATE (Chat 9):
+//   - Verifies Supabase JWT via HS256 using SUPABASE_JWT_SECRET.
+//   - Mode controlled by AUTH_ENFORCE env var:
+//       unset / "false" / "soft"  → SOFT FAIL: logs rejections, allows request through
+//       "true" / "hard"           → HARD FAIL: returns 401 on invalid/missing JWT
+//   - To go live: set AUTH_ENFORCE=true in Vercel env vars and redeploy.
+//   - No new npm deps — uses Node stdlib crypto only.
+
+const crypto = require('crypto');
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
+
+// Base64url decode (JWT uses base64url, not standard base64)
+function b64urlDecode(str) {
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+  return Buffer.from(str, 'base64');
+}
+
+// Verify a Supabase JWT (HS256). Returns payload on success, throws on failure.
+function verifySupabaseJWT(token, secret) {
+  if (!token || typeof token !== 'string') throw new Error('no token');
+  const parts = token.split('.');
+  if (parts.length !== 3) throw new Error('malformed token');
+
+  const [headerB64, payloadB64, sigB64] = parts;
+  const header = JSON.parse(b64urlDecode(headerB64).toString('utf8'));
+  if (header.alg !== 'HS256') throw new Error('unexpected alg: ' + header.alg);
+
+  // Verify signature
+  const expectedSig = crypto
+    .createHmac('sha256', secret)
+    .update(headerB64 + '.' + payloadB64)
+    .digest();
+  const providedSig = b64urlDecode(sigB64);
+  if (expectedSig.length !== providedSig.length ||
+      !crypto.timingSafeEqual(expectedSig, providedSig)) {
+    throw new Error('bad signature');
+  }
+
+  const payload = JSON.parse(b64urlDecode(payloadB64).toString('utf8'));
+
+  // Check expiry
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.exp && payload.exp < now) throw new Error('token expired');
+
+  return payload;
+}
+
+// Run the auth check. Returns { userId, mode, ok, reason }.
+// Never throws — caller decides whether to enforce.
+function checkAuth(req) {
+  const enforce = String(process.env.AUTH_ENFORCE || '').toLowerCase();
+  const mode = (enforce === 'true' || enforce === 'hard') ? 'hard' : 'soft';
+
+  const authHeader = req.headers['authorization'] || req.headers['Authorization'] || '';
+  const match = /^Bearer\s+(.+)$/i.exec(authHeader);
+  if (!match) return { userId: null, mode, ok: false, reason: 'no bearer header' };
+
+  const secret = process.env.SUPABASE_JWT_SECRET;
+  if (!secret) return { userId: null, mode, ok: false, reason: 'server missing SUPABASE_JWT_SECRET' };
+
+  try {
+    const payload = verifySupabaseJWT(match[1], secret);
+    return { userId: payload.sub || null, mode, ok: true, reason: null };
+  } catch (err) {
+    return { userId: null, mode, ok: false, reason: err.message };
+  }
+}
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,6 +82,24 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  // ──────────────────────────────────────────────────────────────────
+  // AUTH GATE (Chat 9)
+  // ──────────────────────────────────────────────────────────────────
+  const auth = checkAuth(req);
+  if (!auth.ok) {
+    if (auth.mode === 'hard') {
+      console.warn('[auth] HARD BLOCK:', auth.reason);
+      return res.status(401).json({ error: 'Unauthorized. Please sign in again.' });
+    } else {
+      console.warn('[auth] SOFT FAIL (would have blocked):', auth.reason);
+    }
+  } else {
+    console.log('[auth] OK user=' + auth.userId);
+  }
+  // Expose for later logging / rate-limit use
+  req.userId = auth.userId;
+  // ──────────────────────────────────────────────────────────────────
 
   // ──────────────────────────────────────────────────────────────────
   // STREAMING: opt-in branch (self-contained, fully revertible)
