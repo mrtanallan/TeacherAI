@@ -836,6 +836,16 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     </div>
     <button class="btn b-sage b-full" id="unitGenBtn" onclick="generateUnitPlan()">📋 Generate Unit Plan</button>
   </div>
+  <div id="unitSorterWrap" style="display:none;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:10px;">
+    <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Sort</label>
+    <select id="unitSortBy" onchange="renderUnitPlansList(true)" style="font-family:'DM Sans',sans-serif;font-size:.82rem;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--paper);color:var(--ink);cursor:pointer;">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+      <option value="title">Title A–Z</option>
+      <option value="subject">Subject</option>
+      <option value="grade">Grade</option>
+    </select>
+  </div>
   <div id="unitPlansList"></div>
 </div>
 
@@ -7790,20 +7800,37 @@ Rules:
   btn.disabled = false; btn.textContent = '📋 Generate Unit Plan';
 }
 
-async function renderUnitPlansList() {
+async function renderUnitPlansList(sortOnly) {
   const el = document.getElementById('unitPlansList');
+  const sorterWrap = document.getElementById('unitSorterWrap');
   if (!el || !currentUser) return;
-  const { data } = await db.from('unit_plans').select('*').eq('teacher_id', currentUser.id).order('created_at', { ascending: false }).limit(30);
-  savedUnitPlans = data || [];
+  // sortOnly=true: re-render from cached savedUnitPlans (called by sort dropdown)
+  // default: fetch fresh from DB (tab switch, after generate, after delete)
+  if (sortOnly !== true) {
+    const { data } = await db.from('unit_plans').select('*').eq('teacher_id', currentUser.id).order('created_at', { ascending: false }).limit(30);
+    savedUnitPlans = data || [];
+  }
   if (!savedUnitPlans.length) {
-    el.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--muted);"><div style="font-size:2rem;margin-bottom:10px;">📋</div><div style="font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:6px;">No unit plans yet</div><div style="font-size:.82rem;">Generate your first unit above — each lesson can be expanded into a full plan.</div></div>`;
+    if (sorterWrap) sorterWrap.style.display = 'none';
+    el.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--muted);"><div style="font-size:2rem;margin-bottom:10px;">📋</div><div style="font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:6px;">No unit plans yet</div><div style="font-size:.82rem;">Generate your first unit above — each lesson can be built into a full plan.</div></div>`;
     return;
   }
-  const unitIds = savedUnitPlans.map(u => u.id);
+  if (sorterWrap) sorterWrap.style.display = 'flex';
+  const sortBy = document.getElementById('unitSortBy')?.value || 'newest';
+  const gradeRank = g => { const m = String(g||'').match(/\d+/); return m ? parseInt(m[0],10) : 99; };
+  const sorted = [...savedUnitPlans].sort((a,b) => {
+    if (sortBy === 'newest') return new Date(b.created_at||0) - new Date(a.created_at||0);
+    if (sortBy === 'oldest') return new Date(a.created_at||0) - new Date(b.created_at||0);
+    if (sortBy === 'title')   return (a.topic||'').localeCompare(b.topic||'');
+    if (sortBy === 'subject') return (a.subject||'').localeCompare(b.subject||'') || (a.topic||'').localeCompare(b.topic||'');
+    if (sortBy === 'grade')   return gradeRank((a.grades||[])[0]) - gradeRank((b.grades||[])[0]) || (a.topic||'').localeCompare(b.topic||'');
+    return 0;
+  });
+  const unitIds = sorted.map(u => u.id);
   const { data: linkedLessons } = await db.from('lessons').select('id, topic, created_at, unit_plan_id').in('unit_plan_id', unitIds).order('created_at', { ascending: true });
   const lessonsByUnit = {};
   (linkedLessons || []).forEach(l => { if (!lessonsByUnit[l.unit_plan_id]) lessonsByUnit[l.unit_plan_id] = []; lessonsByUnit[l.unit_plan_id].push(l); });
-  el.innerHTML = savedUnitPlans.map(u => renderUnitCard(u, lessonsByUnit[u.id] || [])).join('');
+  el.innerHTML = sorted.map(u => renderUnitCard(u, lessonsByUnit[u.id] || [])).join('');
 }
 
 function renderUnitCard(u, linkedLessons) {
@@ -7820,25 +7847,25 @@ function renderUnitCard(u, linkedLessons) {
       <div style="flex:1;min-width:0;">
         <div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">${l.title||'Lesson '+l.lesson_number}</div>
         <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">${l.focus||''}</div>
-        ${isExpanded?`<div style="margin-top:5px;font-size:.72rem;color:var(--sage);font-weight:600;">✅ Expanded · <button onclick="loadLessonById('${linked.id}')" style="background:none;border:none;color:var(--sage);cursor:pointer;font-size:.72rem;font-weight:600;text-decoration:underline;padding:0;">Open lesson →</button></div>`:''}
+        ${isExpanded?`<div style="margin-top:5px;font-size:.72rem;color:var(--sage);font-weight:600;">✅ Built · <button onclick="loadLessonById('${linked.id}')" style="background:none;border:none;color:var(--sage);cursor:pointer;font-size:.72rem;font-weight:600;text-decoration:underline;padding:0;">Open lesson →</button></div>`:''}
       </div>
       <div style="display:flex;align-items:center;flex-shrink:0;">
-        ${!isExpanded?`<button class="btn b-sage b-sm" onclick="expandUnitLesson('${u.id}','${u.subject}','${(u.grades||[]).join(',')}','${(l.title||'').replace(/'/g,"\'")}',${i})" style="font-size:.7rem;padding:3px 9px;">✨ Expand</button>`:''}
+        ${!isExpanded?`<button class="btn b-sage b-sm" onclick="expandUnitLesson('${u.id}','${u.subject}','${(u.grades||[]).join(',')}','${(l.title||'').replace(/'/g,"\'")}',${i})" style="font-size:.7rem;padding:3px 9px;">✨ Build Lesson</button>`:''}
       </div>
     </div>`;
   }).join('');
   const uid = u.id;
   return `<div class="card" id="unit-${uid}" style="padding:0;overflow:hidden;margin-bottom:16px;">
-    <div style="padding:14px 16px;background:#1D3461;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;" onclick="toggleUnitCard('${uid}')">
+    <div style="padding:14px 16px;background:#8A3A1F;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;" onclick="toggleUnitCard('${uid}')">
       <div style="flex:1;min-width:0;">
         <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--cream);margin-bottom:3px;">${u.topic}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:#9CA3AF;">${gradesStr} · ${subj} · ${u.duration} · ${date}</div>
-        ${u.big_idea?`<div style="font-size:.8rem;color:rgba(255,255,255,.7);margin-top:6px;line-height:1.5;font-style:italic;">${u.big_idea}</div>`:''}
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:rgba(255,255,255,.65);">${gradesStr} · ${subj} · ${u.duration} · ${date}</div>
+        ${u.big_idea?`<div style="font-size:.8rem;color:rgba(255,255,255,.75);margin-top:6px;line-height:1.5;font-style:italic;">${u.big_idea}</div>`:''}
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;align-items:flex-start;">
-        <span style="font-family:'DM Mono',monospace;font-size:.65rem;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.1);color:#9CA3AF;white-space:nowrap;">${expandedCount}/${lessons.length} expanded</span>
-        <span id="unit-chevron-${uid}" style="color:rgba(255,255,255,.5);font-size:.8rem;margin-top:2px;">▸</span>
-        <button onclick="event.stopPropagation();deleteUnitPlan('${uid}')" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.8rem;padding:2px 4px;" title="Delete">🗑</button>
+        <span style="font-family:'DM Mono',monospace;font-size:.65rem;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.85);white-space:nowrap;">${expandedCount}/${lessons.length} built</span>
+        <span id="unit-chevron-${uid}" style="color:rgba(255,255,255,.6);font-size:.8rem;margin-top:2px;">▸</span>
+        <button onclick="event.stopPropagation();deleteUnitPlan('${uid}')" style="background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:.8rem;padding:2px 4px;" title="Delete">🗑</button>
       </div>
     </div>
     <div id="unit-lessons-${uid}" style="display:none;">${lessonRows}</div>
