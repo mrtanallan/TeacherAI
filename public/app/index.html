@@ -1119,11 +1119,11 @@ function matchExpectations(inputText, gradeBand) {
   const results = [];
   const getBand = (grade) => {
     const n = parseInt(grade);
-    if (n <= 3) return '1-3';
-    if (n <= 6) return '4-6';
-    return '7-8';
+    if (n <= 3) return ['1-3', String(n)];
+    if (n <= 6) return ['4-6', String(n)];
+    return ['7-8', String(n)];
   };
-  const bands = gradeBand ? [...new Set(gradeBand.map(g => getBand(g.replace('Grade ','').replace('Kindergarten','1'))))] : ['1-3','4-6','7-8'];
+  const bands = gradeBand ? [...new Set(gradeBand.flatMap(g => getBand(g.replace('Grade ','').replace('Kindergarten','1'))))] : ['1-3','4-6','7-8','1','2','3','4','5','6','7','8'];
   terms.forEach(term => {
     const stripped = term.replace(/^\d+\./, '');
     const _allExp = Object.values(EXPECTATIONS).flat();
@@ -1895,7 +1895,8 @@ function updateTopicSuggestions() {
   const placeholder = document.getElementById('topic');
   if (!list) return;
 
-  // For Science: filter topics by selected grades
+  // For Science/Math/Language: build suggestions with grade labels when multiple grades selected
+  // suggestions = string[] (no grade labels) or {topic, grades[]}[] (with grade labels)
   let suggestions;
   if (subj === 'Science & Technology') {
     const selectedGrades = [...document.querySelectorAll('.grade-pill-btn.selected')]
@@ -1903,23 +1904,30 @@ function updateTopicSuggestions() {
       .filter(Boolean)
       .map(g => g.replace('Grade ', '').replace('Kindergarten','K'));
     const SCIENCE_BY_GRADE = {
-      'K': ['Living and Non-Living Things','Seasonal Changes','Needs of Living Things'],
-      '1': ['Needs of Living Things','Plants and Animals','Properties of Materials','Strong Structures','Seasonal Changes'],
-      '2': ['Growth and Changes in Plants','Properties of Materials','Air and Water in the Environment','Strong and Stable Structures'],
-      '3': ['Habitats and Communities','Food Chains and Food Webs','Soils in the Environment','Magnets','Strong Structures'],
-      '4': ['Habitats and Communities','Animal Adaptations','Rocks and Minerals','Pulleys and Gears','Weather'],
-      '5': ['Biodiversity','Human Activity and Ecosystems','Properties of Matter','Simple Machines','Conservation of Energy'],
-      '6': ['Photosynthesis','Cells and Cell Functions','Electricity','Flight','Space Exploration and Solar System'],
-      '7': ['Interactions in the Environment','Pure Substances and Mixtures','Mechanical Systems','Water Systems on Earth'],
-      '8': ['Cells and Human Body Systems','Properties of Fluids','Optics and Light','Climate Change and Earth Systems'],
-      'all': ['Scientific Method','Scientific Inquiry','Environmental Sustainability','Engineering Design','Experiments']
+      'K': ['Needs and Characteristics of Living Things','Energy in Our Lives','Everyday Materials and Structures','Daily and Seasonal Changes'],
+      '1': ['Needs and Characteristics of Living Things','Energy in Our Lives','Everyday Materials and Structures','Daily and Seasonal Changes'],
+      '2': ['Growth and Changes in Animals','Properties of Liquids and Solids','Simple Machines and Movement','Air and Water in the Environment'],
+      '3': ['Growth and Changes in Plants','Forces and Motion','Strong and Stable Structures','Soils in the Environment'],
+      '4': ['Habitats and Communities','Light and Sound','Machines and Their Mechanisms','Rocks, Minerals and Geological Processes'],
+      '5': ['Human Health and Body Systems','Properties of and Changes in Matter','Forces Acting on Structures','Conservation of Energy and Resources'],
+      '6': ['Biodiversity','Electrical Phenomena and Devices','Flight','Space'],
+      '7': ['Interactions in the Environment','Pure Substances and Mixtures','Form, Function and Design of Structures','Heat in the Environment'],
+      '8': ['Cells','Fluids','Systems in Action','Water Systems'],
+      'all': ['Scientific Method','Scientific Inquiry','Engineering Design','Environmental Sustainability','Coding in Science']
     };
     if (selectedGrades.length > 0) {
-      const gradeTopics = new Set(SCIENCE_BY_GRADE.all || []);
-      selectedGrades.forEach(g => { (SCIENCE_BY_GRADE[g]||[]).forEach(t => gradeTopics.add(t)); });
-      suggestions = [...gradeTopics].sort();
+      const topicGrades = {};
+      selectedGrades.forEach(g => {
+        (SCIENCE_BY_GRADE[g] || []).forEach(t => {
+          if (!topicGrades[t]) topicGrades[t] = [];
+          if (!topicGrades[t].includes(g)) topicGrades[t].push(g);
+        });
+      });
+      (SCIENCE_BY_GRADE.all || []).forEach(t => { if (!topicGrades[t]) topicGrades[t] = []; });
+      suggestions = Object.entries(topicGrades)
+        .map(([topic, grades]) => ({ topic, grades }))
+        .sort((a,b) => a.topic.localeCompare(b.topic));
     } else {
-      // No grade selected — show all science topics
       suggestions = [...new Set(Object.values(SCIENCE_BY_GRADE).flat())].sort();
     }
   } else if (subj === 'Mathematics') {
@@ -1952,9 +1960,17 @@ function updateTopicSuggestions() {
       .map(g => g.replace('Grade ', '').replace('Kindergarten','K'));
     const gradeMap = subj === 'Mathematics' ? MATH_BY_GRADE : LANG_BY_GRADE;
     if (selectedGrades2.length > 0) {
-      const gradeTopics = new Set(gradeMap.all || []);
-      selectedGrades2.forEach(g => { (gradeMap[g]||[]).forEach(t => gradeTopics.add(t)); });
-      suggestions = [...gradeTopics].sort();
+      const topicGrades2 = {};
+      selectedGrades2.forEach(g => {
+        (gradeMap[g] || []).forEach(t => {
+          if (!topicGrades2[t]) topicGrades2[t] = [];
+          if (!topicGrades2[t].includes(g)) topicGrades2[t].push(g);
+        });
+      });
+      (gradeMap.all || []).forEach(t => { if (!topicGrades2[t]) topicGrades2[t] = []; });
+      suggestions = Object.entries(topicGrades2)
+        .map(([topic, grades]) => ({ topic, grades }))
+        .sort((a,b) => a.topic.localeCompare(b.topic));
     } else {
       suggestions = TOPIC_SUGGESTIONS[subj] || TOPIC_SUGGESTIONS['Language / Literacy'];
     }
@@ -1962,7 +1978,21 @@ function updateTopicSuggestions() {
     suggestions = TOPIC_SUGGESTIONS[subj] || TOPIC_SUGGESTIONS['Language / Literacy'];
   }
 
-  list.innerHTML = suggestions.map(s => `<option value="${s}">`).join('');
+  // Render datalist — attach grade label to option value when grades are known
+  // Strip grade label before generating (handled in generate() via topicClean)
+  if (suggestions.length && typeof suggestions[0] === 'object') {
+    list.innerHTML = suggestions.map(s => {
+      const label = s.grades.length === 1 ? ` (Gr. ${s.grades[0]})` : s.grades.length > 1 ? ` (Gr. ${s.grades.join('/')})` : '';
+      return `<option value="${s.topic}${label}">`;
+    }).join('');
+    list._topicMap = Object.fromEntries(suggestions.map(s => {
+      const label = s.grades.length === 1 ? ` (Gr. ${s.grades[0]})` : s.grades.length > 1 ? ` (Gr. ${s.grades.join('/')})` : '';
+      return [`${s.topic}${label}`, s.topic];
+    }));
+  } else {
+    list.innerHTML = (suggestions || []).map(s => `<option value="${s}">`).join('');
+    list._topicMap = null;
+  }
   // Update placeholder to be subject-specific
   const placeholders = {
     'Language / Literacy': 'e.g. Making Inferences, Persuasive Writing, Short Story...',
@@ -2070,7 +2100,9 @@ function switchTrackerView(view) {
 // ============================================================
 async function generate() {
   const gA = document.getElementById('gA').value;
-  const topic = document.getElementById('topic').value.trim();
+  const topicRaw = document.getElementById('topic').value.trim();
+  const topicList = document.getElementById('topicSuggestions');
+  const topic = (topicList?._topicMap && topicList._topicMap[topicRaw]) ? topicList._topicMap[topicRaw] : topicRaw.replace(/\s*\(Gr\.[^)]+\)\s*$/, '').trim();
   if (!gA||!topic) { alert('Select a grade and enter a topic.'); return; }
 
   const grades = ['gA','gB','gC','gD','gE','gF'].map(id => document.getElementById(id)?.value||'').filter(g => g&&g!=='');
@@ -2156,10 +2188,12 @@ async function generate() {
                 // Group by grade band so AI sees separate lists per grade
                 const gradeOrder = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
                 const bandForGrade = g => gradeOrder.indexOf(g) <= 3 ? '1-3' : gradeOrder.indexOf(g) <= 6 ? '4-6' : '7-8';
+                const gradeNum = g => String(gradeOrder.indexOf(g) === 0 ? 1 : gradeOrder.indexOf(g));
                 const sections = grades.map(g => {
                   const band = bandForGrade(g);
+                  const gn = gradeNum(g);
                   const bandLabel = band==='1-3'?'[Gr.1-3]':band==='4-6'?'[Gr.4-6]':'[Gr.7-8]';
-                  const gradeExps = relevantExps.filter(e => e.band === band).slice(0,8);
+                  const gradeExps = relevantExps.filter(e => e.band === band || e.band === gn).slice(0,8);
                   return `--- FOR ${g.toUpperCase()} ${bandLabel} ---\n` + gradeExps.map(e => e.code+' '+e.desc).join('\n');
                 });
                 return sections.join('\n\n');
@@ -2431,11 +2465,12 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
     let lessonExpectations = parsed.expectations || preMatchedExp || [];
     if (isSplit && lessonExpectations.length > 0) {
       const _go = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
+      const _gradeNum = g => { const idx = _go.indexOf(g); return String(idx <= 0 ? 1 : idx); };
       const _bf = g => _go.indexOf(g) <= 3 ? '1-3' : _go.indexOf(g) <= 6 ? '4-6' : '7-8';
+      const _bandMatch = (e, g) => e.band === _bf(g) || e.band === _gradeNum(g);
       const _assigned = [];
       grades.forEach(g => {
-        const band = _bf(g);
-        const pick = lessonExpectations.find(e => e.band === band && !_assigned.find(a => a.code===e.code && a.grade===g));
+        const pick = lessonExpectations.find(e => _bandMatch(e, g) && !_assigned.find(a => a.code===e.code && a.grade===g));
         if (pick) _assigned.push({...pick, grade: g});
       });
       if (_assigned.length === grades.length) {
@@ -2443,7 +2478,7 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
       } else {
         lessonExpectations = lessonExpectations.map(e => {
           if (e.grade) return e;
-          const g = grades.find(gr => _bf(gr) === e.band);
+          const g = grades.find(gr => _bandMatch(e, gr));
           return g ? {...e, grade: g} : e;
         });
       }
@@ -2453,6 +2488,7 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
     if (isSplit) {
       const gradeOrder2 = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
       const bandForGrade2 = g => gradeOrder2.indexOf(g) <= 3 ? '1-3' : gradeOrder2.indexOf(g) <= 6 ? '4-6' : '7-8';
+      const gradeNum2 = g => { const idx = gradeOrder2.indexOf(g); return String(idx <= 0 ? 1 : idx); };
       await loadCurriculum(subj);
       const subjKey = (subj||'').toLowerCase().includes('science') ? 'science'
         : (subj||'').toLowerCase().includes('math') ? 'math' : 'language';
@@ -2462,7 +2498,8 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
       const builtExps = [];
       grades.forEach(g => {
         const band = bandForGrade2(g);
-        const bandPool = allCurrExp.filter(e => e.band === band);
+        const gn = gradeNum2(g);
+        const bandPool = allCurrExp.filter(e => e.band === band || e.band === gn);
         const aiExp = (parsed.expectations || []);
 
         // Find an AI expectation whose code exists in this grade's band
