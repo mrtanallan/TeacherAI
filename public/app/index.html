@@ -469,8 +469,8 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <div class="logo"><span class="logo-full">Teacher</span><span>AI</span></div>
   <div class="nav-tabs">
     <label class="tab" for="tr-roster"><span class="tab-full">👥 Class Roster</span><span class="tab-short">👥</span></label>
-    <label class="tab" for="tr-plan"><span class="tab-full">✨ Plan</span><span class="tab-short">✨</span></label>
     <label class="tab" for="tr-units"><span class="tab-full">📋 Units</span><span class="tab-short">📋</span></label>
+    <label class="tab" for="tr-plan"><span class="tab-full">✨ Plan</span><span class="tab-short">✨</span></label>
     <label class="tab" for="tr-lessons"><span class="tab-full">📚 My Lessons</span><span class="tab-short">📚</span></label>
     <label class="tab" for="tr-assess"><span class="tab-full">📊 Trackers</span><span class="tab-short">📊</span></label>
     <label class="tab" for="tr-rc"><span class="tab-full">📝 Report Cards</span><span class="tab-short">📝</span></label>
@@ -713,7 +713,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <div id="classTabs" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     <div id="newClassForm" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:12px;">
       <div style="font-family:DM Mono,monospace;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">New Class</div>
-      <div class="fg" style="margin-bottom:10px;">
+      <div class="fg" style="margin-bottom:10px;align-items:flex-end;">
         <div class="fi"><label>Class Name</label><input type="text" id="newClassName" placeholder="e.g. Grade 6/7 Morning..." autocapitalize="words"></div>
         <div class="fi"><label>Subject Focus <span style="font-weight:400;color:var(--muted);font-size:.75rem;">(optional)</span></label><input type="text" id="newClassSubject" placeholder="e.g. Language, Math..."></div>
         <div class="fi full"><label>Class Context <span style="font-weight:400;color:var(--muted);font-size:.75rem;">(used by AI)</span></label>
@@ -769,7 +769,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       </div>
       <div style="display:flex;gap:6px;">
         <button class="btn b-sage" onclick="openAddStudentModal()" style="font-size:.85rem;">➕ Add Student</button>
-        <button class="btn b-out b-sm" onclick="loadSample()" style="font-size:.78rem;">📋 Sample</button>
+        
         <button class="btn b-out b-sm" onclick="clearR()" style="font-size:.78rem;color:var(--rust);border-color:transparent;">🗑 Clear All</button>
       </div>
     </div>
@@ -834,7 +834,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         style="width:100%;font-family:'DM Sans',sans-serif;font-size:1rem;padding:13px 16px;border:2px solid var(--border);border-radius:10px;background:var(--cream);color:var(--ink);outline:none;transition:border-color .15s;"
         onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
     </div>
-    <button class="btn b-ink b-full" id="unitGenBtn" onclick="generateUnitPlan()">📋 Generate Unit Plan</button>
+    <button class="btn b-sage b-full" id="unitGenBtn" onclick="generateUnitPlan()">📋 Generate Unit Plan</button>
   </div>
   <div id="unitPlansList"></div>
 </div>
@@ -1296,6 +1296,8 @@ async function signOut() {
   currentUser=null; students=[]; sessions=[]; classes=[]; activeClassId=null;
   document.getElementById('appScreen').style.display='none';
   document.getElementById('authScreen').style.display='flex';
+  const fbBtn = document.getElementById('feedbackBtn');
+  if (fbBtn) fbBtn.style.display = 'none';
 }
 
 // ============================================================
@@ -1361,6 +1363,8 @@ function showApp() {
   document.getElementById('authScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
   document.getElementById('navEmail').textContent = currentUser.email;
+  const fbBtn = document.getElementById('feedbackBtn');
+  if (fbBtn) fbBtn.style.display = 'flex';
   if (!localStorage.getItem('teacherai_tour_done')) setTimeout(startTour, 800);
   const savedTab = localStorage.getItem('teacherai_tab') || 'tr-plan';
   const tabEl = document.getElementById(savedTab);
@@ -1993,6 +1997,18 @@ function onSubjectChange() {
       'The Arts':'🎨 Ontario The Arts curriculum — Visual Arts, Music, Drama, Dance.'
     };
     // subjectNote removed — banner hidden to reduce UI clutter
+  }
+  // Update target expectations placeholder based on subject
+  const expEl = document.getElementById('targetExp');
+  if (expEl) {
+    const placeholders = {
+      'Mathematics': 'e.g. B2.1, C1.3 or "fractions, patterning"',
+      'Science & Technology': 'e.g. B1.2, C2.3 or "habitats, states of matter"',
+      'Social Studies': 'e.g. A1.1, B2.2 or "early civilizations, mapping"',
+      'Health & PE': 'e.g. A1.3, C2.1 or "mental health, physical activity"',
+      'The Arts': 'e.g. A1.2, D1.1 or "visual arts elements, drama techniques"',
+    };
+    expEl.placeholder = placeholders[subj] || 'e.g. C1.3, D2.1 or "making inferences, writing paragraphs"';
   }
   checkScienceSplitNote();
 }
@@ -7726,7 +7742,7 @@ function renderUnitCard(u, linkedLessons) {
   }).join('');
   const uid = u.id;
   return `<div class="card" id="unit-${uid}" style="padding:0;overflow:hidden;margin-bottom:16px;">
-    <div style="padding:14px 16px;background:var(--ink);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;" onclick="toggleUnitCard('${uid}')">
+    <div style="padding:14px 16px;background:#1D3461;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;" onclick="toggleUnitCard('${uid}')">
       <div style="flex:1;min-width:0;">
         <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--cream);margin-bottom:3px;">${u.topic}</div>
         <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:#9CA3AF;">${gradesStr} · ${subj} · ${u.duration} · ${date}</div>
@@ -8107,6 +8123,80 @@ function skipTour(){document.getElementById('tourOverlay').style.display='none';
 // BOOT
 // ============================================================
 initApp();
+
+// ============================================================
+// FEEDBACK
+// ============================================================
+let _feedbackCat = null;
+
+function openFeedbackModal() {
+  _feedbackCat = null;
+  document.getElementById('feedbackMsg').value = '';
+  document.getElementById('feedbackErr').style.display = 'none';
+  document.getElementById('feedbackSubmitBtn').textContent = 'Send';
+  document.querySelectorAll('.fbcat').forEach(b => {
+    b.style.background = 'var(--paper)';
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--ink)';
+    b.style.fontWeight = '400';
+  });
+  document.getElementById('feedbackModal').classList.add('open');
+}
+
+function closeFeedbackModal() {
+  document.getElementById('feedbackModal').classList.remove('open');
+}
+
+function selectFeedbackCat(btn) {
+  document.querySelectorAll('.fbcat').forEach(b => {
+    b.style.background = 'var(--paper)';
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--ink)';
+    b.style.fontWeight = '400';
+  });
+  btn.style.background = 'var(--sage-l)';
+  btn.style.borderColor = 'var(--sage)';
+  btn.style.color = 'var(--sage)';
+  btn.style.fontWeight = '600';
+  _feedbackCat = btn.dataset.cat;
+}
+
+function getFeedbackPageContext() {
+  const tabs = ['tr-plan','tr-roster','tr-assess','tr-lessons','tr-rc','tr-units','tr-account'];
+  const labels = {'tr-plan':'lesson_generator','tr-roster':'class_roster','tr-assess':'assessment',
+    'tr-lessons':'my_lessons','tr-rc':'report_cards','tr-units':'unit_plans','tr-account':'account'};
+  for (const t of tabs) {
+    const el = document.getElementById(t);
+    if (el && el.checked) return labels[t] || t;
+  }
+  return 'unknown';
+}
+
+async function submitFeedback() {
+  const msg = (document.getElementById('feedbackMsg').value || '').trim();
+  const errEl = document.getElementById('feedbackErr');
+  const btn = document.getElementById('feedbackSubmitBtn');
+  errEl.style.display = 'none';
+  if (!_feedbackCat) { errEl.textContent = 'Please select a category.'; errEl.style.display = 'block'; return; }
+  if (!msg) { errEl.textContent = 'Please write a message.'; errEl.style.display = 'block'; return; }
+  btn.textContent = 'Sending...'; btn.disabled = true;
+  try {
+    const { error } = await db.from('feedback').insert({
+      user_id: currentUser?.id || null,
+      user_email: currentUser?.email || null,
+      message: msg,
+      category: _feedbackCat,
+      page_context: getFeedbackPageContext()
+    });
+    if (error) throw error;
+    btn.textContent = 'Thanks! 🙏';
+    setTimeout(() => { closeFeedbackModal(); btn.disabled = false; btn.textContent = 'Send'; }, 2000);
+  } catch(e) {
+    errEl.textContent = "Couldn't send, try again.";
+    errEl.style.display = 'block';
+    btn.textContent = 'Send'; btn.disabled = false;
+  }
+}
 
 </script>
 </body>
