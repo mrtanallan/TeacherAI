@@ -2487,7 +2487,8 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
 
     // STREAMING: lesson generator uses streaming helper (revert: swap back to retryAuthFetch)
     const data = await callGenerateStreaming({
-      model:'claude-sonnet-4-20250514', max_tokens:maxTok, call_type:'lesson', topic, grades, messages:[{role:'user',content:prompt}]
+      model:'claude-sonnet-4-20250514', max_tokens:maxTok, call_type:'lesson', topic, grades, messages:[{role:'user',content:prompt}],
+      meta:{type:'lesson', grade:(grades||[]).join('/')||null, subject:subj||null}
     });
     clearInterval(progInterval);
     setProgress(90,'Processing response...');
@@ -3364,7 +3365,8 @@ async function generateSlideData(callerBtn) {
 
     // STREAMING: slide structure uses streaming helper (max_tokens 6000 = highest 504 risk)
     const data = await callGenerateStreaming({
-      model:'claude-sonnet-4-20250514', max_tokens:6000, messages:[{role:'user',content:structurePrompt}]
+      model:'claude-sonnet-4-20250514', max_tokens:6000, messages:[{role:'user',content:structurePrompt}],
+      meta:{type:'slides', grade:gradeStr||null, subject:subject||null}
     });
     if (!data||!data.ok) throw new Error('Slide structure generation failed ('+(data?.status||0)+')');
     const raw = data.content?.map(i=>i.text||'').join('')||'';
@@ -5347,7 +5349,8 @@ async function generateWithAgentLoop(cs, topic, subject, gradeStr) {
     body: JSON.stringify({
       model:'claude-sonnet-4-20250514', max_tokens:1800, call_type:'svg',
       system: GENERATOR_SYSTEM,
-      messages:[{role:'user', content: fullPrompt}]
+      messages:[{role:'user', content: fullPrompt}],
+      meta:{type:'svg', grade:gradeStr||null, subject:null}
     })
   }).then(r=>r?.ok?r.json():null).catch(()=>null);
 
@@ -5374,7 +5377,8 @@ async function generateWithAgentLoop(cs, topic, subject, gradeStr) {
         '',
         'SVG TO EVALUATE:',
         svg.substring(0,3000),
-      ].filter(Boolean).join('\n')}]
+      ].filter(Boolean).join('\n')}],
+      meta:{type:'svg_critic', grade:gradeStr||null, subject:null}
     })
   }).then(r=>r?.ok?r.json():null).catch(()=>null);
 
@@ -5411,7 +5415,8 @@ async function generateWithAgentLoop(cs, topic, subject, gradeStr) {
     body: JSON.stringify({
       model:'claude-sonnet-4-20250514', max_tokens:1800, call_type:'svg',
       system: GENERATOR_SYSTEM,
-      messages:[{role:'user', content: retryPrompt}]
+      messages:[{role:'user', content: retryPrompt}],
+      meta:{type:'svg_retry', grade:gradeStr||null, subject:null}
     })
   }).then(r=>r?.ok?r.json():null).catch(()=>null);
   const svg2 = extractSVG(d2);
@@ -6573,7 +6578,7 @@ Respond ONLY with valid JSON (no markdown fences):
 For suggested_level use: L1, L1+, L2, L2+, L3, L3+, or L4. For score: ✓ (correct), ~ (partial), ✗ (incorrect).`;
 
   try {
-    const res = await authFetch('/api/generate', {method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,messages:[{role:'user',content:prompt}]})});
+    const res = await authFetch('/api/generate', {method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,messages:[{role:'user',content:prompt}],meta:{type:'auto_mark',grade:studentObj.grade||null,subject:null}})});
     if (!res.ok) throw new Error('Server error');
     const data = await res.json();
     if (data.error) throw new Error(data.error.message||'API error');
@@ -7478,7 +7483,7 @@ Requirements:
 - No bullet points — flowing paragraph only
 Return ONLY the comment text, nothing else.`;
   try {
-    const res = await authFetch('/api/generate', {method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    const res = await authFetch('/api/generate', {method:'POST',body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}],meta:{type:'report_card',grade:s.grade||null,subject:subj||null}})});
     if (!res.ok) throw new Error('Server error');
     const data = await res.json();
     if (data.error) throw new Error(data.error.message||'API error');
@@ -7776,7 +7781,8 @@ Rules:
   try {
     // STREAMING: unit plan uses streaming helper
     const data = await callGenerateStreaming({
-      model: 'claude-sonnet-4-20250514', max_tokens: 1400, messages: [{ role: 'user', content: prompt }]
+      model: 'claude-sonnet-4-20250514', max_tokens: 1400, messages: [{ role: 'user', content: prompt }],
+      meta:{type:'unit', grade:(grades||[]).join('/')||null, subject:subj||null}
     });
     setProgress(70, 'Parsing unit...');
     if (!data || !data.ok) { throw new Error(data?.error?.message || data?.error || 'Generation failed'); }
@@ -8018,7 +8024,8 @@ Return ONLY the assessment content — no preamble or explanation.`;
     const data = await callGenerateStreaming({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }]
+      messages: [{ role: 'user', content: prompt }],
+      meta:{type:'unit_assessment_'+type, grade:gradesStr||null, subject:subj||null}
     });
     setProgress(80, 'Finishing...');
     if (!data || !data.ok) throw new Error('Generation failed');
