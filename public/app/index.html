@@ -2402,14 +2402,18 @@ Use emoji headers. 4–6 varied activities. Start directly with the worksheet ti
     ? wsOutputKeys.map((k,i)=>'- '+k+': worksheet for '+grades[i]+' ONLY — '+wsFormatNote).join('\n')
     : '- student_worksheet: '+wsFormatNote;
   const akLines = isSplit
-    ? answerKeyKeys.map((k,i)=>'- '+k+': answer key for '+grades[i]+' worksheet. Format: "Q1: [question] -> [ideal answer]"').join('\n')
-    : hasWorksheet ? '- answer_key: answer key for the worksheet. Format: "Q1: [question] -> [ideal answer]". For open-ended give 2-3 key points expected at Level 3.' : '';
+    ? answerKeyKeys.map((k,i)=>'- '+k+': answer key for '+grades[i]+' worksheet. REQUIRED — do not omit. Format: "Q1: [question] -> [ideal answer]"').join('\n')
+    : hasWorksheet ? '- answer_key: answer key for the worksheet. REQUIRED — do not omit. Format: "Q1: [question] -> [ideal answer]". For open-ended give 2-3 key points expected at Level 3.' : '';
   // Give the AI better guidance on which strand to prioritize based on topic keywords
   const topicLower = topic.toLowerCase();
   // Language strand guidance
-  const isWritingTopic = /writ|short story|story element|narrative|essay|paragraph|persuasive|report|journal|letter|poem|draft|composition|opinion writing|descriptive writing|procedural writing/.test(topicLower);
-  const isReadingTopic = /read|comprehension|infer|main idea|text feature|author|visualiz|predict|connect|summar/.test(topicLower);
-  const isOralTopic = /speak|listen|oral|present|discuss|debate|talk/.test(topicLower);
+  // Strand D (Composition/Writing): any writing genre + opinion/argument/claim language
+  const isWritingTopic = /writ|short story|story element|narrative|essay|paragraph|persuasive|report|journal|letter|poem|draft|composition|opinion|argument|claim|thesis|point of view essay|descriptive|procedural|recount|memoir|biograph|autobiograph|review|editorial|blog|script|fiction|non-?fiction piece/.test(topicLower);
+  // Strand C (Comprehension/Reading): reading skills + character/plot/theme analysis
+  const isReadingTopic = /read|comprehension|infer|main idea|text feature|author|visualiz|predict|connect|summar|theme|character|plot|setting|point of view|compare.*text|text evidence|close reading|retell|sequenc/.test(topicLower);
+  // Strand B (Foundations): phonics, spelling, grammar, vocabulary, word study
+  const isFoundationsTopic = /phonic|phoneme|decod|spell|vocab|grammar|punctuat|syntax|word stud|sight word|root word|prefix|suffix|morph|part of speech|noun|verb|adjective|adverb|sentence structure|paragraph structure/.test(topicLower);
+  const isOralTopic = /speak|listen|oral|present|discuss|debate|talk|conversation|interview/.test(topicLower);
 
   // Math strand guidance
   const isNumberTopic = /fraction|decimal|percent|number|place value|round|multipl|divis|add|subtract|integer|ratio|rate/.test(topicLower);
@@ -2425,13 +2429,15 @@ Use emoji headers. 4–6 varied activities. Start directly with the worksheet ti
     : isSpatialTopic   ? 'PRIORITY: This is a GEOMETRY/MEASUREMENT topic. Lead with Strand E expectations (E1.x spatial reasoning, E2.x measurement). Include at least 2 Strand E expectations.'
     : isFinancialTopic ? 'PRIORITY: This is a FINANCIAL LITERACY topic. Lead with Strand F expectations (F1.x money and finances). Include at least 2 Strand F expectations.'
     : 'Select the 2-4 most relevant Ontario Math 2020 expectations across strands B, C, D, E, F that best match this topic.'
+    : isFoundationsTopic
+    ? 'PRIORITY: This is a FOUNDATIONS topic (phonics, spelling, grammar, vocabulary, word study, or sentence/paragraph structure). You MUST select Strand B expectations (B1.x oral language foundations, B2.x language conventions, B3.x vocabulary/word study). Do NOT use Strand A (Literacy Connections) — those are cross-curricular meta-skills, not specific foundational language skills.'
     : isWritingTopic
-    ? 'PRIORITY: This is a WRITING/COMPOSITION topic. You MUST select Strand D expectations (D1.x writing process, D2.x writing forms, D2.3/D2.4 writing craft). Short Story, Narrative, and all writing genres are Strand D. Do NOT use Strand A (Literacy Connections) — those are cross-curricular meta-skills, not specific writing skills. Do NOT use Strand C (Comprehension) or Strand B (Foundations) as primary expectations for a writing topic.'
+    ? 'PRIORITY: This is a WRITING/COMPOSITION topic. You MUST select Strand D expectations (D1.x writing process, D2.x writing forms, D2.3/D2.4 writing craft). Opinion pieces, arguments, claims, thesis statements, and all writing genres (narrative, persuasive, informational, recount, memoir, review, etc.) are Strand D. Do NOT use Strand A (Literacy Connections) — those are cross-curricular meta-skills, not specific writing skills. Do NOT use Strand C (Comprehension) or Strand B (Foundations) as primary expectations for a writing topic.'
     : isReadingTopic
-    ? 'PRIORITY: This is a READING/COMPREHENSION topic. You MUST select Strand C expectations (C1.x knowledge about texts, C2.x comprehension strategies, C3.x critical thinking). Do NOT use Strand A (Literacy Connections) — those are cross-curricular meta-skills and do NOT describe specific reading skills. For inference topics, the canonical code is C2.3 (making inferences). For main idea/summarizing, use C2.x comprehension strategies. For author purpose/point of view, use C3.x critical thinking. If C.x expectations exist at the grade, you MUST pick from them — do not substitute A.x codes.'
+    ? 'PRIORITY: This is a READING/COMPREHENSION topic. You MUST select Strand C expectations (C1.x knowledge about texts, C2.x comprehension strategies, C3.x critical thinking). Do NOT use Strand A (Literacy Connections) — those are cross-curricular meta-skills and do NOT describe specific reading skills. For inference topics, the canonical code is C2.3 (making inferences). For main idea/summarizing, use C2.x comprehension strategies. For author purpose/point of view, use C3.x critical thinking. For character/plot/theme/setting analysis, use C1.x or C2.x. If C.x expectations exist at the grade, you MUST pick from them — do not substitute A.x codes.'
     : isOralTopic
     ? 'PRIORITY: This is an ORAL topic. You MUST select Strand B expectations (B1.x oral communication). Do NOT use Strand A (Literacy Connections) — those are cross-curricular meta-skills, not specific oral communication skills.'
-    : 'Lead with the expectations that best match this specific topic. Avoid Strand A (Literacy Connections) unless the topic is explicitly about transferable/cross-curricular skills.';
+    : 'PRIORITY: You MUST select expectations from Strand B (Foundations), C (Comprehension), or D (Composition) — whichever best matches this topic. Do NOT use Strand A (Literacy Connections) — Strand A expectations are cross-curricular meta-skills (A1.x transferable skills, A2.x digital citizenship) and are NOT appropriate for a subject-specific Language lesson unless the topic is explicitly about transferable/digital/cross-curricular skills.';
 
   const splitExpNote = isSplit
     ? `SPLIT CLASS — ${grades.join(' / ')}:
@@ -2560,7 +2566,20 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
     window._slideData = null; // clear cached slides — new lesson generated
     window._lessonMeta = {topic, grades, subj, gradeStr:grades.join(' / ')}; // for worksheet regen (Chat 7 fix)
     outputKeys.forEach(k => { genC[k] = {orig:parsed[k]||'', cur:parsed[k]||''}; });
-    answerKeyKeys.forEach(k => { if(parsed[k]) genC[k]={orig:parsed[k],cur:parsed[k]}; });
+    // Always create answer key entries (even if empty) so the pill + content block stay in sync.
+    // Previously `if (parsed[k])` silently dropped missing keys, producing a pill with no matching content.
+    answerKeyKeys.forEach(k => {
+      const val = parsed[k];
+      if (val && val.trim()) {
+        genC[k] = {orig:val, cur:val};
+      } else {
+        // Claude didn't return this answer key — surface the gap with a visible placeholder
+        // so teachers know to regenerate rather than wondering why the block is blank.
+        const gradeLabel = isSplit ? (grades[answerKeyKeys.indexOf(k)] || '') : '';
+        const placeholder = `⚠️ Answer key was not generated${gradeLabel ? ' for '+gradeLabel : ''}. This sometimes happens on long split-class lessons when the AI hits its token limit.\n\nClick **✏️ Edit** to write one manually, or click **🔄 Regenerate Lesson** at the top to try again.`;
+        genC[k] = {orig:placeholder, cur:placeholder};
+      }
+    });
     let lessonExpectations = parsed.expectations || preMatchedExp || [];
 
     // SPLIT CLASS: Validate AI expectations against curriculum and assign grades.
@@ -3246,7 +3265,7 @@ async function getStudentLink(k, allGrades) {
 
     if (allGrades && isSplitWS) {
       if (_combinedLinkCache) {
-        link = `${window.location.origin}/worksheet.html?id=${_combinedLinkCache}`;
+        link = `${window.location.origin}/worksheet.html?id=${_combinedLinkCache.id}&t=${_combinedLinkCache.token}`;
       } else {
         const readingContent = genC['reading_resource']?.cur || '';
         // Use grades_content format that worksheet.html expects for split classes
@@ -3269,24 +3288,24 @@ async function getStudentLink(k, allGrades) {
           answer_keys: answerKeysContent
         });
         const rosterNames = students.map(s => ({id:s.id,first:s.first,last:s.last||'',grade:s.grade}));
-        const { data, error } = await db.from('worksheets').insert({ teacher_id:currentUser.id, topic, grades, subject, content:contentPayload, roster:rosterNames }).select().single();
+        const { data, error } = await db.from('worksheets').insert({ teacher_id:currentUser.id, topic, grades, subject, content:contentPayload, roster:rosterNames }).select('id, share_token').single();
         if (error) throw error;
-        _combinedLinkCache = data.id;
-        link = `${window.location.origin}/worksheet.html?id=${data.id}`;
+        _combinedLinkCache = { id: data.id, token: data.share_token };
+        link = `${window.location.origin}/worksheet.html?id=${data.id}&t=${data.share_token}`;
       }
     } else {
       // Use cached link if already created for this grade this session
       if (_gradeLinksCache[k]) {
-        link = `${window.location.origin}/worksheet.html?id=${_gradeLinksCache[k]}`;
+        link = `${window.location.origin}/worksheet.html?id=${_gradeLinksCache[k].id}&t=${_gradeLinksCache[k].token}`;
       } else {
         const readingContent = genC['reading_resource']?.cur || '';
         const akKey = k.replace('student_worksheet','answer_key');
         const contentPayload = JSON.stringify({ worksheet:genC[k]?.cur||'', reading:readingContent, answer_key:genC[akKey]?.cur||genC['answer_key']?.cur||'' });
         const rosterNames = students.map(s => ({id:s.id,first:s.first,last:s.last||'',grade:s.grade}));
-        const { data, error } = await db.from('worksheets').insert({ teacher_id:currentUser.id, topic, grades, subject, content:contentPayload, roster:rosterNames }).select().single();
+        const { data, error } = await db.from('worksheets').insert({ teacher_id:currentUser.id, topic, grades, subject, content:contentPayload, roster:rosterNames }).select('id, share_token').single();
         if (error) throw error;
-        _gradeLinksCache[k] = data.id;
-        link = `${window.location.origin}/worksheet.html?id=${data.id}`;
+        _gradeLinksCache[k] = { id: data.id, token: data.share_token };
+        link = `${window.location.origin}/worksheet.html?id=${data.id}&t=${data.share_token}`;
       }
     }
 
@@ -7967,17 +7986,36 @@ async function renderUnitPlansList(sortOnly) {
   const lessonsByUnit = {};
   (linkedLessons || []).forEach(l => { if (!lessonsByUnit[l.unit_plan_id]) lessonsByUnit[l.unit_plan_id] = []; lessonsByUnit[l.unit_plan_id].push(l); });
 
-  // Batch-fetch unit assessments (written tests saved with " — Unit Test" suffix)
-  // Match by topic prefix — one query, then group by unit client-side.
-  const { data: allAssessments } = await db.from('worksheets')
-    .select('id, topic, grades, content, created_at')
-    .eq('teacher_id', currentUser.id)
-    .ilike('topic', '% — Unit Test')
-    .order('created_at', { ascending: false });
+  // Batch-fetch unit assessments — all 3 types (Written Test, Oral Task, Creation Task).
+  // Run three parallel ilike queries and merge — safer than a single .or() expression
+  // because the em-dash and spaces in the suffixes make .or() parsing fragile.
+  const ASSESS_SUFFIXES = [
+    { suffix: ' — Unit Test',     type: 'test',    label: 'Written Test',  icon: '📝' },
+    { suffix: ' — Oral Task',     type: 'oral',    label: 'Oral Task',     icon: '🎤' },
+    { suffix: ' — Creation Task', type: 'product', label: 'Creation Task', icon: '🎨' },
+  ];
+  const assessResults = await Promise.all(ASSESS_SUFFIXES.map(s =>
+    db.from('worksheets')
+      .select('id, topic, grades, content, created_at, share_token')
+      .eq('teacher_id', currentUser.id)
+      .ilike('topic', '%' + s.suffix)
+      .order('created_at', { ascending: false })
+  ));
+  const allAssessments = [];
+  assessResults.forEach((res, i) => {
+    (res.data || []).forEach(ws => {
+      ws._assessType  = ASSESS_SUFFIXES[i].type;
+      ws._assessLabel = ASSESS_SUFFIXES[i].label;
+      ws._assessIcon  = ASSESS_SUFFIXES[i].icon;
+      ws._assessSuffix = ASSESS_SUFFIXES[i].suffix;
+      allAssessments.push(ws);
+    });
+  });
+  // Sort merged list newest-first
+  allAssessments.sort((a, b) => new Date(b.created_at||0) - new Date(a.created_at||0));
   const assessmentsByUnit = {};
-  (allAssessments || []).forEach(ws => {
-    // Strip " — Unit Test" suffix to get the unit topic
-    const unitTopic = ws.topic.replace(/ — Unit Test$/, '');
+  allAssessments.forEach(ws => {
+    const unitTopic = ws.topic.slice(0, -ws._assessSuffix.length);
     const match = sorted.find(u => u.topic === unitTopic);
     if (!match) return;
     if (!assessmentsByUnit[match.id]) assessmentsByUnit[match.id] = [];
@@ -8049,16 +8087,21 @@ function renderUnitCard(u, linkedLessons, assessments, submissionCounts) {
         ${assessments.map(a => {
           const subCount = submissionCounts[a.id] || 0;
           const aDate = a.created_at ? new Date(a.created_at).toLocaleDateString('en-CA') : '';
-          const link = `${window.location.origin}/worksheet.html?id=${a.id}`;
+          const isTest = a._assessType === 'test';
+          const label = a._assessLabel || 'Assessment';
+          const icon = a._assessIcon || '📝';
+          const metaLine = isTest
+            ? `${escHTML(aDate)} · ${subCount} submission${subCount!==1?'s':''}`
+            : `${escHTML(aDate)} · Teacher resource`;
           return `<div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--sage-l);margin-bottom:6px;">
             <div style="flex:1;min-width:0;">
-              <div style="font-weight:600;font-size:.82rem;color:var(--ink);">Written Test</div>
-              <div style="font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted);margin-top:1px;">${escHTML(aDate)} · ${subCount} submission${subCount!==1?'s':''}</div>
+              <div style="font-weight:600;font-size:.82rem;color:var(--ink);">${icon} ${escHTML(label)}</div>
+              <div style="font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted);margin-top:1px;">${metaLine}</div>
             </div>
             <div style="display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;align-items:center;">
-              <button class="btn b-out b-sm" onclick="copyUnitAssessmentLink('${escHTML(a.id)}', this)" style="font-size:.68rem;padding:4px 8px;" title="Copy student link">🔗 Link</button>
-              <button class="btn b-out b-sm" onclick="reviewUnitAssessment('${escHTML(a.id)}')" style="font-size:.68rem;padding:4px 8px;" title="Open test and submissions">👁 Review</button>
-              ${subCount > 0 ? `<button class="btn b-sage b-sm" onclick="autoMarkUnitTest('${escHTML(a.id)}')" style="font-size:.68rem;padding:4px 8px;" title="Auto-mark all submissions">🤖 Mark</button>` : ''}
+              ${isTest ? `<button class="btn b-out b-sm" onclick="copyUnitAssessmentLink('${escHTML(a.id)}','${escHTML(a.share_token||'')}', this)" style="font-size:.68rem;padding:4px 8px;" title="Copy student link">🔗 Link</button>` : ''}
+              <button class="btn b-out b-sm" onclick="reviewUnitAssessment('${escHTML(a.id)}')" style="font-size:.68rem;padding:4px 8px;" title="Open assessment">👁 Review</button>
+              ${isTest && subCount > 0 ? `<button class="btn b-sage b-sm" onclick="autoMarkUnitTest('${escHTML(a.id)}')" style="font-size:.68rem;padding:4px 8px;" title="Auto-mark all submissions">🤖 Mark</button>` : ''}
               <button onclick="deleteUnitAssessment('${escHTML(a.id)}', ${subCount})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:2px 4px;" title="Delete assessment">🗑</button>
             </div>
           </div>`;
@@ -8072,8 +8115,8 @@ function renderUnitCard(u, linkedLessons, assessments, submissionCounts) {
 }
 
 // Copy student link for a unit assessment directly from the unit card
-function copyUnitAssessmentLink(wsId, btn) {
-  const link = `${window.location.origin}/worksheet.html?id=${wsId}`;
+function copyUnitAssessmentLink(wsId, token, btn) {
+  const link = `${window.location.origin}/worksheet.html?id=${wsId}&t=${token}`;
   navigator.clipboard.writeText(link).then(() => {
     showToast('✅ Student link copied!');
     if (btn) {
@@ -8084,28 +8127,58 @@ function copyUnitAssessmentLink(wsId, btn) {
   }).catch(() => { alert('Link: ' + link); });
 }
 
-// Review a saved unit assessment — opens the viewer modal with submissions shown
+// Review a saved unit assessment — opens the viewer modal.
+// Behavior differs by type: written tests show student link + submissions;
+// oral/product tasks are teacher resources, so no link or submissions section.
 async function reviewUnitAssessment(wsId) {
   const { data: ws } = await db.from('worksheets')
-    .select('id, topic, grades, content, created_at').eq('id', wsId).single();
+    .select('id, topic, grades, content, created_at, share_token').eq('id', wsId).single();
   if (!ws) { alert('Assessment not found.'); return; }
+
+  // Detect assessment type from topic suffix
+  const SUFFIX_MAP = [
+    { suffix: ' — Unit Test',     type: 'test',    label: 'Written Test',  icon: '📝' },
+    { suffix: ' — Oral Task',     type: 'oral',    label: 'Oral Task',     icon: '🎤' },
+    { suffix: ' — Creation Task', type: 'product', label: 'Creation Task', icon: '🎨' },
+  ];
+  const typeInfo = SUFFIX_MAP.find(s => ws.topic.endsWith(s.suffix)) || SUFFIX_MAP[0];
+  const isTest = typeInfo.type === 'test';
+
   const content = (() => { try { return JSON.parse(ws.content); } catch(e) { return {}; } })();
   const wsText = content.worksheet || '';
   const akText = content.answer_key || '';
-  const { data: subs } = await db.from('worksheet_submissions').select('*').eq('worksheet_id', wsId);
-  const subCount = (subs || []).length;
-  const link = `${window.location.origin}/worksheet.html?id=${wsId}`;
+  const link = `${window.location.origin}/worksheet.html?id=${wsId}&t=${ws.share_token||''}`;
 
-  // Populate cache for autoMark
-  window._unitTestData = window._unitTestData || {};
-  window._unitTestData[wsId] = { wsText, akText };
+  // Populate cache for autoMark (only relevant for written tests)
+  if (isTest) {
+    window._unitTestData = window._unitTestData || {};
+    window._unitTestData[wsId] = { wsText, akText };
+  }
+
+  // Only fetch submissions for written tests
+  let subs = [], subCount = 0;
+  if (isTest) {
+    const { data } = await db.from('worksheet_submissions').select('*').eq('worksheet_id', wsId);
+    subs = data || [];
+    subCount = subs.length;
+  }
 
   const existing = document.getElementById('unitAssessResultModal');
   if (existing) existing.remove();
   const modal = document.createElement('div');
   modal.id = 'unitAssessResultModal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;';
-  const subsHtml = subCount === 0
+
+  // Link + submissions sections only for written tests
+  const linkHtml = isTest ? `<div style="padding:12px 20px;background:var(--sage-l);border-bottom:1px solid #A8C4AB;">
+    <div style="font-weight:600;font-size:.78rem;color:var(--sage);margin-bottom:5px;">🔗 Student link</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input value="${escHTML(link)}" readonly onclick="this.select()" style="flex:1;padding:6px 10px;border:1.5px solid #A8C4AB;border-radius:7px;font-size:.76rem;font-family:'DM Mono',monospace;background:white;">
+      <button onclick="navigator.clipboard.writeText('${escHTML(link)}');showToast('Copied!')" class="btn b-sage b-sm" style="font-size:.72rem;">Copy</button>
+    </div>
+  </div>` : '';
+
+  const subsHtml = !isTest ? '' : (subCount === 0
     ? '<div style="padding:14px 20px;background:var(--paper);border-bottom:1px solid var(--border);font-size:.8rem;color:var(--muted);font-style:italic;">No submissions yet. Share the student link above to collect responses.</div>'
     : `<div style="padding:12px 20px;background:var(--paper);border-bottom:1px solid var(--border);">
         <div style="font-weight:600;font-size:.82rem;color:var(--ink);margin-bottom:8px;">${subCount} submission${subCount!==1?'s':''}</div>
@@ -8118,26 +8191,24 @@ async function reviewUnitAssessment(wsId) {
             ${akText ? `<button class="btn b-out b-sm" onclick="autoMarkOneUnitSub('${escHTML(wsId)}','${escHTML(sub.id)}',this)" style="font-size:.68rem;">🤖 Mark</button>` : ''}
           </div>`;
         }).join('')}
-      </div>`;
+      </div>`);
+
+  // Use renderWS for worksheet-formatted tests; renderMD for oral/product prose
+  const bodyHtml = isTest ? renderWS(wsText) : renderMD(wsText);
 
   modal.innerHTML = `
     <div style="background:var(--paper);border-radius:16px;width:100%;max-width:760px;box-shadow:0 20px 60px rgba(0,0,0,.3);margin:auto;">
       <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;background:var(--paper);border-radius:16px 16px 0 0;z-index:1;">
-        <div style="font-weight:700;font-size:.92rem;color:var(--ink);">📝 ${escHTML(ws.topic)}</div>
+        <div style="font-weight:700;font-size:.92rem;color:var(--ink);">${typeInfo.icon} ${escHTML(ws.topic)}</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          ${akText && subCount > 0 ? `<button class="btn b-sage b-sm" onclick="autoMarkUnitTest('${escHTML(wsId)}')">🤖 Auto-mark All</button>` : ''}
+          ${isTest && akText && subCount > 0 ? `<button class="btn b-sage b-sm" onclick="autoMarkUnitTest('${escHTML(wsId)}')">🤖 Auto-mark All</button>` : ''}
+          <button onclick="navigator.clipboard.writeText(document.querySelector('#unitAssessResultModal .ua-body').innerText||'');showToast('Copied!')" class="btn b-out b-sm">📋 Copy</button>
           <button onclick="document.getElementById('unitAssessResultModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:2px 6px;">✕</button>
         </div>
       </div>
-      <div style="padding:12px 20px;background:var(--sage-l);border-bottom:1px solid #A8C4AB;">
-        <div style="font-weight:600;font-size:.78rem;color:var(--sage);margin-bottom:5px;">🔗 Student link</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input value="${escHTML(link)}" readonly onclick="this.select()" style="flex:1;padding:6px 10px;border:1.5px solid #A8C4AB;border-radius:7px;font-size:.76rem;font-family:'DM Mono',monospace;background:white;">
-          <button onclick="navigator.clipboard.writeText('${escHTML(link)}');showToast('Copied!')" class="btn b-sage b-sm" style="font-size:.72rem;">Copy</button>
-        </div>
-      </div>
+      ${linkHtml}
       ${subsHtml}
-      <div style="padding:20px 24px;line-height:1.75;font-size:.88rem;max-height:50vh;overflow-y:auto;">${renderWS(wsText)}</div>
+      <div class="ua-body" style="padding:20px 24px;line-height:1.75;font-size:.88rem;max-height:55vh;overflow-y:auto;">${bodyHtml}</div>
     </div>`;
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
   document.body.appendChild(modal);
@@ -8315,17 +8386,51 @@ Return ONLY the assessment content — no preamble or explanation.`;
     setProgress(80, 'Finishing...');
     if (!data || !data.ok) throw new Error('Generation failed');
     const text = data.content.map(i => i.text || '').join('');
+
+    // AUTO-SAVE: all three assessment types now persist immediately on generation.
+    // Previously only written tests were saved (and only when the teacher clicked
+    // "Get Student Link"), so oral/product tasks were lost when the modal closed.
+    const topicSuffixes = { test: ' — Unit Test', oral: ' — Oral Task', product: ' — Creation Task' };
+    const savedTopic = unit.topic + topicSuffixes[type];
+    let wsText = text, akText = '';
+    if (type === 'test') {
+      const akIdx = text.search(/^## ANSWER KEY/m);
+      if (akIdx > -1) { wsText = text.slice(0, akIdx).trim(); akText = text.slice(akIdx).trim(); }
+    }
+    const contentPayload = JSON.stringify({ worksheet: wsText, reading: '', answer_key: akText });
+    const rosterNames = students.map(s => ({ id: s.id, first: s.first, last: s.last || '', grade: s.grade }));
+    let savedWsId = null, savedWsToken = null;
+    try {
+      const { data: wsRow, error: wsErr } = await db.from('worksheets').insert({
+        teacher_id: currentUser.id,
+        topic: savedTopic,
+        grades: unit.grades || [],
+        subject: '',
+        content: contentPayload,
+        roster: rosterNames
+      }).select('id, share_token').single();
+      if (wsErr) throw wsErr;
+      savedWsId = wsRow.id;
+      savedWsToken = wsRow.share_token;
+    } catch(saveErr) {
+      console.error('Assessment auto-save failed:', saveErr);
+      // Non-fatal — still show the result modal so the teacher doesn't lose the content.
+    }
+
     hideLoading();
 
     // Show result in a modal viewer with PDF/copy options
-    showUnitAssessmentResult(config.icon + ' ' + config.label, text, unit.topic, (unit.grades||[]).join(','), type==='test', uid);
+    showUnitAssessmentResult(config.icon + ' ' + config.label, text, unit.topic, (unit.grades||[]).join(','), type==='test', uid, savedWsId, savedWsToken);
+
+    // Re-render unit cards so the new assessment shows up in the unit immediately
+    if (savedWsId && typeof renderUnitPlansList === 'function') { renderUnitPlansList(); }
   } catch(e) {
     hideLoading();
     if (e.message !== '__PLAN_LIMIT__') alert('Error generating assessment: ' + e.message);
   }
 }
 
-function showUnitAssessmentResult(title, text, topic, grades, isTest, unitId) {
+function showUnitAssessmentResult(title, text, topic, grades, isTest, unitId, savedWsId, savedWsToken) {
   const existing = document.getElementById('unitAssessResultModal');
   if (existing) existing.remove();
 
@@ -8343,61 +8448,42 @@ function showUnitAssessmentResult(title, text, topic, grades, isTest, unitId) {
   modal.dataset.topic = topic;
   modal.dataset.grades = grades;
   modal.dataset.unitId = unitId || '';
+  modal.dataset.wsId = savedWsId || '';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;';
+
+  // For written tests that auto-saved, we can show the student link immediately.
+  const studentLink = (isTest && savedWsId && savedWsToken) ? `${window.location.origin}/worksheet.html?id=${savedWsId}&t=${savedWsToken}` : '';
+  const linkBanner = studentLink ? `
+    <div style="padding:12px 20px;background:var(--sage-l);border-bottom:1px solid #A8C4AB;font-size:.82rem;">
+      <div style="font-weight:600;color:var(--sage);margin-bottom:6px;">🔗 Student link — share this with your class:</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="unitTestLinkInput" value="${escHTML(studentLink)}" readonly onclick="this.select()" style="flex:1;padding:7px 10px;border:1.5px solid #A8C4AB;border-radius:7px;font-size:.8rem;font-family:'DM Mono',monospace;background:white;">
+        <button onclick="const i=document.getElementById('unitTestLinkInput');i.select();navigator.clipboard.writeText(i.value);showToast('Link copied!')" class="btn b-sage b-sm">Copy</button>
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:6px;">Students submit answers online · Auto-marked · Results appear in Trackers</div>
+    </div>` : '';
+  const savedBadge = savedWsId ? '<span style="font-size:.68rem;color:var(--sage);font-weight:600;margin-left:8px;">✅ Saved to unit</span>' : '';
+
   modal.innerHTML = `
     <div style="background:var(--paper);border-radius:16px;width:100%;max-width:760px;box-shadow:0 20px 60px rgba(0,0,0,.3);margin:auto;">
       <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;background:var(--paper);border-radius:16px 16px 0 0;z-index:1;">
-        <div style="font-weight:700;font-size:.92rem;color:var(--ink);">${title}</div>
+        <div style="font-weight:700;font-size:.92rem;color:var(--ink);">${title}${savedBadge}</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          ${isTest ? '<button id="unitTestLinkBtn" onclick="createUnitTestLink()" class="btn b-sage b-sm">🔗 Get Student Link</button>' : ''}
           <button onclick="navigator.clipboard.writeText(document.getElementById('unitAssessText').innerText||'');showToast('Copied!')" class="btn b-out b-sm">📋 Copy</button>
           <button onclick="printUnitAssessment()" class="btn b-out b-sm">📄 PDF</button>
           <button onclick="document.getElementById('unitAssessResultModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:2px 6px;">✕</button>
         </div>
       </div>
+      ${linkBanner}
       <div id="unitAssessText" style="padding:24px 28px;line-height:1.75;font-size:.9rem;">${rendered}</div>
     </div>`;
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
   document.body.appendChild(modal);
 }
 
-async function createUnitTestLink() {
-  const modal = document.getElementById('unitAssessResultModal');
-  if (!modal) return;
-  const wsText = modal.dataset.wsText;
-  const akText = modal.dataset.akText;
-  const topic = modal.dataset.topic;
-  const gradesArr = (modal.dataset.grades || '').split(',').filter(Boolean);
-  const btn = document.getElementById('unitTestLinkBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Creating...'; }
-  try {
-    const contentPayload = JSON.stringify({ worksheet: wsText, reading: '', answer_key: akText });
-    const rosterNames = students.map(s => ({id:s.id,first:s.first,last:s.last||'',grade:s.grade}));
-    const { data, error } = await db.from('worksheets').insert({
-      teacher_id: currentUser.id, topic: topic + ' — Unit Test',
-      grades: gradesArr, subject: '', content: contentPayload, roster: rosterNames
-    }).select().single();
-    if (error) throw error;
-    const link = `${window.location.origin}/worksheet.html?id=${data.id}`;
-    const linkDiv = document.createElement('div');
-    linkDiv.style.cssText = 'padding:12px 20px;background:var(--sage-l);border-top:1px solid #A8C4AB;font-size:.82rem;';
-    linkDiv.innerHTML = `<div style="font-weight:600;color:var(--sage);margin-bottom:6px;">🔗 Student link ready — share this with your class:</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input id="unitTestLinkInput" value="${link}" readonly style="flex:1;padding:7px 10px;border:1.5px solid #A8C4AB;border-radius:7px;font-size:.8rem;font-family:'DM Mono',monospace;background:white;">
-        <button onclick="const i=document.getElementById('unitTestLinkInput');i.select();navigator.clipboard.writeText(i.value);showToast('Link copied!')" class="btn b-sage b-sm">Copy</button>
-      </div>
-      <div style="font-size:.72rem;color:var(--muted);margin-top:6px;">Students submit answers online · Auto-marked · Results appear in Trackers</div>`;
-    const assessText = document.getElementById('unitAssessText');
-    const container = modal.querySelector('div[style*="max-width:760px"]');
-    container.insertBefore(linkDiv, assessText);
-    if (btn) { btn.textContent = '✅ Link created'; }
-    // Re-render unit cards so the new assessment shows up immediately (no refresh needed)
-    if (typeof renderUnitPlansList === 'function') { renderUnitPlansList(); }
-  } catch(e) {
-    alert('Error creating link: ' + e.message);
-    if (btn) { btn.disabled = false; btn.textContent = '🔗 Get Student Link'; }
-  }
-}
+// NOTE: createUnitTestLink() was removed. Unit assessments now auto-save at
+// generation time (see generateUnitAssessment), and the student link is shown
+// inline in the result modal. Keeping the old flow would cause duplicate rows.
 
 function printUnitAssessment() {
   const modal = document.getElementById('unitAssessResultModal');
