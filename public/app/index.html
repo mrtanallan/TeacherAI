@@ -8704,6 +8704,7 @@ async function onUnitClassSelect() {
   if (!sel.value) {
     activeClassId = null;
     document.querySelectorAll('#unitGradePillContainer .grade-pill-btn').forEach(b => b.classList.remove('selected'));
+    updateKOnlySubjectOptions();
     return;
   }
   // Use the same class-switching pipeline as the Plan tab so students are
@@ -8711,9 +8712,15 @@ async function onUnitClassSelect() {
   // switchClass() calls autoFillGradesFromClass() (for #gradePillContainer),
   // then we fill the unit-specific pill container as well.
   await switchClass(sel.value);
+  // CRITICAL: clear any stale pill state BEFORE auto-filling. Without this,
+  // previously-selected pills (e.g. 5/6 from a prior Plan tab interaction)
+  // remain selected, which causes the class-name fallback to think something
+  // is already selected and skips the actual class's grade.
+  document.querySelectorAll('#unitGradePillContainer .grade-pill-btn').forEach(b => b.classList.remove('selected'));
   autoFillUnitGradesFromClass();
   // Fallback: if no students in the class (or no grades set on students),
-  // try to parse a grade from the class name (e.g. "Gr. 3 Class" → "Grade 3").
+  // try to parse a grade from the class name (e.g. "Gr. 3 Class" → "Grade 3",
+  // "Kindergarten" → "Kindergarten").
   const anySelected = document.querySelector('#unitGradePillContainer .grade-pill-btn.selected');
   if (!anySelected) {
     const cls = classes.find(c => c.id === sel.value);
@@ -8728,17 +8735,25 @@ async function onUnitClassSelect() {
       }
     }
   }
+  // Refresh K-only subject options now that pill state reflects the class
+  updateKOnlySubjectOptions();
 }
 
 function autoFillUnitGradesFromClass() {
+  // Always start from a clean pill state so previous selections don't leak through
+  document.querySelectorAll('#unitGradePillContainer .grade-pill-btn').forEach(b => b.classList.remove('selected'));
   const classStudents = activeClassId ? students.filter(s => s.classId === activeClassId) : [];
-  if (!classStudents.length) return;
+  if (!classStudents.length) {
+    updateKOnlySubjectOptions();
+    return;
+  }
   const gradeOrder = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
   const uniqueGrades = [...new Set(classStudents.map(s => s.grade))].filter(Boolean)
     .sort((a,b) => gradeOrder.indexOf(a) - gradeOrder.indexOf(b));
   document.querySelectorAll('#unitGradePillContainer .grade-pill-btn').forEach(b => {
     b.classList.toggle('selected', uniqueGrades.includes(b.dataset.grade));
   });
+  updateKOnlySubjectOptions();
 }
 
 function updateUnitTopicPlaceholder() {
