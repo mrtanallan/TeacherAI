@@ -145,6 +145,42 @@ async function checkAuth(req) {
   }
 }
 
+// ────────────────────────────────────────────────────────────────────
+// USAGE LOGGING (Chat 9)
+// Fire-and-forget write to Supabase generations table. Never blocks the
+// response path. Swallows all errors and logs them — logging must never
+// break generation. Called via `void logGeneration(...)` so we don't
+// await. Requires SUPABASE_URL + SUPABASE_SERVICE_KEY env vars.
+// ────────────────────────────────────────────────────────────────────
+async function logGeneration(row) {
+  try {
+    if (!row.user_id) return; // anonymous traffic (soft-mode leftovers) — skip
+    const base = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_KEY;
+    if (!base || !key) {
+      console.warn('[log] missing SUPABASE_URL or SUPABASE_SERVICE_KEY');
+      return;
+    }
+    const url = base.replace(/\/$/, '') + '/rest/v1/generations';
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': key,
+        'Authorization': 'Bearer ' + key,
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      console.warn('[log] insert failed', res.status, txt.slice(0, 200));
+    }
+  } catch (err) {
+    console.warn('[log] exception', err.message);
+  }
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -174,6 +210,7 @@ module.exports = async function handler(req, res) {
   // STREAMING: opt-in branch (self-contained, fully revertible)
   // ──────────────────────────────────────────────────────────────────
   if (req.body && req.body.stream === true) {
+    const t0 = Date.now();
     try {
       const { model, max_tokens, messages, system } = req.body;
       const anthropicPayload = { model, max_tokens, messages, stream: true };
@@ -209,14 +246,54 @@ module.exports = async function handler(req, res) {
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('X-Accel-Buffering', 'no');
 
+      // Sniff token usage as SSE passes through. We do NOT buffer —
+      // every chunk is forwarded to the client immediately, we just
+      // accumulate a trailing string to parse complete lines out of.
+      // message_start has input_tokens; message_delta has output_tokens.
+      let tokensIn = null;
+      let tokensOut = null;
+      let sseBuffer = '';
+
       const reader = anthropicRes.body.getReader();
       const decoder = new TextDecoder();
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        res.write(decoder.decode(value, { stream: true }));
+        const chunk = decoder.decode(value, { stream: true });
+        res.write(chunk); // forward IMMEDIATELY
+        sseBuffer += chunk;
+        // Parse out any complete `data: ...\n` lines for usage sniffing
+        let nl;
+        while ((nl = sseBuffer.indexOf('\n')) !== -1) {
+          const line = sseBuffer.slice(0, nl);
+          sseBuffer = sseBuffer.slice(nl + 1);
+          if (!line.startsWith('data:')) continue;
+          const jsonStr = line.slice(5).trim();
+          if (!jsonStr || jsonStr === '[DONE]') continue;
+          try {
+            const ev = JSON.parse(jsonStr);
+            if (ev.type === 'message_start' && ev.message && ev.message.usage) {
+              tokensIn = ev.message.usage.input_tokens ?? tokensIn;
+              tokensOut = ev.message.usage.output_tokens ?? tokensOut;
+            } else if (ev.type === 'message_delta' && ev.usage) {
+              tokensOut = ev.usage.output_tokens ?? tokensOut;
+            }
+          } catch (_) { /* ignore partial JSON */ }
+        }
       }
       res.end();
+
+      // Fire-and-forget usage log
+      const meta = (req.body && req.body.meta) || {};
+      void logGeneration({
+        user_id: req.userId,
+        type: meta.type || 'unknown',
+        grade: meta.grade || null,
+        subject: meta.subject || null,
+        tokens_in: tokensIn,
+        tokens_out: tokensOut,
+        duration_ms: Date.now() - t0,
+      });
       return;
     } catch (err) {
       console.error('generate.js stream error:', err);
@@ -232,6 +309,7 @@ module.exports = async function handler(req, res) {
   // ──────────────────────────────────────────────────────────────────
 
   // Original non-streaming path — byte-identical to pre-streaming v8
+  const t0 = Date.now();
   try {
     const { model, max_tokens, messages, system } = req.body;
     const anthropicPayload = { model, max_tokens, messages };
@@ -257,6 +335,18 @@ module.exports = async function handler(req, res) {
       console.error('Anthropic error:', data);
       return res.status(anthropicRes.status).json({ error: data.error || 'AI generation failed' });
     }
+
+    // Fire-and-forget usage log (never blocks the response)
+    const meta = (req.body && req.body.meta) || {};
+    void logGeneration({
+      user_id: req.userId,
+      type: meta.type || 'unknown',
+      grade: meta.grade || null,
+      subject: meta.subject || null,
+      tokens_in: (data.usage && data.usage.input_tokens) || null,
+      tokens_out: (data.usage && data.usage.output_tokens) || null,
+      duration_ms: Date.now() - t0,
+    });
 
     return res.status(200).json(data);
 
