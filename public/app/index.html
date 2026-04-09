@@ -3119,7 +3119,7 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations, unitInfo
   // Supplied by both fresh generate() (from _pendingUnit) and loadLesson() (from DB).
   // Shape: { topic, lessonNumber, totalLessons } or null/undefined.
   const unitBadgeHtml = (unitInfo && unitInfo.topic)
-    ? `<span style="background:#8A3A1F;color:var(--cream);padding:2px 9px;border-radius:10px;font-family:DM Mono,monospace;font-size:.62rem;display:inline-flex;align-items:center;gap:4px;" title="${escHTML(unitInfo.topic)}">📚 Unit: ${escHTML(unitInfo.topic)}${unitInfo.lessonNumber && unitInfo.totalLessons ? ` · Lesson ${unitInfo.lessonNumber}/${unitInfo.totalLessons}` : ''}</span>`
+    ? `<span style="background:var(--sage-l);color:var(--sage);border:1px solid #A8C4AB;padding:2px 9px;border-radius:10px;font-family:DM Mono,monospace;font-size:.62rem;display:inline-flex;align-items:center;gap:4px;" title="${escHTML(unitInfo.topic)}">📚 Unit: ${escHTML(unitInfo.topic)}${unitInfo.lessonNumber && unitInfo.totalLessons ? ` · Lesson ${unitInfo.lessonNumber}/${unitInfo.totalLessons}` : ''}</span>`
     : '';
   c.innerHTML = `<div style="display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap;">
     <span style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;">Generated Lesson</span>
@@ -8952,17 +8952,30 @@ function renderUnitCard(u, linkedLessons, assessments, submissionCounts) {
     </div>`;
   }).join('');
   const uid = u.id;
-  return `<div class="card" id="unit-${escHTML(uid)}" style="padding:0;overflow:hidden;margin-bottom:16px;">
-    <div style="padding:14px 16px;background:#8A3A1F;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;" onclick="toggleUnitCard('${escHTML(uid)}')">
+  // Subject-based accent color for the left border. Subtle visual distinction
+  // without dominating the layout. Falls back to sage for unmapped subjects.
+  const subjAccent = (() => {
+    const s = (u.subject || '').toLowerCase();
+    if (s.includes('math')) return 'var(--amber)';
+    if (s.includes('science')) return 'var(--blue)';
+    if (s.includes('social')) return 'var(--rust)';
+    if (s.includes('health')) return 'var(--sage)';
+    if (s.includes('art')) return '#8A4A6E'; // muted plum for The Arts
+    return 'var(--sage)'; // Language and default
+  })();
+  return `<div class="card" id="unit-${escHTML(uid)}" style="padding:0;overflow:hidden;margin-bottom:14px;border-left:4px solid ${subjAccent};">
+    <div style="padding:14px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;cursor:pointer;" onclick="toggleUnitCard('${escHTML(uid)}')">
       <div style="flex:1;min-width:0;">
-        <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--cream);margin-bottom:3px;">${escHTML(u.topic)}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:rgba(255,255,255,.65);">${escHTML(gradesStr)} · ${escHTML(subj)} · ${escHTML(u.duration||'')} · ${escHTML(date)}</div>
-        ${u.big_idea?`<div style="font-size:.8rem;color:rgba(255,255,255,.75);margin-top:6px;line-height:1.5;font-style:italic;">${escHTML(u.big_idea)}</div>`:''}
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--ink);">${escHTML(u.topic)}</span>
+          <span id="unit-chevron-${escHTML(uid)}" style="color:var(--muted);font-size:.7rem;">▸</span>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.04em;">${escHTML(gradesStr)} · ${escHTML(subj)} · ${escHTML(u.duration||'')} · ${escHTML(date)}</div>
+        ${u.big_idea?`<div style="font-size:.8rem;color:var(--muted);margin-top:7px;line-height:1.55;font-style:italic;">${escHTML(u.big_idea)}</div>`:''}
       </div>
-      <div style="display:flex;gap:6px;flex-shrink:0;align-items:flex-start;">
-        <span style="font-family:'DM Mono',monospace;font-size:.65rem;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.85);white-space:nowrap;">${expandedCount}/${lessons.length} built</span>
-        <span id="unit-chevron-${escHTML(uid)}" style="color:rgba(255,255,255,.6);font-size:.8rem;margin-top:2px;">▸</span>
-        <button onclick="event.stopPropagation();deleteUnitPlan('${escHTML(uid)}')" style="background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:.8rem;padding:2px 4px;" title="Delete">🗑</button>
+      <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">
+        <span style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);white-space:nowrap;letter-spacing:.04em;">${expandedCount}/${lessons.length} built</span>
+        <button onclick="event.stopPropagation();deleteUnitPlan('${escHTML(uid)}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:2px 4px;opacity:.5;transition:opacity .15s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.5'" title="Delete">🗑</button>
       </div>
     </div>
     <div id="unit-lessons-${escHTML(uid)}" style="display:none;">${lessonRows}</div>
