@@ -7938,10 +7938,48 @@ async function renderUnitPlansList(sortOnly) {
   const { data: linkedLessons } = await db.from('lessons').select('id, topic, created_at, unit_plan_id').in('unit_plan_id', unitIds).order('created_at', { ascending: true });
   const lessonsByUnit = {};
   (linkedLessons || []).forEach(l => { if (!lessonsByUnit[l.unit_plan_id]) lessonsByUnit[l.unit_plan_id] = []; lessonsByUnit[l.unit_plan_id].push(l); });
-  el.innerHTML = sorted.map(u => renderUnitCard(u, lessonsByUnit[u.id] || [])).join('');
+
+  // Batch-fetch unit assessments (written tests saved with " — Unit Test" suffix)
+  // Match by topic prefix — one query, then group by unit client-side.
+  const { data: allAssessments } = await db.from('worksheets')
+    .select('id, topic, grades, content, created_at')
+    .eq('teacher_id', currentUser.id)
+    .ilike('topic', '% — Unit Test')
+    .order('created_at', { ascending: false });
+  const assessmentsByUnit = {};
+  (allAssessments || []).forEach(ws => {
+    // Strip " — Unit Test" suffix to get the unit topic
+    const unitTopic = ws.topic.replace(/ — Unit Test$/, '');
+    const match = sorted.find(u => u.topic === unitTopic);
+    if (!match) return;
+    if (!assessmentsByUnit[match.id]) assessmentsByUnit[match.id] = [];
+    assessmentsByUnit[match.id].push(ws);
+  });
+
+  // Batch-fetch submission counts for all assessments in one query
+  const assessmentIds = (allAssessments || []).map(a => a.id);
+  const submissionCounts = {};
+  if (assessmentIds.length) {
+    const { data: allSubs } = await db.from('worksheet_submissions')
+      .select('worksheet_id').in('worksheet_id', assessmentIds);
+    (allSubs || []).forEach(s => {
+      submissionCounts[s.worksheet_id] = (submissionCounts[s.worksheet_id] || 0) + 1;
+    });
+  }
+
+  // Populate _unitTestData cache so autoMarkUnitTest works when triggered from unit card
+  window._unitTestData = window._unitTestData || {};
+  (allAssessments || []).forEach(ws => {
+    const content = (() => { try { return JSON.parse(ws.content); } catch(e) { return {}; } })();
+    window._unitTestData[ws.id] = { wsText: content.worksheet || '', akText: content.answer_key || '' };
+  });
+
+  el.innerHTML = sorted.map(u => renderUnitCard(u, lessonsByUnit[u.id] || [], assessmentsByUnit[u.id] || [], submissionCounts)).join('');
 }
 
-function renderUnitCard(u, linkedLessons) {
+function renderUnitCard(u, linkedLessons, assessments, submissionCounts) {
+  assessments = assessments || [];
+  submissionCounts = submissionCounts || {};
   const date = u.created_at ? new Date(u.created_at).toLocaleDateString('en-CA') : '';
   const gradesStr = (u.grades || []).join(' / ');
   const subj = (u.subject || '').replace('Language / Literacy', 'Language');
@@ -7977,10 +8015,103 @@ function renderUnitCard(u, linkedLessons) {
       </div>
     </div>
     <div id="unit-lessons-${escHTML(uid)}" style="display:none;">${lessonRows}</div>
-    ${expandedCount > 0 ? `<div style="padding:10px 14px;border-top:1px solid var(--border);background:var(--paper);display:flex;justify-content:flex-end;">
-      <button class="btn b-out b-sm" onclick="openUnitAssessmentPicker('${escHTML(uid)}')" style="font-size:.78rem;gap:5px;">📝 Create Unit Assessment</button>
+    ${expandedCount > 0 ? `<div style="border-top:1px solid var(--border);background:var(--paper);">
+      ${assessments.length > 0 ? `<div style="padding:10px 14px 6px;">
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">📝 Assessments</div>
+        ${assessments.map(a => {
+          const subCount = submissionCounts[a.id] || 0;
+          const aDate = a.created_at ? new Date(a.created_at).toLocaleDateString('en-CA') : '';
+          const link = `${window.location.origin}/worksheet.html?id=${a.id}`;
+          return `<div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--sage-l);margin-bottom:6px;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;font-size:.82rem;color:var(--ink);">Written Test</div>
+              <div style="font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted);margin-top:1px;">${escHTML(aDate)} · ${subCount} submission${subCount!==1?'s':''}</div>
+            </div>
+            <div style="display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+              <button class="btn b-out b-sm" onclick="copyUnitAssessmentLink('${escHTML(a.id)}', this)" style="font-size:.68rem;padding:4px 8px;" title="Copy student link">🔗 Link</button>
+              <button class="btn b-out b-sm" onclick="reviewUnitAssessment('${escHTML(a.id)}')" style="font-size:.68rem;padding:4px 8px;" title="Open test and submissions">👁 Review</button>
+              ${subCount > 0 ? `<button class="btn b-sage b-sm" onclick="autoMarkUnitTest('${escHTML(a.id)}')" style="font-size:.68rem;padding:4px 8px;" title="Auto-mark all submissions">🤖 Mark</button>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>` : ''}
+      <div style="padding:${assessments.length > 0 ? '4px' : '10px'} 14px 10px;display:flex;justify-content:flex-end;">
+        <button class="btn b-out b-sm" onclick="openUnitAssessmentPicker('${escHTML(uid)}')" style="font-size:.78rem;gap:5px;">${assessments.length > 0 ? '➕ Create Another Assessment' : '📝 Create Unit Assessment'}</button>
+      </div>
     </div>` : ''}
   </div>`;
+}
+
+// Copy student link for a unit assessment directly from the unit card
+function copyUnitAssessmentLink(wsId, btn) {
+  const link = `${window.location.origin}/worksheet.html?id=${wsId}`;
+  navigator.clipboard.writeText(link).then(() => {
+    showToast('✅ Student link copied!');
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Copied';
+      setTimeout(() => { btn.innerHTML = orig; }, 1800);
+    }
+  }).catch(() => { alert('Link: ' + link); });
+}
+
+// Review a saved unit assessment — opens the viewer modal with submissions shown
+async function reviewUnitAssessment(wsId) {
+  const { data: ws } = await db.from('worksheets')
+    .select('id, topic, grades, content, created_at').eq('id', wsId).single();
+  if (!ws) { alert('Assessment not found.'); return; }
+  const content = (() => { try { return JSON.parse(ws.content); } catch(e) { return {}; } })();
+  const wsText = content.worksheet || '';
+  const akText = content.answer_key || '';
+  const { data: subs } = await db.from('worksheet_submissions').select('*').eq('worksheet_id', wsId);
+  const subCount = (subs || []).length;
+  const link = `${window.location.origin}/worksheet.html?id=${wsId}`;
+
+  // Populate cache for autoMark
+  window._unitTestData = window._unitTestData || {};
+  window._unitTestData[wsId] = { wsText, akText };
+
+  const existing = document.getElementById('unitAssessResultModal');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'unitAssessResultModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;';
+  const subsHtml = subCount === 0
+    ? '<div style="padding:14px 20px;background:var(--paper);border-bottom:1px solid var(--border);font-size:.8rem;color:var(--muted);font-style:italic;">No submissions yet. Share the student link above to collect responses.</div>'
+    : `<div style="padding:12px 20px;background:var(--paper);border-bottom:1px solid var(--border);">
+        <div style="font-weight:600;font-size:.82rem;color:var(--ink);margin-bottom:8px;">${subCount} submission${subCount!==1?'s':''}</div>
+        ${subs.map(sub => {
+          const name = sub.student_name || 'Unknown student';
+          const submittedAt = sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+          const answered = Object.values(sub.responses||{}).filter(v => v && v !== '—' && v !== '').length;
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);gap:10px;">
+            <div><div style="font-weight:500;font-size:.82rem;">${escHTML(name)}</div><div style="font-size:.7rem;color:var(--muted);">${escHTML(submittedAt)} · ${answered} answered</div></div>
+            ${akText ? `<button class="btn b-out b-sm" onclick="autoMarkOneUnitSub('${escHTML(wsId)}','${escHTML(sub.id)}',this)" style="font-size:.68rem;">🤖 Mark</button>` : ''}
+          </div>`;
+        }).join('')}
+      </div>`;
+
+  modal.innerHTML = `
+    <div style="background:var(--paper);border-radius:16px;width:100%;max-width:760px;box-shadow:0 20px 60px rgba(0,0,0,.3);margin:auto;">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;background:var(--paper);border-radius:16px 16px 0 0;z-index:1;">
+        <div style="font-weight:700;font-size:.92rem;color:var(--ink);">📝 ${escHTML(ws.topic)}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${akText && subCount > 0 ? `<button class="btn b-sage b-sm" onclick="autoMarkUnitTest('${escHTML(wsId)}')">🤖 Auto-mark All</button>` : ''}
+          <button onclick="document.getElementById('unitAssessResultModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:2px 6px;">✕</button>
+        </div>
+      </div>
+      <div style="padding:12px 20px;background:var(--sage-l);border-bottom:1px solid #A8C4AB;">
+        <div style="font-weight:600;font-size:.78rem;color:var(--sage);margin-bottom:5px;">🔗 Student link</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input value="${escHTML(link)}" readonly onclick="this.select()" style="flex:1;padding:6px 10px;border:1.5px solid #A8C4AB;border-radius:7px;font-size:.76rem;font-family:'DM Mono',monospace;background:white;">
+          <button onclick="navigator.clipboard.writeText('${escHTML(link)}');showToast('Copied!')" class="btn b-sage b-sm" style="font-size:.72rem;">Copy</button>
+        </div>
+      </div>
+      ${subsHtml}
+      <div style="padding:20px 24px;line-height:1.75;font-size:.88rem;max-height:50vh;overflow-y:auto;">${renderWS(wsText)}</div>
+    </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
 }
 
 // ── UNIT ASSESSMENT ─────────────────────────────────────────────────────────
