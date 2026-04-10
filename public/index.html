@@ -90,13 +90,14 @@
   .hero-badge {
     display: inline-flex; align-items: center; gap: .5rem;
     background: white; border: 1.5px solid var(--border);
-    border-radius: 20px; padding: .35rem 1rem;
-    font-family: 'DM Mono', monospace; font-size: .68rem;
-    color: var(--sage); font-weight: 500; letter-spacing: .5px;
+    border-radius: 22px; padding: .5rem 1.25rem;
+    font-family: 'DM Mono', monospace; font-size: .88rem;
+    color: var(--sage); font-weight: 600; letter-spacing: .5px;
     margin-bottom: 2rem;
     box-shadow: 0 2px 12px rgba(74,124,89,.12);
     animation: fadeUp .6s ease both;
   }
+  @media (max-width: 700px) { .hero-badge { font-size: .72rem; padding: .4rem 1rem; } }
   .badge-dot {
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--sage);
@@ -167,17 +168,46 @@
 
   /* ── Feature strip ── */
   .strip {
-    background: var(--sage-d);
-    padding: 1.2rem 2rem;
-    display: flex; align-items: center; justify-content: center;
-    gap: 3rem; flex-wrap: wrap;
+    background: linear-gradient(135deg, var(--sage-d) 0%, #2F5A3F 100%);
+    padding: 3rem 2rem;
+  }
+  .strip-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; flex-wrap: wrap; gap: 1.25rem;
+    justify-content: center;
   }
   .strip-item {
-    display: flex; align-items: center; gap: .6rem;
-    font-family: 'DM Mono', monospace; font-size: .7rem;
-    color: rgba(255,255,255,.7); letter-spacing: .5px;
+    flex: 1 1 calc(33.333% - 1.25rem);
+    min-width: 260px; max-width: 340px;
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    transition: transform .2s ease, background .2s ease;
   }
-  .strip-item span:first-child { font-size: 1rem; }
+  .strip-item:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,.1);
+  }
+  .strip-icon { font-size: 1.7rem; line-height: 1; flex-shrink: 0; padding-top: 2px; }
+  .strip-text { flex: 1; min-width: 0; }
+  .strip-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    color: white; letter-spacing: -.01em;
+    margin-bottom: .2rem;
+  }
+  .strip-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem; font-weight: 400;
+    color: rgba(255,255,255,.72); line-height: 1.4;
+  }
+  @media (max-width: 760px) {
+    .strip { padding: 2rem 1.25rem; }
+    .strip-inner { gap: .9rem; }
+    .strip-item { flex: 1 1 100%; max-width: none; }
+  }
 
   /* ── Pain section ── */
   .pain {
@@ -199,8 +229,11 @@
   }
   .pain-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: 1fr 1fr;
     gap: 1.4rem;
+  }
+  @media (max-width: 760px) {
+    .pain-grid { grid-template-columns: 1fr; }
   }
   .pain-card {
     background: var(--paper);
@@ -245,10 +278,11 @@
   }
 
   .section-label {
-    font-family: 'DM Mono', monospace; font-size: .65rem;
+    font-family: 'DM Mono', monospace; font-size: .82rem;
     letter-spacing: 2px; text-transform: uppercase;
-    color: var(--sage); margin-bottom: .8rem;
+    color: var(--sage); margin-bottom: 1rem; font-weight: 600;
   }
+  @media (max-width: 700px) { .section-label { font-size: .7rem; } }
 
   .section-title {
     font-family: 'Fraunces', serif; font-size: clamp(1.8rem, 3.5vw, 2.6rem);
@@ -537,31 +571,58 @@
   <div class="hero-inner">
     <div class="hero-badge">
       <div class="badge-dot"></div>
-      Built for Ontario K–8 teachers · free to start
+      Built for Ontario K–8 teachers
     </div>
     <h1>You didn't become a teacher<br>to spend Sunday night <em>planning.</em></h1>
     <p class="hero-sub">
-      TeacherAI plans the week, builds the worksheets, marks the assessments, and writes the report card comments — so you can actually live your life. Built for real Ontario classrooms, including split grades.
+      TeacherAI drafts your lessons, worksheets, assessments, and report card comments in seconds, so Sunday night becomes yours again and your prep time goes to teaching instead of starting from a blank page. Built for real Ontario classrooms, including split grades.
     </p>
     <div class="hero-actions">
       <a href="/app" class="btn-primary">✨ Try TeacherAI free</a>
       <a href="#pain" class="btn-secondary">See what it does</a>
     </div>
-    <p class="hero-trust">
-      <strong>Free to start</strong> &nbsp;·&nbsp;
-      <strong>No credit card</strong> &nbsp;·&nbsp;
-      <strong>Ontario curriculum</strong>
-    </p>
   </div>
 </section>
 
-<!-- ── Strip ── -->
+<!-- ── Feature Strip ── -->
 <div class="strip">
-  <div class="strip-item"><span>⚡</span> Lessons in under 60 seconds</div>
-  <div class="strip-item"><span>🤖</span> Auto-marking with feedback</div>
-  <div class="strip-item"><span>📋</span> Real Ontario expectations</div>
-  <div class="strip-item"><span>🏫</span> Split-grade ready</div>
-  <div class="strip-item"><span>📝</span> Report card comments</div>
+  <div class="strip-inner">
+    <div class="strip-item">
+      <div class="strip-icon">⚡</div>
+      <div class="strip-text">
+        <div class="strip-title">Lessons & units in under 60 seconds</div>
+        <div class="strip-sub">Full plan, worksheet, rubric, and slides ready for your review. Or a whole unit mapped out in one shot.</div>
+      </div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-icon">🤖</div>
+      <div class="strip-text">
+        <div class="strip-title">Auto-marking with feedback</div>
+        <div class="strip-sub">AI scores a first draft. You review, adjust, and approve before anything is saved.</div>
+      </div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-icon">📋</div>
+      <div class="strip-text">
+        <div class="strip-title">Real Ontario expectations</div>
+        <div class="strip-sub">Pulled from the current Ontario curriculum, tagged per lesson.</div>
+      </div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-icon">🏫</div>
+      <div class="strip-text">
+        <div class="strip-title">Split-grade ready</div>
+        <div class="strip-sub">Separate worksheets per grade in one click.</div>
+      </div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-icon">📝</div>
+      <div class="strip-text">
+        <div class="strip-title">Report card comments</div>
+        <div class="strip-sub">Whole class in one go, within your board's limit.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ── Pain section (NEW) — emotional hook before features ── -->
@@ -583,64 +644,37 @@
       <div class="pain-card">
         <div class="pain-emoji">🥱</div>
         <h3>30 report card comments due in two days.</h3>
-        <p class="pain-relief"><strong>→</strong> Generate every comment for your class in one go. Sorted A–Z, within your board's character limit, ready to paste into your SIS.</p>
+        <p class="pain-relief"><strong>→</strong> Generate every comment for your class in one go. Sorted A–Z, within your board's character limit, ready to paste into your report card system.</p>
       </div>
       <div class="pain-card">
         <div class="pain-emoji">😤</div>
         <h3>That &ldquo;split grade&rdquo; nobody else builds tools for.</h3>
-        <p class="pain-relief"><strong>→</strong> 4/5? 5/6? K/1? TeacherAI generates separate worksheets for each grade in one click — and tracks each student against their own grade's expectations.</p>
+        <p class="pain-relief"><strong>→</strong> 4/5? 5/6? K/1? TeacherAI generates separate worksheets for each grade in one click, and tracks each student against their own grade's expectations.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ── How it works ── -->
-<section class="section" id="how">
-  <div class="section-label">How it works</div>
-  <h2 class="section-title">Four steps. <em>Whole week, planned.</em></h2>
-  <p class="section-sub">Set up your class once. Then type a topic, get a lesson, mark the assessments, and write the report cards — all in one tool that knows your students.</p>
-  <div class="steps">
-    <div class="step-card">
-      <span class="step-emoji">🏫</span>
-      <div class="step-title">Set up your class once</div>
-      <p class="step-body">Add your students, grades, and any IEP or ELL accommodations. TeacherAI uses this to personalize everything — split grades, SSC, you name it. Five minutes, one time.</p>
-    </div>
-    <div class="step-card">
-      <span class="step-emoji">✨</span>
-      <div class="step-title">Type a topic, get a lesson</div>
-      <p class="step-body">"Making Inferences." "Fractions." "Habitats." TeacherAI builds the full lesson plan, worksheet, reading resource, rubric, and slides — aligned to real Ontario expectations. Under 60 seconds.</p>
-    </div>
-    <div class="step-card">
-      <span class="step-emoji">📊</span>
-      <div class="step-title">Mark the whole class in one click</div>
-      <p class="step-body">Students submit on Chromebooks via a shareable link. Click one button to auto-mark everyone with feedback and a level. Review, adjust, save. The marking pile is gone.</p>
-    </div>
-    <div class="step-card">
-      <span class="step-emoji">📝</span>
-      <div class="step-title">Generate report cards in minutes</div>
-      <p class="step-body">Pick your class and term. TeacherAI writes Ontario-style comments for every student — sorted A–Z, within your board's character limit. Paste into your SIS and you're done.</p>
-    </div>
-  </div>
-</section>
 
 <!-- ── Features ── -->
 <section class="features" id="features">
   <div class="features-inner">
     <div class="section-label">Everything you need</div>
-    <h2 class="section-title" style="margin-bottom:3rem">One tool. <em>The whole job.</em></h2>
+    <h2 class="section-title" style="margin-bottom:3rem">Everything you actually need. <em>In one place.</em></h2>
     <div class="feat-grid">
       <div class="feat">
         <div class="feat-icon" style="background:#EAF2EC">📅</div>
         <div class="feat-text">
           <h3>Ontario Curriculum Lesson Plans</h3>
-          <p>Structured lesson plans with Minds On, Direct Instruction, Guided Practice, and Consolidation — mapped to real Ontario expectations.</p>
+          <p>Structured lesson plans with Minds On, Direct Instruction, Guided Practice, and Consolidation, mapped to real Ontario expectations.</p>
         </div>
       </div>
       <div class="feat">
         <div class="feat-icon" style="background:#FDF4E3">📝</div>
         <div class="feat-text">
           <h3>Differentiated Worksheets</h3>
-          <p>Separate worksheets per grade for split classes. All digital — students fill them in on Chromebooks or tablets via a shareable link.</p>
+          <p>Separate worksheets per grade for split classes. Students fill them in on any device through a shareable link.</p>
         </div>
       </div>
       <div class="feat">
@@ -661,14 +695,14 @@
         <div class="feat-icon" style="background:#FDF4E3">▶</div>
         <div class="feat-text">
           <h3>Presentation Slides</h3>
-          <p>Beautiful full-colour classroom slides generated from your lesson — present directly in browser or export to Google Slides.</p>
+          <p>Beautiful full-colour classroom slides generated from your lesson. Present directly in your browser or download as PowerPoint (which Google Slides can import).</p>
         </div>
       </div>
       <div class="feat">
         <div class="feat-icon" style="background:#EAF2EC">📋</div>
         <div class="feat-text">
           <h3>Report Card Comments</h3>
-          <p>Ontario-style comments for every student, sorted A–Z to match your class list. Set your board's character limit and paste straight into your SIS.</p>
+          <p>Ontario-style comments for every student, sorted A–Z to match your class list. Set your board's character limit and paste straight into your report card system.</p>
         </div>
       </div>
     </div>
@@ -676,56 +710,6 @@
 </section>
 
 <!-- ── Differentiator ── -->
-<section class="diff" id="ontario">
-  <div class="diff-grid">
-    <div class="diff-card">
-      <div class="diff-card-label">Why TeacherAI is different</div>
-      <div class="diff-item">
-        <div class="diff-check">✓</div>
-        <div class="diff-item-text">
-          <h4>Real Ontario expectations, not generic AI</h4>
-          <p>Every lesson tagged with actual Ontario curriculum codes — C2.3, B1.4, A2.1. Across Strands A–D, K through Grade 8. Not a US tool with Ontario sprinkled on top.</p>
-        </div>
-      </div>
-      <div class="diff-item">
-        <div class="diff-check">✓</div>
-        <div class="diff-item-text">
-          <h4>Built for split grades</h4>
-          <p>Generate separate worksheets per grade in one click. Most tools assume one grade per class — TeacherAI doesn't. 4/5, 5/6, K/1, all of it.</p>
-        </div>
-      </div>
-      <div class="diff-item">
-        <div class="diff-check">✓</div>
-        <div class="diff-item-text">
-          <h4>Auto-marking that defers to you</h4>
-          <p>Submit worksheets, get them all marked at once. AI suggests a level (1–4) with feedback. You review, you approve. Trained to be a fair teacher, not a strict grader.</p>
-        </div>
-      </div>
-      <div class="diff-item">
-        <div class="diff-check">✓</div>
-        <div class="diff-item-text">
-          <h4>Plan → assess → report, in one tool</h4>
-          <p>TeacherAI knows your students. Report card comments reference their actual assessment history — not generic text the AI guessed.</p>
-        </div>
-      </div>
-      <div class="diff-item">
-        <div class="diff-check">✓</div>
-        <div class="diff-item-text">
-          <h4>Canadian data sovereignty</h4>
-          <p>Supabase Canada Central. Student names never sent to AI. MFIPPA-aware design throughout.</p>
-        </div>
-      </div>
-    </div>
-    <div class="diff-right">
-      <div class="section-label">Ontario-built</div>
-      <h2 class="section-title">For Ontario classrooms.<br><em>By an Ontario teacher.</em></h2>
-      <p class="section-sub">
-        TeacherAI is built from the ground up for Ontario K–8. Real curriculum codes. Real split grades. Real Ontario rubrics. No adapting a US product to fit your class — it just works.
-      </p>
-      <a href="/app" class="btn-primary" style="display:inline-flex">Start free — no credit card →</a>
-    </div>
-  </div>
-</section>
 
 <!-- ── FAQ ── -->
 <section class="faq" id="faq">
@@ -748,7 +732,7 @@
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-a">
-          <p>Three things. First, real Ontario curriculum codes — every lesson is tagged with actual expectations like C2.3 and B1.4, not generic "ELA standards." Second, split grades that actually work — generate separate worksheets per grade in one click. Third, it's built BY an Ontario teacher, not adapted from a US product. If you teach Grade 5/6 SSC in Ontario, this is the tool that was made for your classroom.</p>
+          <p>Three things. First, it's built around the real Ontario curriculum. Every lesson is tagged with specific expectation codes (like C2.3 or B1.4) so you can see exactly what's covered and defend it to admin if asked. Second, split grades that actually work: generate separate worksheets per grade in one click, with each student tracked against their own grade's expectations. Third, it's made by Ontario teachers who use it in their own classrooms, so the workflow matches how Ontario teachers actually plan, not how American product teams think teachers should plan.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -766,16 +750,7 @@
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-a">
-          <p>Yes — this is one of the things TeacherAI was built for. Pick multiple grades (4/5, 5/6, even K/1) and you get separate worksheets per grade with grade-appropriate expectations for each. The lesson plan handles the differentiation, and the auto-marker tracks each student against their own grade's standards. Works for SSCs, multi-age classrooms, and combined Kindergarten classes.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span class="faq-q">Is it actually free?</span>
-          <span class="faq-icon">+</span>
-        </summary>
-        <div class="faq-a">
-          <p>During beta, yes — completely free, no credit card required. There will eventually be paid plans for heavy users, but anyone who signs up during beta gets locked into beta pricing when that happens. Right now I'm focused on making the tool great, not making money.</p>
+          <p>Yes. This is one of the things TeacherAI was built for. Pick multiple grades (4/5, 5/6, even K/1) and you get separate worksheets per grade with grade-appropriate expectations for each. The lesson plan handles the differentiation, and the auto-marker tracks each student against their own grade's standards. Works for any split grade configuration, multi-age classrooms, and combined Kindergarten classes.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -784,7 +759,7 @@
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-a">
-          <p>Yes. TeacherAI supports the new Ontario Kindergarten Curriculum (2026) with play-based "Play Invitation" lesson plans, K-specific worksheets with images, and observation-based assessment instead of Level 1-4 rubrics. Activities are designed for print-and-write — kids draw, trace, and circle on paper while you observe.</p>
+          <p>Yes. TeacherAI supports the new Ontario Kindergarten Curriculum (2026) with play-based "Play Invitation" lesson plans, K-specific worksheets with images, and observation-based assessment instead of Level 1-4 rubrics. Activities are designed for print-and-write. Kids draw, trace, and circle on paper while you observe.</p>
         </div>
       </details>
     </div>
@@ -796,12 +771,15 @@
   <div class="proof-inner">
     <div class="bip-card">
       <p class="bip-label">Built in the open</p>
-      <h2 class="bip-headline">Made by an Ontario teacher who got tired of waiting for someone else to build it.</h2>
+      <h2 class="bip-headline">Made by Ontario teachers who got tired of waiting for someone else to build it.</h2>
       <p class="bip-body">
-        TeacherAI is in active beta with a small group of Ontario teachers. Every feature exists because a teacher asked for it. No VC funding, no growth hacking, no fake reviews — just a tool I'm building because I wanted it to exist for my own classroom.
+        Every feature exists because a teacher asked for it. No VC funding, no growth hacking, no fake reviews. Just a tool built by teachers who wanted it to exist for their own classrooms.
+      </p>
+      <p class="bip-body" style="border-left:3px solid var(--sage);padding-left:1.1rem;background:var(--sage-l);padding:1rem 1.1rem;border-radius:0 8px 8px 0;">
+        <strong>TeacherAI drafts. You decide.</strong> Every lesson, assessment, and report card comment is yours to review, edit, or rewrite before it reaches a student or parent. Your professional judgment is the product — we just give you a head start so you're not working from a blank page at 9pm on a Sunday.
       </p>
       <p class="bip-body">
-        If you'd like to be one of the first teachers to try it, the door is open. It's free during beta. Tell me what's missing and I'll build it.
+        If you'd like to try it, the door is open. Tell us what's missing and we'll build it.
       </p>
       <a href="/app" class="btn-primary" style="display:inline-flex;margin-top:.6rem;">Try TeacherAI free →</a>
     </div>
@@ -814,7 +792,7 @@
   <div class="cta-deco cta-deco-2"></div>
   <div class="cta-inner">
     <h2>Get your weekends <em>back.</em></h2>
-    <p>Type a topic. Get a full lesson, worksheets, rubric, and slides — ready for Monday morning. Free during beta. No credit card.</p>
+    <p>Type a topic. Get a full lesson, worksheets, rubric, and slides, ready for Monday morning. Free during beta. No credit card.</p>
     <a href="/app" class="btn-white">✨ Start for free</a>
     <p class="cta-note">CANADIAN SERVERS · ONTARIO CURRICULUM · MFIPPA-AWARE</p>
   </div>
