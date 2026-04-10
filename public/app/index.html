@@ -467,7 +467,8 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <div id="signupForm" style="display:none;">
       <div class="fi" style="margin-bottom:12px;"><label>Full Name</label><input type="text" id="signupName" placeholder="Your name"></div>
       <div class="fi" style="margin-bottom:12px;"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div>
-      <div class="fi" style="margin-bottom:20px;"><label>Password</label><input type="password" id="signupPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')signUp()"></div>
+      <div class="fi" style="margin-bottom:14px;"><label>Password</label><input type="password" id="signupPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')signUp()"></div>
+      <div class="fi" style="margin-bottom:20px;"><label style="display:flex;align-items:center;justify-content:space-between;">Beta code <span style="font-weight:400;color:var(--muted);font-size:.72rem;">optional</span></label><input type="text" id="signupCode" placeholder="Have one? Paste it here" autocapitalize="off" spellcheck="false"></div>
       <button class="btn b-sage b-full" onclick="signUp()" style="font-size:.95rem;padding:12px;">Create Account →</button>
     </div>
     <div style="margin-top:20px;">
@@ -512,6 +513,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <button id="gConnectBtn" onclick="connectGoogleSlides()" style="display:none;background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);border-radius:6px;padding:3px 9px;font-size:.7rem;cursor:pointer;font-family:'DM Sans',sans-serif;" title="Connect Google Slides">🔗 Connect Google</button>
     <button id="upgradeBtn" onclick="startUpgrade()" style="display:none;padding:5px 11px;background:#F59E0B;border:none;color:#1C1C1C;border-radius:5px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">⚡ Upgrade</button>
     <label class="tab" for="tr-account" style="padding:5px 10px;font-size:.75rem;color:#9CA3AF;" title="Account">👤</label>
+    <button class="signout-btn" onclick="openRedeemModal()" style="margin-right:6px;" title="Redeem a beta access code">🎟 Redeem Code</button>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
   </div>
 </nav>
@@ -1429,7 +1431,29 @@ async function signUp() {
   const { error } = await db.auth.signUp({email, password:pass, options:{data:{full_name:name}}});
   hideLoading();
   if (error) { showAuthErr(error.message); return; }
+  // If a beta code was entered, stash it for redemption right after the user signs in
+  const code = document.getElementById('signupCode')?.value?.trim();
+  if (code) try { localStorage.setItem('teacherai_pending_code', code); } catch(_){}
   showAuthMsg('Account created! Check your email to confirm, then sign in.');
+}
+
+async function redeemBetaCode(code) {
+  if (!code) return { ok:false, error:'No code provided.' };
+  try {
+    const res = await authFetch('/api/redeem-code', { method:'POST', body: JSON.stringify({ code }) });
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok) return { ok:false, error: data.error || 'Could not redeem code.' };
+    return { ok:true, ...data };
+  } catch(e) { return { ok:false, error: e.message }; }
+}
+
+async function openRedeemModal() {
+  const code = prompt('Enter your beta access code:');
+  if (!code) return;
+  showToast('Redeeming code...');
+  const r = await redeemBetaCode(code.trim());
+  if (r.ok) { showToast('🎉 Beta access unlocked! Reload to see your new limits.', 6000); setTimeout(()=>location.reload(), 2000); }
+  else { showToast('⚠️ ' + (r.error||'Could not redeem.'), 5000); }
 }
 async function signOut() {
   await db.auth.signOut();
@@ -1455,7 +1479,7 @@ async function initApp() {
     currentUser = user;
     showLoading('Loading your data...');
     try { await loadUserData(); handleOAuthRedirect(); } catch(e){ console.error(e); }
-    loadUsageMeter();
+    loadUsageMeter(); _autoRedeemPendingCode && _autoRedeemPendingCode();
     loadCurriculum('Language / Literacy'); // preload most common subject in background
     loadKCurriculum(); // preload K curriculum so it's available if teacher picks K
     setTimeout(() => { if (typeof updateKOnlySubjectOptions === 'function') updateKOnlySubjectOptions(); }, 100);
@@ -1819,7 +1843,17 @@ function dismissWelcomeBanner(permanent) {
 // ============================================================
 // PLAN / STRIPE UI
 // ============================================================
-async function loadUsageMeter() {
+async async function _autoRedeemPendingCode() {
+  try {
+    const code = localStorage.getItem('teacherai_pending_code');
+    if (!code) return;
+    localStorage.removeItem('teacherai_pending_code');
+    const r = await redeemBetaCode(code);
+    if (r.ok) showToast('🎉 Beta code applied — unlimited monthly lessons unlocked!', 6000);
+  } catch(_){}
+}
+
+function loadUsageMeter() {
   try {
     const meter = document.getElementById('usageMeter');
     const countEl = document.getElementById('usageCount');
