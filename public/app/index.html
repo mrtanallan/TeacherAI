@@ -800,7 +800,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   </div>
 
   <!-- Student list -->
-  <div class="card">
+  <div class="card" id="rosterStudentsCard">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <div class="ct" style="margin-bottom:0;">👥 Students <span id="rCount" style="color:var(--muted);font-weight:400;">(0)</span></div>
@@ -893,6 +893,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       <option value="subject">Subject</option>
       <option value="grade">Grade</option>
     </select>
+    <button class="btn b-out b-sm" onclick="deleteAllUnitPlans()" style="color:var(--rust);border-color:transparent;font-size:.72rem;margin-left:4px;" title="Delete all unit plans">🗑 Delete All</button>
   </div>
   <div id="unitPlansList"></div>
 </div>
@@ -1871,8 +1872,9 @@ async function loadUsageMeter() {
     const FREE_LIMIT = 5;
     meter.style.display = 'block';
     if (killSwitch || plan === 'beta' || plan === 'pro') {
-      const { count } = await db.from('lessons').select('*',{count:'exact',head:true}).eq('teacher_id',currentUser.id);
-      countEl.textContent = (count||0)+' lesson'+((count||0)!==1?'s':'')+' generated';
+      // Use profile counter (incremented on every generation, never decremented on delete)
+      // so teachers see the true lifetime number — deleted lessons still count as generated.
+      countEl.textContent = used+' lesson'+(used!==1?'s':'')+' generated';
       if (noteEl) { noteEl.textContent = plan==='pro' ? 'Pro — unlimited' : 'Unlimited — beta access'; noteEl.style.color='var(--sage)'; }
       if (upgradeBtn) upgradeBtn.style.display = 'none';
     } else {
@@ -3104,9 +3106,12 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations, unitInfo
     seen.add(key); return true;
   });
   const expHtml = uniqueExpectations.length ? `
-    <div style="background:var(--sage-l);border:1px solid #A8C4AB;border-radius:8px;padding:11px 14px;margin-bottom:14px;">
-      <div style="font-family:DM Mono,monospace;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--sage);margin-bottom:8px;">🎯 Ontario 2023 Expectations Covered</div>
-      <div style="display:flex;flex-wrap:wrap;gap:7px;">
+    <details style="background:var(--sage-l);border:1px solid #A8C4AB;border-radius:8px;padding:9px 14px;margin-bottom:14px;">
+      <summary style="font-family:DM Mono,monospace;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--sage);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none;">
+        <span>🎯 Ontario 2023 Expectations Covered (${uniqueExpectations.length})</span>
+        <span style="font-size:.8rem;opacity:.6;">▾ click to expand</span>
+      </summary>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;">
         ${uniqueExpectations.map(e => {
           const s = e.strand||(e.code&&e.code[0])||'';
           const sColor = strandColors[s]||'var(--sage)';
@@ -3128,7 +3133,7 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations, unitInfo
           </div>`;
         }).join('')}
       </div>
-    </div>` : '';
+    </details>` : '';
 
   const c = document.getElementById('editBlocks');
   // Optional "Part of Unit" badge — shown when this lesson is part of a unit plan.
@@ -3202,10 +3207,10 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations, unitInfo
       const icon = rawLabel.match(/^(\S+)/)?.[1]||'📄';
       return `<button onclick="document.getElementById('cb-${k}')?.scrollIntoView({behavior:'smooth',block:'start'});updateSidebarActive('${k}')"
         id="sbl-${k}"
-        style="background:none;border:none;cursor:pointer;padding:4px 10px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.75rem;color:var(--muted);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:all .12s;"
-        onmouseover="if(!this.classList.contains('active')){this.style.background='var(--sage-l)';this.style.color='var(--sage)';}"
-        onmouseout="if(!this.classList.contains('active')){this.style.background='none';this.style.color='var(--muted)';}"
-        ><span style="font-size:.8rem;">${icon}</span><span>${label}</span></button>`;
+        style="background:none;border:none;cursor:pointer;padding:5px 11px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;color:var(--ink);opacity:.62;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:all .12s;"
+        onmouseover="if(!this.classList.contains('active')){this.style.background='var(--sage-l)';this.style.color='var(--sage)';this.style.opacity='1';}"
+        onmouseout="if(!this.classList.contains('active')){this.style.background='none';this.style.color='var(--ink)';this.style.opacity='.62';}"
+        ><span style="font-size:.85rem;">${icon}</span><span>${label}</span></button>`;
     }).join('');
     sidebar.style.display = outputs.length > 1 ? 'flex' : 'none';
     if (outputs.length > 0) updateSidebarActive(outputs[0]);
@@ -3217,8 +3222,9 @@ function updateSidebarActive(k) {
   document.querySelectorAll('[id^="sbl-"]').forEach(b => {
     const isActive = b.id==='sbl-'+k;
     b.style.background = isActive ? 'var(--sage)' : 'none';
-    b.style.color = isActive ? 'white' : 'var(--muted)';
-    b.style.fontWeight = isActive ? '600' : '400';
+    b.style.color = isActive ? 'white' : 'var(--ink)';
+    b.style.opacity = isActive ? '1' : '.62';
+    b.style.fontWeight = isActive ? '600' : '500';
     b.classList.toggle('active', isActive);
   });
 }
@@ -3800,6 +3806,20 @@ Return ONLY a valid JSON object with this exact shape, no markdown fences, no pr
       const akBody = document.getElementById('cbb-' + akKey);
       if (akBody) akBody.innerHTML = renderAnswerKey(genC[akKey].cur);
     }
+    // Persist to the lesson row so extras survive page reload
+    try {
+      const _topic = curSess?.task || '';
+      const _grades = (curSess?.grades || []).join(',');
+      const _match = savedLessons.find(l => l.topic === _topic && (l.grades||[]).join(',') === _grades);
+      if (_match && currentUser) {
+        const _updContent = { ...(_match.content || {}) };
+        _updContent[k] = genC[k].cur;
+        if (newAK && genC[akKey]) _updContent[akKey] = genC[akKey].cur;
+        db.from('lessons').update({ content: _updContent }).eq('id', _match.id).then(() => {
+          _match.content = _updContent;
+        }).catch(err => console.warn('Extra Qs save failed:', err.message));
+      }
+    } catch(_) {}
     showToast(genC[akKey] ? '✅ Added more questions + answers' : '✅ Added more questions');
   } catch (e) {
     showToast('⚠️ Could not add questions: ' + e.message);
@@ -6719,7 +6739,8 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
 
   const CSS=`*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:#111;font-family:Arial,'Helvetica Neue',sans-serif}
-#deck{width:100%;height:100vh;position:relative}
+#deckWrap{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+#deck{aspect-ratio:16/9;width:100%;max-width:min(100%,calc((100vh - 40px) * 16 / 9));max-height:calc(100vh - 40px);position:relative;box-shadow:0 10px 40px rgba(0,0,0,.5);border-radius:4px;overflow:hidden}
 .slide{position:absolute;inset:0;opacity:0;transition:opacity .35s ease;pointer-events:none;overflow:hidden}
 .slide.active{opacity:1;pointer-events:all}
 .deco{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -6757,7 +6778,7 @@ window.addEventListener('message',function(e){
 <title>${esc(topic)} — TeacherAI</title>
 <style>${CSS}</style></head><body>
 <div id="progress"></div>
-<div id="deck">${allSlides.map(s=>s.replace(/`/g,'&#96;')).join('\n')}</div>
+<div id="deckWrap"><div id="deck">${allSlides.map(s=>s.replace(/`/g,'&#96;')).join('\n')}</div></div>
 <div id="ctrl">
   <button onclick="go(-1)">&#8249;</button>
   <span id="snum">1/${total}</span>
@@ -7197,6 +7218,10 @@ function renderR() {
   const el = document.getElementById('rosterGrid');
   const cnt = document.getElementById('rCount');
   if (!el) return;
+  // First-run: no classes AND no students → hide students card entirely,
+  // so the "Create a class" card is the only thing visible
+  const stuCard = document.getElementById('rosterStudentsCard');
+  if (stuCard) stuCard.style.display = (!classes.length && !students.length) ? 'none' : '';
   const sortMode = document.getElementById('rosterSort')?.value || 'added';
   const gradeOrder = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
   let sorted = [...students];
@@ -7214,12 +7239,12 @@ function renderR() {
     const color = AVCOLORS[i % AVCOLORS.length];
     const initials = s.first[0]+(s.last?.[0]||'');
     const hasIEP = s.iep && s.iep.trim();
-    const prevClass = s.prevClassName ? `<span style="font-family:DM Mono,monospace;font-size:.55rem;color:var(--muted);background:var(--cream);padding:1px 5px;border-radius:3px;border:1px solid var(--border);">was: ${s.prevClassName}</span>` : '';
+    const prevClass = s.prevClassName ? `<span style="font-family:DM Mono,monospace;font-size:.55rem;color:var(--muted);background:var(--cream);padding:1px 5px;border-radius:3px;border:1px solid var(--border);">was: ${escHTML(s.prevClassName)}</span>` : '';
     return `<div class="sc ${hasIEP?'iep':''}" onclick="toggleStuDetail('${escHTML(s.id)}')">
       <div class="sct">
         <div class="av" style="background:${color};">${escHTML(initials)}</div>
         <div style="flex:1;">
-          <div class="sn">${escHTML(s.first)} ${escHTML(s.last||'')} ${hasIEP?'<span class="ib">IEP</span>':''} ${s.notes&&s.notes.toLowerCase().includes('ell')?'<span class="ib" style="background:var(--blue-l);color:var(--blue);border-color:#B0C8E8;">ELL</span>':''} ${escHTML(prevClass||'')}</div>
+          <div class="sn">${escHTML(s.first)} ${escHTML(s.last||'')} ${hasIEP?'<span class="ib">IEP</span>':''} ${s.notes&&s.notes.toLowerCase().includes('ell')?'<span class="ib" style="background:var(--blue-l);color:var(--blue);border-color:#B0C8E8;">ELL</span>':''} ${prevClass||''}</div>
           <div class="sm">${escHTML(s.grade)}${s.notes&&!s.notes.toLowerCase().includes('ell')?' · '+escHTML(s.notes):''}</div>
         </div>
         <button onclick="event.stopPropagation();removeStu('${escHTML(s.id)}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:4px 6px;border-radius:4px;transition:color .15s;" onmouseover="this.style.color='var(--rust)'" onmouseout="this.style.color='var(--muted)'">✕</button>
@@ -7630,6 +7655,17 @@ MARKING PHILOSOPHY — read this carefully before assigning a level:
    - Blanks lower the level somewhat, but a student who answered 4 of 5 questions well is still at L3, not L2
    - Only let blanks pull below L3 if more than half were left blank
 
+6B. PERCENT-CORRECT FLOOR (HARD RULE — overrides rules 2 and 6 when they conflict).
+   Count (correct + generous partial credit) ÷ (total questions) as a rough percentage.
+   - 80%+ correct → Level 3 or Level 4 range
+   - 65–79% correct → Level 3 or Level 3- range
+   - 50–64% correct → Level 2 or Level 2+ range
+   - 30–49% correct → Level 1+ or Level 2- (approaching)
+   - Under 30% correct → Level 1 or Level 1+ — NEVER Level 2 or higher
+   A student who answered 2 of 12 questions correctly (≈17%) is Level 1 or Level 1+, full stop.
+   Warmth and encouragement belong in the FEEDBACK, not in inflating the level.
+   "Leaning higher when in doubt" only applies BETWEEN ADJACENT BANDS above (e.g. L2 vs L2+), never to jump a band.
+
 7. FEEDBACK TONE — Warm, specific, growth-oriented:
    - In per_question feedback: 1 short sentence. Affirm what they did right OR offer a gentle next step. Never sarcastic, never harsh.
    - In observation_note: 2-3 sentences addressed to ${studentObj.first} by first name. Lead with a specific strength you observed. End with one concrete next step framed positively ("Next time, try..." not "You need to...").
@@ -7952,7 +7988,13 @@ async function renderTracker() {
   if (!students.length) { gTable.innerHTML='<div style="color:var(--muted);font-size:.83rem;font-style:italic;">No students yet.</div>'; }
   else {
     const gradeOrder=['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
-    const sorted = [...students].sort((a,b) => gradeOrder.indexOf(a.grade)-gradeOrder.indexOf(b.grade));
+    // Mirror the Class Roster sort preference (change it there to change it everywhere)
+    const sortMode = document.getElementById('rosterSort')?.value || 'grade';
+    let sorted = [...students];
+    if (sortMode==='first')      sorted.sort((a,b) => a.first.localeCompare(b.first));
+    else if (sortMode==='last')  sorted.sort((a,b) => (a.last||a.first).localeCompare(b.last||b.first));
+    else if (sortMode==='added') { /* keep original order */ }
+    else                          sorted.sort((a,b) => gradeOrder.indexOf(a.grade)-gradeOrder.indexOf(b.grade));
     gTable.innerHTML = `<table class="dt"><thead><tr><th>Student</th><th>Grade</th><th>Tasks</th><th>Avg Level</th></tr></thead><tbody>` +
       sorted.map(s => {
         // Build rich marks array with task/date/level info for expandable rows
@@ -8356,6 +8398,18 @@ async function loadLesson(id) {
   window._curSessGrades = lesson.grades || [];
   window._slideData = (content._slideData) ? content._slideData : null;
   _pendingSlideSave = !content._slideData;
+  // If cached slides exist, flip the Build Slides button label to Present
+  if (content._slideData) {
+    const _syncBtn = () => {
+      const btns = document.querySelectorAll('button');
+      let found = false;
+      btns.forEach(b => {
+        if (b.textContent.trim() === '🎬 Build Slides') { b.textContent = '▶ Present'; found = true; }
+      });
+      if (!found) setTimeout(_syncBtn, 200); // retry until the button renders
+    };
+    requestAnimationFrame(_syncBtn);
+  }
   _combinedLinkCache = null;
   Object.keys(_gradeLinksCache).forEach(k => delete _gradeLinksCache[k]);
   // Auto-switch active class to match lesson grades
@@ -9638,13 +9692,62 @@ async function loadLessonById(lessonId) {
   if (lesson) loadLesson(lesson.id);
 }
 
+async function deleteAllUnitPlans() {
+  if (!savedUnitPlans.length) { showToast('No unit plans to delete.'); return; }
+  const n = savedUnitPlans.length;
+  if (!confirm(`Delete ALL ${n} unit plan${n!==1?'s':''}? This also deletes every unit assessment and its student submissions. Lessons generated from units will NOT be deleted. This cannot be undone.`)) return;
+  if (!confirm('Last chance — permanently delete all unit plans?')) return;
+  try {
+    const ids = savedUnitPlans.map(u => u.id);
+    // 1. Fetch all unit assessments across these units
+    const { data: unitWs, error: wsFetchErr } = await db.from('worksheets').select('id').in('unit_plan_id', ids);
+    if (wsFetchErr) throw wsFetchErr;
+    const wsIds = (unitWs || []).map(w => w.id);
+    // 2. Delete all submissions for those worksheets
+    if (wsIds.length) {
+      const { error: subErr } = await db.from('worksheet_submissions').delete().in('worksheet_id', wsIds);
+      if (subErr) throw subErr;
+      const { error: wsErr } = await db.from('worksheets').delete().in('id', wsIds);
+      if (wsErr) throw wsErr;
+      if (window._unitTestData) wsIds.forEach(wid => delete window._unitTestData[wid]);
+    }
+    // 3. Delete all unit plans
+    const { error } = await db.from('unit_plans').delete().in('id', ids);
+    if (error) throw error;
+    savedUnitPlans = [];
+    showToast(`✅ Deleted ${n} unit plan${n!==1?'s':''}.`);
+    renderUnitPlansList();
+  } catch (e) {
+    alert('Error deleting unit plans: ' + e.message);
+  }
+}
+
 async function deleteUnitPlan(id) {
-  if (!confirm('Delete this unit plan? Lessons generated from it will not be deleted.')) return;
-  const { error } = await db.from('unit_plans').delete().eq('id', id);
-  if (error) { alert('Error: ' + error.message); return; }
-  savedUnitPlans = savedUnitPlans.filter(u => u.id !== id);
-  showToast('✅ Unit plan deleted.');
-  renderUnitPlansList();
+  if (!confirm('Delete this unit plan? All unit assessments and their submissions will also be deleted. Lessons generated from it will not be deleted.')) return;
+  try {
+    // 1. Find any unit assessments (worksheets) tied to this unit
+    const { data: unitWs, error: wsFetchErr } = await db.from('worksheets').select('id').eq('unit_plan_id', id);
+    if (wsFetchErr) throw wsFetchErr;
+    const wsIds = (unitWs || []).map(w => w.id);
+    // 2. Delete submissions for those worksheets first (no cascade assumed)
+    if (wsIds.length) {
+      const { error: subErr } = await db.from('worksheet_submissions').delete().in('worksheet_id', wsIds);
+      if (subErr) throw subErr;
+      // 3. Delete the worksheets themselves
+      const { error: wsErr } = await db.from('worksheets').delete().in('id', wsIds);
+      if (wsErr) throw wsErr;
+      // 4. Clean up any in-memory cache
+      if (window._unitTestData) wsIds.forEach(wid => delete window._unitTestData[wid]);
+    }
+    // 5. Finally delete the unit plan row
+    const { error } = await db.from('unit_plans').delete().eq('id', id);
+    if (error) throw error;
+    savedUnitPlans = savedUnitPlans.filter(u => u.id !== id);
+    showToast('✅ Unit plan deleted.');
+    renderUnitPlansList();
+  } catch (e) {
+    alert('Error deleting unit plan: ' + e.message);
+  }
 }
 
 // ============================================================
