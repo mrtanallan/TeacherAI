@@ -9,15 +9,6 @@
 <script src="https://accounts.google.com/gsi/client" async></script>
 <style>
 
-.setup-pill{display:inline-flex;align-items:center;gap:.55rem;margin-left:.9rem;padding:.35rem .75rem .35rem .7rem;background:linear-gradient(135deg,#F5C842,#E8B82E);border:1px solid #D4A422;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:600;color:#2C2520;cursor:pointer;box-shadow:0 2px 8px rgba(212,164,34,.25);transition:transform .15s ease,box-shadow .15s ease;}
-.setup-pill:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(212,164,34,.35);}
-.sp-dots{display:inline-flex;gap:3px;}
-.sp-dot{width:7px;height:7px;border-radius:50%;background:rgba(44,37,32,.25);}
-.sp-dot.on{background:#2C2520;}
-.sp-label{letter-spacing:.01em;}
-.sp-x{opacity:.45;font-size:.72rem;padding:0 2px;margin-left:.2rem;}
-.sp-x:hover{opacity:1;}
-@media (max-width:700px){.setup-pill{margin-left:.4rem;padding:.3rem .55rem;font-size:.68rem;}.sp-label{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}}
 
 /* ============================================================
    DESIGN TOKENS
@@ -511,7 +502,6 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <label class="tab" for="tr-plan"><span class="tab-full">✨ Plan</span><span class="tab-short">✨</span></label>
     <label class="tab" for="tr-lessons"><span class="tab-full">📚 My Lessons</span><span class="tab-short">📚</span></label>
     <label class="tab" for="tr-assess"><span class="tab-full">📊 Trackers</span><span class="tab-short">📊</span></label>
-<div id="setupPill" class="setup-pill" style="display:none;" title="Click to continue setup"></div>
     <label class="tab" for="tr-rc"><span class="tab-full">📝 Report Cards</span><span class="tab-short">📝</span></label>
   </div>
   <div class="nav-user">
@@ -1520,12 +1510,12 @@ function showApp() {
   const savedTab = localStorage.getItem('teacherai_tab') || 'tr-plan';
   const tabEl = document.getElementById(savedTab);
   if (tabEl) tabEl.checked = true;
-  /*updateWelcomeBanner*/updateSetupPill();
+  updateWelcomeBanner();
   document.querySelectorAll('.tab-r').forEach(r => {
     r.addEventListener('change', function() {
       if (!this.checked) return;
       localStorage.setItem('teacherai_tab', this.id);
-      if (this.id==='tr-plan')    { renderClassSelector(); /*updateWelcomeBanner*/updateSetupPill(); resetWorkflow(); }
+      if (this.id==='tr-plan')    { renderClassSelector(); updateWelcomeBanner(); resetWorkflow(); }
       if (this.id==='tr-assess')  { loadUserData().then(() => { renderTracker(); loadSubmissions(); renderAssessClassTabs(); loadUnitTestResults(); const v=localStorage.getItem('teacherai_tracker_view')||'grade'; switchTrackerView(v); }); }
       if (this.id==='tr-rc')      { populateRCFilters().then(() => loadSavedRCPage()); }
       if (this.id==='tr-account') { loadAccountPage(); }
@@ -1546,7 +1536,7 @@ function showApp() {
     switchTrackerView(localStorage.getItem('teacherai_tracker_view') || 'grade');
   });
   loadSubmissions();
-  /*updateWelcomeBanner*/updateSetupPill();
+  updateWelcomeBanner();
   if (savedTab === 'tr-units') renderUnitPlansList();
   if (savedTab === 'tr-lessons') renderLessonsList();
   if (savedTab === 'tr-assess') { loadUnitTestResults(); }
@@ -1641,6 +1631,7 @@ async function createClass() {
   document.getElementById('newClassForm').style.display = 'none';
   await loadUserData();
   renderClassTabs(); renderClassSelector(); renderUnitClassSelector(); renderR(); renderTracker();
+  
 }
 
 async function switchClass(classId) {
@@ -1663,7 +1654,7 @@ async function switchClass(classId) {
   }));
   renderClassTabs(); renderClassSelector(); renderUnitClassSelector();
   autoFillGradesFromClass();
-  renderR(); renderTracker(); /*updateWelcomeBanner*/updateSetupPill();
+  renderR(); renderTracker(); updateWelcomeBanner();
 }
 
 async function deleteClass(classId) {
@@ -1806,23 +1797,8 @@ function autoFillGradesFromClass(gradesHint) {
 // ONBOARDING BANNER
 // ============================================================
 
-function updateSetupPill() {
-  const pill = document.getElementById('setupPill');
-  if (!pill) return;
-  if (localStorage.getItem('teacherai_setup_done')==='1') { pill.style.display='none'; return; }
-  const hasClass = (typeof classes!=='undefined') && classes.length > 0;
-  const hasStudents = (typeof students!=='undefined') && students.length > 0;
-  const hasLesson = (typeof savedLessons!=='undefined') && savedLessons.length > 0;
-  const done = [hasClass, hasStudents, hasLesson].filter(Boolean).length;
-  if (done === 3) { localStorage.setItem('teacherai_setup_done','1'); pill.style.display='none'; return; }
-  pill.style.display='inline-flex';
-  const next = !hasClass ? 'Create a class' : !hasStudents ? 'Add students' : 'Generate a lesson';
-  const tab  = !hasClass ? 'tr-roster' : !hasStudents ? 'tr-roster' : 'tr-plan';
-  pill.innerHTML = `<span class="sp-dots">${[0,1,2].map(i=>`<span class="sp-dot ${i<done?'on':''}"></span>`).join('')}</span><span class="sp-label">Next: ${next}</span><span class="sp-x" onclick="event.stopPropagation();localStorage.setItem('teacherai_setup_done','1');document.getElementById('setupPill').style.display='none';" title="Dismiss setup">✕</span>`;
-  pill.onclick = () => { document.getElementById(tab).checked = true; };
-}
 
-function updateWelcomeBanner() { updateSetupPill(); }
+function updateWelcomeBanner() { /* removed */ }
 function dismissWelcomeBanner(permanent) {
   if (permanent) localStorage.setItem('teacherai_welcomed','1');
   const banner = document.getElementById('welcomeBanner');
@@ -7208,9 +7184,26 @@ function renderR() {
   else if (sortMode==='grade') sorted.sort((a,b) => gradeOrder.indexOf(a.grade)-gradeOrder.indexOf(b.grade));
   if (cnt) cnt.textContent = '('+students.length+')';
   if (!sorted.length) {
-    el.innerHTML = `<div style="text-align:center;padding:24px 16px;color:var(--muted);"><div style="font-size:2rem;margin-bottom:10px;">👥</div>
-      <div style="font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:6px;">No students yet</div>
-      <div style="font-size:.82rem;margin-bottom:16px;">Click "Add Student" to add your class roster.</div></div>`;
+    el.innerHTML = `<div style="text-align:center;padding:28px 20px 32px;max-width:520px;margin:0 auto;">
+      <div style="font-size:2.4rem;margin-bottom:10px;">👥</div>
+      <div style="font-family:'Fraunces',serif;font-weight:700;font-size:1.35rem;margin-bottom:6px;color:var(--ink);">Add your first student</div>
+      <div style="color:var(--muted);font-size:.86rem;margin-bottom:22px;line-height:1.5;">Students added here are used across every lesson, assessment, and report card. Add them once, use them everywhere.</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:22px;text-align:left;">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;">
+          <div style="font-size:1.25rem;line-height:1.1;flex-shrink:0;">✍️</div>
+          <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">Personalized comments</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">Report card comments reference specific students by name.</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;">
+          <div style="font-size:1.25rem;line-height:1.1;flex-shrink:0;">♿</div>
+          <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">IEP & ELL accommodations</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">Lessons automatically adjust to each student's learning profile.</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;">
+          <div style="font-size:1.25rem;line-height:1.1;flex-shrink:0;">🔒</div>
+          <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">Private by design</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">Student names never leave Canada or get sent to the AI.</div></div>
+        </div>
+      </div>
+      <button class="btn b-sage" onclick="openAddStudentModal()" style="font-size:.92rem;padding:10px 22px;">+ Add Your First Student</button>
+    </div>`;
     return;
   }
   el.innerHTML = sorted.map((s,i) => {
@@ -7316,7 +7309,7 @@ async function addStu() {
   document.getElementById('sF').value=''; document.getElementById('sL').value='';
   document.getElementById('sN').value=''; document.getElementById('sI').value='';
   document.getElementById('sF')?.focus();
-  renderR(); /*updateWelcomeBanner*/updateSetupPill();
+  renderR(); updateWelcomeBanner();
 }
 
 async function loadSample() {
@@ -7336,7 +7329,7 @@ async function loadSample() {
   hideLoading();
   if (error) { alert('Error: '+error.message); return; }
   data.forEach(s => students.push({id:s.id,first:s.first_name,last:s.last_name||'',grade:s.grade,notes:s.notes||'',iep:s.learning_profile||'',dbId:s.id,classId:s.class_id}));
-  renderR(); /*updateWelcomeBanner*/updateSetupPill();
+  renderR(); updateWelcomeBanner();
 }
 
 async function clearR() {
@@ -8288,7 +8281,26 @@ function _renderLessonsUI() {
   const el = document.getElementById('lessonsList');
   if (!el) return;
   if (!savedLessons.length) {
-    el.innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--muted);"><div style="font-size:2rem;margin-bottom:10px;">📚</div><div style="font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:6px;">No lessons yet</div><div style="font-size:.82rem;margin-bottom:16px;">Every lesson you generate is saved here for reuse.</div><label for="tr-plan" class="btn b-sage b-sm" style="cursor:pointer;display:inline-block;">✨ Generate your first lesson →</label></div>';
+    el.innerHTML = `<div style="text-align:center;padding:32px 20px;max-width:520px;margin:0 auto;">
+      <div style="font-size:2.4rem;margin-bottom:10px;">📚</div>
+      <div style="font-family:'Fraunces',serif;font-weight:700;font-size:1.35rem;margin-bottom:6px;color:var(--ink);">Your lesson library starts here</div>
+      <div style="color:var(--muted);font-size:.86rem;margin-bottom:22px;line-height:1.5;">Every lesson you generate is saved automatically. Open them later to reuse, edit, or reprint — no starting from scratch next semester.</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:22px;text-align:left;">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;">
+          <div style="font-size:1.25rem;line-height:1.1;flex-shrink:0;">🗂️</div>
+          <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">Auto-saved and searchable</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">Filter by topic, grade, or subject. Nothing ever disappears.</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;">
+          <div style="font-size:1.25rem;line-height:1.1;flex-shrink:0;">♻️</div>
+          <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">Reuse across years</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">Teaching the same unit next year? Pull up last year's lesson in one click.</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;">
+          <div style="font-size:1.25rem;line-height:1.1;flex-shrink:0;">🖨️</div>
+          <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">Print or share anytime</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">PDF, PowerPoint, or a shareable student link — all saved with the lesson.</div></div>
+        </div>
+      </div>
+      <label for="tr-plan" class="btn b-sage" style="font-size:.92rem;padding:10px 22px;cursor:pointer;display:inline-block;">✨ Generate Your First Lesson →</label>
+    </div>`;
     return;
   }
   const filterText = _lessonsFilterText.toLowerCase();
@@ -8978,7 +8990,26 @@ async function renderUnitPlansList(sortOnly) {
   }
   if (!savedUnitPlans.length) {
     if (sorterWrap) sorterWrap.style.display = 'none';
-    el.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--muted);"><div style="font-size:2rem;margin-bottom:10px;">📋</div><div style="font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:6px;">No unit plans yet</div><div style="font-size:.82rem;">Generate your first unit above — each lesson can be built into a full plan.</div></div>`;
+    el.innerHTML = `<div style="text-align:center;padding:32px 20px;max-width:520px;margin:0 auto;">
+      <div style="font-size:2.4rem;margin-bottom:10px;">📋</div>
+      <div style="font-family:'Fraunces',serif;font-weight:700;font-size:1.35rem;margin-bottom:6px;color:var(--ink);">Plan whole units in one sitting</div>
+      <div style="color:var(--muted);font-size:.86rem;margin-bottom:22px;line-height:1.5;">Type a unit topic and get a 2–4 week scope and sequence in under 30 seconds. Each lesson can be expanded into a full plan with one click when you're ready to teach it.</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:22px;text-align:left;">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;">
+          <div style="font-size:1.25rem;line-height:1.1;flex-shrink:0;">🗺️</div>
+          <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">Scope and sequence, done</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">Big ideas, expectations mapped across lessons, assessment points.</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;">
+          <div style="font-size:1.25rem;line-height:1.1;flex-shrink:0;">⚡</div>
+          <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">Expand lessons on demand</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">Build each lesson into a full plan, worksheet, and slides as you need them.</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;">
+          <div style="font-size:1.25rem;line-height:1.1;flex-shrink:0;">📊</div>
+          <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">Unit assessments included</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">Generate a culminating assessment aligned to your expectations.</div></div>
+        </div>
+      </div>
+      <div style="color:var(--muted);font-size:.78rem;">Use the form above to generate your first unit plan ↑</div>
+    </div>`;
     return;
   }
   if (sorterWrap) sorterWrap.style.display = 'flex';
