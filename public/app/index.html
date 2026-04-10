@@ -511,7 +511,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <div class="nav-user">
     <span class="nav-email" id="navEmail"></span>
     <button id="gConnectBtn" onclick="connectGoogleSlides()" style="display:none;background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);border-radius:6px;padding:3px 9px;font-size:.7rem;cursor:pointer;font-family:'DM Sans',sans-serif;" title="Connect Google Slides">🔗 Connect Google</button>
-    <button id="upgradeBtn" onclick="startUpgrade()" style="display:none;padding:5px 11px;background:#F59E0B;border:none;color:#1C1C1C;border-radius:5px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">⚡ Upgrade</button>
+    <button id="upgradeBtn" onclick="openRedeemModal()" style="display:none;padding:5px 11px;background:var(--sage);border:none;color:white;border-radius:5px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">🎟 Redeem Code</button>
     <label class="tab" for="tr-account" style="padding:5px 10px;font-size:.75rem;color:#9CA3AF;" title="Account">👤</label>
     <button class="signout-btn" onclick="openRedeemModal()" style="margin-right:6px;" title="Redeem a beta access code">🎟 Redeem Code</button>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
@@ -1843,7 +1843,7 @@ function dismissWelcomeBanner(permanent) {
 // ============================================================
 // PLAN / STRIPE UI
 // ============================================================
-async async function _autoRedeemPendingCode() {
+async function _autoRedeemPendingCode() {
   try {
     const code = localStorage.getItem('teacherai_pending_code');
     if (!code) return;
@@ -1853,35 +1853,52 @@ async async function _autoRedeemPendingCode() {
   } catch(_){}
 }
 
-function loadUsageMeter() {
+async function loadUsageMeter() {
   try {
     const meter = document.getElementById('usageMeter');
     const countEl = document.getElementById('usageCount');
     const noteEl = document.getElementById('usageNote');
     const upgradeBtn = document.getElementById('upgradeBtn');
-    const killSwitch = true;
-    if (!meter||!countEl) return;
-    const { data: profile } = await db.from('profiles').select('plan, lessons_this_month').eq('id', currentUser.id).single();
-    const plan = profile?.plan || 'free';
-    const used = profile?.lessons_this_month || 0;
-    const FREE_LIMIT = 5;
+    if (!meter || !countEl || !currentUser) return;
     meter.style.display = 'block';
-    if (killSwitch || plan === 'beta' || plan === 'pro') {
-      // Use profile counter (incremented on every generation, never decremented on delete)
-      // so teachers see the true lifetime number — deleted lessons still count as generated.
-      countEl.textContent = used+' lesson'+(used!==1?'s':'')+' generated';
-      if (noteEl) { noteEl.textContent = plan==='pro' ? 'Pro — unlimited' : 'Unlimited — beta access'; noteEl.style.color='var(--sage)'; }
+
+    // Read plan from profile
+    const { data: profile } = await db.from('profiles').select('plan').eq('id', currentUser.id).single();
+    const plan = profile?.plan || 'free';
+
+    // Count lesson+unit generations in last 30 days (same window as server rate limiter)
+    const since = new Date(Date.now() - 30*24*60*60*1000).toISOString();
+    const { count } = await db.from('generations')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id)
+      .gte('created_at', since)
+      .in('type', ['lesson', 'unit']);
+    const used = count || 0;
+
+    if (plan === 'pro') {
+      countEl.textContent = used + ' lesson' + (used !== 1 ? 's' : '') + ' generated · last 30 days';
+      if (noteEl) { noteEl.textContent = 'Pro — unlimited'; noteEl.style.color = 'var(--sage)'; }
+      if (upgradeBtn) upgradeBtn.style.display = 'none';
+    } else if (plan === 'beta') {
+      countEl.textContent = used + ' lesson' + (used !== 1 ? 's' : '') + ' generated · last 30 days';
+      if (noteEl) { noteEl.textContent = 'Beta — unlimited monthly lessons'; noteEl.style.color = 'var(--sage)'; }
       if (upgradeBtn) upgradeBtn.style.display = 'none';
     } else {
-      countEl.textContent = used+' / '+FREE_LIMIT+' lessons this month';
-      const remaining = FREE_LIMIT - used;
-      if (noteEl) { noteEl.textContent = remaining > 0 ? remaining+' remaining — upgrade for unlimited' : 'Limit reached — upgrade to continue'; noteEl.style.color = remaining > 0 ? 'var(--muted)' : '#EF4444'; }
+      const FREE_LIMIT = 5;
+      const remaining = Math.max(0, FREE_LIMIT - used);
+      countEl.textContent = used + ' / ' + FREE_LIMIT + ' lessons this month';
+      if (noteEl) {
+        noteEl.textContent = remaining > 0
+          ? remaining + ' remaining — redeem a beta code for unlimited'
+          : 'Monthly limit reached — redeem a beta code or wait 30 days';
+        noteEl.style.color = remaining > 0 ? 'var(--muted)' : '#EF4444';
+      }
       if (upgradeBtn) upgradeBtn.style.display = 'inline-block';
     }
-  } catch(e) { console.warn('loadUsageMeter error', e); }
+  } catch (e) { console.warn('loadUsageMeter error', e); }
 }
-
-async function startUpgrade() {
+async function startUpgrade() { showToast("Redeem a beta code for unlimited monthly lessons.", 5000); openRedeemModal(); }
+async function _startUpgrade_stripe_deprecated() {
   try {
     showToast('Opening checkout...');
     const res = await authFetch('/api/create-checkout', { method: 'POST' });
@@ -1899,7 +1916,7 @@ function showUpgradePrompt(message) {
   const modal = document.createElement('div');
   modal.id = 'upgradeModal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
-  modal.innerHTML = `<div style="background:white;border-radius:16px;padding:32px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);"><div style="font-size:2rem;margin-bottom:12px;">⚡</div><div style="font-weight:700;font-size:1.1rem;color:#1C1C1C;margin-bottom:8px;">You've hit your free limit</div><div style="font-size:.88rem;color:#6B7280;margin-bottom:24px;line-height:1.5;">${message}</div><button onclick="startUpgrade()" style="width:100%;padding:12px;background:#F59E0B;border:none;border-radius:10px;font-weight:700;font-size:.95rem;color:#1C1C1C;cursor:pointer;margin-bottom:10px;">⚡ Upgrade to Pro — Unlimited</button><button onclick="document.getElementById('upgradeModal').remove()" style="width:100%;padding:10px;background:none;border:1px solid #E5E7EB;border-radius:10px;font-size:.85rem;color:#6B7280;cursor:pointer;">Maybe later</button></div>`;
+  modal.innerHTML = `<div style="background:white;border-radius:16px;padding:32px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);"><div style="font-size:2rem;margin-bottom:12px;">⚡</div><div style="font-weight:700;font-size:1.1rem;color:#1C1C1C;margin-bottom:8px;">You've used your 5 free lessons this month</div><div style="font-size:.88rem;color:#6B7280;margin-bottom:24px;line-height:1.5;">${message}</div><button onclick="document.getElementById('upgradeModal').remove();openRedeemModal();" style="width:100%;padding:12px;background:var(--sage);border:none;border-radius:10px;font-weight:700;font-size:.95rem;color:white;cursor:pointer;margin-bottom:10px;">🎟 Redeem Beta Code</button><button onclick="document.getElementById('upgradeModal').remove()" style="width:100%;padding:10px;background:none;border:1px solid #E5E7EB;border-radius:10px;font-size:.85rem;color:#6B7280;cursor:pointer;">Maybe later</button></div>`;
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
 }
