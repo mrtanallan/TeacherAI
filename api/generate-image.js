@@ -70,9 +70,9 @@ async function generateAIImage({ topic, subject, grade, theme, style, imageSize 
   const prompt = isKLineDrawing
     ? [resolvedStyle, topic, 'no text anywhere in image', 'no signatures, no artist names, no watermarks'].join(', ')
     : [
-        resolvedStyle,
         `${topic}${themeStr}`,
         `Grade ${gradeNum || 'K-8'} classroom`,
+        resolvedStyle,
         'beautiful artwork',
         'soft warm colours',
         'high quality',
@@ -152,7 +152,7 @@ export default async function handler(req, res) {
     : !style && (subject || '').toLowerCase().includes('math') ? 'm'
     : 'c';
   const subKeyClean = (subKey || '_').slice(0, 40).replace(/[^a-z0-9_-]/gi, '');
-  const cacheKey = `v5:${(subject||'').slice(0,20)}:${(grade||'').slice(0,10)}:${topic.slice(0,60)}:${styleCode}:${subKeyClean}`;
+  const cacheKey = `v6:${(subject||'').slice(0,20)}:${(grade||'').slice(0,10)}:${topic.slice(0,60)}:${styleCode}:${subKeyClean}`;
 
   try {
     const cached = await getCached(cacheKey);
