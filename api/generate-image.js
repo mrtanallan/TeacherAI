@@ -143,7 +143,7 @@ export default async function handler(req, res) {
   // left alone (no deletion) — they just won't match new requests. Over time
   // the cache will repopulate with v4 entries.
   //
-  // Key format: v4:subject:grade:topic:style-code:subKey
+  // Key format: v7:subject:grade:topic:style-code:subKey
   // style is hashed to a short code (l=line, s=science, m=math, c=children) to
   // keep keys short. subKey is optional; if not passed, defaults to '_' so
   // cover-art calls still share a cache slot per topic.
@@ -152,7 +152,7 @@ export default async function handler(req, res) {
     : !style && (subject || '').toLowerCase().includes('math') ? 'm'
     : 'c';
   const subKeyClean = (subKey || '_').slice(0, 40).replace(/[^a-z0-9_-]/gi, '');
-  const cacheKey = `v6:${(subject||'').slice(0,20)}:${(grade||'').slice(0,10)}:${topic.slice(0,60)}:${styleCode}:${subKeyClean}`;
+  const cacheKey = `v7:${(subject||'').slice(0,20)}:${(grade||'').slice(0,10)}:${topic.slice(0,60)}:${styleCode}:${subKeyClean}`;
 
   try {
     const cached = await getCached(cacheKey);
