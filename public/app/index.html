@@ -1064,7 +1064,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
 <!-- Footer -->
 <div style="text-align:center;padding:24px 16px 32px;border-top:1px solid var(--border);margin-top:20px;font-size:.75rem;color:var(--muted);">
-  <span>🍁 Aligned to the <strong>Ontario Curriculum</strong> · Student names anonymized · 🇨🇦 Data stored in Canada</span><br>
+  <span>🍁 Aligned to the <strong>Ontario Curriculum</strong> · Student names never sent to AI · 🇨🇦 Data stored in Canada</span><br>
   <span style="margin-top:6px;display:inline-block;">
     <a href="/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
     <a href="/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms of Service</a> &nbsp;·&nbsp;
@@ -8892,7 +8892,42 @@ async function connectGoogleDrive() {
 }
 
 
-function requestAccountDeletion(){if(!confirm('Are you sure you want to delete your account? All your lessons, assessments, and student data will be permanently removed. This cannot be undone.'))return;if(!confirm('Last chance — this will permanently delete everything. Continue?'))return;const email=currentUser.email;window.open('mailto:teacheraicanada@gmail.com?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20TeacherAI%20account.%0A%0AEmail%3A%20'+encodeURIComponent(email)+'%0AUser%20ID%3A%20'+currentUser.id,'_blank');alert('A deletion request email has been opened. Send it to confirm. We will remove your account and all data within 30 days.');}
+async function requestAccountDeletion() {
+  if (!confirm('⚠️ Permanently delete your TeacherAI account?\n\nThis will immediately and permanently erase ALL your data:\n• Class roster and student records\n• Lessons, units, and worksheets\n• Assessment sessions, marks, and tracker data\n• Report card comments\n• Account profile\n\nThis cannot be undone. There is no recovery.')) return;
+  if (!confirm('Last chance.\n\nClick OK to proceed to the final confirmation.')) return;
+  const typed = prompt('Type DELETE (in capital letters) to confirm permanent deletion of your account and all data:');
+  if (typed !== 'DELETE') { alert('Deletion cancelled.'); return; }
+  showLoading('Deleting your account...');
+  try {
+    const uid = currentUser.id;
+    // 1. Get student IDs first (student_marks has no teacher_id, only student_id)
+    const { data: myStudents } = await db.from('students').select('id').eq('teacher_id', uid);
+    const studentIds = (myStudents || []).map(s => s.id);
+    // 2. Delete student_marks via student_id
+    if (studentIds.length) await db.from('student_marks').delete().in('student_id', studentIds);
+    // 3. Delete teacher-scoped tables (order matters for any FKs)
+    await db.from('assessment_sessions').delete().eq('teacher_id', uid);
+    await db.from('report_card_comments').delete().eq('teacher_id', uid);
+    await db.from('worksheets').delete().eq('teacher_id', uid); // CASCADE clears worksheet_submissions
+    await db.from('unit_plans').delete().eq('teacher_id', uid);
+    await db.from('lessons').delete().eq('teacher_id', uid);
+    await db.from('students').delete().eq('teacher_id', uid);
+    await db.from('classes').delete().eq('teacher_id', uid);
+    // 4. user_id-scoped tables
+    await db.from('generations').delete().eq('user_id', uid);
+    await db.from('feedback').delete().eq('user_id', uid);
+    // 5. Profile last
+    await db.from('profiles').delete().eq('id', uid);
+    // 6. Sign out
+    await db.auth.signOut();
+    hideLoading();
+    alert('✅ Your account and all data have been permanently deleted.\n\nYou will now be returned to the sign-in screen.');
+    window.location.href = '/';
+  } catch (e) {
+    hideLoading();
+    alert('Error during account deletion: ' + e.message + '\n\nSome data may have been deleted. Please contact teacheraicanada@gmail.com for assistance.');
+  }
+}
 
 
 // ============================================================
@@ -9785,27 +9820,13 @@ async function loadLessonById(lessonId) {
 async function deleteAllUnitPlans() {
   if (!savedUnitPlans.length) { showToast('No unit plans to delete.'); return; }
   const n = savedUnitPlans.length;
-  if (!confirm(`Delete ALL ${n} unit plan${n!==1?'s':''}? This also deletes every unit assessment and its student submissions. Lessons generated from units will NOT be deleted. This cannot be undone.`)) return;
-  if (!confirm('Last chance — permanently delete all unit plans?')) return;
+  if (!confirm(`Delete ALL ${n} unit plan${n!==1?'s':''}? Lessons and assessments will be kept — marks stay in Trackers. Only the planning documents are removed.`)) return;
   try {
     const ids = savedUnitPlans.map(u => u.id);
-    // 1. Fetch all unit assessments across these units
-    const { data: unitWs, error: wsFetchErr } = await db.from('worksheets').select('id').in('unit_plan_id', ids);
-    if (wsFetchErr) throw wsFetchErr;
-    const wsIds = (unitWs || []).map(w => w.id);
-    // 2. Delete all submissions for those worksheets
-    if (wsIds.length) {
-      const { error: subErr } = await db.from('worksheet_submissions').delete().in('worksheet_id', wsIds);
-      if (subErr) throw subErr;
-      const { error: wsErr } = await db.from('worksheets').delete().in('id', wsIds);
-      if (wsErr) throw wsErr;
-      if (window._unitTestData) wsIds.forEach(wid => delete window._unitTestData[wid]);
-    }
-    // 3. Delete all unit plans
     const { error } = await db.from('unit_plans').delete().in('id', ids);
     if (error) throw error;
     savedUnitPlans = [];
-    showToast(`✅ Deleted ${n} unit plan${n!==1?'s':''}.`);
+    showToast(`✅ Deleted ${n} unit plan${n!==1?'s':''}. Marks preserved.`);
     renderUnitPlansList();
   } catch (e) {
     alert('Error deleting unit plans: ' + e.message);
@@ -9813,18 +9834,12 @@ async function deleteAllUnitPlans() {
 }
 
 async function deleteUnitPlan(id) {
-  if (!confirm('Delete this unit plan? All unit assessments and their submissions will also be deleted. Lessons generated from it will not be deleted.')) return;
+  if (!confirm('Delete this unit plan? Lessons and assessments generated from it will be kept — you\'ll still see marks in Trackers. Only the planning document is removed.')) return;
   try {
-    const { data: unitWs } = await db.from('worksheets').select('id').eq('unit_plan_id', id);
-    const wsIds = (unitWs || []).map(w => w.id);
-    if (wsIds.length) {
-      await db.from('worksheets').delete().in('id', wsIds);
-      if (window._unitTestData) wsIds.forEach(wid => delete window._unitTestData[wid]);
-    }
     const { error } = await db.from('unit_plans').delete().eq('id', id);
     if (error) throw error;
     savedUnitPlans = savedUnitPlans.filter(u => u.id !== id);
-    showToast('✅ Unit plan deleted.');
+    showToast('✅ Unit plan deleted. Marks preserved in Trackers.');
     renderUnitPlansList();
   } catch (e) {
     alert('Error deleting unit plan: ' + e.message);
