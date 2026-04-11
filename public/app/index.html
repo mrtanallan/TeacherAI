@@ -4507,9 +4507,8 @@ async function generateSlideData(callerBtn) {
 
     // Per-slide AI images — one per content slide using slide title as prompt
     const fetchSlideImages = async () => {
-      const slides = (sd.content_slides||[]).slice(0,4);
+      const slides = (sd.content_slides||[]).slice(0, profile.slideCount);
       if (!slides.length) return;
-      // Fire all 4 in parallel
       const promises = slides.map(async (cs, i) => {
         const slidePrompt = cs.title || topic;
         try {
