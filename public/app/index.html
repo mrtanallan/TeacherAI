@@ -4241,13 +4241,29 @@ const GRADE_FINETUNE = {
 };
 function resolveSlideProfile(grades) {
   const gs = (grades && grades.length) ? grades : ['4'];
+  // Normalize: "Grade 1" → "1", "Kindergarten" → "K", "K" → "K"
+  const normalize = (g) => {
+    const s = String(g || '').trim();
+    if (/^k/i.test(s) || /kinder/i.test(s)) return 'K';
+    const m = s.match(/\d+/);
+    return m ? m[0] : '4';
+  };
+  const bandOf = (g) => {
+    if (g === 'K') return 'K';
+    const n = parseInt(g, 10);
+    if (n <= 3) return '1-3';
+    if (n <= 6) return '4-6';
+    return '7-8';
+  };
+  const normalized = gs.map(normalize);
+  const bands = normalized.map(bandOf);
   const order = ['K','1-3','4-6','7-8'];
-  const bands = gs.map(g => (typeof getBand === 'function' ? getBand(g) : '4-6'));
   const highest = bands.slice().sort((a,b)=>order.indexOf(b)-order.indexOf(a))[0] || '4-6';
-  const nums = gs.map(g => g==='K'?0:parseInt(g,10)).filter(n=>!isNaN(n));
+  const nums = normalized.map(g => g==='K'?0:parseInt(g,10)).filter(n=>!isNaN(n));
   const lowest = nums.length ? (Math.min(...nums)===0?'K':String(Math.min(...nums))) : '4';
   const base = BAND_PROFILES[highest] || BAND_PROFILES['4-6'];
   const fine = GRADE_FINETUNE[lowest] || GRADE_FINETUNE['4'];
+  console.log('[resolveSlideProfile] input=', grades, 'normalized=', normalized, 'band=', highest, 'anchor=', lowest);
   return {
     ...base,
     maxSentenceWords: Math.min(base.maxSentenceWords, fine.maxSentenceWords),
