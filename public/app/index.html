@@ -511,9 +511,9 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <div class="nav-user">
     <span class="nav-email" id="navEmail"></span>
     <button id="gConnectBtn" onclick="connectGoogleSlides()" style="display:none;background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);border-radius:6px;padding:3px 9px;font-size:.7rem;cursor:pointer;font-family:'DM Sans',sans-serif;" title="Connect Google Slides">🔗 Connect Google</button>
-    <button id="upgradeBtn" onclick="openRedeemModal()" style="display:none;padding:5px 11px;background:var(--sage);border:none;color:white;border-radius:5px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">🎟 Redeem Code</button>
+    <button id="upgradeBtn" onclick="openRedeemModal()" style="display:none;"></button>
     <label class="tab" for="tr-account" style="padding:5px 10px;font-size:.75rem;color:#9CA3AF;" title="Account">👤</label>
-    <button class="signout-btn" onclick="openRedeemModal()" style="margin-right:6px;" title="Redeem a beta access code">🎟 Redeem Code</button>
+    
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
   </div>
 </nav>
@@ -1038,6 +1038,12 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   </div>
 
   <div class="card" style="margin-bottom:14px;">
+    <div class="ct">🎟 Redeem Beta Code</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:12px;">Have a beta access code? Redeem it here for unlimited monthly lessons.</p>
+    <button class="btn b-sage b-sm" onclick="openRedeemModal()">🎟 Redeem Code</button>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
     <div class="ct">📊 Usage</div>
     <div id="acct-usage"><div style="color:var(--muted);font-size:.83rem;">Loading...</div></div>
   </div>
@@ -1543,7 +1549,7 @@ function showApp() {
       if (!this.checked) return;
       localStorage.setItem('teacherai_tab', this.id);
       if (this.id==='tr-plan')    { renderClassSelector(); updateWelcomeBanner(); resetWorkflow(); }
-      if (this.id==='tr-assess')  { loadUserData().then(() => { renderTracker(); loadSubmissions(); renderAssessClassTabs(); loadUnitTestResults(); const v=localStorage.getItem('teacherai_tracker_view')||'grade'; switchTrackerView(v); }); }
+      if (this.id==='tr-assess')  { loadUserData().then(() => { renderTracker(); renderAssessClassTabs(); loadUnitTestResults(); const v=localStorage.getItem('teacherai_tracker_view')||'grade'; switchTrackerView(v); }); }
       if (this.id==='tr-rc')      { populateRCFilters().then(() => loadSavedRCPage()); }
       if (this.id==='tr-account') { loadAccountPage(); }
       if (this.id==='tr-roster')  { renderClassTabs(); renderR(); }
@@ -1562,7 +1568,6 @@ function showApp() {
   renderLessonsList().then(() => {
     switchTrackerView(localStorage.getItem('teacherai_tracker_view') || 'grade');
   });
-  loadSubmissions();
   updateWelcomeBanner();
   if (savedTab === 'tr-units') renderUnitPlansList();
   if (savedTab === 'tr-lessons') renderLessonsList();
@@ -2375,7 +2380,7 @@ function toggleExpLessons(codeKey) {
 // ============================================================
 // TAB HELPERS
 // ============================================================
-function switchToAssess() { document.getElementById('tr-assess').checked=true; renderTracker(); loadSubmissions(); renderAssessClassTabs(); }
+function switchToAssess() { document.getElementById('tr-assess').checked=true; renderTracker(); renderAssessClassTabs(); }
 function switchTrackerView(view) {
   const isGrade = view==='grade';
   const gv = document.getElementById('gradeTrackerView');
@@ -7877,7 +7882,6 @@ async function saveOneStu(sid, btn) {
 // ============================================================
 // TRACKER
 // ============================================================
-async function loadSubmissions() {}
 
 async function loadUnitTestResults() {
   const card = document.getElementById('unitTestResultsCard');
@@ -8328,7 +8332,7 @@ function renderAssessClassTabs() {
       activeClassId=cid||null; _classIdInitialized=true;
       showLoading('Switching class...');
       await loadUserData(); hideLoading();
-      renderAssessClassTabs(); renderTracker(); loadSubmissions();
+      renderAssessClassTabs(); renderTracker();
       const curView=localStorage.getItem('teacherai_tracker_view');
       if(curView==='exp') renderExpInAssess();
     });
@@ -9814,7 +9818,6 @@ async function deleteUnitPlan(id) {
     const { data: unitWs } = await db.from('worksheets').select('id').eq('unit_plan_id', id);
     const wsIds = (unitWs || []).map(w => w.id);
     if (wsIds.length) {
-      await db.from('worksheet_submissions').delete().in('worksheet_id', wsIds);
       await db.from('worksheets').delete().in('id', wsIds);
       if (window._unitTestData) wsIds.forEach(wid => delete window._unitTestData[wid]);
     }
