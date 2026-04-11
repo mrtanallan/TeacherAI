@@ -68,7 +68,7 @@ async function generateAIImage({ topic, subject, grade, theme, style, imageSize 
   // and decorative words because we want a clean single object, not a scene.
   const isKLineDrawing = resolvedStyle === K_LINE_DRAWING_STYLE;
   const prompt = isKLineDrawing
-    ? [resolvedStyle, topic, 'no text anywhere in image'].join(', ')
+    ? [resolvedStyle, topic, 'no text anywhere in image', 'no signatures, no artist names, no watermarks'].join(', ')
     : [
         resolvedStyle,
         `${topic}${themeStr}`,
@@ -77,11 +77,13 @@ async function generateAIImage({ topic, subject, grade, theme, style, imageSize 
         'soft warm colours',
         'high quality',
         'no text anywhere in image',
+        'no signatures, no artist names, no watermarks, no logos',
       ].join(', ');
 
   const negativePrompt = [
     'text', 'letters', 'words', 'numbers', 'labels', 'captions',
     'titles', 'headings', 'watermark', 'writing', 'typography',
+    'signature', 'artist name', 'logo', 'autograph',
     'diagram', 'chart', 'infographic', 'ugly', 'blurry',
     'distorted', 'low quality', 'bad art',
   ].join(', ');
@@ -150,7 +152,7 @@ export default async function handler(req, res) {
     : !style && (subject || '').toLowerCase().includes('math') ? 'm'
     : 'c';
   const subKeyClean = (subKey || '_').slice(0, 40).replace(/[^a-z0-9_-]/gi, '');
-  const cacheKey = `v4:${(subject||'').slice(0,20)}:${(grade||'').slice(0,10)}:${topic.slice(0,60)}:${styleCode}:${subKeyClean}`;
+  const cacheKey = `v5:${(subject||'').slice(0,20)}:${(grade||'').slice(0,10)}:${topic.slice(0,60)}:${styleCode}:${subKeyClean}`;
 
   try {
     const cached = await getCached(cacheKey);
