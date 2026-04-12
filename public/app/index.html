@@ -2178,10 +2178,21 @@ function checkGradeAlignment() {
   const hintText = document.getElementById('gradeAlignmentHintText');
   if (!hint || !hintText) return;
   hint.style.display = 'none';
-  const topic = (document.getElementById('topic')?.value || '').toLowerCase().trim();
+  const topicRaw = (document.getElementById('topic')?.value || '').trim();
+  const topic = topicRaw.toLowerCase();
   const subj = document.getElementById('subj')?.value || '';
   const selectedGrades = [...document.querySelectorAll('#gradePillContainer .grade-pill-btn.selected')].map(b => b.dataset.grade);
   if (!topic || topic.length < 4 || !subj || !selectedGrades.length) return;
+  // Trust-our-own-suggestions rule: if the topic matches a suggestion we offered
+  // for the selected grade (indicated by a "(Gr. K)" or "(Gr. 4)" style suffix),
+  // don't nag the teacher that it belongs somewhere else. Our curated lists
+  // override the keyword matcher.
+  const gradeTagMatch = topicRaw.match(/\(Gr\.\s*([K\d/]+)\)\s*$/i);
+  if (gradeTagMatch) {
+    const taggedGrades = gradeTagMatch[1].split('/').map(g => g.trim().toUpperCase());
+    const selectedTagged = selectedGrades.map(g => g === 'Kindergarten' ? 'K' : g.replace('Grade ','').trim());
+    if (selectedTagged.some(g => taggedGrades.includes(g))) return;
+  }
   const subjKey = subj === 'Science & Technology' ? 'science'
     : subj === 'Mathematics' ? 'math'
     : subj === 'Language / Literacy' ? 'language' : null;
@@ -2189,7 +2200,8 @@ function checkGradeAlignment() {
   const pool = EXPECTATIONS[subjKey] || [];
   if (pool.length < 10) return; // curriculum not loaded yet
   const STOP = new Set(['the','a','an','of','and','or','in','on','to','for','with','is','are','about','using','into','through','from','how','what','why','when','where','basic','intro','introduction','learning']);
-  const topicWords = topic.replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w => w.length > 3 && !STOP.has(w));
+  const topicClean = topic.replace(/\(gr\.\s*[k\d/]+\)\s*$/i,'').trim();
+  const topicWords = topicClean.replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w => w.length > 3 && !STOP.has(w));
   if (!topicWords.length) return;
   // Score each grade by how many topic words appear in that grade's expectation descriptions
   const gradesAll = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
@@ -2210,7 +2222,7 @@ function checkGradeAlignment() {
   if (selectedMaxScore >= Math.ceil(maxScore * 0.6)) return; // selected is close enough
   const betterGrades = gradesAll.filter(g => scoreByGrade[g] === maxScore && !selectedGrades.includes(g));
   if (!betterGrades.length) return;
-  const topicDisplay = document.getElementById('topic')?.value || topic;
+  const topicDisplay = topicRaw;
   const shortList = betterGrades.slice(0,2).map(g => g.replace('Grade ','Gr. ')).join(' or ');
   hintText.textContent = `"${topicDisplay}" aligns more closely with ${shortList} ${subj}. We'll still generate it for ${selectedGrades.map(g=>g.replace('Grade ','Gr. ')).join(' / ')} — expectations may be a loose fit.`;
   hint.style.display = 'block';
@@ -4736,7 +4748,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-12-E (K-appropriate topic suggestions + grade-aware placeholders)';
+const TA_BUILD = '2026-04-12-F (hint suppresses when topic tagged for selected grade)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
