@@ -4292,9 +4292,14 @@ async function generateSlideData(callerBtn) {
     const _sd = window._slideData.sd;
     // Re-render hardcoded SVGs from current renderer code (don't trust cached svg_html
     // — it may be from an older renderer version with bugs since fixed).
-    (_sd.content_slides||[]).forEach(cs => {
+    (_sd.content_slides||[]).forEach((cs, idx) => {
       const fresh = renderHardcoded(cs.visual_type, cs.visual_params);
-      if (fresh) cs.svg_html = fresh;
+      if (fresh) {
+        cs.svg_html = fresh;
+        console.log('[FAST-PATH RERENDER] slide', idx, 'visual_type=', cs.visual_type, 'rerendered OK');
+      } else {
+        console.log('[FAST-PATH RERENDER] slide', idx, 'visual_type=', cs.visual_type, 'NO HARDCODED RENDERER — keeping agent svg');
+      }
     });
     const _t  = window._slideData.topic    || topic;
     const _s  = window._slideData.subject  || subject;
