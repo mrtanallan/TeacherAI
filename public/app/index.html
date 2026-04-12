@@ -4290,6 +4290,12 @@ async function generateSlideData(callerBtn) {
   // Fast path: reuse saved slide data if we already have it
   if (window._slideData && window._slideData.sd) {
     const _sd = window._slideData.sd;
+    // Re-render hardcoded SVGs from current renderer code (don't trust cached svg_html
+    // — it may be from an older renderer version with bugs since fixed).
+    (_sd.content_slides||[]).forEach(cs => {
+      const fresh = renderHardcoded(cs.visual_type, cs.visual_params);
+      if (fresh) cs.svg_html = fresh;
+    });
     const _t  = window._slideData.topic    || topic;
     const _s  = window._slideData.subject  || subject;
     const _g  = window._slideData.gradeStr || gradeStr;
@@ -4601,7 +4607,10 @@ async function generateSlideData(callerBtn) {
     // Save slide data to lesson record so it can be restored on reload
     if (_pendingSlideSave && curSess && currentUser) {
       _pendingSlideSave = false;
-      const _slideToSave = { sd, topic, subject, gradeStr, detectedTheme, wikiImg: wikiImg||null, mindsonImg: mindsonImg||null, wikiTitle: wikiTitle||null, wikiLicense: wikiLicense||null, slideImgs: slideImgs||[] };
+      // Strip svg_html from content_slides — always re-render with current renderer code on reload.
+      // This prevents stale SVG from old renderer versions being served forever.
+      const sdToSave = { ...sd, content_slides: (sd.content_slides||[]).map(cs => { const {svg_html, ...rest} = cs; return rest; }) };
+      const _slideToSave = { sd: sdToSave, topic, subject, gradeStr, detectedTheme, wikiImg: wikiImg||null, mindsonImg: mindsonImg||null, wikiTitle: wikiTitle||null, wikiLicense: wikiLicense||null, slideImgs: slideImgs||[] };
       // Find the most recent lesson with this topic
       const _matchLesson = savedLessons.find(l => l.topic === topic && (l.grades||[]).join(',') === (curSess.grades||[]).join(','));
       if (_matchLesson) {
