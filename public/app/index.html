@@ -6160,10 +6160,10 @@ const SVG_RENDERERS = {
     const count = steps.length;
     if (count < 2) return `<svg viewBox="0 0 ${DT.W} 340" width="100%" height="100%"><text x="${DT.W/2}" y="170" text-anchor="middle" font-size="${DT.BODY}" fill="${DT.SECONDARY}">Add at least 2 steps</text></svg>`;
 
-    const W = DT.W, H = 350;
-    const cx = W / 2, cy = H / 2 + 10;
-    const orbitR = Math.min(cx, cy) - 76;
-    const nodeR = 50;
+    const W = DT.W, H = 400;
+    const cx = W / 2, cy = H / 2 + 12;
+    const orbitR = Math.min(cx, cy) - 80;
+    const nodeR = 54;
     const angleStep = (2 * Math.PI) / count;
     const startAngle = -Math.PI / 2;
 
@@ -6202,12 +6202,15 @@ const SVG_RENDERERS = {
       const color = step.color || defaultColors[i % defaultColors.length];
       const label = step.label || '';
       const desc = step.description || step.desc || '';
+      const hasDesc = desc && desc.length > 0;
+      const labelSize = hasDesc ? 12 : DT.CAPTION;
+      const descSize = 10;
       return `
         <circle cx="${x}" cy="${y}" r="${nodeR}" fill="${color}"/>
-        <foreignObject x="${x - nodeR + 5}" y="${y - nodeR + 5}" width="${(nodeR-5)*2}" height="${(nodeR-5)*2}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="width:${(nodeR-5)*2}px;height:${(nodeR-5)*2}px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:${DT.FONT};color:white;line-height:1.25">
-            <div style="font-size:${DT.CAPTION}px;font-weight:900;word-wrap:break-word">${label}</div>
-            ${desc ? `<div style="font-size:${DT.CAPTION}px;opacity:0.85;margin-top:2px;word-wrap:break-word">${desc}</div>` : ''}
+        <foreignObject x="${x - nodeR + 4}" y="${y - nodeR + 4}" width="${(nodeR-4)*2}" height="${(nodeR-4)*2}">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="width:${(nodeR-4)*2}px;height:${(nodeR-4)*2}px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:${DT.FONT};color:white;line-height:1.2;overflow:hidden">
+            <div style="font-size:${hasDesc ? 12 : 14}px;font-weight:900;word-wrap:break-word;max-width:${(nodeR-8)*2}px">${label}</div>
+            ${hasDesc ? `<div style="font-size:${descSize}px;opacity:0.85;margin-top:1px;word-wrap:break-word;max-width:${(nodeR-8)*2}px">${desc}</div>` : ''}
           </div>
         </foreignObject>`;
     }).join('');
@@ -6871,9 +6874,6 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
         <p style="font-size:24px;color:white;line-height:1.6;margin:0;font-weight:500">${esc(et.question)}</p>
       </div>
       ${et.answer_hint?`<p style="font-size:14px;color:rgba(255,255,255,.45);font-style:italic">Hint: ${esc(et.answer_hint)}</p>`:''}
-      <div style="margin-top:28px;display:flex;gap:12px">
-        ${['Name:','Date:','Class:'].map(l=>`<div style="border-bottom:1px solid rgba(255,255,255,.3);padding:8px 32px 4px;font-size:13px;color:rgba(255,255,255,.4)">${l}</div>`).join('')}
-      </div>
     </div>`, NAVY) : null;
 
   const allSlides=[sTitle,sGoals,sMindson,sVocab,...contentSlides,sPractice,sDiscuss,sExit].filter(Boolean);
