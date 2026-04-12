@@ -2018,7 +2018,7 @@ function updateKOnlySubjectOptions() {
 function checkScienceSplitNote() {
   const subj = (document.getElementById('subj')||{}).value || '';
   const isScience = subj.toLowerCase().includes('science');
-  const selectedGrades = [...document.querySelectorAll('.grade-pill-btn.selected')];
+  const selectedGrades = [...document.querySelectorAll('#gradePillContainer .grade-pill-btn.selected')];
   const isSplit = selectedGrades.length > 1;
   const noteEl = document.getElementById('scienceSplitNote');
   if (!noteEl) return;
@@ -2026,7 +2026,7 @@ function checkScienceSplitNote() {
 }
 
 function syncGradePillsToSelects() {
-  const selected = [...document.querySelectorAll('.grade-pill-btn.selected')].map(b => b.dataset.grade);
+  const selected = [...document.querySelectorAll('#gradePillContainer .grade-pill-btn.selected')].map(b => b.dataset.grade);
   ['gA','gB','gC','gD','gE','gF'].forEach((id,i) => { const el=document.getElementById(id); if(el) el.value=selected[i]||''; });
   const splitToggle = document.getElementById('splitToggle');
   if (splitToggle) {
@@ -2040,7 +2040,7 @@ function syncGradePillsToSelects() {
 
 function syncSelectsToGradePills() {
   const selectedGrades = ['gA','gB','gC','gD','gE','gF'].map(id => document.getElementById(id)?.value).filter(v => v && v!=='— None —' && v!=='');
-  document.querySelectorAll('.grade-pill-btn').forEach(btn => { btn.classList.toggle('selected', selectedGrades.includes(btn.dataset.grade)); });
+  document.querySelectorAll('#gradePillContainer .grade-pill-btn').forEach(btn => { btn.classList.toggle('selected', selectedGrades.includes(btn.dataset.grade)); });
   const note = document.getElementById('gradeSelectionNote');
   if (note) note.style.display = selectedGrades.length > 1 ? 'inline' : 'none';
 }
@@ -3025,6 +3025,9 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
       }
     }
     genC['_expectations'] = lessonExpectations;
+    if (!lessonExpectations || lessonExpectations.length === 0) {
+      console.warn('[EXPECTATIONS] Empty expectations array for lesson:', { topic, subj, grades, parsedHadExpectations: !!(parsed.expectations && parsed.expectations.length), preMatchedCount: (preMatchedExp||[]).length });
+    }
 
     loadUsageMeter();
     // Auto-switch active class to match lesson grades so student link roster is correct
@@ -4648,7 +4651,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-11-B (cycle_diagram labels-only)';
+const TA_BUILD = '2026-04-12-A (grade pill scope fix + expectations diagnostic)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
