@@ -341,7 +341,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 /* Trace */
 .kws-trace-block { display: flex; align-items: center; gap: 14px; margin: 12px 0; padding: 12px 16px; background: var(--sage-l); border-left: 4px solid var(--sage); border-radius: 6px; }
 .kws-trace-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--sage); }
-.kws-trace-word { font-family: Georgia, 'Times New Roman', serif; font-size: 2.2rem; color: #888; letter-spacing: .12em; text-decoration: underline dotted; text-decoration-thickness: 2px; }
+.kws-trace-word { font-family: Georgia, 'Times New Roman', serif; font-size: 2.2rem; color: #666; letter-spacing: .12em; text-decoration: underline dotted; text-decoration-thickness: 2px; }
 /* Count */
 .kws-count-block { margin: 14px 0; padding: 12px 16px; background: var(--blue-l); border-radius: 8px; }
 .kws-count-items { font-size: 1.8rem; letter-spacing: .1em; margin-bottom: 8px; text-align: center; }
@@ -3729,11 +3729,12 @@ function renderKWS(text) {
       return;
     }
 
-    // [DRAW: prompt] — big empty draw box
+    // [DRAW: prompt] — big empty draw box. Prompt text is suppressed from
+    // rendering because the preceding "Teacher says:" line already conveys
+    // the instruction; showing both produces double instructions.
     m = trimmed.match(/^\s*(?:\d+\.\s*)?\[DRAW:\s*([^\]]+)\]\s*$/i);
     if (m) {
-      const prompt = m[1].trim();
-      h += `<div class="kws-draw-block"><div class="kws-draw-prompt">${escHTML(prompt)}</div><div class="kws-draw-box"></div></div>`;
+      h += `<div class="kws-draw-block"><div class="kws-draw-box"></div></div>`;
       return;
     }
 
@@ -4193,10 +4194,10 @@ async function downloadKPDF(k) {
       return;
     }
 
-    // [DRAW: prompt]
+    // [DRAW: prompt] — draw box only, instruction comes from preceding Teacher says
     mm = trimmed.match(/^\s*(?:\d+\.\s*)?\[DRAW:\s*([^\]]+)\]\s*$/i);
     if (mm) {
-      body += `<div class="drawblk"><div class="drawp">${escHTML(mm[1].trim())}</div><div class="drawbox"></div></div>`;
+      body += `<div class="drawblk"><div class="drawbox"></div></div>`;
       return;
     }
 
@@ -4310,7 +4311,7 @@ p{margin:4px 0;font-size:1rem;}
 /* Trace */
 .traceblk{margin:10px 0;padding:10px 14px;border:2px solid #000;border-radius:6px;display:flex;align-items:center;gap:16px;page-break-inside:avoid;}
 .tracelbl{font-size:.9rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;}
-.traceword{font-family:Georgia,'Times New Roman',serif;font-size:2.8rem;color:#aaa;letter-spacing:.15em;text-decoration:underline dotted;text-decoration-thickness:2px;}
+.traceword{font-family:Georgia,'Times New Roman',serif;font-size:2.8rem;color:#666;letter-spacing:.15em;text-decoration:underline dotted;text-decoration-thickness:2px;}
 /* Count */
 .countblk{margin:10px 0;padding:10px 14px;border:2px solid #000;border-radius:6px;}
 .countitems{font-size:2.1rem;letter-spacing:.1em;margin-bottom:8px;text-align:center;}
@@ -4342,7 +4343,7 @@ button.print-btn{position:fixed;top:14px;right:14px;background:#000;color:white;
   .countblk,.traceblk,.cpblk,.imgblk{margin:8px 0;}
   .countitems{font-size:1.9rem;}
   .countimg{width:70px;height:70px;}
-  .traceword{font-size:2.4rem;}
+  .traceword{font-size:2.4rem;color:#444;}
   .cpitem img{width:130px;height:130px;}
   .imgblk img{width:160px;height:160px;}
   .teachersays{margin:8px 0 4px;padding:6px 12px;}
@@ -4665,7 +4666,15 @@ async function generateSlideData(callerBtn) {
         'GOOD (Gr1, 8w): "Soft means it feels nice and gentle."',
         'GOOD (Gr1, 7w): "Big means really, really, really large."',
         'BAD  (Gr1, 12w): "When something is soft it feels nice and gentle to touch." — split into two sentences',
-        'RULE: count every word in every sentence. If over the cap, split or shorten before returning.'
+        'RULE: count every word in every sentence. If over the cap, split or shorten before returning.',
+        '',
+        '── K/1-3 MINDS ON HOOK RULES (non-negotiable) ──',
+        '- The hook MUST be a concrete physical action, observational prompt, or invitation to notice. Children are 4-7 years old and need something tangible.',
+        '- NEVER invent fictional songs, chants, poems, or rhymes (e.g. "Let\'s sing the sorting song!" — there is no sorting song). If you name a song, it must be a real published children\'s song (Five Little Ducks, Head Shoulders Knees and Toes, The Wheels on the Bus, etc.).',
+        '- NEVER use "Let\'s sing..." or "Let\'s chant..." unless the song is real and referenceable.',
+        '- GOOD hook types: "Look at these buttons. What do you notice?" / "Let\'s put the red blocks in one pile and blue in another." / "Wiggle like the animal on this card!"',
+        '- BAD hook types (do NOT produce): "Let\'s sing our counting song." / "Time for the shapes chant!" / "Sing along to the sorting rhyme."',
+        '- The Think/Pair/Share prompt should be an open observational question, not an instruction to perform a fictional routine.'
       ].join('\n') : '',
       '',
       '══ ACCURACY GUARDRAIL ══',
@@ -4921,7 +4930,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-13-L (K PDF paper-saver: tighter spacing, 180px draw box, 1.75 line-height, targets ~2 pages for 4 activities)';
+const TA_BUILD = '2026-04-13-M (K slide hooks: no fake songs/chants; DRAW box drops redundant caption; traceword darkened for print legibility)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
