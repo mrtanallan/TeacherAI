@@ -2267,7 +2267,7 @@ function updateTopicSuggestionsFor(scope) {
     } else {
       suggestions = [...new Set(Object.values(SCIENCE_BY_GRADE).flat())].sort();
     }
-  } else if (subj === 'Mathematics') {
+  } else if (subj === 'Mathematics' || subj === 'Language / Literacy') {
     const MATH_BY_GRADE = {
       'K':  ['Counting','Number Sense','Shapes','Patterns','Sorting','Measurement'],
       '1':  ['Addition to 20','Subtraction to 20','Number Sense','2D and 3D Shapes','Patterns','Measurement','Money'],
@@ -2281,9 +2281,9 @@ function updateTopicSuggestionsFor(scope) {
       'all': ['Addition','Subtraction']
     };
     const LANG_BY_GRADE = {
-      'K':  ['Oral Communication','Phonological Awareness','Letter Recognition','Rhyming','Story Elements'],
-      '1':  ['Reading Comprehension','Phonics','Sight Words','Story Elements','Oral Communication','Sentence Structure'],
-      '2':  ['Reading Comprehension','Making Connections','Narrative Writing','Phonics','Vocabulary','Main Idea'],
+      'K':  ['Letter Recognition','Letter Sounds','Rhyming','Name Writing','Oral Storytelling','Listening to Stories','Drawing to Tell a Story','Print Awareness','Syllables','Beginning Sounds','Colours','Shapes in Words'],
+      '1':  ['Phonics','Sight Words','Sentence Structure','Reading Comprehension','Story Elements','Oral Communication','Print Conventions','Simple Writing'],
+      '2':  ['Reading Comprehension','Making Connections','Narrative Writing','Phonics','Vocabulary','Main Idea','Retelling a Story'],
       '3':  ['Making Inferences','Main Idea','Narrative Writing','Procedural Writing','Vocabulary','Text Features'],
       '4':  ['Making Inferences','Author’s Purpose','Persuasive Writing','Narrative Writing','Point of View','Figurative Language','Media Literacy'],
       '5':  ['Making Inferences','Author’s Purpose','Persuasive Writing','Short Story','Descriptive Writing','Figurative Language','Media Literacy','Point of View'],
@@ -2345,8 +2345,16 @@ function updateTopicSuggestionsFor(scope) {
     list.innerHTML = (suggestions || []).map(s => `<option value="${escHTML(s)}">`).join('');
     list._topicMap = null;
   }
-  // Update placeholder to be subject-specific
-  const placeholders = {
+  // Update placeholder to be subject + grade specific
+  const kOnly = [...document.querySelectorAll(kPillContainerSel)].map(b => b.dataset.grade).every(g => g === 'Kindergarten') && [...document.querySelectorAll(kPillContainerSel)].length >= 1;
+  const placeholders = kOnly ? {
+    'Language / Literacy': 'e.g. Letter Recognition, Rhyming, Name Writing, Beginning Sounds...',
+    'Mathematics': 'e.g. Counting, Shapes, Sorting, Patterns...',
+    'Science & Technology': 'e.g. Living vs Non-Living, Seasons, My Senses...',
+    'Social Studies': 'e.g. My Family, Our Community, Traditions...',
+    'Health & Physical Education': 'e.g. Healthy Eating, Feelings, Movement Games...',
+    'The Arts': 'e.g. Drawing, Singing, Dance and Movement, Colours...',
+  } : {
     'Language / Literacy': 'e.g. Making Inferences, Persuasive Writing, Short Story...',
     'Mathematics': 'e.g. Fractions, Multiplication, Area and Perimeter...',
     'Science & Technology': 'e.g. Habitats, States of Matter, Simple Machines...',
@@ -4728,7 +4736,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-12-D (content-matched expectations fallback + grade alignment hint)';
+const TA_BUILD = '2026-04-12-E (K-appropriate topic suggestions + grade-aware placeholders)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
