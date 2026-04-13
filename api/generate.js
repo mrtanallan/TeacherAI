@@ -274,18 +274,44 @@ module.exports = async function handler(req, res) {
       const anthropicPayload = { model, max_tokens, messages, stream: true };
       if (system) anthropicPayload.system = system;
 
-      const anthropicRes = await fetch(ANTHROPIC_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify(anthropicPayload),
-      });
+      // BUILD AB (server): Sonnet 4.6 is the new default. Fallback prioritizes
+      // Opus (better, ~5x cost, separate capacity pool) before older Sonnet
+      // versions and Haiku. Same-price Sonnet 4.6 vs 4.5 with stronger
+      // instruction-following → reduces content-quality bugs (e.g. mode chart
+      // value mismatch) and outperforms 4.5 on long-horizon multi-field schemas.
+      const FALLBACK_CHAIN = {
+        'claude-sonnet-4-6':           ['claude-opus-4-6', 'claude-sonnet-4-5', 'claude-sonnet-4-20250514', 'claude-haiku-4-5-20251001'],
+        'claude-sonnet-4-5':           ['claude-opus-4-6', 'claude-sonnet-4-6', 'claude-sonnet-4-20250514', 'claude-haiku-4-5-20251001'],
+        'claude-sonnet-4-20250514':   ['claude-opus-4-6', 'claude-sonnet-4-6', 'claude-sonnet-4-5', 'claude-haiku-4-5-20251001'],
+        'claude-opus-4-6':             ['claude-sonnet-4-6', 'claude-sonnet-4-5', 'claude-sonnet-4-20250514'],
+      };
+      const fallbacks = FALLBACK_CHAIN[model] || [];
+
+      let anthropicRes;
+      let modelUsed = model;
+      const modelsToTry = [model, ...fallbacks];
+      for (let i = 0; i < modelsToTry.length; i++) {
+        const tryModel = modelsToTry[i];
+        anthropicRes = await fetch(ANTHROPIC_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({ ...anthropicPayload, model: tryModel }),
+        });
+        modelUsed = tryModel;
+        if (anthropicRes.status !== 529) break;
+        // 529 — log + try next model in chain
+        console.warn('[generate.js] model 529, falling back:', tryModel, '→', modelsToTry[i+1] || '(none — exhausted)');
+      }
 
       // Handle non-200 BEFORE starting the stream (status is known up front)
       if (anthropicRes.status === 529) {
+        // Whole chain exhausted — surface the 529 to client so its retry
+        // loop can wait + retry the whole request. Better than silently
+        // serving Haiku output for a Sonnet lesson.
         return res.status(529).json({ error: 'AI service at capacity. Please try again in a moment.' });
       }
       if (!anthropicRes.ok) {
@@ -295,6 +321,10 @@ module.exports = async function handler(req, res) {
         try { errJson = JSON.parse(errText); } catch(_) {}
         return res.status(anthropicRes.status).json({ error: errJson.error || 'AI generation failed' });
       }
+
+      // Surface the model that actually served this request — useful for
+      // debugging quality complaints without changing the client API shape.
+      res.setHeader('X-Model-Used', modelUsed);
 
       // Pipe the SSE stream to the client. Vercel's 25s idle timer
       // resets on every chunk, so as long as Anthropic streams tokens we
@@ -373,15 +403,34 @@ module.exports = async function handler(req, res) {
     const anthropicPayload = { model, max_tokens, messages };
     if (system) anthropicPayload.system = system;
 
-    const anthropicRes = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify(anthropicPayload),
-    });
+    // BUILD AB (server): same chain as streaming branch — Sonnet 4.6 default,
+    // Opus first fallback (better quality, separate pool), Haiku last resort.
+    const FALLBACK_CHAIN_NS = {
+      'claude-sonnet-4-6':           ['claude-opus-4-6', 'claude-sonnet-4-5', 'claude-sonnet-4-20250514', 'claude-haiku-4-5-20251001'],
+      'claude-sonnet-4-5':           ['claude-opus-4-6', 'claude-sonnet-4-6', 'claude-sonnet-4-20250514', 'claude-haiku-4-5-20251001'],
+      'claude-sonnet-4-20250514':   ['claude-opus-4-6', 'claude-sonnet-4-6', 'claude-sonnet-4-5', 'claude-haiku-4-5-20251001'],
+      'claude-opus-4-6':             ['claude-sonnet-4-6', 'claude-sonnet-4-5', 'claude-sonnet-4-20250514'],
+    };
+    const fallbacksNS = FALLBACK_CHAIN_NS[model] || [];
+
+    let anthropicRes;
+    let modelUsedNS = model;
+    const modelsToTryNS = [model, ...fallbacksNS];
+    for (let i = 0; i < modelsToTryNS.length; i++) {
+      const tryModel = modelsToTryNS[i];
+      anthropicRes = await fetch(ANTHROPIC_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({ ...anthropicPayload, model: tryModel }),
+      });
+      modelUsedNS = tryModel;
+      if (anthropicRes.status !== 529) break;
+      console.warn('[generate.js NS] model 529, falling back:', tryModel, '→', modelsToTryNS[i+1] || '(none)');
+    }
 
     if (anthropicRes.status === 529) {
       return res.status(529).json({ error: 'AI service at capacity. Please try again in a moment.' });
@@ -393,6 +442,7 @@ module.exports = async function handler(req, res) {
       console.error('Anthropic error:', data);
       return res.status(anthropicRes.status).json({ error: data.error || 'AI generation failed' });
     }
+    res.setHeader('X-Model-Used', modelUsedNS);
 
     // Fire-and-forget usage log (never blocks the response)
     const meta = (req.body && req.body.meta) || {};
