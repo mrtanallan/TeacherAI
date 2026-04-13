@@ -154,7 +154,19 @@ async function loadWorksheet(){
     if(!res.ok){showError();return;}
     const data=await res.json();
     if(!data||!data.content){showError();return;}
-    roster=data.roster||[];
+    // BUILD AD: filter roster by worksheet grade so a Gr 3 worksheet only
+    // suggests Gr 3 students. Previously ALL students in the class were
+    // shown, which let a Gr 2 student appear on a Gr 3 worksheet (bug
+    // observed 2026-04-13). Split-grade worksheets handle their own
+    // filtering in loadGradeWorksheet() — this only affects single-grade.
+    // If a student has no grade set, they pass through (legacy data).
+    const wsGrades = data.grades || [];
+    const allRoster = data.roster || [];
+    if (wsGrades.length === 1) {
+      roster = allRoster.filter(s => !s.grade || s.grade === wsGrades[0]);
+    } else {
+      roster = allRoster;
+    }
 
     // Check for split-grade worksheet (grades_content map)
     const gradesContent = data.grades_content;
