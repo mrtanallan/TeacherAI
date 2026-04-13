@@ -1152,11 +1152,34 @@ async function loadCurriculum(subject) {
   }
   try {
     const res = await fetch(`/data/curriculum_${key}.json`);
-    if (!res.ok) { console.warn('Curriculum not found:', key); return; }
+    if (!res.ok) {
+      // Curriculum JSON not deployed yet. Mark as missing so we don't retry
+      // every time the user clicks the subject, and notify the teacher ONCE
+      // per session so they know lesson expectations will be best-effort.
+      _curriculumCache[key] = []; // negative cache — suppresses repeat fetches
+      EXPECTATIONS[key] = [];
+      _notifyMissingCurriculum(subject, key);
+      return;
+    }
     const data = await res.json();
     _curriculumCache[key] = data;
     EXPECTATIONS[key] = data;
-  } catch(e) { console.warn('Failed to load curriculum:', key, e); }
+  } catch(e) {
+    // Network error (not 404) — warn loudly, these are real bugs.
+    console.warn('Failed to load curriculum:', key, e);
+  }
+}
+
+// Tracks which missing-curriculum toasts we've shown this session so we
+// don't spam the teacher if they toggle subjects.
+const _missingCurriculumNotified = new Set();
+function _notifyMissingCurriculum(subject, key) {
+  if (_missingCurriculumNotified.has(key)) return;
+  _missingCurriculumNotified.add(key);
+  console.info('[curriculum] ' + key + ' not deployed — using best-effort expectations');
+  if (typeof showToast === 'function') {
+    showToast(`⚠️ ${subject} curriculum data is still being finalized — lessons will use best-effort expectations.`, 5500);
+  }
 }
 
 
@@ -2882,7 +2905,7 @@ Use ONLY these tag formats, and keep total activities to 3–5:
 
 NEVER use [TEXT BOX], [LARGE BOX], [WORD BANK], [CIRCLE ONE], or anything requiring students to read or type. Those are Grade 1-8 formats only.
 
-ACTIVITY VARIETY — required: Across the 3-5 activities, use AT LEAST 3 different tag types. A worksheet that is 4× [CIRCLE PICTURE] is unacceptable. Mix circling, counting, drawing, and tracing so the worksheet feels varied and exercises different skills.
+ACTIVITY VARIETY — required: Across the 3-5 activities, use AT LEAST 3 different tag types and enforce these caps: max 3 circle/sort tasks, max 2 count tasks, max 2 draw tasks, max 2 trace-only tasks. A worksheet that is 4× [CIRCLE PICTURE] is unacceptable. Mix circling, counting, drawing, and tracing so the worksheet feels varied and exercises different skills.
 
 Title line uses ONE emoji (e.g. "🌼 Spring Counting"). Max 6 images ([IMAGE] + [CIRCLE PICTURE] + one per [COUNT]) total — each triggers a slow image gen.` : '';
 
@@ -3719,9 +3742,12 @@ function renderKWS(text) {
     // activities and they render as literal "---" text under "How many?".
     if (/^-{3,}$/.test(trimmed)) return;
 
-    // Headers
-    if (trimmed.startsWith('## ')) { h += `<h2 class="kwsh2">${escHTML(trimmed.slice(3))}</h2>`; return; }
+    // Headers. Single `#` is handled as H2 because the AI sometimes emits
+    // `# Title` for the worksheet title — without this it leaks through as
+    // literal "# Title" text. Order matters: check longer prefixes first.
     if (trimmed.startsWith('### ')) { h += `<h3 class="kwsh3">${escHTML(trimmed.slice(4))}</h3>`; return; }
+    if (trimmed.startsWith('## ')) { h += `<h2 class="kwsh2">${escHTML(trimmed.slice(3))}</h2>`; return; }
+    if (trimmed.startsWith('# ')) { h += `<h2 class="kwsh2">${escHTML(trimmed.slice(2))}</h2>`; return; }
 
     // [IMAGE: description] — single line drawing, max 6 per worksheet
     let m = trimmed.match(/^\s*(?:\d+\.\s*)?\[IMAGE:\s*([^\]]+)\]\s*(.*)$/i);
@@ -4196,8 +4222,9 @@ async function downloadKPDF(k) {
     trimmed = trimmed.replace(/^(\d+\.\s*)\*\*(.+)\*\*$/, '$1$2').trim();
     if (/^-{3,}$/.test(trimmed)) return;
 
-    if (trimmed.startsWith('## ')) { body += `<h2 class="sec">${escHTML(trimmed.slice(3))}</h2>`; return; }
     if (trimmed.startsWith('### ')) { body += `<h3>${escHTML(trimmed.slice(4))}</h3>`; return; }
+    if (trimmed.startsWith('## ')) { body += `<h2 class="sec">${escHTML(trimmed.slice(3))}</h2>`; return; }
+    if (trimmed.startsWith('# ')) { body += `<h2 class="sec">${escHTML(trimmed.slice(2))}</h2>`; return; }
 
     let mm;
 
@@ -4943,7 +4970,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-13-O (Safari PDF fix: blob URLs replaced with document.write in all 5 download paths; also fixes duplicate </style> in K PDF template)';
+const TA_BUILD = '2026-04-13-Q (Missing curriculum JSON: quiet console 404, negative-cache to prevent refetches, and show one-time teacher toast so best-effort expectations are transparent. Also: synced initial K worksheet prompt to use same activity-type caps as addMoreQuestions.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
