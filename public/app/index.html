@@ -3320,7 +3320,13 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
   } catch(e) {
     clearInterval(progInterval);
     hideLoading();
-    if (e.message !== '__PLAN_LIMIT__') alert('Error: '+e.message);
+    if (e.message === '__PLAN_LIMIT__') {
+      // handled elsewhere
+    } else if (/overload|capacity|529/i.test(e.message)) {
+      alert("Anthropic's AI service is at capacity right now.\n\nThis usually clears within 30-60 seconds. Please wait a moment and click Generate again.\n\n(This is a temporary issue with the AI provider, not with TeacherAI.)");
+    } else {
+      alert('Error: '+e.message);
+    }
   }
   clearInterval(progInterval);
   hideLoading();
@@ -5047,7 +5053,11 @@ async function generateSlideData(callerBtn) {
     return true;
 
   } catch(e) {
-    alert('Error generating slides: '+e.message);
+    if (/overload|capacity|529/i.test(e.message)) {
+      alert("Anthropic's AI service is at capacity right now.\n\nThis usually clears within 30-60 seconds. Please wait a moment and try Build Slides again.");
+    } else {
+      alert('Error generating slides: '+e.message);
+    }
     clearInterval(imgLoadTimer);
     if (callerBtn) { callerBtn.disabled=false; callerBtn.textContent='▶ Present'; }
     logGen({ kind:'slides', subject, grades, topic, model:'claude-sonnet-4-20250514', duration_ms:Date.now()-_logT0, success:false, error_code:(e.message||'unknown').slice(0,64) });
@@ -5061,7 +5071,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-13-T (Privacy hardening: student names are no longer stored as readable text. Roster-matched students submit with student_id only (name field blank). Unmatched typed names are SHA-256 hashed with worksheet_id salt before submission. Teacher-side displayStudentName() helper resolves student_id back to roster names at display time. Legacy rows still display correctly.)';
+const TA_BUILD = '2026-04-13-U (Better overload error messaging: lesson + slide generation now show a clear "Anthropic AI at capacity" message that explains the issue is upstream and tells the teacher to wait 30-60s. Replaces cryptic "Error: Overloaded" alert. Auto-retry on 529 deferred to next session.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
