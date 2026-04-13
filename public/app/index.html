@@ -3160,6 +3160,24 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
         });
       }
     }
+    // BUILD AD diagnostic: log per-field content length so we can spot
+    // empty/truncated outputs without dumping the whole response.
+    // Specifically chasing the "lesson_plan stops at 'Ask:'" bug seen on
+    // Money + Division Gr 3 lessons. If lesson_plan length looks normal but
+    // it still renders truncated, the bug is in the renderer not the AI.
+    try {
+      const fieldSizes = {};
+      Object.keys(parsed).forEach(k => {
+        const v = parsed[k];
+        fieldSizes[k] = typeof v === 'string' ? v.length : (Array.isArray(v) ? v.length+' items' : typeof v);
+      });
+      console.log('[LESSON FIELDS]', fieldSizes);
+      if (typeof parsed.lesson_plan === 'string') {
+        console.log('[LESSON_PLAN PREVIEW first 400ch]', parsed.lesson_plan.slice(0, 400));
+        console.log('[LESSON_PLAN PREVIEW last 200ch]', parsed.lesson_plan.slice(-200));
+      }
+      console.log('[RAW RESPONSE LENGTH]', raw.length, 'chars');
+    } catch(_) {}
 
     genC = {};
     window._slideData = null; // clear cached slides — new lesson generated
@@ -5048,10 +5066,15 @@ async function generateSlideData(callerBtn) {
         // all — "What you sey?" was a real production bug). Strip question
         // words and punctuation, take the first concrete noun phrase, and
         // anchor with the topic so Flux gets a clean subject to illustrate.
+        // BUILD AD: also strip numeric quantities ("10 counters" → "counters")
+        // because Flux Schnell cannot reliably render exact counts (a hook
+        // saying "10 counters" produced an image with 6 — visible mismatch
+        // confuses the lesson). Better to show "some counters" generically.
         let visualSubject = topic;
         if (sd.minds_on && sd.minds_on.hook) {
           const cleaned = String(sd.minds_on.hook)
             .replace(/[?!."]/g, ' ')
+            .replace(/\b\d+\b/g, ' ')   // drop digits — Flux can't count
             .replace(/\b(look at|see|notice|what do you|what comes|let'?s|tell me|can you|how many|wiggle like|listen to)\b/gi, ' ')
             .replace(/\s+/g, ' ').trim()
             .split(' ').slice(0, 6).join(' ');
@@ -5164,7 +5187,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-13-AC (CRITICAL BUGFIX — Build T was silently broken since shipping: worksheet-3.js backend required student_name to be non-empty, but build T intentionally sent empty string for roster-matched submissions because student_id carries identity. Every matched student hitting Submit saw "Something went wrong" and could not submit. Fixed: backend now accepts EITHER student_name (unmatched hash) OR student_id (matched UUID). Also: worksheet-6.html now surfaces the real server error instead of the generic alert, so future breakage is debuggable. Also fixed: money_display coin renderer was using emoji (🔵 for nickel, 🟤 for penny) making Canadian coin slides look like colored dots — now renders actual SVG circles with realistic Canadian coin colours (gold loonie, silver quarter/dime/nickel) and cent-value labels inside each coin. Penny removed from valid coin list in slides prompt because it was discontinued in 2013. Carries forward AB model upgrade to Sonnet 4.6 and all prior work.)';
+const TA_BUILD = '2026-04-13-AD (Real-world fixes from Gr 3 Money + Division testing. (1) RENDERER MATH BUG: grouped_objects renderer was hardcoding the multiplication equation form (3 × 4 = 12) regardless of operator — when AI passed operator:÷ the slide showed "3 ÷ 4 = 12" which is mathematically wrong. Now writes total ÷ groups = per_group for division. (2) ROSTER FILTER: single-grade worksheets now filter roster by the worksheet grade so a Gr 3 worksheet only suggests Gr 3 students (Ayaan, a Gr 2 student, was incorrectly suggested for a Gr 3 worksheet). Split-grade workflow already had this. (3) FLUX COUNT: Mindson image prompt now strips numeric quantities ("10 counters" → "counters") because Schnell cannot reliably render exact counts. Hook text says 10, image showed 6 — strip the digit, less mismatch. (4) DIAGNOSTIC: lesson generation now console.logs per-field content lengths + first/last 200 chars of lesson_plan, so the next time lesson_plan renders empty we will know whether the AI returned truncated content or the renderer is dropping it. Empty lesson_plan still UNRESOLVED — needs one more repro to capture the diagnostic. (5) Carries forward AC critical worksheet submit fix and all prior work.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
@@ -6184,9 +6207,19 @@ const SVG_RENDERERS = {
       groups_svg += `<text x="${gx+gw/2-4}" y="${oy+gh+18}" text-anchor="middle" font-size="${DT.LABEL}" font-weight="700" fill="${DT.HIGHLIGHT}" font-family="${DT.FONT}">${per_group}</text>`;
     }
     const equationY = oy + gh + 46;
+    // BUILD AD: equation form depends on operator. Multiplication reads
+    // groups × per_group = total (e.g. 3 × 4 = 12). Division reads
+    // total ÷ groups = per_group (e.g. 12 ÷ 3 = 4) OR total ÷ per_group =
+    // groups. Previously this always wrote the multiplication form even
+    // when operator was ÷, producing nonsense like "3 ÷ 4 = 12" — caught
+    // on a Gr 3 division lesson 2026-04-13. Now matches the operator.
+    const isDivision = operator === '÷' || operator === '/';
+    const equationText = isDivision
+      ? `${total} ÷ ${groups} = ${per_group}`
+      : `${groups} ${operator} ${per_group} = ${total}`;
     return `<svg viewBox="0 0 600 ${Math.min(equationY+40, 300)}" width="100%" height="100%">
       ${groups_svg}
-      <text x="250" y="${equationY}" text-anchor="middle" font-size="20" font-weight="900" fill="${DT.PRIMARY}" font-family="${DT.FONT}">${groups} ${operator} ${per_group} = ${total}</text>
+      <text x="250" y="${equationY}" text-anchor="middle" font-size="20" font-weight="900" fill="${DT.PRIMARY}" font-family="${DT.FONT}">${equationText}</text>
       <text x="250" y="${Math.min(equationY+26, 295)}" text-anchor="middle" font-size="${DT.CAPTION}" fill="${DT.SECONDARY}" font-family="${DT.FONT}">${label}</text>
     </svg>`;
   },
