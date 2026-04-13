@@ -2965,7 +2965,7 @@ CRITICAL OUTPUT RULES:
 - Do NOT wrap question numbers in **bold** (no \`**1. [TRACE: 2]**\`). Just plain \`1. [TRACE: 2]\`.
 - Do NOT use \`---\` horizontal rules anywhere in the worksheet.
 - Never put instructional prose addressed to the student (e.g. "Draw your own way to sort:"). Always rewrite as Teacher says.
-- Every numbered activity should start with a short title line beginning with "### " (e.g. "### Sort by size") so subsequent pages keep consistent structure.
+- Every activity starts with a short title line beginning with "### " on its own line (e.g. "### Sort by size"). NEVER combine numbering with the heading marker — write \`### Continue the pattern\` on its own line, NOT \`1. ### Continue the pattern\`. The "###" and any "1." are mutually exclusive on the same line.
 
 Use ONLY these tag formats, and keep total activities to 3–5:
 
@@ -3841,6 +3841,11 @@ function renderKWS(text) {
     // body is bolded.
     trimmed = trimmed.replace(/^\*\*(.+)\*\*$/, '$1').trim();
     trimmed = trimmed.replace(/^(\d+\.\s*)\*\*(.+)\*\*$/, '$1$2').trim();
+    // Strip "N. " prefix BEFORE a markdown heading marker. The AI sometimes
+    // emits "1. ### Continue the pattern" which would otherwise leak through
+    // as literal text because the heading-startsWith checks below only match
+    // bare '### '. Patterns worksheet bug seen in real output 2026-04-13.
+    trimmed = trimmed.replace(/^\d+\.\s+(#{1,3}\s)/, '$1');
 
     // Drop markdown horizontal-rule lines ("---"). The AI emits these between
     // activities and they render as literal "---" text under "How many?".
@@ -4103,6 +4108,7 @@ ACTIVITY DIVERSITY RULES (critical — read the current worksheet first and COUN
 
 CRITICAL FORMAT RULES:
 - Match the existing worksheet's format for Teacher says lines, subsection headers (### ...), and numbered activities. If the worksheet above uses "Teacher says:" before every visual, yours must too.
+- NEVER combine numbering with the heading marker on the same line. Write \`### Continue the pattern\` on its own line, NOT \`${startNum}. ### Continue the pattern\`. The "###" and any number prefix are mutually exclusive on the same line.
 - Do NOT repeat any existing activity.
 - Number new activities starting from ${startNum}.
 - Do NOT wrap question numbers in **bold** (plain \`${startNum}. [...]\`, not \`**${startNum}. [...]**\`).
@@ -4324,6 +4330,8 @@ async function downloadKPDF(k) {
     // (mirrors renderKWS fixes).
     trimmed = trimmed.replace(/^\*\*(.+)\*\*$/, '$1').trim();
     trimmed = trimmed.replace(/^(\d+\.\s*)\*\*(.+)\*\*$/, '$1$2').trim();
+    // Strip "N. " prefix BEFORE a markdown heading marker (mirrors renderKWS).
+    trimmed = trimmed.replace(/^\d+\.\s+(#{1,3}\s)/, '$1');
     if (/^-{3,}$/.test(trimmed)) return;
 
     if (trimmed.startsWith('### ')) { body += `<h3>${escHTML(trimmed.slice(4))}</h3>`; return; }
@@ -4813,7 +4821,7 @@ async function generateSlideData(callerBtn) {
       'Return ONLY valid JSON:',
       '{',
       '  "learning_goals": ["I can... statement", "I can... statement"],',
-      '  "minds_on": {"hook": "real-world hook max 2 sentences", "prompt": "think-pair-share prompt"},',
+      '  "minds_on": {"hook": "real-world hook max 2 sentences directly about the lesson topic", "prompt": "think-pair-share prompt that DIRECTLY follows from the hook and references the same objects/concept (NOT a generic prompt like \\"share your favorite season\\" — must be specific to this lesson)"},',
       '  "vocabulary": [{"word": "term", "definition": "student-friendly definition", "example": "sentence using the word"}],',
       '  "content_slides": [',
       '    {',
@@ -4907,6 +4915,12 @@ async function generateSlideData(callerBtn) {
       '  * fraction_compare: verify comparison operator is correct (e.g. 1/4 < 1/2, not >).',
       '  * worked_steps: verify every arithmetic calculation in steps is correct. final answer must be correct.',
       '  * bar_graph/pictograph: values must be realistic for the grade context.',
+      '  * STATISTICAL CONCEPT INTEGRITY (mode/mean/median/range): bar chart values MUST actually demonstrate the concept being taught.',
+      '    - MODE lessons: at least TWO bars must share the same value. Example for mode=8: [Math:5, Art:8, Gym:8, Reading:3]. NEVER all-distinct values like [7,12,8,5] — that has no mode and contradicts the lesson.',
+      '    - MEAN lessons: values must produce a clean integer or half-integer average appropriate for grade. Show 4 values for grades 2-3, up to 6 for grade 4+.',
+      '    - MEDIAN lessons: use an ODD count of values (3, 5, 7) so the middle is unambiguous.',
+      '    - RANGE lessons: clearly distinct max and min, and write "Range = max - min = N" in the slide notes.',
+      '    Verify by reading your own values back: if you cannot point at the bars and say "see, X repeats" / "the middle is Y", regenerate the values.',
       '  * coordinate_graph: points array must include label field with coordinate e.g. "(2,4)".',
       '  * pie_chart: slice values must sum to 100 if using percentages.',
       '  * t_table: rule must be mathematically consistent with all rows in the table.',
@@ -5028,11 +5042,24 @@ async function generateSlideData(callerBtn) {
 
     const fetchMindsonImage = async () => {
       try {
-        // Use the hook question as the image prompt — more relevant than generic topic
-        const mindsonPrompt = (sd.minds_on && sd.minds_on.hook) ? sd.minds_on.hook : topic;
+        // Derive a clean visual subject from the hook. Pasting the literal
+        // hook text (e.g. "Look at these coloured blocks. What do you see?")
+        // causes Flux to bake the question text into the image (typos and
+        // all — "What you sey?" was a real production bug). Strip question
+        // words and punctuation, take the first concrete noun phrase, and
+        // anchor with the topic so Flux gets a clean subject to illustrate.
+        let visualSubject = topic;
+        if (sd.minds_on && sd.minds_on.hook) {
+          const cleaned = String(sd.minds_on.hook)
+            .replace(/[?!."]/g, ' ')
+            .replace(/\b(look at|see|notice|what do you|what comes|let'?s|tell me|can you|how many|wiggle like|listen to)\b/gi, ' ')
+            .replace(/\s+/g, ' ').trim()
+            .split(' ').slice(0, 6).join(' ');
+          if (cleaned.length > 3) visualSubject = cleaned + ' (' + topic + ')';
+        }
         const r = await authFetch('/api/generate-image', {
           method: 'POST',
-          body: JSON.stringify({ type: 'ai', topic: mindsonPrompt, subject, grade: gradeStr, theme: detectedTheme, style: deckStyle.style, subKey: deckStyle.code })
+          body: JSON.stringify({ type: 'ai', topic: visualSubject, subject, grade: gradeStr, theme: detectedTheme, style: deckStyle.style, subKey: deckStyle.code })
         });
         if (r.ok) {
           const d = await r.json();
@@ -5137,7 +5164,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-13-X (FIX: Build V 529 retry was broken — it only caught HTTP 529 before stream start, but Anthropic delivers most overloads as SSE error events inside an HTTP 200 response, which V passed through to the user. X rewraps the entire request+stream phase in a 3-attempt retry loop (4s/10s/20s = 34s budget), detects stream-embedded overloaded_error events AND empty-stream early-close cases, and only commits once non-empty text arrives. Progress bar shows "retrying in Xs (attempt N/4)" so teachers know the app is still working. Everything else from build W carried forward: build-S residue gone, deck-wide image style seed, K worksheet .gap/.instr pagination fix, worksheet-6.html crypto.subtle fallback.)';
+const TA_BUILD = '2026-04-13-Y (Quality fixes after real-world test on Patterns + Data and Graphs lessons. (1) RENDERING: "1. ### Title" no longer leaks as literal text — both renderKWS and downloadKPDF now strip the N. prefix before checking for heading markers. (2) PROMPT: K worksheet prompt no longer contradicts itself on numbering vs heading markers. addMoreQuestions extend prompt synced. (3) PROMPT: slides spec now enforces statistical-concept integrity — mode lessons require repeated bar values, mean lessons require clean averages, median lessons require odd value counts. Catches the "Finding the Mode" bar chart with no repeated values bug. (4) PROMPT: minds_on.prompt schema now requires the TPS prompt directly relate to the hook/topic — no more "share your favorite season" on a button-sorting slide. (5) IMAGE: Mindson hook is now cleaned (question words stripped, top noun phrase extracted) before being sent to Flux. Stops Flux from baking literal question text like "What you sey?" into images. (6) IMAGE (separate file generate-image-3.js): Flux prompt restructured — style descriptor now leads, topic phrased as the painted subject. Cache bumped v7→v8. Carries forward X 529 retry, W deck style seed, etc.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
