@@ -437,14 +437,21 @@ async function submitWorksheet(){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({worksheet_id:worksheetId,share_token:shareToken,student_name:anonName,student_id:matchedStudent?.id||null,responses:collectResponses()})
     });
-    if(!res.ok)throw new Error('Submit failed');
+    if(!res.ok){
+      // BUILD AC: surface the real error to help debug submission failures.
+      // Previously this threw a generic "Submit failed" → caught below →
+      // shown as "Something went wrong" which was impossible to diagnose.
+      let serverMsg = '';
+      try { const errJson = await res.json(); serverMsg = errJson.error || ''; } catch(_){}
+      throw new Error(serverMsg || ('Submit failed (HTTP '+res.status+')'));
+    }
     // Hide grade picker if visible (split-grade link) and clear global state
     document.getElementById('gradePicker')?.remove();
     window._wsGradesContent = null;
     window._wsData = null;
     document.getElementById('worksheetScreen').style.display='none';
     document.getElementById('successScreen').style.display='block';
-  }catch(e){btn.disabled=false;btn.textContent='✅ Submit Worksheet';alert('Something went wrong. Please try again.');}
+  }catch(e){btn.disabled=false;btn.textContent='✅ Submit Worksheet';alert('Submit failed: ' + (e.message || 'Unknown error') + '\n\nPlease try again. If this keeps happening, let your teacher know.');}
 }
 
 function renderWS(text){
