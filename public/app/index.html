@@ -1375,6 +1375,68 @@ async function retryAuthFetch(url, options, maxRetries=3) {
 }
 
 // ============================================================
+// GENERATION LOGGING — fire-and-forget metadata only.
+// MFIPPA-conscious: hashes topic, never logs content, no PII.
+// Failures are silent; logging never blocks user-facing flows.
+// See /api/log-generation.js for server-side scope + table schema.
+// ============================================================
+function _getClientId() {
+  try {
+    let id = localStorage.getItem('ta_cid');
+    if (!id) {
+      // RFC4122 v4 UUID via crypto.randomUUID where available, else fallback
+      id = (crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : 'cid-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem('ta_cid', id);
+    }
+    return id;
+  } catch { return 'cid-anon'; }
+}
+
+async function _hashTopic(topic) {
+  try {
+    const t = String(topic || '').trim().toLowerCase();
+    if (!t) return null;
+    const buf = new TextEncoder().encode(t);
+    const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  } catch { return null; }
+}
+
+// Call after every generation. fields:
+//   kind: 'lesson' | 'worksheet_extend' | 'slides' | 'image' (required)
+//   subject, grades (array), topic (raw — will be hashed before send)
+//   duration_ms, input_tokens, output_tokens, model, success (bool), error_code
+async function logGen(fields) {
+  try {
+    const topic_hash = fields.topic ? await _hashTopic(fields.topic) : null;
+    const topic_len = fields.topic ? String(fields.topic).length : null;
+    const body = {
+      kind: fields.kind,
+      subject: fields.subject || null,
+      grades: fields.grades || null,
+      topic_hash,
+      topic_len,
+      duration_ms: fields.duration_ms || null,
+      input_tokens: fields.input_tokens || null,
+      output_tokens: fields.output_tokens || null,
+      model: fields.model || null,
+      success: !!fields.success,
+      error_code: fields.error_code || null,
+      client_id: _getClientId(),
+    };
+    // Use fetch directly (no auth header — endpoint is public) and don't await
+    // the response. Logging must never delay the UI.
+    fetch('/api/log-generation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      keepalive: true,  // survives page nav/close
+    }).catch(() => {});
+  } catch { /* never throw from logging */ }
+}
+
+// ============================================================
 // STREAMING: /api/generate streaming helper.
 // Returns {ok, status, content:[{text}], error?} — same shape as a
 // parsed non-streaming response so callers' downstream parsing logic
@@ -3505,6 +3567,28 @@ function escHTML(s) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+// Resolve a worksheet submission row to a display name for the teacher's UI.
+// The DB never holds readable student names anymore — either a student_id
+// (opaque UUID from the teacher's private students table) or a hashed token
+// like "#a3f21b" (for typed names that didn't match the roster). This helper
+// maps those back to readable labels AT DISPLAY TIME only. Legacy rows with
+// raw names are shown as-is for backward compat.
+function displayStudentName(sub) {
+  if (!sub) return 'Unknown';
+  // New path: matched to roster — look up by student_id in teacher's local list
+  if (sub.student_id) {
+    const s = (typeof students !== 'undefined' ? students : []).find(st => st.id === sub.student_id);
+    if (s) return ((s.first||'') + ' ' + (s.last||'')).trim() || 'Student';
+    return 'Student ' + String(sub.student_id).slice(0, 6);
+  }
+  // New path: unmatched typed name, hash-tokenized (starts with #)
+  if (sub.student_name && /^#[a-f0-9]+$/.test(sub.student_name)) {
+    return 'Unknown ' + sub.student_name;
+  }
+  // Legacy: raw name from pre-anonymization rows
+  return sub.student_name || 'Unknown student';
+}
 // Escape then re-enable **bold**. Safe because the markers are plain ASCII
 // asterisks that survive HTML escaping unchanged.
 function md(s) {
@@ -3965,6 +4049,7 @@ async function addMoreQuestions(k) {
   const btn = document.querySelector('[data-morebtn="' + k + '"]');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Adding...'; }
   const { topic, grades, subj, gradeStr } = window._lessonMeta;
+  const _logT0 = Date.now();
   // Split-grade worksheets are named student_worksheet_A/B/C/D — pick the matching grade from the array
   const splitMatch = k.match(/student_worksheet_([A-F])$/);
   const gradeForBlock = (splitMatch && grades) ? (grades[['A','B','C','D','E','F'].indexOf(splitMatch[1])] || gradeStr) : gradeStr;
@@ -4081,8 +4166,10 @@ Return ONLY a valid JSON object with this exact shape, no markdown fences, no pr
       }
     } catch(_) {}
     showToast(genC[akKey] ? '✅ Added more questions + answers' : '✅ Added more questions');
+    logGen({ kind:'worksheet_extend', subject:subj, grades:[gradeForBlock], topic, model:'claude-sonnet-4-20250514', duration_ms:Date.now()-_logT0, success:true });
   } catch (e) {
     showToast('⚠️ Could not add questions: ' + e.message);
+    logGen({ kind:'worksheet_extend', subject:subj, grades:[gradeForBlock], topic, model:'claude-sonnet-4-20250514', duration_ms:Date.now()-_logT0, success:false, error_code:(e.message||'unknown').slice(0,64) });
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '➕ More Questions'; }
   }
@@ -4630,6 +4717,7 @@ async function generateSlideData(callerBtn) {
 
   const lpText = genC['lesson_plan']?.cur || '';
   if (callerBtn) { callerBtn.disabled=true; callerBtn.textContent='⏳ Building slides...'; }
+  const _logT0 = Date.now();
   try {
     const iepCount = students.filter(s=>s.iep&&s.iep.trim()).length;
     const isMath = (subject||'').toLowerCase().includes('math');
@@ -4662,7 +4750,8 @@ async function generateSlideData(callerBtn) {
       '    {',
       '      "title": "slide title",',
       '      "key_point": "core concept in 1 clear sentence",',
-      '      "teacher_note": "delivery tip max 10 words",',
+      '      "teacher_script": "what to SAY out loud to students, 60-80 words, conversational classroom voice — not a lecture, not bullet points. Hook into prior knowledge, model thinking aloud, end with a turn-and-talk or quick check.",',
+      '      "misconception": "common student error on this concept + one-line redirect. Use null if no major misconception applies.",',
       '      "visual_type": "ONE OF THE TYPES BELOW",',
       '      "visual_params": { ... },',
       '      "image_prompt": "literal visual scene for image generator, concrete nouns, no abstractions, no meta-language, max 120 chars"',
@@ -4954,12 +5043,14 @@ async function generateSlideData(callerBtn) {
 
     const gsBtn = document.getElementById('gSlidesBtn');
     if (gsBtn && _gToken) gsBtn.style.display='inline-flex';
+    logGen({ kind:'slides', subject, grades, topic, model:'claude-sonnet-4-20250514', duration_ms:Date.now()-_logT0, success:true });
     return true;
 
   } catch(e) {
     alert('Error generating slides: '+e.message);
     clearInterval(imgLoadTimer);
     if (callerBtn) { callerBtn.disabled=false; callerBtn.textContent='▶ Present'; }
+    logGen({ kind:'slides', subject, grades, topic, model:'claude-sonnet-4-20250514', duration_ms:Date.now()-_logT0, success:false, error_code:(e.message||'unknown').slice(0,64) });
     return false;
   }
 }
@@ -4970,7 +5061,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-13-Q (Missing curriculum JSON: quiet console 404, negative-cache to prevent refetches, and show one-time teacher toast so best-effort expectations are transparent. Also: synced initial K worksheet prompt to use same activity-type caps as addMoreQuestions.)';
+const TA_BUILD = '2026-04-13-T (Privacy hardening: student names are no longer stored as readable text. Roster-matched students submit with student_id only (name field blank). Unmatched typed names are SHA-256 hashed with worksheet_id salt before submission. Teacher-side displayStudentName() helper resolves student_id back to roster names at display time. Legacy rows still display correctly.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
@@ -7013,7 +7104,17 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
 
   function corners(a=YELLOW) { return `<circle cx="0" cy="0" r="80" fill="${a}" opacity=".18"/><circle cx="1200" cy="675" r="100" fill="${TEAL}" opacity=".14"/><circle cx="1200" cy="0" r="60" fill="#BDBDBD" opacity=".13"/>`; }
   function headerBar(t,bg=TEAL) { return `<rect x="0" y="0" width="1200" height="${HEADER_H}" fill="${bg}"/><text x="48" y="${HEADER_H-22}" font-family="'Arial Black',Arial,sans-serif" font-size="26" font-weight="900" fill="white" textLength="${Math.min(esc(t).length*15,1080)}" lengthAdjust="spacingAndGlyphs">${esc(t)}</text>`; }
-  function slideWrap(h,bg=GREY) { return `<div class="slide" style="background:${bg}">${h}</div>`; }
+  // slideWrap can attach optional teacher notes (script + misconception) as
+  // data-attrs. The presenter overlays a separate Notes panel that reads these
+  // off the active slide. Notes are NEVER visible on the slide itself — that
+  // protects teachers who mirror to a smartboard from exposing their script
+  // to students.
+  function slideWrap(h,bg=GREY,notes) {
+    const dataAttrs = notes
+      ? ` data-script="${esc(notes.script||'')}" data-misconception="${esc(notes.misconception||'')}"`
+      : '';
+    return `<div class="slide" style="background:${bg}"${dataAttrs}>${h}</div>`;
+  }
 
   // TITLE
   const sTitle = slideWrap(`<svg class="deco" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
@@ -7132,8 +7233,7 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
           <div style="background:white;border-left:5px solid ${TEAL};border-radius:0 12px 12px 0;padding:20px 22px;box-shadow:0 2px 12px rgba(0,0,0,.07)">
             <p style="font-size:18px;color:${NAVY};line-height:1.65;font-weight:500;margin:0">${esc(cs.key_point||'')}</p>
           </div>
-          ${cs.teacher_note?`<p style="font-size:12px;color:#888780;font-style:italic;padding-left:4px">📌 ${esc(cs.teacher_note)}</p>`:''}
-        </div>`);
+        </div>`,GREY,{script:cs.teacher_script,misconception:cs.misconception});
     } else {
       // DIAGRAM-LED: full SVG panel, standard layout
       return slideWrap(`
@@ -7147,7 +7247,6 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
             <div style="background:white;border-left:5px solid ${TEAL};border-radius:0 10px 10px 0;padding:18px 18px;box-shadow:0 2px 10px rgba(0,0,0,.06)">
               <p style="font-size:17px;color:${NAVY};line-height:1.6;font-weight:500;margin:0">${esc(cs.key_point||'')}</p>
             </div>
-            ${cs.teacher_note?`<p style="font-size:12px;color:#888780;font-style:italic;padding-left:4px">📌 ${esc(cs.teacher_note)}</p>`:''}
           </div>
           <div id="vis-${i}" style="flex:1;display:flex;align-items:center;justify-content:center;background:white;border-radius:14px;padding:20px;box-shadow:0 2px 14px rgba(0,0,0,.07);min-height:340px;overflow:hidden">
             ${existingSVG || `<div style="display:flex;flex-direction:column;align-items:center;gap:12px;opacity:.4">
@@ -7155,7 +7254,7 @@ function openHTMLPresenter(sd, topic, subject, gradeStr, wikiImg, mindsonImg, wi
               <p style="font-size:14px;color:#888780;margin:0">Drawing visual...</p>
             </div>`}
           </div>
-        </div>`);
+        </div>`,GREY,{script:cs.teacher_script,misconception:cs.misconception});
     }
   });
 
@@ -7230,16 +7329,35 @@ html,body{width:100%;height:100%;overflow:hidden;background:#111;font-family:Ari
 #ctrl button:hover{background:rgba(255,255,255,.28)}
 #snum{color:rgba(255,255,255,.55);font-size:.72rem;min-width:3.2rem;text-align:center;font-family:monospace}
 #fsb{border-radius:8px!important;width:auto!important;padding:.3rem .85rem!important;font-size:.7rem!important;font-family:monospace}
+#nb{border-radius:8px!important;width:auto!important;padding:.3rem .85rem!important;font-size:.7rem!important;font-family:monospace}
+#nb.on{background:#3BBFAD!important;color:#0a2118!important;font-weight:700}
+#notes{position:fixed;left:1.2rem;bottom:5.2rem;max-width:420px;max-height:48vh;overflow-y:auto;background:rgba(20,28,24,.94);backdrop-filter:blur(20px);color:#e8efe9;border-radius:14px;padding:1rem 1.1rem;border:1px solid rgba(59,191,173,.25);font-family:'Helvetica Neue',Arial,sans-serif;font-size:13.5px;line-height:1.55;z-index:250;display:none;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#notes.show{display:block}
+#notes .nh{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:#3BBFAD;margin-bottom:.25rem;display:block}
+#notes .nb{margin:0 0 .85rem 0;color:#e8efe9}
+#notes .nm{margin:0;padding:.6rem .8rem;background:rgba(245,200,66,.1);border-left:3px solid #F5C842;border-radius:0 6px 6px 0;color:#fce8a8;font-size:12.5px}
+#notes .nm-h{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#F5C842;display:block;margin-bottom:.2rem}
 @keyframes spin{to{transform:rotate(360deg)}}`;
 
   // The deck JS listens for postMessage and injects visuals
-  const JS=`var c=0,t=${total},sl,pr,nm;
-function show(n){if(sl[c])sl[c].classList.remove('active');c=Math.max(0,Math.min(n,t-1));if(sl[c])sl[c].classList.add('active');nm.textContent=(c+1)+'/'+t;pr.style.width=((c+1)/t*100)+'%';}
+  const JS=`var c=0,t=${total},sl,pr,nm,np,nbtn,notesOn=false;
+function rn(){
+  if(!sl||!sl[c]||!np)return;
+  var s=sl[c].getAttribute('data-script')||'';
+  var m=sl[c].getAttribute('data-misconception')||'';
+  if(!s&&!m){np.innerHTML='<span class="nh">Teacher Notes</span><p class="nb" style="opacity:.55;font-style:italic">No notes for this slide.</p>';return;}
+  var html='';
+  if(s)html+='<span class="nh">📋 Say this</span><p class="nb">'+s+'</p>';
+  if(m&&m!=='null')html+='<p class="nm"><span class="nm-h">⚠ Watch for</span>'+m+'</p>';
+  np.innerHTML=html;
+}
+function tn(){notesOn=!notesOn;np.classList.toggle('show',notesOn);nbtn.classList.toggle('on',notesOn);if(notesOn)rn();}
+function show(n){if(sl[c])sl[c].classList.remove('active');c=Math.max(0,Math.min(n,t-1));if(sl[c])sl[c].classList.add('active');nm.textContent=(c+1)+'/'+t;pr.style.width=((c+1)/t*100)+'%';if(notesOn)rn();}
 function go(d){show(c+d);}
 function fs(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.();}
-document.addEventListener('DOMContentLoaded',function(){sl=document.querySelectorAll('.slide');pr=document.getElementById('progress');nm=document.getElementById('snum');show(0);});
-document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();go(1);}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}if(e.key==='f'||e.key==='F')fs();});
-document.addEventListener('click',function(e){if(e.target.closest('#ctrl'))return;e.clientX>window.innerWidth/2?go(1):go(-1);});
+document.addEventListener('DOMContentLoaded',function(){sl=document.querySelectorAll('.slide');pr=document.getElementById('progress');nm=document.getElementById('snum');np=document.getElementById('notes');nbtn=document.getElementById('nb');show(0);});
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();go(1);}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}if(e.key==='f'||e.key==='F')fs();if(e.key==='n'||e.key==='N')tn();});
+document.addEventListener('click',function(e){if(e.target.closest('#ctrl')||e.target.closest('#notes'))return;e.clientX>window.innerWidth/2?go(1):go(-1);});
 window.addEventListener('message',function(e){
   if(!e.data||e.data.type!=='VISUAL_READY')return;
   var idx=e.data.slideIndex, svg=e.data.svg||'';
@@ -7259,10 +7377,12 @@ window.addEventListener('message',function(e){
 <style>${CSS}</style></head><body>
 <div id="progress"></div>
 <div id="deckWrap"><div id="deck">${allSlides.map(s=>s.replace(/`/g,'&#96;')).join('\n')}</div></div>
+<div id="notes" aria-hidden="true"></div>
 <div id="ctrl">
   <button onclick="go(-1)">&#8249;</button>
   <span id="snum">1/${total}</span>
   <button onclick="go(1)">&#8250;</button>
+  <button id="nb" onclick="tn()" title="Toggle teacher notes (N)">📋 Notes</button>
   <button id="fsb" onclick="fs()">&#x26F6; Full</button>
 </div>
 <script>${JS}<\/script>
@@ -8383,7 +8503,7 @@ async function loadUnitTestResults() {
         ${subCount === 0
           ? '<div style="color:var(--muted);font-size:.82rem;font-style:italic;padding:8px 0;">No submissions yet.</div>'
           : (subs||[]).map(sub => {
-              const name = sub.student_name || 'Unknown student';
+              const name = displayStudentName(sub);
               const submittedAt = sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
               const answered = Object.values(sub.responses||{}).filter(v => v && v !== '—' && v !== '').length;
               return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);gap:10px;" id="utr-${ws.id}-${sub.id}">
@@ -8418,7 +8538,7 @@ async function autoMarkOneUnitSub(wsId, subId, btn) {
   if (btn) { btn.disabled = true; btn.textContent = '...'; }
   const totalQ = extractWSQuestions(d.wsText);
   const totalQuestions = Object.keys(totalQ).length;
-  const studentObj = { first: sub.student_name || 'Student', last: '', id: sub.student_id || subId, grade: '' };
+  const studentObj = { first: displayStudentName(sub), last: '', id: sub.student_id || subId, grade: '' };
   await autoMarkStudent(sub.student_id || subId, studentObj, sub.responses||{}, d.akText, '', btn, totalQuestions);
   const levelEl = document.getElementById('utr-level-'+subId);
   if (levelEl) levelEl.textContent = 'Marked ✓';
@@ -8434,7 +8554,7 @@ async function autoMarkUnitTest(wsId) {
   const totalQ = extractWSQuestions(d.wsText);
   const totalQuestions = Object.keys(totalQ).length;
   for (const sub of subs) {
-    const studentObj = { first: sub.student_name || 'Student', last: '', id: sub.student_id || sub.id, grade: '' };
+    const studentObj = { first: displayStudentName(sub), last: '', id: sub.student_id || sub.id, grade: '' };
     const btn = document.querySelector(`button[onclick*="autoMarkOneUnitSub('${wsId}','${sub.id}"]`);
     await autoMarkStudent(sub.student_id || sub.id, studentObj, sub.responses||{}, d.akText, '', btn, totalQuestions);
   }
@@ -9810,7 +9930,7 @@ async function reviewUnitAssessment(wsId) {
     : `<div style="padding:12px 20px;background:var(--paper);border-bottom:1px solid var(--border);">
         <div style="font-weight:600;font-size:.82rem;color:var(--ink);margin-bottom:8px;">${subCount} submission${subCount!==1?'s':''}</div>
         ${subs.map(sub => {
-          const name = sub.student_name || 'Unknown student';
+          const name = displayStudentName(sub);
           const submittedAt = sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
           const answered = Object.values(sub.responses||{}).filter(v => v && v !== '—' && v !== '').length;
           return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);gap:10px;">
