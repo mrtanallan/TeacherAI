@@ -1384,64 +1384,123 @@ async function retryAuthFetch(url, options, maxRetries=3) {
 // ============================================================
 async function callGenerateStreaming(bodyObj) {
   const body = { ...bodyObj, stream: true };
-  // BUILD V: auto-retry on 529 (Anthropic overloaded) with exponential backoff.
-  // Only the initial POST + status check are inside the retry loop — once the
-  // response is OK we're committed to consuming the stream, so retries past
-  // that point would be unsafe (partial output already delivered).
-  // Mid-stream errors are returned as-is so callers can show the friendly
-  // overload message (build U) rather than silently retry on torn output.
-  const MAX_RETRIES = 2;
-  let res;
+  // BUILD X: full-stream 529 retry. Anthropic's streaming endpoint
+  // delivers most "overloaded" errors as an SSE error event inside an
+  // HTTP 200 response, not as an HTTP 529. Build V only retried the
+  // outer HTTP layer, which is why teachers were still seeing the
+  // overload alert constantly. We now retry the entire request+stream
+  // phase up to 3 times (4s/10s/20s = 34s total budget) when we see:
+  //   - HTTP 529 before streaming starts
+  //   - HTTP 200 with an overloaded_error event in the SSE stream
+  //   - HTTP 200 that ends with empty fullText and no events parsed
+  //     (server closed the stream early — almost always an overload)
+  // Once we receive non-empty content we commit and never retry.
+  const MAX_RETRIES = 3;
+  const WAITS = [4000, 10000, 20000];
+  const isOverloadErr = (e) => {
+    if (!e) return false;
+    const t = (e.type || '').toLowerCase();
+    const m = (e.message || '').toLowerCase();
+    return t.includes('overload') || /overload|capacity|529/.test(m);
+  };
+  const setRetryMsg = (waitMs, attempt) => {
+    try { setProgress(null, `AI is busy — retrying in ${Math.round(waitMs/1000)}s (attempt ${attempt+2}/${MAX_RETRIES+1})...`); } catch(_) {}
+  };
+
+  let lastRes = null;
+  let lastStreamError = null;
+
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    res = await authFetch('/api/generate', {
+    const res = await authFetch('/api/generate', {
       method: 'POST',
       body: JSON.stringify(body)
     });
-    if (res?.status === 529 && attempt < MAX_RETRIES) {
-      const wait = [4000, 10000][attempt];
-      try { setProgress(null, `AI is busy — retrying in ${Math.round(wait/1000)}s...`); } catch(_) {}
+    lastRes = res;
+
+    // Hard HTTP 529 — retry if budget remains
+    if (res?.status === 529) {
+      if (attempt < MAX_RETRIES) {
+        const wait = WAITS[attempt];
+        setRetryMsg(wait, attempt);
+        await new Promise(r => setTimeout(r, wait));
+        continue;
+      }
+      // out of retries — fall through to error return below
+      let errData = {};
+      try { errData = await res.json(); } catch(_) {}
+      return { ok:false, status: 529, error: errData.error || { type:'overloaded_error', message:'Overloaded' }, content: [{text:''}] };
+    }
+
+    // Non-OK and not 529 — return immediately, no retry (it's a real error)
+    if (!res || !res.ok) {
+      let errData = {};
+      try { errData = await res.json(); } catch(_) {}
+      return { ok:false, status: res?.status || 0, error: errData.error, content: [{text:''}] };
+    }
+
+    // OK response — start consuming the stream
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    let fullText = '';
+    let streamError = null;
+    let eventCount = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let sepIdx;
+      while ((sepIdx = buf.indexOf('\n\n')) !== -1) {
+        const rawEvent = buf.slice(0, sepIdx);
+        buf = buf.slice(sepIdx + 2);
+        const dataLines = rawEvent.split('\n').filter(l => l.startsWith('data: '));
+        for (const dl of dataLines) {
+          const payload = dl.slice(6).trim();
+          if (!payload || payload === '[DONE]') continue;
+          try {
+            const evt = JSON.parse(payload);
+            eventCount++;
+            if (evt.type === 'content_block_delta' && evt.delta && evt.delta.type === 'text_delta') {
+              fullText += evt.delta.text || '';
+            } else if (evt.type === 'error') {
+              streamError = evt.error || { message: 'Unknown stream error' };
+            }
+          } catch(_) { /* ignore malformed SSE chunks */ }
+        }
+      }
+    }
+
+    // Decide whether this attempt is retryable.
+    // Retry IF: (a) explicit overloaded_error event AND no usable text yet,
+    // OR (b) zero events received (likely server closed without sending).
+    // Do NOT retry if we got partial text — that would double-charge tokens
+    // and the partial output may be salvageable.
+    const isStreamOverload = isOverloadErr(streamError);
+    const isEmptyStream = (eventCount === 0 && fullText.length === 0);
+    const shouldRetry = (isStreamOverload && fullText.length === 0) || isEmptyStream;
+
+    if (shouldRetry && attempt < MAX_RETRIES) {
+      const wait = WAITS[attempt];
+      setRetryMsg(wait, attempt);
+      lastStreamError = streamError || { type:'overloaded_error', message:'Empty stream — likely overload' };
       await new Promise(r => setTimeout(r, wait));
       continue;
     }
-    break;
-  }
-  if (!res || !res.ok) {
-    let errData = {};
-    try { errData = await res.json(); } catch(_) {}
-    return { ok:false, status: res?.status || 0, error: errData.error, content: [{text:''}] };
-  }
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buf = '';
-  let fullText = '';
-  let streamError = null;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += decoder.decode(value, { stream: true });
-    let sepIdx;
-    while ((sepIdx = buf.indexOf('\n\n')) !== -1) {
-      const rawEvent = buf.slice(0, sepIdx);
-      buf = buf.slice(sepIdx + 2);
-      const dataLines = rawEvent.split('\n').filter(l => l.startsWith('data: '));
-      for (const dl of dataLines) {
-        const payload = dl.slice(6).trim();
-        if (!payload || payload === '[DONE]') continue;
-        try {
-          const evt = JSON.parse(payload);
-          if (evt.type === 'content_block_delta' && evt.delta && evt.delta.type === 'text_delta') {
-            fullText += evt.delta.text || '';
-          } else if (evt.type === 'error') {
-            streamError = evt.error || { message: 'Unknown stream error' };
-          }
-        } catch(_) { /* ignore malformed SSE chunks */ }
-      }
+
+    if (streamError) {
+      // Surface as 529 if it's clearly an overload, so callers can show the friendly message.
+      const isOverload = isOverloadErr(streamError);
+      return { ok:false, status: isOverload ? 529 : 500, error: streamError, content: [{text: fullText}] };
     }
+    if (isEmptyStream) {
+      return { ok:false, status: 529, error: { type:'overloaded_error', message:'Empty stream from upstream' }, content: [{text:''}] };
+    }
+    return { ok:true, status: 200, content: [{text: fullText}] };
   }
-  if (streamError) {
-    return { ok:false, status: 500, error: streamError, content: [{text: fullText}] };
-  }
-  return { ok:true, status: 200, content: [{text: fullText}] };
+
+  // Exhausted retries (only reached if last loop iteration triggered shouldRetry-but-out-of-budget,
+  // which the inner branches already handle via early return; this is a safety net).
+  return { ok:false, status: 529, error: lastStreamError || { type:'overloaded_error', message:'Overloaded after retries' }, content: [{text:''}] };
 }
 
 // ============================================================
@@ -5078,7 +5137,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-13-W (Four changes: (1) Removed build-S residue — logGen helper + 4 call sites + 2 _logT0 timestamps + _hashTopic/_getClientId. No more 404s on /api/log-generation. (2) Deck-wide image style seed — buildDeckStyleSeed() picks a subject-anchored aesthetic once per deck and locks all 5 image gens (mindson + 4 slides) to it. Subject palettes: science=watercolour botanical, math=flat geometric vector, social=gouache historical, etc. Cache key safely differentiated by 8-char FNV hash. Visible consistency moat vs Chalkie. (3) K worksheet PDF pagination: .gap now break-before:avoid and .instr break-after:avoid, so blank-line spacers can no longer break the chain between Teacher-says and the activity below. CSS-only fix, no parser surgery — chose this over state-machine wrap for zero regression risk. (4) Carries forward V auto-retry on 529. Plus: worksheet-6.html submitWorksheet now falls back to anonName=#unavailable if crypto.subtle is unavailable, so HTTP test contexts and any iPad Safari edge case do not block submission.)';
+const TA_BUILD = '2026-04-13-X (FIX: Build V 529 retry was broken — it only caught HTTP 529 before stream start, but Anthropic delivers most overloads as SSE error events inside an HTTP 200 response, which V passed through to the user. X rewraps the entire request+stream phase in a 3-attempt retry loop (4s/10s/20s = 34s budget), detects stream-embedded overloaded_error events AND empty-stream early-close cases, and only commits once non-empty text arrives. Progress bar shows "retrying in Xs (attempt N/4)" so teachers know the app is still working. Everything else from build W carried forward: build-S residue gone, deck-wide image style seed, K worksheet .gap/.instr pagination fix, worksheet-6.html crypto.subtle fallback.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
