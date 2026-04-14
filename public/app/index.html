@@ -3014,12 +3014,12 @@ Each value is a markdown string except "expectations" (JSON array).
 - [3-6 items for the play center, using real classroom materials: blocks, counters, playdough, markers, picture cards, nature items, etc.]
 ## ✨ THE INVITATION
 **Set up:** [How to arrange the materials — 1-2 sentences]
-**Provocation:** "[Exact 1-2 sentence question or statement the educator says to spark curiosity. Should be wonder-based, not instructional. Example: 'I wonder how many different ways we can sort these buttons...']"
+**Provocation:** [Exact 1-2 sentence question or statement the educator says to spark curiosity. Should be wonder-based, not instructional. Example: I wonder how many different ways we can sort these buttons... Do NOT wrap in quote marks.]
 ## 🎭 DURING PLAY
 **Educator prompts to extend thinking:**
-- "[Open question 1 that deepens exploration]"
-- "[Open question 2]"
-- "[Open question 3]"
+- [Open question 1 that deepens exploration — write plainly, no quote marks]
+- [Open question 2]
+- [Open question 3]
 **Vocabulary to introduce naturally:** [3-5 Tier 2 words children will hear in context]
 ## 👀 WHAT TO LOOK FOR
 Tied to the specific expectations, observable in play:
@@ -3059,34 +3059,34 @@ ${expHint}
 Align to Ontario Ministry of Education 2023 curriculum.
 Return ONLY valid JSON with keys: ${allOutputKeys.map(k=>'"'+k+'"').join(', ')}, "expectations".
 Each value is a markdown string except "expectations" (JSON array).
-- lesson_plan: Use EXACTLY this format:
+- lesson_plan: Use EXACTLY this format. IMPORTANT: do NOT wrap any field values in quote characters — just write the value plainly. Embedded quote chars inside markdown templates were causing JSON-string escaping issues that truncated the field.
 ## LESSON SNAPSHOT
 **Topic:** [topic] | **Grade(s):** [grade] | **Subject:** [subject] | **Time:** [total]
 **Expectation(s):** [codes]
 **I can...:** [student-facing learning goal]
-**Materials:** [3 items max or "Worksheet only."]
+**Materials:** [3 items max or Worksheet only.]
 ## MINDS ON — [8 min]
-**Ask:** "[Hook question]"
-**Think-pair-share:** "[Discussion prompt]"
+**Ask:** [Hook question — write the question plainly, no surrounding quote marks]
+**Think-pair-share:** [Discussion prompt]
 **Listen for:** [Strong response — 1 line]
 ↳ ELL: [One visual/gesture cue]
 ## DIRECT INSTRUCTION — [10–12 min]
 **Core concept:** [2–3 sentences MAX]
-**Model:** "[Exact teacher words with concrete example]"
-✓ **Check:** "[Whole-class question right now]"
+**Model:** [Exact teacher words with concrete example]
+✓ **Check:** [Whole-class question right now]
 → If confused: [One re-teaching move]
 ↳ IEP/ELL: [Scaffold — sentence frame or visual]
 ## GUIDED PRACTICE — [12–15 min]
 **Activity:** [What students do — 2–3 lines]
-✓ **Circulate — look for:** "[Specific observable behaviour]"
+✓ **Circulate — look for:** [Specific observable behaviour]
 ↳ IEP/ELL: [Modification]
 ↳ Extension: [Deepening prompt for early finishers]
 ## INDEPENDENT WORK — [12–15 min]
 → Student worksheet
 **Teacher during this time:** [Pull small group / observe / confer — pick one]
 ## CONSOLIDATION — [5 min]
-**Exit ticket:** "[One focused question]"
-**Level 3 looks like:** "[Proficient answer — 1 line]"
+**Exit ticket:** [One focused question]
+**Level 3 looks like:** [Proficient answer — 1 line]
 **Collect via:** [worksheet / sticky note / verbal — pick one]
 ${wsLines}
 ${isSplit && isScience && rdOutputKeys.length > 1 ? rdOutputKeys.map((k,i)=>`- ${k}: original 200-300 word reading passage specifically for ${grades[i]} on their grade-level science content`).join('\n') : '- reading_resource: original 200–300 word passage appropriate for the grade(s)'}
@@ -5187,7 +5187,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-13-AD (Real-world fixes from Gr 3 Money + Division testing. (1) RENDERER MATH BUG: grouped_objects renderer was hardcoding the multiplication equation form (3 × 4 = 12) regardless of operator — when AI passed operator:÷ the slide showed "3 ÷ 4 = 12" which is mathematically wrong. Now writes total ÷ groups = per_group for division. (2) ROSTER FILTER: single-grade worksheets now filter roster by the worksheet grade so a Gr 3 worksheet only suggests Gr 3 students (Ayaan, a Gr 2 student, was incorrectly suggested for a Gr 3 worksheet). Split-grade workflow already had this. (3) FLUX COUNT: Mindson image prompt now strips numeric quantities ("10 counters" → "counters") because Schnell cannot reliably render exact counts. Hook text says 10, image showed 6 — strip the digit, less mismatch. (4) DIAGNOSTIC: lesson generation now console.logs per-field content lengths + first/last 200 chars of lesson_plan, so the next time lesson_plan renders empty we will know whether the AI returned truncated content or the renderer is dropping it. Empty lesson_plan still UNRESOLVED — needs one more repro to capture the diagnostic. (5) Carries forward AC critical worksheet submit fix and all prior work.)';
+const TA_BUILD = '2026-04-13-AE (CRITICAL FIX — Empty lesson_plan bug solved. AD diagnostic revealed lesson_plan was 355 chars total (vs ~2500 normal) and ended literally at `**Ask:** ""` with empty quotes. Root cause: lesson_plan template uses `"[Hook question]"` with literal quote characters embedded inside what becomes a JSON string field. Sonnet 4.6 (stricter JSON instruction-following than 4) was bailing on that field rather than risk breaking JSON validity. Fixed: stripped all literal quote chars from the template — values are now written plainly. Other fields (worksheet, rubric, answer_key) were unaffected because they did not contain embedded quote templates. Carries forward all AD fixes (division equation, roster filter, Flux count, diagnostic logging).)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
