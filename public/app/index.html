@@ -2289,6 +2289,11 @@ function checkGradeAlignment() {
   const subj = document.getElementById('subj')?.value || '';
   const selectedGrades = [...document.querySelectorAll('#gradePillContainer .grade-pill-btn.selected')].map(b => b.dataset.grade);
   if (!topic || topic.length < 4 || !subj || !selectedGrades.length) return;
+  // BUILD AF: topics tagged "(any grade)" or "(all grades)" explicitly opt
+  // out of grade-fit suggestions. These are meta-skills (scientific inquiry,
+  // literacy strategies) that apply across the K-8 spectrum; warning the
+  // teacher it "aligns better with Gr 8" is wrong and erodes trust.
+  if (/\((any|all)\s*grades?\)/i.test(topicRaw)) return;
   // Trust-our-own-suggestions rule: if the topic matches a suggestion we offered
   // for the selected grade (indicated by a "(Gr. K)" or "(Gr. 4)" style suffix),
   // don't nag the teacher that it belongs somewhere else. Our curated lists
@@ -2893,8 +2898,8 @@ Use emoji headers. 4–6 varied activities. Start directly with the worksheet ti
     ? wsOutputKeys.map((k,i)=>'- '+k+': worksheet for '+grades[i]+' ONLY — '+wsFormatNote).join('\n')
     : '- student_worksheet: '+wsFormatNote;
   const akLines = isSplit
-    ? answerKeyKeys.map((k,i)=>'- '+k+': answer key for '+grades[i]+' worksheet. REQUIRED — do not omit. Format: "Q1: [question] -> [ideal answer]"').join('\n')
-    : hasWorksheet ? '- answer_key: answer key for the worksheet. REQUIRED — do not omit. Format: "Q1: [question] -> [ideal answer]". For open-ended give 2-3 key points expected at Level 3.' : '';
+    ? answerKeyKeys.map((k,i)=>'- '+k+': answer key for '+grades[i]+' worksheet. REQUIRED — do not omit. Format each entry as: Q1: the question text -> the ideal answer. Do NOT wrap any part in quote marks.').join('\n')
+    : hasWorksheet ? '- answer_key: answer key for the worksheet. REQUIRED — do not omit. Format each entry as: Q1: the question text -> the ideal answer. Do NOT wrap any part in quote marks. For open-ended questions give 2-3 key points expected at Level 3.' : '';
   // Give the AI better guidance on which strand to prioritize based on topic keywords
   const topicLower = topic.toLowerCase();
   // Language strand guidance
@@ -3197,7 +3202,7 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
           // Claude didn't return this answer key — surface the gap with a visible placeholder
           // so teachers know to regenerate rather than wondering why the block is blank.
           const gradeLabel = isSplit ? (grades[answerKeyKeys.indexOf(k)] || '') : '';
-          const placeholder = `⚠️ Answer key was not generated${gradeLabel ? ' for '+gradeLabel : ''}. This sometimes happens on long split-class lessons when the AI hits its token limit.\n\nClick **✏️ Edit** to write one manually, or click **🔄 Regenerate Lesson** at the top to try again.`;
+          const placeholder = `⚠️ Answer key was not generated${gradeLabel ? ' for '+gradeLabel : ''}. This can happen on very long lessons.\n\nClick **✏️ Edit** to write one manually, or click **🔄 Regenerate Lesson** at the top to try again.`;
           genC[k] = {orig:placeholder, cur:placeholder};
         }
       });
@@ -3680,11 +3685,24 @@ function renderRubric(text) {
   lines.forEach(line => {
     const trimmed = line.trim();
     if (!trimmed) return;
+    // BUILD AF: drop horizontal-rule lines ('---' / '—') and handle single-#
+    // titles. AI sometimes emits them between rubric sections, leaking as
+    // literal dashes. Also strip stray trailing asterisks the AI sometimes
+    // leaves from malformed **bold** tokens.
+    if (/^[-—]{2,}$/.test(trimmed)) return;
+    const cleanedLine = trimmed.replace(/\*+$/, '').replace(/^\*(?!\*)/, '');
 
-    if (line.startsWith('## ')) {
+    if (line.startsWith('# ') && !line.startsWith('## ')) {
+      // Top-level title: render as a header, don't leak as raw text
       if (inLevel)    { html += '</div>'; inLevel = false; }
       if (inCategory) { html += '</div></div>'; inCategory = false; }
-      const cat = line.slice(3).trim();
+      const title = line.slice(2).trim().replace(/\*+$/, '');
+      html += `<div style="font-family:Fraunces,serif;font-size:1.05rem;font-weight:600;margin-bottom:12px;">${md(title)}</div>`;
+
+    } else if (line.startsWith('## ')) {
+      if (inLevel)    { html += '</div>'; inLevel = false; }
+      if (inCategory) { html += '</div></div>'; inCategory = false; }
+      const cat = line.slice(3).trim().replace(/\*+$/, '');
       html += `<div style="margin-bottom:18px;">
         <div style="font-family:Fraunces,serif;font-size:.95rem;font-weight:600;padding:8px 12px;background:var(--sage-l);border-left:3px solid var(--sage);border-radius:0 5px 5px 0;margin-bottom:8px;">${md(cat)}</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">`;
@@ -3692,7 +3710,7 @@ function renderRubric(text) {
 
     } else if (line.startsWith('### ')) {
       if (inLevel) { html += '</div>'; inLevel = false; }
-      const lvl = line.slice(4).trim();
+      const lvl = line.slice(4).trim().replace(/\*+$/, '');
       // Match "Level 1", "Level 2" etc (may have percentage in parens)
       const lvlKey = Object.keys(lvlColors).find(k => lvl.startsWith(k)) || '';
       const col    = lvlColors[lvlKey]  || '#9CA3AF';
@@ -3704,7 +3722,7 @@ function renderRubric(text) {
 
     } else if (trimmed) {
       // Strip list markers, then escape+bold. NEVER inject raw text.
-      const txt = md(trimmed.replace(/^[-*]\s*/, ''));
+      const txt = md(cleanedLine.replace(/^[-*]\s*/, ''));
       if (txt) html += `<div style="font-size:.78rem;line-height:1.55;margin-bottom:4px;">${txt}</div>`;
     }
   });
@@ -4951,7 +4969,7 @@ async function generateSlideData(callerBtn) {
       '  * Food chains / food webs / energy flow: food_chain.',
       '  * Labeled organism / plant parts / animal parts / cell / body system: science_diagram.',
       '  * Classification / living vs non-living / sorting: anchor_chart (two-column).',
-      '  * Scientific method / inquiry process: reading_strategy (Question/Predict/Test or similar).',
+      '  * Scientific method / inquiry process / investigation steps: use cycle_diagram (steps as stages) OR concept_card (one step per card). NEVER reading_strategy — that has hardcoded "Before/During/After Reading" labels that make no sense for science inquiry.',
       '  * States of matter / properties comparison: comparison_table or anchor_chart.',
       '  LITERACY TOPIC MAPPINGS:',
       '  * Story elements / narrative / fiction: story_map for slide 1.',
@@ -5187,7 +5205,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-13-AE (CRITICAL FIX — Empty lesson_plan bug solved. AD diagnostic revealed lesson_plan was 355 chars total (vs ~2500 normal) and ended literally at `**Ask:** ""` with empty quotes. Root cause: lesson_plan template uses `"[Hook question]"` with literal quote characters embedded inside what becomes a JSON string field. Sonnet 4.6 (stricter JSON instruction-following than 4) was bailing on that field rather than risk breaking JSON validity. Fixed: stripped all literal quote chars from the template — values are now written plainly. Other fields (worksheet, rubric, answer_key) were unaffected because they did not contain embedded quote templates. Carries forward all AD fixes (division equation, roster filter, Flux count, diagnostic logging).)';
+const TA_BUILD = '2026-04-13-AF (Four fixes from Gr 3 Science Scientific Inquiry test. (1) GRADE-FIT WARNING: topics tagged "(any grade)" or "(all grades)" now suppress the "aligns better with Gr X" hint — meta-skills apply across the spectrum, warning was wrong and eroded trust. (2) RUBRIC RENDERER: now handles single-# titles (was leaking as literal "# Assessment Rubric..." text), drops --- horizontal rules, and strips stray trailing asterisks from malformed AI markdown. Fixes the garbled rubric display. (3) SLIDE VISUAL MISMATCH: removed prompt rule that routed "scientific method / inquiry process" to reading_strategy renderer. That renderer has hardcoded "Before Reading / During Reading / After Reading" column headers that made no sense for science inquiry — observed in production showing science steps under reading labels. Now routes to cycle_diagram or concept_card. (4) ANSWER KEY EMPTY: same root cause as the AE lesson_plan bug — answer_key format template had "Q1: [question] -> [ideal answer]" with embedded quotes that Sonnet 4.6 refused to nest inside a JSON string. Stripped the quotes. Also fixed misleading warning that blamed split-class + token limits when cause was actually quote-nesting. Carries forward all AE fixes.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
