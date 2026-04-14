@@ -1,271 +1,326 @@
-# TeacherAI — Project Brief v5.0
-*Last updated: March 31, 2026*
+# TeacherAI — Developer Handover
 
-## QUICK START FOR NEW SESSION
-Upload `teacherai-project-brief.md` + `index.html` to Claude. Say: "Continue building TeacherAI. Read the brief first."
-
----
-
-## PRODUCT
-**TeacherAI** — AI teaching OS for Ontario K–8 teachers
-**Live app:** teacherai.ca/app
-**Landing page:** teacherai.ca
-**GitHub:** github.com/mrtanallan/TeacherAI
-**Version:** v5.0 · Mar 31 2026
+**Last updated:** April 14, 2026
+**Current production build:** `2026-04-14-AJ+`
+**Status:** Beta-ready. 1 active tester. Imminent Facebook post to 5,300 YRDSB teachers.
 
 ---
 
-## STACK
-- **Frontend:** Two HTML files:
-  - `public/app/index.html` — the actual tool (~278KB, ~4500 lines)
-  - `public/index.html` — marketing landing page
-  - `public/worksheet.html` — student-facing digital worksheet
-- **Backend:** Vercel serverless `api/generate.js` + `api/worksheet.js`
-- **DB:** Supabase (bbhhkyiyfybmlfkerfto.supabase.co, Canada Central)
-- **Auth:** Supabase (email/password + Google OAuth)
-- **AI:** claude-sonnet-4-20250514
+## Product Context
 
-## URL STRUCTURE
-- `teacherai.ca` → `public/index.html` (landing page)
-- `teacherai.ca/app` → `public/app/index.html` (the tool)
-- `teacherai.ca/worksheet.html` → `public/worksheet.html` (student worksheet — direct path, not /ws)
+**TeacherAI** (teacherai.ca) is an AI-assisted lesson planning and assessment tool built specifically for Ontario K-8 teachers. Target user: classroom teachers, including split-grade and special-ed teachers.
 
-## vercel.json (CURRENT — uses rewrites not routes)
-```json
-{
-  "rewrites": [
-    { "source": "/api/generate", "destination": "/api/generate.js" },
-    { "source": "/api/worksheet", "destination": "/api/worksheet.js" },
-    { "source": "/ws/:path*", "destination": "/public/worksheet.html" },
-    { "source": "/app/:path*", "destination": "/public/app/index.html" },
-    { "source": "/app", "destination": "/public/app/index.html" },
-    { "source": "/privacy", "destination": "/public/privacy.html" },
-    { "source": "/terms", "destination": "/public/terms.html" },
-    { "source": "/", "destination": "/public/index.html" }
-  ]
-}
-```
+**What it does:**
+- Generates Ontario-curriculum-aligned lesson plans, student worksheets, reading resources, rubrics, and answer keys
+- Teaching slide decks with subject-specific visual renderers (math, science, literacy, K)
+- Student worksheet delivery via shareable links (no student accounts)
+- Assessment tracking + descriptive feedback
+- Report card comment generation (PowerSchool-compatible format)
+- Unit planning
+- K-specific Play Invitation format with observational assessment
 
----
+**Primary differentiators vs MagicSchool / Chalkie / Kuraplan:**
+- Genuinely Ontario-specific (curriculum expectations, MFIPPA compliance, Ontario Achievement Chart)
+- Canadian data residency (Supabase ca-central-1 in Montreal)
+- Student names never sent to Anthropic (anonymized as "Student A/B/C")
+- K hardcoded SVG renderers (triangles actually render as triangles, not chicks)
+- Split-grade support (ABAB + parallel lessons)
+- Free during beta
 
-## CRITICAL CONFIG
-
-### Supabase
-- **URL:** `https://bbhhkyiyfybmlfkerfto.supabase.co`
-- **Anon key (CURRENT — rotated Mar 31 2026):**
-  `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJiaGhreWl5ZnlibWxma2VyZnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDgzODMsImV4cCI6MjA4OTc4NDM4M30.nLzOUCAa8XSD4BL0XIdPvwVNZy-5Rnp6NVLUTVjE-ZQ`
-- **Init pattern (MUST use this exact form):**
-  ```js
-  const { createClient } = supabase;
-  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  ```
-  Do NOT use `supabase.createClient(...)` — that pattern fails with the jsDelivr CDN build.
-- Site URL: `https://teacherai.ca/app`
-- Redirect URLs: `https://www.teacherai.ca`, `https://teacherai.ca`, `https://teacherai.ca/app`
-
-### Google Slides
-- Client ID: `745642384007-u7anvn00lh74qum6b9u19eodm7flokfd.apps.googleusercontent.com`
-- Authorized origin: `https://teacherai.ca`
-- Uses Google Identity Services (client-side OAuth, no backend needed)
+**Stack:**
+- Frontend: single-file HTML + vanilla JS (`index-14.html`, ~10,979 lines, ~700KB)
+- Hosting: Vercel (Hobby plan)
+- Database: Supabase (free tier, ca-central-1)
+- AI: Anthropic API (Claude Sonnet 4.6 primary, with fallback chain)
+- Image gen: Fal.ai Flux Schnell (plus K hardcoded SVGs)
+- DNS: Cloudflare (active, DNS-only mode)
+- Email: Cloudflare Email Routing → `teacheraicanada@gmail.com`
+- Domain registrar: GoDaddy (teacherai.ca + teacher.ca owned)
 
 ---
 
-## DATABASE TABLES
-- `profiles` — teacher accounts
-- `classes` — (id, teacher_id, name, subject_focus, context)
-- `students` — (id, teacher_id, class_id, first_name, last_name, grade, notes, learning_profile)
-- `lessons` — (id, teacher_id, topic, grades[], subject, content jsonb, expectations jsonb, class_id)
-- `worksheets` — (id, teacher_id, lesson_id, topic, grades[], content, roster jsonb, class_id)
-- `worksheet_submissions` — (id, worksheet_id, student_name, student_id, responses jsonb, submitted_at)
-- `assessment_sessions` — (id, teacher_id, task, subject, strand, grades[], date, class_id, expectations jsonb)
-- `student_marks` — (id, session_id, student_id, level, notes)
-- `report_card_comments` — (id, teacher_id, student_id, term, subject, comment, char_limit, updated_at)
+## User Preferences (Carries Across Sessions)
+
+From active userPreferences:
+
+> Act as a product strategist + senior engineer helping me build TeacherAI (an AI tool for Ontario teachers).
+>
+> **Prioritize:** Practical buildable solutions over theory. Simplicity and speed (low token cost, low UI complexity). Teacher usability and low mental load. Strong differentiation vs existing tools (MagicSchool, Chalkie, etc.). Clear product decisions, not just options.
+>
+> **When responding:** Default to strong recommendation, not multiple equal options. Think in terms of real classroom use (K-8, split grades, SSC). Optimize for workflows that save teachers time immediately. Consider cost of generation (tokens, API calls) in design decisions. Flag anything that could become a competitive moat.
+>
+> **Avoid:** Overly academic explanations. Feature bloat. Vague answers without concrete implementation direction.
+>
+> Challenge my assumptions when needed and point out weak ideas directly.
+
+Dev works solo. Testing pattern: user generates lessons → screenshots bugs → Claude patches → user deploys → re-tests. Multi-day sprints. User prefers direct honest pushback over sycophantic agreement.
 
 ---
 
-## CODEBASE STRUCTURE
-The index.html is built from 8 part files assembled on disk at `/home/claude/build/`:
+## Current File State (`/mnt/user-data/outputs/`)
 
-| File | Contents |
-|------|----------|
-| `part1.html` | HTML shell, CSS, all page markup |
-| `part2_constants.js` | Supabase init, EXPECTATIONS object, state vars, BLABELS, link caches |
-| `part3_auth.js` | Loading/toast, authFetch, retryAuthFetch, auth functions, initApp, loadUserData |
-| `part4_generate.js` | Workflow steps, grade pills, generate(), prompt building with strand guidance |
-| `part5_render.js` | buildEditBlocks, renderMD, renderRubric, renderWS, renderAnswerKey, downloadPDF, getStudentLink |
-| `part6_slides.js` | generateSlideData, presentSlides (blob URL), openHTMLPresenter, Google Slides export |
-| `part7_roster_assess.js` | renderR, addStu, renderAssGrid, autoMarkAll, autoMarkStudent, saveOneStu, renderTracker, renderExpInAssess, toggleTrackerRow |
-| `part8b_lessons_rc.js` | renderLessonsList, loadLesson, generateReportCards, generateOneComment, renderCommentCard, saveRCComment, loadAccountPage |
-| `part8_tour_boot.js` | Tour steps, initApp() call |
+| File | Build | Deployed? | What it does |
+|------|-------|-----------|--------------|
+| `index-14.html` | AJ+ | ✅ Yes | Main app — all UI, prompts, renderers |
+| `worksheet-6.html` | AC | ✅ Yes | Student-facing worksheet page |
+| `generate-4.js` | AB | ✅ Yes | Backend lesson API (streaming + fallback chain) |
+| `generate-image-3.js` | unstamped | ✅ Yes | Backend Flux image gen + CORS tightening |
+| `worksheet-3.js` | AC | ✅ Yes | Backend worksheet submit/fetch + CORS |
+| `privacy.html` | Apr 14 2026 | ✅ Yes | Privacy policy with clean contact@teacherai.ca |
+| `terms.html` | Apr 14 2026 | ✅ Yes | Terms of service with clean contact@teacherai.ca |
 
-### Rebuild command (run from /home/claude/build/):
-```bash
-cat part2_constants.js part3_auth.js part4_generate.js part5_render.js part6_slides.js part7_roster_assess.js part8b_lessons_rc.js part8_tour_boot.js > script_final.js
-{ cat part1.html; echo '<script>'; cat script_final.js; printf '\n</script>\n</body>\n</html>\n'; } > index_final.html
-# Syntax check:
-node -e "const fs=require('fs'),c=fs.readFileSync('index_final.html','utf8'),s=c.indexOf('<script>\n')+9,e=c.lastIndexOf('</script>');fs.writeFileSync('/tmp/fc.js',c.slice(s,e));"
-node --check /tmp/fc.js
-```
+All deployed to production as of end of April 14, 2026 session.
 
 ---
 
-## CRITICAL RULES
+## Key File Locations in index-14.html
 
-### ⛔ NO FULL REBUILDS
-**Never rewrite the whole file from scratch.** The rebuild from v4→v5 cost a full day of regressions. Always make surgical edits to the specific part file, then reassemble with the build command above.
-
-### SURGICAL EDIT WORKFLOW
-1. Edit only the affected part file
-2. Rebuild with the cat command above
-3. Run node --check to validate syntax
-4. Copy to outputs and deploy
-
-### OTHER CRITICAL GOTCHAS
-- **Supabase init:** Always `const { createClient } = supabase; const db = createClient(...)` — never `supabase.createClient()`
-- **Supabase key gets rotated** — always verify against Supabase dashboard → Settings → API if login fails
-- **Two `index.html` files is intentional** — `public/index.html` = landing, `public/app/index.html` = tool
-- **vercel.json uses `rewrites` not `routes`** — `routes` is legacy
-- **Supabase query builder:** MUST reassign `q = q.eq(...)` not `q.eq(...)`
-- **Student names anonymized** before Anthropic API
-- **Worksheet URL:** Student links use `/worksheet.html?id=` (NOT `/ws?id=`)
-- **Combined worksheet payload:** Uses `grades_content` key (not `worksheets`) — must match what `worksheet.html` reads
-- **Template literal escaping:** Never put complex onclick with escaped quotes inside template literals — extract to named functions
-- **`downloadPDF`** contains `</body></html>` inside a template literal — don't break it
-- `teacherai_tour_done` localStorage — guided tour
-- `teacherai_tracker_view` localStorage — grade vs expectations tracker view
-
-## DEPLOYMENT
-1. Download `index.html` from Claude outputs
-2. GitHub → `public/app/` → **Add file → Upload files** (NOT the edit/paste method — paste silently truncates large files)
-3. Wait for Vercel deploy (~30-45s) — ignore red ✗ on GitHub, check Vercel dashboard directly
-4. Hard refresh (Cmd+Shift+R) on teacherai.ca/app
-5. Check footer version number to confirm deploy
+| Feature | Line (approx) | Notes |
+|---------|---------------|-------|
+| `callGenerateStreaming` | 1385 | Client-side streaming helper w/ 529 retry |
+| `authFetch` / `retryAuthFetch` | 1348 / 1365 | Auth-wrapped fetch |
+| K worksheet prompt (`kWorksheetFormat`) | 2959 | K-specific prompt format |
+| `addMoreQuestions` | 4071 | Add-questions flow |
+| Lesson prompt grade branch | 3062 | Grades 1-8 vs K branching |
+| `renderKWS` K worksheet renderer | 3918 | K worksheet HTML output |
+| `renderRubric` | 3695 | Rubric renderer (AH fixed lazy grid) |
+| `renderAnswerKey` | 3767 | Answer key renderer (AG+ regex expanded) |
+| `downloadKPDF` K worksheet PDF | 4596 | K PDF export (AJ+ activity wrapper) |
+| `_kHardcodedSVG` | ~3905 | AJ hardcoded K shapes/objects |
+| `loadKWorksheetImages` | ~4092 | Intercepts Flux with hardcoded first |
+| `generateSlideData` | 4740 | Slide structure generation |
+| `generateAndPushVisuals` | 7004 | Slide visual generation |
+| `grouped_objects` renderer | 6184 | Math grouping visual |
+| `sort_diagram` renderer | 5907 | Sorting diagram (AJ+ 2-col) |
+| `money_display` renderer | 6367 | Canadian coins (AG .toFixed + toonie ring) |
+| Slide JSON spec | 4665 | Slide structure prompt |
+| `displayStudentName` | 3570 | Roster name resolution |
+| `TA_BUILD` constant | ~5208 | Build banner (bumps each session) |
+| Model refs | 10 sites | All `claude-sonnet-4-6` as of AB |
 
 ---
 
-## FEATURES LIVE (v5.0)
+## Build Ledger (V → AJ+, Last Two Days)
 
-### Core Flow
-- Class Roster — create classes, add/edit students (grade, notes, IEP all editable inline by clicking student card)
-- Plan — generate lessons (plan + differentiated worksheets + reading + rubric + slides)
-- Review & Edit — horizontal pill nav, edit/reset/copy/PDF per block, PDF in header button row
-- Assess — level tap (1− L1 1+ grouped buttons), auto-mark submitted worksheets, observation notes
-- Trackers — Grade Tracker (expandable rows → per-assessment breakdown) + Expectations Tracker (expandable chips → which lessons covered each expectation)
-- Report Cards — Ontario-style comments, board-agnostic char limit, save with delete+insert fallback
-- My Lessons — search, sort, bulk delete, 📋 Open to reload
-- Units — tab scaffold exists (Coming Soon UI), ready to wire up
+Each build has a banner in console on page load. Recent builds:
 
-### Auth & UI
-- Email/password + Google OAuth login
-- Guided tour (5 steps, fires on first login via localStorage flag)
-- Onboarding banner (dismissed after first lesson saved)
-
-### Lesson Generation
-- Ontario 2023 Language curriculum (EXPECTATIONS object in part2_constants.js)
-- `EXPECTATIONS.math = []` stub ready — infrastructure in place, data not yet filled
-- Topic-aware strand guidance: writing topics → Strand D, reading → Strand C, oral → Strand B
-- Split-grade support (separate worksheets per grade, grade label on each expectation chip)
-- IEP/ELL aware, student names anonymized
-- Expectations deduplicated by code before display
-
-### Slides
-- HTML presenter (▶ Present) — blob URL approach, DOMContentLoaded fix for blank page bug
-- Save Slides (⬇ downloads .html)
-- Google Slides export (🔗 requires OAuth)
-
-### Assessment
-- Grouped level buttons: `1− L1 1+` | `2− L2 2+` | `3− L3 3+` | `4− L4 4+`
-- Auto-mark shows question text (not just q1:, q4: keys)
-- Observation note shown in AI suggestion box — teacher clicks "Copy to notes" explicitly
-- Auto-mark button next to "View submitted work"
-- Per-grade worksheet link caching (`_gradeLinksCache`) — no duplicate DB records on repeat clicks
-
-### Tracker
-- Grade Tracker: level labels with +/− (L3+, L2−) not decimals
-- Class avg shows level label not decimal
-- Expandable student rows → per-assessment task breakdown with colored level badges
-- Assessment rows clickable → jumps to that session in Assess tab
-- Expectations Tracker: chips expandable → shows which lessons covered each expectation
-
-### Worksheet (worksheet.html)
-- Name matching: if multiple roster names similar → shows "Which one are you?" with buttons for each
-- If single match → "Did you mean X?" as before
-- Grade picker for split-class combined links (reads `grades_content` from payload)
+- **V**: Client-side 529 retry in callGenerateStreaming
+- **W**: Removed build-S residue. `buildDeckStyleSeed()` for image consistency. K PDF pagination CSS. worksheet-6.html crypto fallback.
+- **X**: CRITICAL — retry entire request+stream phase, detects SSE `overloaded_error` inside HTTP 200
+- **Y**: Fixed `1. ### Title` leak, K prompt contradiction, slides prompt mode-chart rules
+- **Z/AA**: Server-side model fallback chain (Sonnet → Opus → Sonnet 4.5 → Haiku)
+- **AB**: Upgraded default to Sonnet 4.6
+- **AC**: CRITICAL — worksheet submit was silently broken since T. Fixed student_name empty bypass. Coin SVG renderers.
+- **AD**: Division equation flip, roster filter by grade, Flux count stripping, diagnostic logging
+- **AE**: CRITICAL — lesson_plan empty bug solved (quote-nesting in JSON strings)
+- **AF**: Grade-fit (any grade) bypass, rubric renderer handles #, science inquiry no longer routes to reading_strategy, answer_key quote fix
+- **AG**: Rubric prompt tightened, defensive asterisk stripping, token budget 3200→4800, money display .toFixed(2), Mindson image uses topic-only
+- **AG+**: Answer key regex expanded for parenthetical qualifiers
+- **AH**: RUBRIC LAYOUT — lazy grid opening so all 4 levels sit on one row
+- **AJ**: K HARDCODED SVG RENDERERS — 12 shapes, 14 objects, 12 colours × shapes = 144 combos. Skipped letter AI to avoid confusion with term "AI"
+- **AJ+**: Activity-wrapper state machine for K PDF, K assessment toast, sort_diagram 2-col
 
 ---
 
-## WHAT'S NOT BUILT YET (priority order)
+## Infrastructure Details
 
-1. **Math curriculum expectations** — `EXPECTATIONS.math = []` stub is in part2_constants.js, infrastructure ready. Fill with ~200 Ontario Math 2020 expectations. **This is the biggest competitive moat.**
-2. **Stripe payments** — free tier (5 lessons/month), paid ($12-15/month). Unit plans = paid-only feature.
-3. **Unit plan generation** — tab scaffold exists in part1.html and CSS, needs generation logic + "expand to full lesson" button
-4. **Science/Social Studies** — same infrastructure as math, just add to EXPECTATIONS object
-5. **Mobile-first polish** — partial
+### Security
+- **Supabase RLS**: Audited April 14. 15 tables, all RLS enabled. 19 policies. All policies correctly scoped to `teacher_id = auth.uid()` or equivalent joined check. `access_codes` and `image_cache` are RLS-locked with zero policies (service-role-only, correct pattern).
+- **AUTH_ENFORCE=true** confirmed in Vercel env vars
+- **Rate limiting**: Two-layer implemented in generate-4.js:
+  - Layer 1: Monthly lesson cap per plan (free=5, beta=∞, pro=∞)
+  - Layer 2: Daily abuse ceiling (free=50/24h, beta=500/24h, pro=2000/24h)
+  - Fail-open on Supabase outage (correct pattern)
+  - Uses `generations` table for persistent counting
+- **Spending caps**:
+  - Anthropic: $100/month (returns 429 when exceeded)
+  - Fal.ai: $30/month
+  - Supabase: free tier, usage alerts configured
+- **CORS**: All three backend endpoints whitelist teacherai.ca origins only
+- **Model fallback chain** (generate-4.js): `sonnet-4-6 → opus-4-6 → sonnet-4-5 → sonnet-4-20250514 → haiku-4-5-20251001`
+
+### DNS / Email
+- **Nameservers**: `jason.ns.cloudflare.com` + `kara.ns.cloudflare.com` (Cloudflare)
+- **All DNS records in "DNS only" mode** (gray cloud) — required for Vercel compatibility. Do NOT enable proxy.
+- **Email Routing active**: `contact@teacherai.ca` → `teacheraicanada@gmail.com`
+- **Catch-all enabled**: any `@teacherai.ca` → `teacheraicanada@gmail.com`
+- **Email Address Obfuscation OFF** (emails display as plain text in HTML)
+- Gmail tip: incoming forwarded mail may land in Spam; filter rule created to auto-allow
+
+### Domains owned
+- `teacherai.ca` — primary, active
+- `teacher.ca` — owned but not configured. Deferred decision (park / redirect / future enterprise brand)
+
+### MFIPPA Compliance
+- Canadian data residency (Supabase ca-central-1, Montreal AWS)
+- Student names never sent to Anthropic
+- Assessment data never sent to Anthropic
+- Worksheet submissions never sent to Anthropic
+- Student name hashing since build T
+- Privacy policy + Terms of Service published at `/privacy.html` and `/terms.html`
+- Real contact@teacherai.ca email visible on both
 
 ---
 
-## LANDING PAGE
-- Warm cream design, Fraunces serif, sage green CTAs
-- Hero: "Your next lesson, already planned."
-- Key messages: instant generation, Ontario curriculum, split grades
-- Links to /app for sign up/sign in
-- File: `public/index.html` (separate from app)- `lessons` — (id, teacher_id, topic, grades[], subject, content jsonb, expectations jsonb, class_id)
-- `worksheets` — (id, teacher_id, lesson_id, topic, grades[], content, roster jsonb, class_id)
-- `worksheet_submissions` — (id, worksheet_id, student_name, student_id, responses jsonb, submitted_at)
-- `assessment_sessions` — (id, teacher_id, task, subject, strand, grades[], date, class_id, expectations jsonb)
-- `student_marks` — (id, session_id, student_id, level, notes)
-- `report_card_comments` — (id, teacher_id, student_id, term, subject, comment, char_limit, updated_at) UNIQUE(teacher_id, student_id, term, subject)
+## K Hardcoded SVG Library (Build AJ Moat Play)
 
-**SQL migrations (run in Supabase SQL editor if not done):**
-- `add-class-id-to-lessons.sql`
-- `create-report-card-comments-table.sql`
+**Problem solved:** Flux Schnell drew chicks instead of triangles, donut-ring-donut for patterns, "square with Y" for rectangles.
 
-## CURRENT UI (v3.8 Generate form)
-1. Class · Subject · Duration — compact top row
-2. Grade pills — K · Gr.1–Gr.8, tap multiple for split class
-3. "What are you teaching?" — big hero input
-4. What to Generate — chip checkboxes
-5. ⚙️ More options — collapsible, localStorage state, contains Strands (A→B→C→D, all unchecked) + Target Expectations
+**Coverage:**
+- 12 shapes: circle, square, triangle, rectangle, oval, diamond, star, heart, pentagon, hexagon, crescent, arrow
+- 14 objects: apple, banana, sun, moon, cloud, flower, tree, fish, ball, house, car, egg, cup (+ star/heart aliases)
+- 12 named colours: red, blue, yellow, green, orange, purple, pink, brown, black, white, grey/gray
+- 144 colour+shape combos possible
 
-## KEY GOTCHAS
-- Supabase query builder: MUST reassign `q = q.eq(...)` not `q.eq(...)`
-- `authFetch()` refreshes JWT if expiring within 60s
-- Duration labels: "1 lesson" / "3 lessons" / "5 lessons" → normalised in prompt
-- Strands use Ontario 2023 names: A=Literacy Connections, B=Foundations of Language, C=Comprehension, D=Composition
-- Student names anonymized before Anthropic API (never sends real names)
-- `teacherai_moreopts` localStorage for More Options state
-- `teacherai_welcomed` localStorage for onboarding dismissed state
-- Footer version number confirms correct deploy
+**Flow:**
+1. K worksheet generates with [IMAGE: red circle] tags etc.
+2. `loadKWorksheetImages` checks `_kHardcodedSVG(prompt)` first
+3. If match → returns SVG data URL, caches in `_kImageCache`, swaps into DOM instantly
+4. If no match → falls through to Flux (existing flow)
+5. PDF export path uses same cache transparently
 
-## DEPLOYMENT
-1. Download index.html from Claude outputs
-2. GitHub → public/ → Add file → Upload files
-3. Wait for green checkmark (~30-45s)
-4. Hard refresh (Cmd+Shift+R)
-5. Check footer shows v3.8
+**Moat positioning:** "The only K worksheet tool where triangles are actually triangles, every time." MagicSchool uses limited clipart library. Chalkie has same Flux issues. This is genuine differentiation.
 
-## FEATURES LIVE
-- Full lesson generation (lesson plan, worksheet, reading resource, rubric, differentiation)
-- Grade pills for single/split grade selection
-- Ontario 2023 curriculum expectations (96 embedded, strands A/B/C/D)
-- Target expectations: hard requirement + "focus only" mode
-- Student worksheet delivery (combined link for split, per-grade links)
-- Fuzzy name matching on worksheet submission
-- Auto-marking of submitted worksheets
-- Assessment tab: Level 1-4 per student, observation notes
-- Grade tracker with CSV export
-- Expectations tracker
-- Report Cards: AI-generated Ontario-style comments, auto-save to Supabase, Copy All
-- My Lessons: search, bulk delete, reload past lesson
-- Google OAuth login
-- Password reset
-- Account page
-- Toast notifications (lesson saved, assessment saved)
-- Onboarding banner (2 steps, dismisses after students + first lesson)
+**Matcher unit-tested**: 18/18 cases pass including edge cases like "a big red apple", "ONE YELLOW STAR".
 
-## WHAT'S NOT BUILT YET
-- Stripe subscription/payments
-- Mobile-first polish
-- React rewrite
-- Math/Science curriculum
-- Unit plan generation (duration beyond 5 lessons)
+---
+
+## Known Issues / Recurring Bug Patterns
+
+### Flux baking text into images (3+ incidents)
+- "What you sey?" (typo'd question on blocks)
+- "HOLD UP ROINE / TONE" (toonie with baked text)
+- Counter mismatches (10 counters prompt → 6 shown)
+
+AG mitigated by using topic-only prompts for Mindson cover. Not fully solved for content slides. Possible structural fixes (deferred):
+- Upgrade to Flux Dev (~5× cost, better instruction following)
+- Post-gen OCR check + regenerate if text detected
+- Move cover art to illustration library
+
+### Prompt quote-nesting failures (pattern)
+- AE fixed lesson_plan, AF fixed answer_key
+- Root cause: `"[placeholder]"` with literal quotes inside JSON string field
+- Sonnet 4.6 refuses to produce content when quote-nesting risks JSON invalidity
+- **Rule for future prompts**: NEVER wrap template placeholders in quote characters
+
+### Answer key regex strictness (fixed AG+)
+- Long-form keys without `->` separator fell through to plain paragraph styling
+- Now handles both `Q1: question -> answer` and `Q7 (Long answer — Level 3 key points): rubric-style description`
+
+---
+
+## Pending Backlog (Deferred Code Work)
+
+Priority order. **Do not start these without explicit user direction** — priority may have shifted from the Facebook post results.
+
+1. **Refactor rubric to JSON output** (~1 hour)
+   - Eliminates class of markdown-format bugs permanently
+   - Like slide spec — structured JSON, deterministic rendering
+   - Worth doing once before any new rubric features
+
+2. **Centralize `TA_MODEL` constant** (~5 min)
+   - 10 hardcoded `claude-sonnet-4-6` refs → 1 constant
+   - Makes next model swap a 1-line change
+   - Low risk, do when next model upgrade pressure arrives
+
+3. **Auto-delete worksheet_submissions older than school year**
+   - Supabase scheduled job
+   - Calendar reminder July 1, 2026
+   - MFIPPA compliance improvement
+
+4. **Unify two overload error formatters**
+   - generate-4.js + client catch both hardcode messages independently
+   - Low priority cosmetic
+
+5. **Post-processing OCR check for Flux text-baking**
+   - Tesseract.js or similar in worker
+   - If baked text detected, regenerate with modified prompt
+   - Addresses recurring Flux issue above
+
+6. **Hybrid Flux Schnell/Dev**
+   - Schnell for content slides (cheap)
+   - Dev for Mindson cover only (quality)
+   - ~5× cost on just the hero shot
+
+7. **Subscribe to Anthropic changelog or build 20-line model-availability checker**
+   - Don't rely on Claude to surface new models
+   - Small scheduled job checking API for new model IDs
+
+8. **Beta code mechanism**
+   - Currently `plan='beta'` is set manually in Supabase
+   - Future: UI flow where user redeems code → plan updates
+   - Enables Facebook post to include redeemable codes
+
+9. **Sentry or client error logging**
+   - Currently no observability on what teachers hit
+   - Feedback button exists but relies on users reporting
+   - Sentry free tier would capture JS errors automatically
+
+---
+
+## Tonight's Task (Fresh Chat Recommended)
+
+User plans to draft a Facebook post for his 5,300-teacher YRDSB (York Region District School Board) group where he is admin. Goal: 10-15 new beta testers.
+
+**Opening context for new session:**
+
+> Solo dev building TeacherAI (teacherai.ca) for Ontario K-8 teachers. Product is in strong beta state. MFIPPA-compliant. Already have 1 active beta tester. Ready to post to my 5,300-teacher YRDSB Facebook group where I'm admin. Goal: 10-15 new beta testers. Help me draft a post that's not cringe, leads with pain not features, and invites real feedback.
+
+User prefers direct, non-cringe tone. Start with pain point ("Tired of Sunday nights making rubrics?"), not feature list. Show don't tell — include screenshot or 30-second demo if possible. Include call for honest feedback.
+
+---
+
+## Tomorrow's Post-Launch Monitoring
+
+When teachers start trickling in:
+
+1. **Morning check** — Anthropic usage page. If curve is steeper than expected ($100 cap approaching), come back for scaling response.
+2. **Feedback table in Supabase** — new entries indicate what teachers surfaced. User has feedback button on site.
+3. **Watch for 429 errors in Vercel logs** — rate limiter engaging is FINE, but volume matters.
+4. **RLS test** — if possible, have one teacher friend try to access another teacher's data (expected: blocked).
+
+**Scaling triggers:**
+- >50 signups in 24h: consider raising Anthropic cap to $200
+- >200 signups: upgrade Supabase to Pro ($25/mo) for better connection pooling
+- Sustained >10 gens/hour: consider upgrading Vercel Hobby → Pro
+
+---
+
+## Critical Lessons from Development
+
+### Never ship without verification
+Build T shipped broken for 2 sessions before user caught it (worksheet submissions silently failed). Every build needs production smoke test before layering more changes.
+
+### Diagnostic logging beats guessing
+AD diagnostic logging solved the empty lesson_plan mystery in one repro. When a bug is mysterious, add logging first, fix second.
+
+### Ask "what specifically looks wrong"
+Spent 2 builds (AG, AG+) on wrong rubric problem because assumed content issues when real problem was layout/grid overflow. When user says "still broken," ask them to point at the exact issue before patching.
+
+### Bug discovery rate doesn't drop with more solo testing
+User caught ~7 bugs per session, consistently across 10+ sessions. Fresh eyes testing (non-user teacher) is the fastest path to surfacing the next layer.
+
+### Prompt changes need verification
+Rubric prompt tightening (AG) was supposed to fix preamble. Turned out prompt fix wasn't the issue — CSS grid overflow was. Always verify fresh generation actually exhibits the improvement before declaring victory.
+
+---
+
+## Smoke Test Checklist (Run Before Each Deploy)
+
+1. Generate a Gr 3 Math lesson — lesson plan fills, rubric 4 levels on 1 row, answer key populates
+2. Generate a Gr 3 Science lesson — same checks plus confirm no "Before/During Reading" labels appear
+3. Generate a K shapes worksheet — shapes render instantly (hardcoded SVGs), no Flux delay
+4. Build slides — no baked text on Mindson image, coins visible and distinct
+5. Download worksheet PDF — activities don't orphan titles across pages
+6. Open student worksheet link → submit as roster-matched student → confirm submission appears in teacher dashboard
+7. Auto-mark submission → verify scores populate
+
+If all 7 pass, build is safe to ship.
+
+---
+
+## End Note
+
+User had a genuinely productive 2-day sprint. Product is in solid state. Next inflection point is the Facebook post — real user feedback beats solo iteration from this point forward.
+
+When starting a new session, reference this doc for state. Update the build ledger and file state table as new builds ship.
