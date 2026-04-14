@@ -3769,13 +3769,28 @@ function renderAnswerKey(text) {
   const lines = text.split('\n').filter(l => l.trim());
   let html = '<div style="display:flex;flex-direction:column;gap:6px;">';
   lines.forEach(line => {
-    const m = line.match(/^(Q\d+[a-z]?):(.+?)\s*->\s*(.+)$/i);
+    // AG: regex expanded to accept parenthetical qualifiers after Q-number
+    // like "Q2 (Part 2, item 1): question -> answer". Previously these fell
+    // through to plain paragraph rendering, producing inconsistent styling
+    // within a single answer key. Also accepts Q# followed by optional
+    // " (anything)" before the colon.
+    const m = line.match(/^(Q\d+[a-z]?(?:\s*\([^)]+\))?):(.+?)\s*->\s*(.+)$/i);
     if (m) {
-      html += `<div style="display:grid;grid-template-columns:3rem 1fr 1fr;gap:8px;align-items:start;padding:7px 10px;background:var(--cream);border-radius:6px;border-left:3px solid var(--sage);">
-        <span style="font-family:DM Mono,monospace;font-size:.72rem;font-weight:600;color:var(--sage);">${escHTML(m[1].trim())}</span>
+      html += `<div style="display:grid;grid-template-columns:4.5rem 1fr 1fr;gap:8px;align-items:start;padding:7px 10px;background:var(--cream);border-radius:6px;border-left:3px solid var(--sage);">
+        <span style="font-family:DM Mono,monospace;font-size:.7rem;font-weight:600;color:var(--sage);">${escHTML(m[1].trim())}</span>
         <span style="font-size:.82rem;color:var(--muted);">${md(m[2].trim())}</span>
         <span style="font-size:.82rem;font-weight:500;color:var(--ink);">${md(m[3].trim())}</span>
       </div>`;
+    } else if (line.match(/^(Q\d+[a-z]?(?:\s*\([^)]+\))?):/i)) {
+      // Q-line WITHOUT a "->" separator — e.g. "Q7 (Long answer — Level 3 key points): Student chooses..."
+      // Style it like a Q entry but put the full body in a single column.
+      const qm = line.match(/^(Q\d+[a-z]?(?:\s*\([^)]+\))?):(.+)$/i);
+      if (qm) {
+        html += `<div style="display:grid;grid-template-columns:4.5rem 1fr;gap:8px;align-items:start;padding:7px 10px;background:var(--cream);border-radius:6px;border-left:3px solid var(--sage);">
+          <span style="font-family:DM Mono,monospace;font-size:.7rem;font-weight:600;color:var(--sage);">${escHTML(qm[1].trim())}</span>
+          <span style="font-size:.82rem;color:var(--ink);line-height:1.5;">${md(qm[2].trim())}</span>
+        </div>`;
+      }
     } else if (line.match(/^#{1,3}\s/)) {
       html += `<div style="font-family:Fraunces,serif;font-size:.88rem;font-weight:600;color:var(--sage);margin-top:8px;">${md(line.replace(/^#+\s/,''))}</div>`;
     } else {
@@ -5222,7 +5237,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-14-AG (Morning test findings on Math + Science Gr 3 lessons. (1) RUBRIC PROMPT: tightened from a one-liner to a strict format spec. AI was inventing preamble lines like "*Expectations:**" with mismatched asterisks and "Ontario Achievement Chart — Grade 3..." title lines that rendered as empty sage-bar categories. Now: start directly at first ## category, no title, no bolded preamble labels. (2) RUBRIC RENDERER: defensive strip of lines with unbalanced `**` markers — if AI slips once, we dont leak garbage. (3) TOKEN BUDGET: single-grade max_tokens raised from 3200 to 4800 because verbose Science rubrics pushed the answer_key (alphabetically last field) past the cap and it silently came back empty. Split-grade and K caps raised proportionally. (4) MONEY DISPLAY: amount formatting forced to .toFixed(2) so $0.30 renders as $0.30 not $0.3. Toonie now has a visible inner gold ring so it is distinguishable from a quarter at a glance. (5) MINDS ON IMAGE: stopped cleaning the hook text — now uses topic+theme directly. Previous AD hook-cleaner still bled instructional words like "hold up" into Flux prompts which baked "HOLD UP ROINE" onto coin images. Hook text is already displayed to the teacher on the slide; image doesnt need to mirror it. Carries forward all AF fixes.)';
+const TA_BUILD = '2026-04-14-AG+ (AG plus one follow-up: answer key renderer regex expanded to accept parenthetical qualifiers like "Q2 (Part 2, item 1): ... -> ..." — Science answer keys had long-form Q7/Q8/Q9 entries without -> separator that fell through to plain-paragraph styling, producing inconsistent row styling within a single answer key. Now all Q-numbered lines get sage-pill styling; lines without -> use a two-column layout so the content still reads clean. Carries forward all AG fixes: rubric prompt tightening, rubric renderer defensive asterisk stripping, token budget raise, money display formatting, Mindson image no longer cleans hook text.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
