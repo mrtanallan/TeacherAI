@@ -3095,7 +3095,23 @@ Each value is a markdown string except "expectations" (JSON array).
 **Collect via:** [worksheet / sticky note / verbal — pick one]
 ${wsLines}
 ${isSplit && isScience && rdOutputKeys.length > 1 ? rdOutputKeys.map((k,i)=>`- ${k}: original 200-300 word reading passage specifically for ${grades[i]} on their grade-level science content`).join('\n') : '- reading_resource: original 200–300 word passage appropriate for the grade(s)'}
-- assessment_rubric: Ontario Achievement Chart. Use ## for each category, ### Level 1–4 under each.${iepStudents.length?' Include modified criteria for IEP students.':''}
+- assessment_rubric: Ontario Achievement Chart. STRICT FORMAT — emit ONLY the 4 categories with their level descriptions, nothing else. Do NOT add a title line, do NOT add an "Expectations:" line, do NOT add a "Categories Used:" line, do NOT add horizontal rules. Start directly with the first "## Category Name" heading. Required structure:
+## Knowledge and Understanding
+[One-line descriptor of what this category assesses for this lesson]
+### Level 1
+[Student behaviour description — 1-2 sentences]
+### Level 2
+[description]
+### Level 3
+[description]
+### Level 4
+[description]
+## Thinking and Investigation
+[descriptor]
+### Level 1
+...
+(repeat for all 4 Ontario categories: Knowledge and Understanding, Thinking and Investigation OR Thinking for non-science, Communication, Application)
+Use EXACTLY "## " and "### " markdown headers. Do NOT use single "*" or mismatched "**". Do NOT write "**Expectations:**" or any bolded labels outside the category/level headers.${iepStudents.length?' Include modified criteria for IEP students inline within the relevant level descriptions.':''}
 - differentiation_tips: per-grade and per-student strategies
 ${akLines}
 - expectations: JSON array of Ontario 2023 ${subj} expectations actually taught in THIS lesson. Each object: "code" (e.g. "C2.3"), "desc", "strand", "band", "grade".
@@ -3108,10 +3124,14 @@ CRITICAL: Return ONLY valid JSON. No markdown fences.`;
   let progInterval = null;
   try {
     const outputCount = outputs.length;
-    // Cap tokens based on complexity — more outputs = less per output to stay under timeout
-    const maxTok = grades.length >= 4 ? Math.min(7000, 2000 + outputCount * 800)
-      : isSplit ? Math.min(5000, 1800 + outputCount * 700)
-      : Math.min(3200, 1200 + outputCount * 600);
+    // Cap tokens based on complexity — more outputs = less per output to stay under timeout.
+    // AG: single-grade cap raised from 3200→4800 because 5-output lessons
+    // (plan+reading+worksheet+rubric+answer_key) were hitting the cap and
+    // truncating the tail field (answer_key, alphabetically last). Science
+    // rubrics especially verbose → answer_key silently missing.
+    const maxTok = grades.length >= 4 ? Math.min(8000, 2400 + outputCount * 900)
+      : isSplit ? Math.min(6000, 2000 + outputCount * 800)
+      : Math.min(4800, 1600 + outputCount * 700);
     setProgress(15,'Reading curriculum expectations...');
     let progVal = 15;
     progInterval = setInterval(() => {
@@ -3690,7 +3710,16 @@ function renderRubric(text) {
     // literal dashes. Also strip stray trailing asterisks the AI sometimes
     // leaves from malformed **bold** tokens.
     if (/^[-—]{2,}$/.test(trimmed)) return;
-    const cleanedLine = trimmed.replace(/\*+$/, '').replace(/^\*(?!\*)/, '');
+    // AF+AG: Strip stray leading/trailing asterisks AND detect unbalanced
+    // **bold** pairs. If a line has an odd number of ** or has lone * at
+    // start/end (unmatched), remove them — they're AI markdown mistakes
+    // like "*Expectations:**" that render as literal garbage.
+    let cleanedLine = trimmed.replace(/\*+$/, '').replace(/^\*(?!\*)/, '');
+    // If ** count is odd, strip all ** from this line (safer than guessing).
+    const boldCount = (cleanedLine.match(/\*\*/g) || []).length;
+    if (boldCount % 2 === 1) {
+      cleanedLine = cleanedLine.replace(/\*\*/g, '');
+    }
 
     if (line.startsWith('# ') && !line.startsWith('## ')) {
       // Top-level title: render as a header, don't leak as raw text
@@ -5078,26 +5107,14 @@ async function generateSlideData(callerBtn) {
 
     const fetchMindsonImage = async () => {
       try {
-        // Derive a clean visual subject from the hook. Pasting the literal
-        // hook text (e.g. "Look at these coloured blocks. What do you see?")
-        // causes Flux to bake the question text into the image (typos and
-        // all — "What you sey?" was a real production bug). Strip question
-        // words and punctuation, take the first concrete noun phrase, and
-        // anchor with the topic so Flux gets a clean subject to illustrate.
-        // BUILD AD: also strip numeric quantities ("10 counters" → "counters")
-        // because Flux Schnell cannot reliably render exact counts (a hook
-        // saying "10 counters" produced an image with 6 — visible mismatch
-        // confuses the lesson). Better to show "some counters" generically.
-        let visualSubject = topic;
-        if (sd.minds_on && sd.minds_on.hook) {
-          const cleaned = String(sd.minds_on.hook)
-            .replace(/[?!."]/g, ' ')
-            .replace(/\b\d+\b/g, ' ')   // drop digits — Flux can't count
-            .replace(/\b(look at|see|notice|what do you|what comes|let'?s|tell me|can you|how many|wiggle like|listen to)\b/gi, ' ')
-            .replace(/\s+/g, ' ').trim()
-            .split(' ').slice(0, 6).join(' ');
-          if (cleaned.length > 3) visualSubject = cleaned + ' (' + topic + ')';
-        }
+        // AG: Simplified from AD's hook-cleaning approach. Hook text like
+        // "Hold up a toonie..." was still bleeding instructional words into
+        // the Flux prompt which baked "HOLD UP ROINE" onto the image.
+        // The hook is already displayed to the teacher on the slide — the
+        // image doesn't need to mirror it. Use topic + subject only for
+        // a clean, predictable visual. If there's a detected theme, append.
+        const themeBit = detectedTheme ? ' (' + detectedTheme + ' theme)' : '';
+        const visualSubject = topic + themeBit;
         const r = await authFetch('/api/generate-image', {
           method: 'POST',
           body: JSON.stringify({ type: 'ai', topic: visualSubject, subject, grade: gradeStr, theme: detectedTheme, style: deckStyle.style, subKey: deckStyle.code })
@@ -5205,7 +5222,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-13-AF (Four fixes from Gr 3 Science Scientific Inquiry test. (1) GRADE-FIT WARNING: topics tagged "(any grade)" or "(all grades)" now suppress the "aligns better with Gr X" hint — meta-skills apply across the spectrum, warning was wrong and eroded trust. (2) RUBRIC RENDERER: now handles single-# titles (was leaking as literal "# Assessment Rubric..." text), drops --- horizontal rules, and strips stray trailing asterisks from malformed AI markdown. Fixes the garbled rubric display. (3) SLIDE VISUAL MISMATCH: removed prompt rule that routed "scientific method / inquiry process" to reading_strategy renderer. That renderer has hardcoded "Before Reading / During Reading / After Reading" column headers that made no sense for science inquiry — observed in production showing science steps under reading labels. Now routes to cycle_diagram or concept_card. (4) ANSWER KEY EMPTY: same root cause as the AE lesson_plan bug — answer_key format template had "Q1: [question] -> [ideal answer]" with embedded quotes that Sonnet 4.6 refused to nest inside a JSON string. Stripped the quotes. Also fixed misleading warning that blamed split-class + token limits when cause was actually quote-nesting. Carries forward all AE fixes.)';
+const TA_BUILD = '2026-04-14-AG (Morning test findings on Math + Science Gr 3 lessons. (1) RUBRIC PROMPT: tightened from a one-liner to a strict format spec. AI was inventing preamble lines like "*Expectations:**" with mismatched asterisks and "Ontario Achievement Chart — Grade 3..." title lines that rendered as empty sage-bar categories. Now: start directly at first ## category, no title, no bolded preamble labels. (2) RUBRIC RENDERER: defensive strip of lines with unbalanced `**` markers — if AI slips once, we dont leak garbage. (3) TOKEN BUDGET: single-grade max_tokens raised from 3200 to 4800 because verbose Science rubrics pushed the answer_key (alphabetically last field) past the cap and it silently came back empty. Split-grade and K caps raised proportionally. (4) MONEY DISPLAY: amount formatting forced to .toFixed(2) so $0.30 renders as $0.30 not $0.3. Toonie now has a visible inner gold ring so it is distinguishable from a quarter at a glance. (5) MINDS ON IMAGE: stopped cleaning the hook text — now uses topic+theme directly. Previous AD hook-cleaner still bled instructional words like "hold up" into Flux prompts which baked "HOLD UP ROINE" onto coin images. Hook text is already displayed to the teacher on the slide; image doesnt need to mirror it. Carries forward all AF fixes.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
@@ -6341,27 +6358,38 @@ const SVG_RENDERERS = {
     // discontinued as legal tender in 2013 — if AI emits it we fall back to
     // nickel rendering so at least the value shows. Size relative to real
     // coins: toonie biggest, then quarter, loonie, nickel, dime smallest.
-    // Each coin renders as a circle with the cent value printed inside —
-    // that way kids learn "the silver one worth 25¢" not "the blue dot".
+    // AG: toonie now has a visible inner gold ring to distinguish it from
+    // quarters (which were previously identical-looking gray circles).
+    // Each coin renders with the cent value printed inside.
     const coinSpec={
-      'toonie': {r:22, fill:'#B8B8B8', stroke:'#6B5F3E', label:'$2'},   // outer silver, inner gold-ish ring
-      'loonie': {r:19, fill:'#D4A850', stroke:'#8B6914', label:'$1'},   // gold
-      'quarter':{r:20, fill:'#C8C8C8', stroke:'#6B6B6B', label:'25¢'},
-      'dime':   {r:14, fill:'#C8C8C8', stroke:'#6B6B6B', label:'10¢'},
-      'nickel': {r:18, fill:'#BFBFBF', stroke:'#6B6B6B', label:'5¢'},
+      'toonie': {r:24, fill:'#B8B8B8', stroke:'#555', label:'$2',  innerR:13, innerFill:'#D4A850'}, // silver + gold center
+      'loonie': {r:20, fill:'#D4A850', stroke:'#8B6914', label:'$1'},                               // gold
+      'quarter':{r:19, fill:'#C8C8C8', stroke:'#555', label:'25¢'},
+      'dime':   {r:13, fill:'#C8C8C8', stroke:'#555', label:'10¢'},
+      'nickel': {r:17, fill:'#BFBFBF', stroke:'#555', label:'5¢'},
     };
     let items='', x=50, y=90;
     breakdown.forEach(({coin,count})=>{
       const spec=coinSpec[coin]||coinSpec.nickel;
       for(let i=0;i<Math.min(count,8);i++) {
-        items+=`<circle cx="${x}" cy="${y}" r="${spec.r}" fill="${spec.fill}" stroke="${spec.stroke}" stroke-width="1.5"/>`+
-               `<text x="${x}" y="${y+4}" text-anchor="middle" font-size="11" font-weight="700" fill="${spec.stroke}" font-family="${DT.FONT}">${spec.label}</text>`;
-        x+=(spec.r*2+8); if(x>520){x=50;y+=50;}
+        items+=`<circle cx="${x}" cy="${y}" r="${spec.r}" fill="${spec.fill}" stroke="${spec.stroke}" stroke-width="1.5"/>`;
+        if (spec.innerR) {
+          items+=`<circle cx="${x}" cy="${y}" r="${spec.innerR}" fill="${spec.innerFill}" stroke="${spec.stroke}" stroke-width="1"/>`;
+        }
+        items+=`<text x="${x}" y="${y+4}" text-anchor="middle" font-size="11" font-weight="700" fill="#2a2a2a" font-family="${DT.FONT}">${spec.label}</text>`;
+        x+=(spec.r*2+8); if(x>520){x=50;y+=55;}
       }
       x+=12; // gap between coin groups
     });
+    // AG: format amount to always 2 decimal places. Previously "$0.3"
+    // would render from a numeric 0.3 — should be "$0.30". Also handle
+    // integer amounts ($2 → $2.00 for consistency).
+    const rawAmt = p.amount;
+    const amtStr = (typeof rawAmt === 'number') ? rawAmt.toFixed(2)
+                 : (typeof rawAmt === 'string' && rawAmt.length) ? (parseFloat(rawAmt).toFixed(2) || rawAmt)
+                 : '0.00';
     return `<svg viewBox="0 0 600 200" width="100%" height="100%">
-      <text x="550" y="110" text-anchor="end" font-size="32" font-weight="900" fill="${DT.PRIMARY}" font-family="${DT.FONT}">$${p.amount||'0.00'}</text>
+      <text x="550" y="110" text-anchor="end" font-size="32" font-weight="900" fill="${DT.PRIMARY}" font-family="${DT.FONT}">$${amtStr}</text>
       ${items}
     </svg>`;
   },
