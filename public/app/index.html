@@ -3701,6 +3701,7 @@ function renderRubric(text) {
   let html = '';
   let inCategory = false;
   let inLevel = false;
+  let inGrid = false;
 
   lines.forEach(line => {
     const trimmed = line.trim();
@@ -3724,40 +3725,63 @@ function renderRubric(text) {
     if (line.startsWith('# ') && !line.startsWith('## ')) {
       // Top-level title: render as a header, don't leak as raw text
       if (inLevel)    { html += '</div>'; inLevel = false; }
-      if (inCategory) { html += '</div></div>'; inCategory = false; }
+      if (inGrid)     { html += '</div>'; inGrid = false; }
+      if (inCategory) { html += '</div>'; inCategory = false; }
       const title = line.slice(2).trim().replace(/\*+$/, '');
       html += `<div style="font-family:Fraunces,serif;font-size:1.05rem;font-weight:600;margin-bottom:12px;">${md(title)}</div>`;
 
     } else if (line.startsWith('## ')) {
       if (inLevel)    { html += '</div>'; inLevel = false; }
-      if (inCategory) { html += '</div></div>'; inCategory = false; }
+      if (inGrid)     { html += '</div>'; inGrid = false; }
+      if (inCategory) { html += '</div>'; inCategory = false; }
       const cat = line.slice(3).trim().replace(/\*+$/, '');
+      // AH: open the category with header, but DON'T open the grid yet.
+      // The descriptor line (if any) renders between header and grid.
+      // Grid opens lazily when we hit the first ### Level. This fixes the
+      // "levels wrap to second row" bug — previously the descriptor was
+      // counted as a grid child, so 4 levels + 1 descriptor = 5 children
+      // in a 4-column grid → level 4 wrapped.
       html += `<div style="margin-bottom:18px;">
-        <div style="font-family:Fraunces,serif;font-size:.95rem;font-weight:600;padding:8px 12px;background:var(--sage-l);border-left:3px solid var(--sage);border-radius:0 5px 5px 0;margin-bottom:8px;">${md(cat)}</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">`;
+        <div style="font-family:Fraunces,serif;font-size:.95rem;font-weight:600;padding:8px 12px;background:var(--sage-l);border-left:3px solid var(--sage);border-radius:0 5px 5px 0;margin-bottom:8px;">${md(cat)}</div>`;
       inCategory = true;
+      inGrid = false;
 
     } else if (line.startsWith('### ')) {
       if (inLevel) { html += '</div>'; inLevel = false; }
+      // Lazily open the 4-column levels grid the first time we see ### Level
+      if (inCategory && !inGrid) {
+        html += '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;">';
+        inGrid = true;
+      }
       const lvl = line.slice(4).trim().replace(/\*+$/, '');
       // Match "Level 1", "Level 2" etc (may have percentage in parens)
       const lvlKey = Object.keys(lvlColors).find(k => lvl.startsWith(k)) || '';
       const col    = lvlColors[lvlKey]  || '#9CA3AF';
       const bg     = lvlBgs[lvlKey]     || '#F5F5F5';
       const txtCol = lvlTextCol[lvlKey] || '#374151';
-      html += `<div style="background:${bg};border:1.5px solid ${col};border-radius:7px;padding:9px 11px;">
+      html += `<div style="background:${bg};border:1.5px solid ${col};border-radius:7px;padding:9px 11px;min-width:0;">
         <div style="font-family:DM Mono,monospace;font-size:.62rem;font-weight:700;color:${txtCol};margin-bottom:6px;border-bottom:1px solid ${col}40;padding-bottom:4px;">${md(lvl)}</div>`;
       inLevel = true;
 
     } else if (trimmed) {
       // Strip list markers, then escape+bold. NEVER inject raw text.
       const txt = md(cleanedLine.replace(/^[-*]\s*/, ''));
-      if (txt) html += `<div style="font-size:.78rem;line-height:1.55;margin-bottom:4px;">${txt}</div>`;
+      // AH: descriptor text (before first level) renders OUTSIDE the grid
+      // as a full-width line. Body text INSIDE a level still renders inside.
+      if (txt) {
+        if (inCategory && !inGrid) {
+          // Descriptor line — render full width above the future grid
+          html += `<div style="font-size:.82rem;line-height:1.55;margin-bottom:10px;color:var(--ink);">${txt}</div>`;
+        } else {
+          html += `<div style="font-size:.78rem;line-height:1.55;margin-bottom:4px;">${txt}</div>`;
+        }
+      }
     }
   });
 
   if (inLevel)    html += '</div>';
-  if (inCategory) html += '</div></div>';
+  if (inGrid)     html += '</div>';
+  if (inCategory) html += '</div>';
   return html || renderMD(text);
 }
 
@@ -5237,7 +5261,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-14-AG+ (AG plus one follow-up: answer key renderer regex expanded to accept parenthetical qualifiers like "Q2 (Part 2, item 1): ... -> ..." — Science answer keys had long-form Q7/Q8/Q9 entries without -> separator that fell through to plain-paragraph styling, producing inconsistent row styling within a single answer key. Now all Q-numbered lines get sage-pill styling; lines without -> use a two-column layout so the content still reads clean. Carries forward all AG fixes: rubric prompt tightening, rubric renderer defensive asterisk stripping, token budget raise, money display formatting, Mindson image no longer cleans hook text.)';
+const TA_BUILD = '2026-04-14-AH (RUBRIC LAYOUT FIX: Level 4 was wrapping to a second row because the category descriptor ("Demonstrates understanding of...") was being treated as a 5th grid child, pushing Level 4 into row 2. Fixed with lazy grid opening — descriptor renders OUTSIDE the 4-column grid as a full-width line above the level cards. Also changed grid-template-columns to minmax(0,1fr) so cells can shrink below their content width, preventing future overflow. Carries forward AG+ answer key regex fix, AG rubric prompt tightening + renderer defensive asterisk stripping, token budget raise, money display formatting, Mindson image no hook cleaning.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
