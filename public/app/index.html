@@ -803,7 +803,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
      UNITS TAB
      ══════════════════════════════════════════════════════════ -->
 <div class="page" id="pg-units">
-  <div class="ph"><h1>Unit <em>Plans</em></h1><p>Generate a 2–4 week curriculum-mapped unit. Each lesson can be expanded into a full plan with one click.</p></div>
+  <div class="ph"><h1>Unit <em>Plans</em></h1><p>Generate a multi-lesson curriculum-mapped unit. Each lesson can be expanded into a full plan with one click.</p></div>
   <div class="card" id="unitFormCard" style="margin-bottom:20px;">
     <div class="ct" style="margin-bottom:14px;">📋 New Unit Plan</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
@@ -2289,6 +2289,14 @@ function checkGradeAlignment() {
   const subj = document.getElementById('subj')?.value || '';
   const selectedGrades = [...document.querySelectorAll('#gradePillContainer .grade-pill-btn.selected')].map(b => b.dataset.grade);
   if (!topic || topic.length < 4 || !subj || !selectedGrades.length) return;
+  // BUILD AK: trust-the-unit rule. If this lesson was launched from a unit-plan card
+  // (expandUnitLesson set _pendingUnitPlanId + _pendingUnitLessonTitle), the unit
+  // already committed to this title for this grade. Don't second-guess our own
+  // upstream output — that's a self-contradiction that erodes trust.
+  // Suppression only applies while topic still matches what the unit prefilled;
+  // if the teacher edits the topic, fall through to normal grade-fit checking.
+  if (window._pendingUnitPlanId && window._pendingUnitLessonTitle &&
+      topicRaw === window._pendingUnitLessonTitle) return;
   // BUILD AF: topics tagged "(any grade)" or "(all grades)" explicitly opt
   // out of grade-fit suggestions. These are meta-skills (scientific inquiry,
   // literacy strategies) that apply across the K-8 spectrum; warning the
@@ -5443,7 +5451,7 @@ async function generateSlideData(callerBtn) {
 // ── BUILD VERSION ──────────────────────────────────────────────────────────
 // Bump this string every time you deploy. If you don't see it in console,
 // Cloudflare is still serving a cached version — purge cache and hard refresh.
-const TA_BUILD = '2026-04-14-AJ+ (Three fixes on top of AJ. (1) K WORKSHEET PDF — activity-wrapper state machine: each h3-led activity (title + teachersays + content blocks) is now wrapped in <div class="activity"> with break-inside:avoid. Supersedes the CSS-only chain that could only prevent 2-element separation. Fixes the "Find shapes with corners" title appearing orphaned at page bottom with its content on the next page. (2) K ASSESSMENT AFFORDANCE: Kindergarten lessons intentionally omit Level 1-4 rubrics (Ontario K uses observational assessment), but teachers had no signal explaining the absence. Added a one-time session toast on K lesson completion pointing to the "What to Look For" section of the lesson plan. Session-scoped so it only shows once per session, not per generation. (3) SORT_DIAGRAM: changed from 3 columns to 2 columns per side, box width 60→95px, so common K vocabulary like "Rectangle" fits without wrapping to "Rectangl/e". Font bumped 11→12px. All AJ (K hardcoded SVG renderers) + AH (rubric layout) fixes carry forward.)';
+const TA_BUILD = '2026-04-15-AK (Three pre-launch fixes. (1) ORPHAN ASSESSMENT CLEANUP: Trackers > Unit Test Results gets a 🗑 button per row, and deleteUnitPlan / deleteAllUnitPlans now cascade-delete empty test worksheets via cleanupEmptyUnitAssessments. Worksheets WITH submissions are preserved (the "Unit removed" badge stays — protects real student data). Dialog copy reworded to "lessons and assessments WITH submissions will be kept". (2) UNIT-PLAN/GRADE-FIT SELF-CONTRADICTION: when a teacher launches a lesson from a unit card via expandUnitLesson, the grade-fit checker now suppresses its warning if the topic still matches the unit-prefilled title. We already trusted the title coming out of the unit-plan generator — don\'t nag the teacher about it on the next screen. Edit the topic and the warning re-engages. (3) "2-4 WEEKS" COPY: replaced with "multi-lesson" on the Unit Plans page header and empty-state, since the duration dropdown is already lesson-count based, not week-count based. All AJ+ / AJ / AH fixes carry forward.)';
 console.log('%c[TeacherAI] build ' + TA_BUILD + ' loaded', 'color:#1D9E75;font-weight:bold;font-size:13px');
 
 // ── SLIDE DESIGN TOKENS ─────────────────────────────────────────────────────
@@ -8917,7 +8925,10 @@ async function loadUnitTestResults() {
           <div style="font-weight:600;font-size:.88rem;color:var(--ink);">${ws.topic}${ws.unit_plan_id===null?' <span style="display:inline-block;font-family:\'DM Mono\',monospace;font-size:.58rem;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);background:var(--cream);border:1px solid var(--border);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle;font-weight:500;">Unit removed</span>':''}</div>
           <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);">${gradesStr} · ${date} · ${subCount} submission${subCount!==1?'s':''}</div>
         </div>
-        ${akText ? `<button class="btn b-sage b-sm" onclick="autoMarkUnitTest('${ws.id}')" style="font-size:.72rem;white-space:nowrap;">🤖 Auto-mark All</button>` : ''}
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          ${akText ? `<button class="btn b-sage b-sm" onclick="autoMarkUnitTest('${ws.id}')" style="font-size:.72rem;white-space:nowrap;">🤖 Auto-mark All</button>` : ''}
+          <button onclick="deleteUnitAssessment('${ws.id}', ${subCount})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;padding:4px 6px;opacity:.55;transition:opacity .15s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.55'" title="Delete this assessment">🗑</button>
+        </div>
       </div>
       <div style="padding:8px 14px;">
         ${subCount === 0
@@ -10107,7 +10118,7 @@ async function renderUnitPlansList(sortOnly) {
     el.innerHTML = `<div style="text-align:center;padding:32px 20px;max-width:520px;margin:0 auto;">
       <div style="font-size:2.4rem;margin-bottom:10px;">📋</div>
       <div style="font-family:'Fraunces',serif;font-weight:700;font-size:1.35rem;margin-bottom:6px;color:var(--ink);">Plan whole units in one sitting</div>
-      <div style="color:var(--muted);font-size:.86rem;margin-bottom:22px;line-height:1.5;">Type a unit topic and get a 2–4 week scope and sequence in under 30 seconds. Each lesson can be expanded into a full plan with one click when you're ready to teach it.</div>
+      <div style="color:var(--muted);font-size:.86rem;margin-bottom:22px;line-height:1.5;">Type a unit topic and get a multi-lesson scope and sequence in under 30 seconds. Each lesson can be expanded into a full plan with one click when you're ready to teach it.</div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:22px;text-align:left;">
         <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;">
           <div style="font-size:1.25rem;line-height:1.1;flex-shrink:0;">🗺️</div>
@@ -10399,6 +10410,8 @@ async function deleteUnitAssessment(wsId, subCount) {
     if (window._unitTestData) delete window._unitTestData[wsId];
     showToast('✅ Assessment deleted');
     renderUnitPlansList();
+    // Also refresh tracker view if visible (delete button now lives there too)
+    try { if (typeof loadUnitTestResults === 'function') await loadUnitTestResults(); } catch {}
   } catch (e) {
     alert('Error deleting assessment: ' + e.message);
   }
@@ -10814,29 +10827,63 @@ async function loadLessonById(lessonId) {
 async function deleteAllUnitPlans() {
   if (!savedUnitPlans.length) { showToast('No unit plans to delete.'); return; }
   const n = savedUnitPlans.length;
-  if (!confirm(`Delete ALL ${n} unit plan${n!==1?'s':''}? Lessons and assessments will be kept — marks stay in Trackers. Only the planning documents are removed.`)) return;
+  if (!confirm(`Delete ALL ${n} unit plan${n!==1?'s':''}? Lessons and assessments WITH submissions will be kept — marks stay in Trackers. Empty assessments will be cleaned up.`)) return;
   try {
     const ids = savedUnitPlans.map(u => u.id);
+    // Cascade: clean up empty test worksheets tied to these units before deleting the units themselves.
+    // Worksheets with submissions are preserved (they hold real student data).
+    await cleanupEmptyUnitAssessments(ids);
     const { error } = await db.from('unit_plans').delete().in('id', ids);
     if (error) throw error;
     savedUnitPlans = [];
     showToast(`✅ Deleted ${n} unit plan${n!==1?'s':''}. Marks preserved.`);
     renderUnitPlansList();
+    try { if (typeof loadUnitTestResults === 'function') await loadUnitTestResults(); } catch {}
   } catch (e) {
     alert('Error deleting unit plans: ' + e.message);
   }
 }
 
 async function deleteUnitPlan(id) {
-  if (!confirm('Delete this unit plan? Lessons and assessments generated from it will be kept — you\'ll still see marks in Trackers. Only the planning document is removed.')) return;
+  if (!confirm('Delete this unit plan? Lessons and assessments WITH submissions will be kept — you\'ll still see marks in Trackers. Empty assessments will be cleaned up.')) return;
   try {
+    await cleanupEmptyUnitAssessments([id]);
     const { error } = await db.from('unit_plans').delete().eq('id', id);
     if (error) throw error;
     savedUnitPlans = savedUnitPlans.filter(u => u.id !== id);
     showToast('✅ Unit plan deleted. Marks preserved in Trackers.');
     renderUnitPlansList();
+    try { if (typeof loadUnitTestResults === 'function') await loadUnitTestResults(); } catch {}
   } catch (e) {
     alert('Error deleting unit plan: ' + e.message);
+  }
+}
+
+// Find test worksheets tied to the given unit_plan_ids that have ZERO submissions,
+// and delete them. Worksheets with submissions are left alone (they become orphans
+// with the "Unit removed" badge, intentional — protects real student marks).
+async function cleanupEmptyUnitAssessments(unitPlanIds) {
+  if (!unitPlanIds || !unitPlanIds.length) return;
+  try {
+    const { data: tests } = await db.from('worksheets')
+      .select('id')
+      .eq('teacher_id', currentUser.id)
+      .in('unit_plan_id', unitPlanIds);
+    if (!tests || !tests.length) return;
+    const emptyIds = [];
+    for (const t of tests) {
+      const { count } = await db.from('worksheet_submissions')
+        .select('id', { count: 'exact', head: true })
+        .eq('worksheet_id', t.id);
+      if (!count) emptyIds.push(t.id);
+    }
+    if (emptyIds.length) {
+      await db.from('worksheets').delete().in('id', emptyIds);
+    }
+  } catch (e) {
+    console.warn('[cleanupEmptyUnitAssessments]', e.message);
+    // Don't throw — cleanup is best-effort. If it fails, the user just sees an orphan,
+    // which they can now delete manually from the Tracker tile.
   }
 }
 
