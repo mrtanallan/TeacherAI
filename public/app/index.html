@@ -1759,8 +1759,16 @@ async function loadUserData() {
 // ============================================================
 function toggleNewClassForm() {
   const form = document.getElementById('newClassForm');
-  form.style.display = form.style.display==='none' ? 'block' : 'none';
+  const opening = form.style.display === 'none' || !form.style.display;
+  form.style.display = opening ? 'block' : 'none';
   document.getElementById('editClassForm').style.display = 'none';
+  // BUILD AL+: scroll the form into view when opening. On mobile (and on
+  // small desktop windows), the form appears below the empty-state card and
+  // gives no visual signal that the button worked. New users assumed it
+  // was broken and bounced. Smooth-scroll fixes the perception problem.
+  if (opening) {
+    setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }
 }
 function toggleAddStudent() { openAddStudentModal(); }
 function openAddStudentModal() {
