@@ -560,7 +560,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">Student-ready worksheets</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">Share a link or print a PDF. Auto-marks student submissions on any device.</div></div>
       </div>
     </div>
-    <button class="btn b-sage" onclick="document.getElementById('s1').style.display='block';document.getElementById('planWelcomeBanner').style.display='none';setTimeout(()=>document.getElementById('topic')?.focus(),100);" style="font-size:.92rem;padding:10px 22px;">+ Generate Your First Lesson</button>
+    <button class="btn b-sage" onclick="document.getElementById('s1').style.display='block';document.getElementById('planWelcomeBanner').style.display='none';" style="font-size:.92rem;padding:10px 22px;">+ Generate Your First Lesson</button>
   </div>
 
   <!-- ── Step 1: Generate. Hidden by default — maybeShowPlanWelcome() shows
@@ -10841,7 +10841,7 @@ async function renderUnitPlansList(sortOnly) {
           <div><div style="font-weight:600;font-size:.86rem;color:var(--ink);margin-bottom:2px;">Unit assessments included</div><div style="font-size:.78rem;color:var(--muted);line-height:1.4;">Generate a culminating assessment aligned to your expectations.</div></div>
         </div>
       </div>
-      <button class="btn b-sage" onclick="document.getElementById('unitFormCard').style.display='block';document.getElementById('unitWelcomeEmpty').style.display='none';setTimeout(()=>document.getElementById('unit-topic')?.focus(),100);" style="font-size:.92rem;padding:10px 22px;">+ Create Your First Unit Plan</button>
+      <button class="btn b-sage" onclick="document.getElementById('unitFormCard').style.display='block';document.getElementById('unitWelcomeEmpty').style.display='none';" style="font-size:.92rem;padding:10px 22px;">+ Create Your First Unit Plan</button>
     </div>`;
     return;
   }
