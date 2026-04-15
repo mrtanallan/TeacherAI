@@ -4646,12 +4646,119 @@ Rules:
       }
     }
     showToast('✅ Answer key ready'+(gradeLabel?' for '+gradeLabel:''), 3000);
+    // BUILD AL+: persist regenerated answer key to DB so it doesn't have to
+    // regen every time the teacher opens this lesson.
+    persistRegeneratedField(akKey, text);
   } catch (e) {
     console.warn('[regenAnswerKeyAsync]', akKey, e.message);
     const fallback = `⚠️ Answer key couldn't be generated automatically${gradeLabel ? ' for '+gradeLabel : ''}. Click ✏️ Edit to write one manually, or go back to the planning page (← Back to Plan) and generate the lesson again.`;
     if (genC[akKey]) { genC[akKey].cur = fallback; genC[akKey].orig = fallback; }
     const block = document.getElementById('cbb-'+akKey);
     if (block) block.innerHTML = '<p style="color:var(--muted);">'+fallback+'</p>';
+  }
+}
+
+// BUILD AL+: regenRubricAsync — when assessment_rubric is empty (either from
+// a fresh generation that truncated, or a saved lesson loaded from DB), this
+// generates a fresh rubric using the lesson_plan as input. Mirrors the
+// regenAnswerKeyAsync / regenWorksheetAsync pattern. Persists to lessons.content
+// so the empty stays fixed permanently.
+async function regenRubricAsync(rubricKey, gradeLabel, topic, subj, lessonPlanText) {
+  if (!lessonPlanText || !lessonPlanText.trim()) {
+    const fallback = `⚠️ Rubric couldn't be generated automatically${gradeLabel ? ' for '+gradeLabel : ''}. Click ✏️ Edit to write one manually, or go back to the planning page (← Back to Plan) and generate the lesson again.`;
+    if (genC[rubricKey]) { genC[rubricKey].cur = fallback; genC[rubricKey].orig = fallback; }
+    const block = document.getElementById('cbb-'+rubricKey);
+    if (block) block.innerHTML = '<p style="color:var(--muted);padding:12px;">'+fallback+'</p>';
+    return;
+  }
+  const isScience = subj === 'Science & Technology';
+  const thinkingCategory = isScience ? 'Thinking and Investigation' : 'Thinking';
+  const prompt = `You are an Ontario K-8 teacher writing the assessment rubric for a lesson you just planned.
+
+LESSON PLAN${gradeLabel?' (for '+gradeLabel+')':''} on "${topic}" (${subj}):
+---
+${lessonPlanText.slice(0, 3500)}
+---
+
+Write the assessment rubric using the Ontario Achievement Chart format. STRICT FORMAT — emit ONLY the 4 categories with their level descriptions. No title line, no "Expectations:" line, no horizontal rules, no preamble.
+
+Required structure:
+## Knowledge and Understanding
+[One-line descriptor of what this category assesses for this lesson]
+### Level 1
+[Student behaviour description — 1-2 sentences]
+### Level 2
+[description]
+### Level 3
+[description]
+### Level 4
+[description]
+## ${thinkingCategory}
+[descriptor]
+### Level 1
+...
+## Communication
+[descriptor]
+### Level 1
+...
+## Application
+[descriptor]
+### Level 1
+...
+
+Use EXACTLY "## " and "### " markdown headers. No single asterisks, no bolded labels outside the category/level headers. Plain text only — no JSON, no markdown fences.`;
+
+  try {
+    const data = await callGenerateStreaming({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2400,
+      messages: [{ role: 'user', content: prompt }],
+      meta: { type: 'rubric_regen', grade: gradeLabel || null, subject: subj || null }
+    });
+    if (!data || !data.ok) throw new Error('regen failed: '+(data?.status||'no status'));
+    const text = (data.content||[]).map(i=>i.text||'').join('').trim();
+    if (!text) throw new Error('empty response');
+    if (genC[rubricKey]) { genC[rubricKey].cur = text; genC[rubricKey].orig = text; }
+    const block = document.getElementById('cbb-'+rubricKey);
+    if (block) {
+      if (typeof renderRubric === 'function') {
+        block.innerHTML = renderRubric(text);
+      } else {
+        block.innerText = text;
+      }
+    }
+    showToast('✅ Rubric ready'+(gradeLabel?' for '+gradeLabel:''), 3000);
+    // Persist to DB so this lesson never has to regen the rubric again.
+    persistRegeneratedField(rubricKey, text);
+  } catch (e) {
+    console.warn('[regenRubricAsync]', rubricKey, e.message);
+    const fallback = `⚠️ Rubric couldn't be generated automatically${gradeLabel ? ' for '+gradeLabel : ''}. Click ✏️ Edit to write one manually, or go back to the planning page (← Back to Plan) and generate the lesson again.`;
+    if (genC[rubricKey]) { genC[rubricKey].cur = fallback; genC[rubricKey].orig = fallback; }
+    const block = document.getElementById('cbb-'+rubricKey);
+    if (block) block.innerHTML = '<p style="color:var(--muted);padding:12px;">'+fallback+'</p>';
+  }
+}
+
+// BUILD AL+: shared helper used by all regen functions to write the freshly
+// regenerated content back to the lessons.content JSONB column. Without this,
+// the regen runs every time the teacher opens the lesson — wasted tokens and
+// awkward UX. With this, the empty field is fixed permanently after one regen.
+async function persistRegeneratedField(fieldKey, newValue) {
+  try {
+    if (!currentUser || !window._lessonMeta) return;
+    const _topic = window._lessonMeta.topic;
+    const _grades = (window._lessonMeta.grades || []).join(',');
+    const _match = savedLessons.find(l => l.topic === _topic && (l.grades||[]).join(',') === _grades);
+    if (!_match) return;
+    const _updContent = { ...(_match.content || {}), [fieldKey]: newValue };
+    const { error } = await db.from('lessons').update({ content: _updContent }).eq('id', _match.id);
+    if (!error) {
+      _match.content = _updContent;
+    } else {
+      console.warn('[persistRegeneratedField] DB update failed:', error.message);
+    }
+  } catch(e) {
+    console.warn('[persistRegeneratedField] error:', e?.message);
   }
 }
 
@@ -10160,7 +10267,37 @@ async function loadLesson(id) {
   if (!lesson) return;
   const content = lesson.content || {};
   genC = {};
-  Object.keys(content).forEach(k => { if (!k.startsWith('_') && typeof content[k]==='string') genC[k]={orig:content[k],cur:content[k]}; });
+  // BUILD AL+: when loading a lesson from the DB, detect empty critical fields
+  // (answer_key, assessment_rubric, student_worksheet) and queue background
+  // regens. Show a loading placeholder in the meantime. After regen lands,
+  // result is persisted back to the DB so the next open is fast.
+  // This fixes the "saved lesson has empty rubric/answer key forever" bug.
+  const _missingOnLoad = []; // {fieldKey, kind: 'answer_key' | 'rubric' | 'worksheet'}
+  Object.keys(content).forEach(k => {
+    if (k.startsWith('_')) return;
+    if (typeof content[k] !== 'string') return;
+    const v = content[k];
+    if (v.trim()) {
+      genC[k] = { orig: v, cur: v };
+      return;
+    }
+    // Empty field — figure out what kind and queue if regen-eligible.
+    if (k === 'answer_key' || k.startsWith('answer_key_')) {
+      genC[k] = { orig: '⏳ Generating answer key...', cur: '⏳ Generating answer key...' };
+      _missingOnLoad.push({ fieldKey: k, kind: 'answer_key' });
+    } else if (k === 'assessment_rubric') {
+      genC[k] = { orig: '⏳ Generating rubric...', cur: '⏳ Generating rubric...' };
+      _missingOnLoad.push({ fieldKey: k, kind: 'rubric' });
+    } else if (k === 'student_worksheet' || k.startsWith('student_worksheet_')) {
+      genC[k] = { orig: '⏳ Generating worksheet...', cur: '⏳ Generating worksheet...' };
+      _missingOnLoad.push({ fieldKey: k, kind: 'worksheet' });
+    } else {
+      // Other empty field — keep as empty, don't auto-regen.
+      genC[k] = { orig: v, cur: v };
+    }
+  });
+  // Stash for the post-render pass below.
+  window._loadLessonRegens = _missingOnLoad;
   genC['_expectations'] = lesson.expectations || [];
   curSess = { id:null, date:new Date().toLocaleDateString('en-CA'), subject:lesson.subject||'Language / Literacy', strand:'General', grades:lesson.grades||[], task:lesson.topic||'', marks:{} };
   window._curSessGrades = lesson.grades || [];
@@ -10233,6 +10370,43 @@ async function loadLesson(id) {
   document.getElementById('tr-plan').checked = true;
   gs(2);
   showToast('✅ Lesson loaded.');
+
+  // BUILD AL+: kick off background regens for any empty critical fields detected
+  // during load. Each regen function writes its result back to the DB via
+  // persistRegeneratedField (or its inline equivalent for worksheets) so the
+  // empty stays fixed permanently. Show progress toast so teacher knows.
+  if (window._loadLessonRegens && window._loadLessonRegens.length) {
+    const queue = window._loadLessonRegens.slice();
+    window._loadLessonRegens = [];
+    const lessonPlanText = genC['lesson_plan']?.cur || '';
+    const _topic = lesson.topic || '';
+    const _subj = lesson.subject || '';
+    const _grades = lesson.grades || [];
+    const isSplit = _grades.length > 1;
+    showToast('⏳ Filling in missing parts of this lesson...', 4000);
+    queue.forEach(({ fieldKey, kind }) => {
+      // Determine grade label for split-class variants (answer_key_A → grade A)
+      let gradeLabel = '';
+      if (isSplit) {
+        const m = fieldKey.match(/_([A-F])$/);
+        if (m) {
+          const idx = ['A','B','C','D','E','F'].indexOf(m[1]);
+          if (idx >= 0 && _grades[idx]) gradeLabel = _grades[idx];
+        }
+      }
+      if (kind === 'rubric') {
+        regenRubricAsync(fieldKey, gradeLabel, _topic, _subj, lessonPlanText);
+      } else if (kind === 'answer_key') {
+        // Answer key needs the matching worksheet as input
+        const wsKey = fieldKey === 'answer_key' ? 'student_worksheet' : fieldKey.replace('answer_key_', 'student_worksheet_');
+        regenAnswerKeyAsync(fieldKey, wsKey, gradeLabel, _topic, _subj);
+      } else if (kind === 'worksheet') {
+        // Worksheet needs lesson_plan as input. Chains answer_key regen.
+        const matchingAk = fieldKey === 'student_worksheet' ? 'answer_key' : fieldKey.replace('student_worksheet_', 'answer_key_');
+        regenWorksheetAsync(fieldKey, matchingAk, gradeLabel, _topic, _subj, lessonPlanText);
+      }
+    });
+  }
 }
 
 // ============================================================
