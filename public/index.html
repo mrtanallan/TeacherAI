@@ -166,6 +166,110 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* ── Interactive demo ── */
+  .hero-demo {
+    margin-top: 2.5rem;
+    max-width: 520px; width: 100%;
+    margin-left: auto; margin-right: auto;
+    animation: fadeUp .7s .4s ease both;
+  }
+  .demo-form {
+    display: flex; align-items: center; gap: .5rem;
+    background: white; border: 1.5px solid var(--border);
+    border-radius: 12px; padding: .45rem .45rem .45rem 1.1rem;
+    box-shadow: 0 2px 16px rgba(74,124,89,.08);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .demo-form:focus-within {
+    border-color: var(--sage);
+    box-shadow: 0 2px 20px rgba(74,124,89,.18);
+  }
+  .demo-input {
+    flex: 1; border: none; outline: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem; color: var(--ink);
+    padding: .6rem 0;
+    min-width: 0;
+  }
+  .demo-input::placeholder { color: var(--muted); }
+  .demo-submit {
+    background: var(--sage); color: white; border: none;
+    width: 38px; height: 38px; border-radius: 8px;
+    font-size: 1.1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, transform .1s;
+    flex-shrink: 0;
+  }
+  .demo-submit:hover { background: var(--sage-d); }
+  .demo-submit:active { transform: scale(.95); }
+
+  .demo-shake { animation: shake .35s ease-in-out; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  .demo-output {
+    margin-top: 1rem;
+    background: white; border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 1.1rem 1.3rem;
+    text-align: left;
+    display: none;
+  }
+  .demo-output.show { display: block; animation: fadeUp .35s ease both; }
+  .demo-topic-label {
+    font-family: 'DM Mono', monospace;
+    font-size: .68rem; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: .75rem;
+  }
+  .demo-topic-label strong { color: var(--ink); font-weight: 600; }
+  .demo-check {
+    display: flex; align-items: center; gap: .65rem;
+    font-size: .92rem; color: var(--ink);
+    padding: .35rem 0;
+    opacity: 0;
+  }
+  .demo-check.show { animation: fadeUp .35s ease both; opacity: 1; }
+  .demo-check-icon {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--sage); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; font-weight: 700; flex-shrink: 0;
+  }
+
+  .demo-cta {
+    margin-top: 1.1rem;
+    display: none;
+    text-align: center;
+  }
+  .demo-cta.show { display: block; animation: fadeUp .4s ease both; }
+  .demo-cta a {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--sage); color: white;
+    padding: .7rem 1.5rem; border-radius: 10px;
+    font-size: .92rem; font-weight: 600; text-decoration: none;
+    transition: background .15s, transform .1s;
+    box-shadow: 0 4px 14px rgba(74,124,89,.28);
+  }
+  .demo-cta a:hover { background: var(--sage-d); transform: translateY(-1px); }
+
+  .demo-caption {
+    margin-top: .9rem;
+    font-size: .72rem; color: var(--muted);
+    font-style: italic;
+  }
+
+  @media (max-width: 520px) {
+    .hero-demo { margin-top: 2rem; }
+    .demo-output { padding: .9rem 1rem; }
+    .demo-input { font-size: .88rem; }
+  }
+
   /* ── Social proof bar ── */
   .proof-bar {
     background: var(--cream);
@@ -540,6 +644,33 @@
       <a href="/app" class="btn-primary">✨ Try TeacherAI free</a>
       <a href="#pain" class="btn-secondary">See what it does</a>
     </div>
+
+    <!-- Interactive demo -->
+    <div class="hero-demo">
+      <form class="demo-form" id="demoForm" autocomplete="off">
+        <input
+          type="text"
+          class="demo-input"
+          id="demoInput"
+          placeholder="Try: Forces on Structures, Grade 5 Science"
+          aria-label="Enter a lesson topic">
+        <button type="submit" class="demo-submit" aria-label="Draft lesson">→</button>
+      </form>
+
+      <div class="demo-output" id="demoOutput">
+        <div class="demo-topic-label">Drafting: <strong id="demoTopicEcho"></strong></div>
+        <div class="demo-check" id="demoCheck1"><span class="demo-check-icon">✓</span> Lesson plan</div>
+        <div class="demo-check" id="demoCheck2"><span class="demo-check-icon">✓</span> Student worksheet</div>
+        <div class="demo-check" id="demoCheck3"><span class="demo-check-icon">✓</span> Rubric</div>
+        <div class="demo-check" id="demoCheck4"><span class="demo-check-icon">✓</span> Answer key</div>
+      </div>
+
+      <div class="demo-cta" id="demoCta">
+        <a href="/app" id="demoCtaLink">✨ Generate this in the real app →</a>
+      </div>
+
+      <p class="demo-caption" id="demoCaption" style="display:none;">Demo preview. Real lessons generate in about 60 seconds.</p>
+    </div>
   </div>
 </section>
 
@@ -715,5 +846,108 @@
   </div>
 </footer>
 
+<script>
+(function() {
+  const form = document.getElementById('demoForm');
+  const input = document.getElementById('demoInput');
+  const output = document.getElementById('demoOutput');
+  const topicEcho = document.getElementById('demoTopicEcho');
+  const checks = [1,2,3,4].map(i => document.getElementById('demoCheck' + i));
+  const cta = document.getElementById('demoCta');
+  const ctaLink = document.getElementById('demoCtaLink');
+  const caption = document.getElementById('demoCaption');
+
+  if (!form) return;
+
+  // Parse "Forces on Structures, Grade 5 Science" into {topic, grade}
+  // Tolerates "Grade 5", "Gr 5", "Gr. 5", "Grade K", or no grade at all.
+  function parseTopic(raw) {
+    const s = (raw || '').trim();
+    if (!s) return null;
+
+    // Find a grade marker anywhere in the string
+    const gradeMatch = s.match(/\b(?:grade|gr\.?)\s*(K|\d{1,2})\b/i);
+    let topic = s;
+    let grade = '';
+
+    if (gradeMatch) {
+      grade = gradeMatch[1].toUpperCase();
+      // Strip the whole "Grade X" chunk plus a trailing subject word if present
+      topic = s.replace(gradeMatch[0], '').replace(/,\s*,/g, ',').replace(/,\s*$/, '').trim();
+      // If user wrote "Topic, Grade 5 Science", subject word might be left dangling
+      // Leave it — the real app can handle it, and we want "Grade 5 Science" flavour visible.
+    }
+
+    // Clean trailing commas / whitespace
+    topic = topic.replace(/^[,\s]+|[,\s]+$/g, '');
+
+    return { topic: topic || s, grade };
+  }
+
+  let submitted = false;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (submitted) {
+      // Already ran — just send them to the app
+      window.location.href = ctaLink.getAttribute('href');
+      return;
+    }
+
+    const raw = input.value.trim() || input.placeholder.replace(/^Try:\s*/i, '');
+    const parsed = parseTopic(raw);
+
+    if (!parsed || !parsed.topic) {
+      form.classList.remove('demo-shake');
+      // Reflow trick to restart animation
+      void form.offsetWidth;
+      form.classList.add('demo-shake');
+      return;
+    }
+
+    submitted = true;
+    input.blur();
+
+    // Echo the topic back
+    topicEcho.textContent = parsed.topic + (parsed.grade ? ' · Grade ' + parsed.grade : '');
+
+    // Show output shell
+    output.classList.add('show');
+
+    // Cascade checkmarks
+    const CASCADE_DELAY = 400;
+    checks.forEach((el, i) => {
+      setTimeout(() => {
+        el.classList.add('show');
+      }, 250 + i * CASCADE_DELAY);
+    });
+
+    // After cascade, swap form for CTA deep-link
+    const totalDelay = 250 + checks.length * CASCADE_DELAY + 200;
+    setTimeout(() => {
+      // Build deep link
+      const params = new URLSearchParams();
+      params.set('topic', parsed.topic);
+      if (parsed.grade) params.set('grade', parsed.grade);
+      ctaLink.setAttribute('href', '/app?' + params.toString());
+
+      cta.classList.add('show');
+      caption.style.display = 'block';
+      caption.style.animation = 'fadeUp .4s ease both';
+
+      // Disable the input so it doesn't look re-submittable
+      input.disabled = true;
+      form.querySelector('.demo-submit').disabled = true;
+      form.style.opacity = '.6';
+    }, totalDelay);
+  });
+
+  // If input is empty on blur and user had typed nothing, no change.
+  // Purely cosmetic reset on ESC for teachers who want to try again before submitting.
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') input.value = '';
+  });
+})();
+</script>
 </body>
 </html>
