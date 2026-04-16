@@ -359,6 +359,50 @@
   }
   .demo-panel.active { display: block; }
 
+  /* Locked state: hide all panels, show placeholder */
+  .demo-tabs-wrap.demo-locked .demo-panel { display: none !important; }
+  .demo-tabs-wrap.demo-locked .demo-placeholder { display: flex; }
+  .demo-tabs-wrap:not(.demo-locked) .demo-placeholder { display: none; }
+
+  /* Placeholder shown before generate is clicked */
+  .demo-placeholder {
+    min-height: 320px;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--muted);
+  }
+  .demo-placeholder-icon {
+    font-size: 2.2rem;
+    color: var(--sage);
+    margin-bottom: 1rem;
+    opacity: .6;
+    animation: placeholderBob 1.8s ease-in-out infinite;
+  }
+  @keyframes placeholderBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .demo-placeholder-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.25rem; font-weight: 400;
+    color: var(--ink);
+    margin-bottom: .4rem;
+  }
+  .demo-placeholder-title strong {
+    font-weight: 700; color: var(--sage-d);
+  }
+  .demo-placeholder-sub {
+    font-size: .88rem; color: var(--muted);
+    line-height: 1.5;
+  }
+  @media (max-width: 700px) {
+    .demo-placeholder { min-height: 240px; padding: 2rem 1.2rem; }
+    .demo-placeholder-icon { font-size: 1.8rem; }
+    .demo-placeholder-title { font-size: 1.05rem; }
+  }
+
   .demo-panel-caption {
     background: var(--sage-l);
     border-left: 3px solid var(--sage);
@@ -1006,7 +1050,7 @@
       <p class="demo-section-sub"><em style="font-style:italic;color:var(--muted);">Shown here as a sample — the real app generates the full worksheet, full slide deck, and full answer key.</em></p>
     </div>
 
-    <div class="demo-tabs-wrap">
+    <div class="demo-tabs-wrap demo-locked">
       <div class="demo-tabs" role="tablist">
         <button class="demo-tab active" data-tab="exp" role="tab"><span class="demo-tab-icon">📋</span>Expectations</button>
         <button class="demo-tab" data-tab="plan" role="tab"><span class="demo-tab-icon">📅</span>Lesson Plan</button>
@@ -1015,6 +1059,13 @@
         <button class="demo-tab" data-tab="rub" role="tab"><span class="demo-tab-icon">📊</span>Rubric</button>
         <button class="demo-tab" data-tab="slides" role="tab"><span class="demo-tab-icon">▶</span>Slides</button>
         <button class="demo-tab" data-tab="mark" role="tab"><span class="demo-tab-icon">🤖</span>Suggested Marks</button>
+      </div>
+
+      <!-- Locked placeholder (shown until generate is clicked) -->
+      <div class="demo-placeholder">
+        <div class="demo-placeholder-icon">↑</div>
+        <div class="demo-placeholder-title">Click <strong>Generate lesson</strong> to see the real output</div>
+        <div class="demo-placeholder-sub">Or click any tab above to reveal the full lesson preview.</div>
       </div>
 
       <!-- EXPECTATIONS -->
@@ -1379,7 +1430,12 @@
 (function() {
   const tabs = document.querySelectorAll('.demo-tab');
   const panels = document.querySelectorAll('.demo-panel');
+  const tabsWrapEl = document.querySelector('.demo-tabs-wrap');
   if (!tabs.length) return;
+
+  function unlock() {
+    if (tabsWrapEl) tabsWrapEl.classList.remove('demo-locked');
+  }
 
   function activate(tabKey) {
     tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabKey));
@@ -1387,22 +1443,25 @@
   }
 
   tabs.forEach(tab => {
-    tab.addEventListener('click', () => activate(tab.dataset.tab));
+    tab.addEventListener('click', () => {
+      unlock();
+      activate(tab.dataset.tab);
+    });
     // Keyboard a11y: left/right arrows cycle tabs
     tab.addEventListener('keydown', (e) => {
       const keys = Array.from(tabs);
       const idx = keys.indexOf(tab);
       if (e.key === 'ArrowRight') {
         const next = keys[(idx + 1) % keys.length];
-        next.focus(); activate(next.dataset.tab);
+        next.focus(); unlock(); activate(next.dataset.tab);
       } else if (e.key === 'ArrowLeft') {
         const prev = keys[(idx - 1 + keys.length) % keys.length];
-        prev.focus(); activate(prev.dataset.tab);
+        prev.focus(); unlock(); activate(prev.dataset.tab);
       }
     });
   });
 
-  // Demo trigger button: simulate a generation, scroll to tabs, reveal
+  // Demo trigger button: unlock tabs, scroll into view, brief reveal
   const genBtn = document.getElementById('demoGenerateBtn');
   const tabsWrap = document.querySelector('.demo-tabs-wrap');
   const demoSection = document.getElementById('demo');
@@ -1410,7 +1469,7 @@
     let triggered = false;
     genBtn.addEventListener('click', function() {
       if (triggered) {
-        // If clicked again after reveal, just scroll down
+        // Subsequent clicks: just scroll back to the demo
         demoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
@@ -1418,10 +1477,10 @@
       genBtn.classList.add('loading');
       genBtn.disabled = true;
 
-      // Brief loading state, then scroll + reveal
+      // Brief loading state, then unlock + scroll + reveal
       setTimeout(() => {
+        unlock();
         demoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // Re-trigger the reveal animation
         tabsWrap.classList.remove('demo-revealed');
         void tabsWrap.offsetWidth;
         tabsWrap.classList.add('demo-revealed');
