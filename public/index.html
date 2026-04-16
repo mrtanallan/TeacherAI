@@ -176,29 +176,101 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ── Hero demo link ── */
-  .hero-demo-link {
-    display: inline-block;
-    margin-top: 2.2rem;
-    color: var(--sage-d);
-    font-size: .92rem; font-weight: 500;
-    text-decoration: none;
-    border-bottom: 1.5px dashed rgba(74,124,89,.5);
-    padding-bottom: 2px;
-    transition: color .15s, border-color .15s;
-    animation: fadeUp .7s .4s ease both;
+  /* ── Demo trigger (connective tissue between hero and tabs) ── */
+  .demo-trigger {
+    background: var(--cream);
+    padding: 4rem 2rem 3.5rem;
+    text-align: center;
   }
-  .hero-demo-link:hover {
-    color: var(--sage);
-    border-bottom-color: var(--sage);
+  .demo-trigger-inner {
+    max-width: 640px; margin: 0 auto;
   }
-  @media (max-width: 700px) { .hero-demo-link { font-size: .85rem; } }
+  .demo-trigger-label {
+    font-family: 'DM Mono', monospace; font-size: .72rem;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1rem; font-weight: 600;
+  }
+  .demo-trigger-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+    font-weight: 700; line-height: 1.2;
+    letter-spacing: -.02em; color: var(--ink);
+    margin-bottom: .8rem;
+  }
+  .demo-trigger-title em {
+    font-style: italic; color: var(--sage); font-weight: 300;
+  }
+  .demo-trigger-sub {
+    font-size: 1rem; color: var(--muted);
+    line-height: 1.6; margin-bottom: 2rem;
+  }
+  .demo-trigger-btn {
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 220px; min-height: 54px;
+    background: var(--sage); color: white;
+    border: none; border-radius: 12px;
+    padding: 1rem 2.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.02rem; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(74,124,89,.32);
+    transition: background .15s, transform .1s, box-shadow .15s;
+  }
+  .demo-trigger-btn:hover:not(:disabled) {
+    background: var(--sage-d); transform: translateY(-2px);
+    box-shadow: 0 8px 26px rgba(74,124,89,.38);
+  }
+  .demo-trigger-btn:active:not(:disabled) { transform: translateY(0); }
+  .demo-trigger-btn:disabled { cursor: default; opacity: .85; }
+  .demo-trigger-btn-label {
+    display: inline-flex; align-items: center; gap: .55rem;
+    transition: opacity .2s;
+  }
+  .demo-trigger-btn-icon { font-size: 1.15rem; }
+  .demo-trigger-btn-spinner {
+    position: absolute; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    gap: .45rem;
+  }
+  .demo-trigger-btn.loading .demo-trigger-btn-label { opacity: 0; }
+  .demo-trigger-btn.loading .demo-trigger-btn-spinner {
+    display: inline-flex;
+  }
+  .demo-trigger-btn-spinner::before {
+    content: 'Drafting';
+    font-weight: 600; color: white;
+    margin-right: .3rem;
+  }
+  .demo-trigger-btn-spinner::after {
+    content: '';
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: demoSpin .7s linear infinite;
+  }
+  @keyframes demoSpin {
+    to { transform: rotate(360deg); }
+  }
+  @media (max-width: 700px) {
+    .demo-trigger { padding: 3rem 1.25rem 2.5rem; }
+    .demo-trigger-sub { font-size: .92rem; }
+  }
+
+  /* When the demo reveals itself after trigger */
+  .demo-tabs-wrap.demo-revealed {
+    animation: demoReveal .5s ease both;
+  }
+  @keyframes demoReveal {
+    from { opacity: .5; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
   /* ── Demo tabs section ── */
   .demo-section {
     background: var(--cream);
-    padding: 5rem 2rem 4rem;
-    border-top: 1px solid var(--border);
+    padding: 1rem 2rem 4rem;
     border-bottom: 1px solid var(--border);
   }
   .demo-section-inner {
@@ -206,7 +278,7 @@
   }
   .demo-section-header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
   }
   .demo-section-header .section-label {
     margin-bottom: .8rem;
@@ -898,8 +970,6 @@
       <a href="/app" class="btn-primary">✨ Try TeacherAI free</a>
       <a href="#pain" class="btn-secondary">See what it does</a>
     </div>
-
-    <a href="#demo" class="hero-demo-link">▶ See a real Grade 5 Science lesson — exactly what you'd get</a>
   </div>
 </section>
 
@@ -912,13 +982,28 @@
   </div>
 </div>
 
+<!-- ── Demo trigger ── -->
+<section class="demo-trigger">
+  <div class="demo-trigger-inner">
+    <div class="demo-trigger-label">Don't take our word for it</div>
+    <h2 class="demo-trigger-title">Click generate. See what TeacherAI <em>actually makes.</em></h2>
+    <p class="demo-trigger-sub">Here's the exact lesson TeacherAI would draft for a Grade 5 Science class studying Forces on Structures.</p>
+    <button id="demoGenerateBtn" class="demo-trigger-btn" type="button">
+      <span class="demo-trigger-btn-label">
+        <span class="demo-trigger-btn-icon">✨</span>
+        Generate lesson
+      </span>
+      <span class="demo-trigger-btn-spinner"></span>
+    </button>
+  </div>
+</section>
+
 <!-- ── Demo section (tabbed real lesson preview) ── -->
 <section class="demo-section" id="demo">
   <div class="demo-section-inner">
     <div class="demo-section-header">
       <div class="demo-topic-chip">Grade 5 · Science · Forces on Structures</div>
-      <h2 class="demo-section-title">See what you get. <em>One real lesson, start to finish.</em></h2>
-      <p class="demo-section-sub">This is the actual output TeacherAI generates for this topic. Nothing staged. Click through the tabs to see every piece. <em style="font-style:italic;color:var(--muted);">Shown here as a sample — the real app generates the full worksheet, full slide deck, and full answer key.</em></p>
+      <p class="demo-section-sub"><em style="font-style:italic;color:var(--muted);">Shown here as a sample — the real app generates the full worksheet, full slide deck, and full answer key.</em></p>
     </div>
 
     <div class="demo-tabs-wrap">
@@ -1316,6 +1401,43 @@
       }
     });
   });
+
+  // Demo trigger button: simulate a generation, scroll to tabs, reveal
+  const genBtn = document.getElementById('demoGenerateBtn');
+  const tabsWrap = document.querySelector('.demo-tabs-wrap');
+  const demoSection = document.getElementById('demo');
+  if (genBtn && tabsWrap && demoSection) {
+    let triggered = false;
+    genBtn.addEventListener('click', function() {
+      if (triggered) {
+        // If clicked again after reveal, just scroll down
+        demoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      triggered = true;
+      genBtn.classList.add('loading');
+      genBtn.disabled = true;
+
+      // Brief loading state, then scroll + reveal
+      setTimeout(() => {
+        demoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Re-trigger the reveal animation
+        tabsWrap.classList.remove('demo-revealed');
+        void tabsWrap.offsetWidth;
+        tabsWrap.classList.add('demo-revealed');
+
+        // Reset button after a moment
+        setTimeout(() => {
+          genBtn.classList.remove('loading');
+          genBtn.disabled = false;
+          const labelSpan = genBtn.querySelector('.demo-trigger-btn-label');
+          if (labelSpan) {
+            labelSpan.innerHTML = '<span class="demo-trigger-btn-icon">↓</span>See it again';
+          }
+        }, 900);
+      }, 850);
+    });
+  }
 
   // Pause hero animations when scrolled out of view (scroll perf)
   const hero = document.querySelector('.hero');
