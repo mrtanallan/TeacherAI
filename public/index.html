@@ -166,108 +166,388 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ── Interactive demo ── */
-  .hero-demo {
-    margin-top: 2.5rem;
-    max-width: 520px; width: 100%;
-    margin-left: auto; margin-right: auto;
+  /* ── Hero demo link ── */
+  .hero-demo-link {
+    display: inline-block;
+    margin-top: 2.2rem;
+    color: var(--sage-d);
+    font-size: .92rem; font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1.5px dashed rgba(74,124,89,.5);
+    padding-bottom: 2px;
+    transition: color .15s, border-color .15s;
     animation: fadeUp .7s .4s ease both;
   }
-  .demo-form {
-    display: flex; align-items: center; gap: .5rem;
-    background: white; border: 1.5px solid var(--border);
-    border-radius: 12px; padding: .45rem .45rem .45rem 1.1rem;
-    box-shadow: 0 2px 16px rgba(74,124,89,.08);
-    transition: border-color .15s, box-shadow .15s;
+  .hero-demo-link:hover {
+    color: var(--sage);
+    border-bottom-color: var(--sage);
   }
-  .demo-form:focus-within {
-    border-color: var(--sage);
-    box-shadow: 0 2px 20px rgba(74,124,89,.18);
-  }
-  .demo-input {
-    flex: 1; border: none; outline: none;
-    background: transparent;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .95rem; color: var(--ink);
-    padding: .6rem 0;
-    min-width: 0;
-  }
-  .demo-input::placeholder { color: var(--muted); }
-  .demo-submit {
-    background: var(--sage); color: white; border: none;
-    width: 38px; height: 38px; border-radius: 8px;
-    font-size: 1.1rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background .15s, transform .1s;
-    flex-shrink: 0;
-  }
-  .demo-submit:hover { background: var(--sage-d); }
-  .demo-submit:active { transform: scale(.95); }
+  @media (max-width: 700px) { .hero-demo-link { font-size: .85rem; } }
 
-  .demo-shake { animation: shake .35s ease-in-out; }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
+  /* ── Demo tabs section ── */
+  .demo-section {
+    background: var(--cream);
+    padding: 5rem 2rem 6rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
   }
-
-  .demo-output {
-    margin-top: 1rem;
-    background: white; border: 1.5px solid var(--border);
-    border-radius: 12px; padding: 1.1rem 1.3rem;
-    text-align: left;
-    display: none;
+  .demo-section-inner {
+    max-width: 1080px; margin: 0 auto;
   }
-  .demo-output.show { display: block; animation: fadeUp .35s ease both; }
-  .demo-topic-label {
-    font-family: 'DM Mono', monospace;
-    font-size: .68rem; letter-spacing: 1.2px;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: .75rem;
-  }
-  .demo-topic-label strong { color: var(--ink); font-weight: 600; }
-  .demo-check {
-    display: flex; align-items: center; gap: .65rem;
-    font-size: .92rem; color: var(--ink);
-    padding: .35rem 0;
-    opacity: 0;
-  }
-  .demo-check.show { animation: fadeUp .35s ease both; opacity: 1; }
-  .demo-check-icon {
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--sage); color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-size: .75rem; font-weight: 700; flex-shrink: 0;
-  }
-
-  .demo-cta {
-    margin-top: 1.1rem;
-    display: none;
+  .demo-section-header {
     text-align: center;
+    margin-bottom: 2.5rem;
   }
-  .demo-cta.show { display: block; animation: fadeUp .4s ease both; }
-  .demo-cta a {
-    display: inline-flex; align-items: center; gap: .4rem;
-    background: var(--sage); color: white;
-    padding: .7rem 1.5rem; border-radius: 10px;
-    font-size: .92rem; font-weight: 600; text-decoration: none;
-    transition: background .15s, transform .1s;
-    box-shadow: 0 4px 14px rgba(74,124,89,.28);
+  .demo-section-header .section-label {
+    margin-bottom: .8rem;
   }
-  .demo-cta a:hover { background: var(--sage-d); transform: translateY(-1px); }
+  .demo-section-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.8rem, 3.8vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.15; letter-spacing: -.02em;
+    color: var(--ink);
+    margin-bottom: .8rem;
+  }
+  .demo-section-title em {
+    font-style: italic; color: var(--sage); font-weight: 300;
+  }
+  .demo-section-sub {
+    font-size: 1rem; color: var(--muted);
+    line-height: 1.6; max-width: 620px;
+    margin: 0 auto;
+  }
+  .demo-topic-chip {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: white; border: 1.5px solid var(--border);
+    border-radius: 20px; padding: .4rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: .72rem; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--sage-d); font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
 
-  .demo-caption {
+  /* Tab bar */
+  .demo-tabs-wrap {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(22,18,14,.06);
+  }
+  .demo-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: #FBF8F3;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .demo-tabs::-webkit-scrollbar { height: 4px; }
+  .demo-tabs::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .demo-tab {
+    flex: 1 0 auto;
+    min-width: 130px;
+    background: none; border: none;
+    padding: 1.1rem .9rem .95rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem; font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color .15s, border-color .15s, background .15s;
+    white-space: nowrap;
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+  }
+  .demo-tab:hover { color: var(--ink); background: rgba(255,255,255,.5); }
+  .demo-tab.active {
+    color: var(--sage-d);
+    border-bottom-color: var(--sage);
+    background: white;
+    font-weight: 600;
+  }
+  .demo-tab-icon { font-size: 1rem; }
+
+  /* Tab panels */
+  .demo-panel {
+    display: none;
+    padding: 2rem 2.2rem 2.2rem;
+    min-height: 480px;
+    animation: fadeUp .25s ease both;
+  }
+  .demo-panel.active { display: block; }
+
+  .demo-panel-caption {
+    background: var(--sage-l);
+    border-left: 3px solid var(--sage);
+    padding: .85rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    font-size: .88rem; color: var(--sage-d);
+    line-height: 1.55;
+    margin-bottom: 1.8rem;
+  }
+  .demo-panel-caption strong { color: var(--sage-d); font-weight: 700; }
+
+  /* Expectations list */
+  .demo-exp-list {
+    display: flex; flex-direction: column; gap: .75rem;
+  }
+  .demo-exp-item {
+    display: flex; gap: 1rem;
+    padding: 1rem 1.2rem;
+    background: #FBF8F3;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .demo-exp-code {
+    font-family: 'DM Mono', monospace;
+    font-size: .85rem; font-weight: 700;
+    color: var(--sage-d);
+    background: white;
+    padding: .3rem .6rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    align-self: flex-start;
+    height: fit-content;
+  }
+  .demo-exp-text {
+    font-size: .92rem;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  .demo-exp-strand {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .3rem;
+    font-weight: 600;
+  }
+
+  /* Lesson plan */
+  .demo-lesson-header {
+    display: flex; flex-wrap: wrap; gap: .8rem;
+    padding: .9rem 1.1rem;
+    background: #FBF8F3;
+    border-radius: 10px;
+    margin-bottom: 1.4rem;
+    font-size: .85rem;
+    border: 1px solid var(--border);
+  }
+  .demo-lesson-meta {
+    display: inline-flex; align-items: center; gap: .35rem;
+    color: var(--muted);
+  }
+  .demo-lesson-meta strong { color: var(--ink); font-weight: 600; }
+
+  .demo-phase {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .demo-phase:last-child { border-bottom: none; }
+  .demo-phase-head {
+    display: flex; align-items: baseline; gap: .8rem;
+    margin-bottom: .5rem;
+  }
+  .demo-phase-name {
+    font-family: 'DM Mono', monospace;
+    font-size: .72rem; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--sage-d);
+  }
+  .demo-phase-time {
+    font-size: .76rem; color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .demo-phase-body {
+    font-size: .92rem; color: var(--ink);
+    line-height: 1.6;
+  }
+  .demo-phase-body strong { color: var(--ink); font-weight: 600; }
+
+  /* Worksheet / Answer key */
+  .demo-ws-header {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem; font-weight: 700;
+    color: var(--ink);
+    margin-bottom: .3rem;
+  }
+  .demo-ws-subhead {
+    font-size: .8rem; color: var(--muted);
+    margin-bottom: 1.2rem;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .demo-ws-section-label {
+    font-size: .78rem; font-weight: 700;
+    color: var(--sage-d);
+    margin: 1.4rem 0 .7rem;
+    text-transform: uppercase; letter-spacing: 1px;
+    font-family: 'DM Mono', monospace;
+  }
+  .demo-ws-section-label:first-child { margin-top: 0; }
+  .demo-wordbank {
+    background: #FDF4E3;
+    border: 1px dashed var(--amber);
+    border-radius: 8px;
+    padding: .8rem 1rem;
+    margin-bottom: 1.2rem;
+    font-size: .88rem;
+    color: #7A5020;
+  }
+  .demo-wordbank strong {
+    display: block;
+    font-size: .68rem; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--amber);
+    margin-bottom: .4rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .demo-q {
+    margin-bottom: .95rem;
+    padding-bottom: .95rem;
+    border-bottom: 1px dashed var(--border);
+    font-size: .92rem;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .demo-q:last-child { border-bottom: none; }
+  .demo-q-num {
+    font-weight: 700; color: var(--sage-d);
+    margin-right: .4rem;
+  }
+  .demo-q-blank {
+    display: inline-block;
+    min-width: 110px;
+    border-bottom: 1.5px solid var(--ink);
+    margin: 0 4px;
+  }
+  .demo-q-answer {
+    display: inline-block;
+    background: var(--sage-l);
+    color: var(--sage-d);
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 4px;
+    border: 1px dashed var(--sage);
+    margin: 0 3px;
+  }
+  .demo-q-rationale {
+    margin-top: .4rem;
+    padding: .5rem .7rem;
+    background: #FBF8F3;
+    border-left: 3px solid var(--sage);
+    border-radius: 0 6px 6px 0;
+    font-size: .82rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* Rubric */
+  .demo-rubric {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .82rem;
+  }
+  .demo-rubric th, .demo-rubric td {
+    padding: .75rem .85rem;
+    border: 1px solid var(--border);
+    vertical-align: top;
+    text-align: left;
+  }
+  .demo-rubric th {
+    background: var(--sage-d);
+    color: white;
+    font-weight: 600;
+    font-size: .75rem;
+    letter-spacing: .5px;
+  }
+  .demo-rubric .demo-rubric-cat {
+    background: #FBF8F3;
+    font-weight: 700;
+    color: var(--sage-d);
+    width: 22%;
+  }
+  .demo-rubric .demo-rubric-cat small {
+    display: block;
+    font-weight: 400;
+    color: var(--muted);
+    font-size: .72rem;
+    margin-top: .3rem;
+    line-height: 1.45;
+  }
+  .demo-rubric td { color: var(--ink); line-height: 1.5; }
+
+  /* Slides tab */
+  .demo-slides-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+  .demo-slide-card {
+    background: linear-gradient(135deg, #FBF8F3 0%, white 100%);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem .9rem .9rem;
+    aspect-ratio: 4 / 3;
+    display: flex; flex-direction: column; justify-content: space-between;
+    font-size: .82rem;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .demo-slide-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(22,18,14,.08); }
+  .demo-slide-num {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem; letter-spacing: 1.2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .demo-slide-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem; font-weight: 700;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+
+  /* Auto-mark tab */
+  .demo-automark-img {
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(22,18,14,.06);
+  }
+  .demo-automark-wrap { text-align: center; }
+
+  /* Demo CTA */
+  .demo-section-cta {
+    text-align: center;
+    margin-top: 2.2rem;
+  }
+  .demo-section-cta a {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: var(--sage); color: white;
+    padding: .9rem 2rem; border-radius: 10px;
+    font-size: 1rem; font-weight: 600; text-decoration: none;
+    box-shadow: 0 4px 16px rgba(74,124,89,.3);
+    transition: background .15s, transform .1s;
+  }
+  .demo-section-cta a:hover { background: var(--sage-d); transform: translateY(-2px); }
+  .demo-section-cta-note {
+    display: block;
     margin-top: .9rem;
     font-size: .72rem; color: var(--muted);
-    font-style: italic;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1px; text-transform: uppercase;
   }
 
-  @media (max-width: 520px) {
-    .hero-demo { margin-top: 2rem; }
-    .demo-output { padding: .9rem 1rem; }
-    .demo-input { font-size: .88rem; }
+  @media (max-width: 760px) {
+    .demo-section { padding: 3.5rem 1rem 4rem; }
+    .demo-panel { padding: 1.5rem 1.2rem 1.8rem; min-height: 420px; }
+    .demo-tab { padding: .9rem .6rem .75rem; font-size: .78rem; min-width: 110px; }
+    .demo-rubric { font-size: .72rem; }
+    .demo-rubric th, .demo-rubric td { padding: .55rem .55rem; }
   }
 
   /* ── Social proof bar ── */
@@ -618,6 +898,7 @@
 <nav>
   <a href="/" class="nav-logo">Teacher<span>AI</span></a>
   <div class="nav-links">
+    <a href="#demo">See a real lesson</a>
     <a href="#pain">What it does</a>
     <a href="#faq">FAQ</a>
     <a href="/privacy.html">Privacy</a>
@@ -645,32 +926,7 @@
       <a href="#pain" class="btn-secondary">See what it does</a>
     </div>
 
-    <!-- Interactive demo -->
-    <div class="hero-demo">
-      <form class="demo-form" id="demoForm" autocomplete="off">
-        <input
-          type="text"
-          class="demo-input"
-          id="demoInput"
-          placeholder="Try: Forces on Structures, Grade 5 Science"
-          aria-label="Enter a lesson topic">
-        <button type="submit" class="demo-submit" aria-label="Draft lesson">→</button>
-      </form>
-
-      <div class="demo-output" id="demoOutput">
-        <div class="demo-topic-label">Drafting: <strong id="demoTopicEcho"></strong></div>
-        <div class="demo-check" id="demoCheck1"><span class="demo-check-icon">✓</span> Lesson plan</div>
-        <div class="demo-check" id="demoCheck2"><span class="demo-check-icon">✓</span> Student worksheet</div>
-        <div class="demo-check" id="demoCheck3"><span class="demo-check-icon">✓</span> Rubric</div>
-        <div class="demo-check" id="demoCheck4"><span class="demo-check-icon">✓</span> Answer key</div>
-      </div>
-
-      <div class="demo-cta" id="demoCta">
-        <a href="/app" id="demoCtaLink">✨ Generate this in the real app →</a>
-      </div>
-
-      <p class="demo-caption" id="demoCaption" style="display:none;">Demo preview. Real lessons generate in about 60 seconds.</p>
-    </div>
+    <a href="#demo" class="hero-demo-link">▶ See a real Grade 5 Science lesson — exactly what you'd get</a>
   </div>
 </section>
 
@@ -682,6 +938,254 @@
     <span class="proof-bar-item">👋 Made by Ontario classroom teachers</span>
   </div>
 </div>
+
+<!-- ── Demo section (tabbed real lesson preview) ── -->
+<section class="demo-section" id="demo">
+  <div class="demo-section-inner">
+    <div class="demo-section-header">
+      <div class="demo-topic-chip">Grade 5 · Science · Forces on Structures</div>
+      <h2 class="demo-section-title">See what you get. <em>One real lesson, start to finish.</em></h2>
+      <p class="demo-section-sub">This is the actual output TeacherAI generates for this topic. Nothing staged. Click through the tabs to see every piece.</p>
+    </div>
+
+    <div class="demo-tabs-wrap">
+      <div class="demo-tabs" role="tablist">
+        <button class="demo-tab active" data-tab="exp" role="tab"><span class="demo-tab-icon">📋</span>Expectations</button>
+        <button class="demo-tab" data-tab="plan" role="tab"><span class="demo-tab-icon">📅</span>Lesson Plan</button>
+        <button class="demo-tab" data-tab="ws" role="tab"><span class="demo-tab-icon">📝</span>Worksheet</button>
+        <button class="demo-tab" data-tab="key" role="tab"><span class="demo-tab-icon">🔑</span>Answer Key</button>
+        <button class="demo-tab" data-tab="rub" role="tab"><span class="demo-tab-icon">📊</span>Rubric</button>
+        <button class="demo-tab" data-tab="slides" role="tab"><span class="demo-tab-icon">▶</span>Slides</button>
+        <button class="demo-tab" data-tab="mark" role="tab"><span class="demo-tab-icon">🤖</span>Suggested Marks</button>
+      </div>
+
+      <!-- EXPECTATIONS -->
+      <div class="demo-panel active" data-panel="exp">
+        <div class="demo-panel-caption">
+          <strong>Real Ontario expectation codes.</strong> Every lesson is tagged with the specific expectations it covers, pulled from the 2022 Science and Technology curriculum.
+        </div>
+        <div class="demo-exp-list">
+          <div class="demo-exp-item">
+            <div class="demo-exp-code">D1.2</div>
+            <div class="demo-exp-text">
+              <span class="demo-exp-strand">Strand D · Structures and Mechanisms</span>
+              describe forces resulting from natural phenomena that can have severe consequences for human-built structures, and identify structural features and materials that can allow such structures to withstand these forces
+            </div>
+          </div>
+          <div class="demo-exp-item">
+            <div class="demo-exp-code">D2.1</div>
+            <div class="demo-exp-text">
+              <span class="demo-exp-strand">Strand D · Structures and Mechanisms</span>
+              identify internal forces acting on a structure, and describe their effects on the structure
+            </div>
+          </div>
+          <div class="demo-exp-item">
+            <div class="demo-exp-code">D2.2</div>
+            <div class="demo-exp-text">
+              <span class="demo-exp-strand">Strand D · Structures and Mechanisms</span>
+              identify external forces acting on a structure, and describe their effects on the structure
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LESSON PLAN -->
+      <div class="demo-panel" data-panel="plan">
+        <div class="demo-panel-caption">
+          <strong>Every lesson follows Ontario's 4-part structure.</strong> Minds On, Direct Instruction, Guided Practice, Consolidation. With timings, teacher moves, IEP and ELL supports, and look-fors built in.
+        </div>
+        <div class="demo-lesson-header">
+          <span class="demo-lesson-meta"><strong>Topic:</strong>&nbsp;Forces Acting on Structures</span>
+          <span class="demo-lesson-meta"><strong>Time:</strong>&nbsp;60 minutes</span>
+          <span class="demo-lesson-meta"><strong>I can:</strong>&nbsp;identify internal and external forces and describe how each affects a structure</span>
+        </div>
+
+        <div class="demo-phase">
+          <div class="demo-phase-head">
+            <span class="demo-phase-name">Minds On</span>
+            <span class="demo-phase-time">8 min</span>
+          </div>
+          <div class="demo-phase-body">
+            <strong>Ask:</strong> Think about a bridge you have crossed. What do you think is pushing or pulling on it right now, even when no cars are on it? <strong>Think-pair-share</strong> one external force and one internal force. <strong>Listen for:</strong> students who recognize gravity pulling down (external) and materials being squeezed or stretched (internal). <strong>ELL support:</strong> gesture pushing palms together for compression, pulling fists apart for tension.
+          </div>
+        </div>
+
+        <div class="demo-phase">
+          <div class="demo-phase-head">
+            <span class="demo-phase-name">Direct Instruction</span>
+            <span class="demo-phase-time">10–12 min</span>
+          </div>
+          <div class="demo-phase-body">
+            Introduce two categories: <strong>external forces</strong> (gravity, wind, load, water) and <strong>internal forces</strong> (compression, tension, shear, torsion). Model with a cardboard tube: push both ends to show compression, bend it to show tension on top and compression below. <strong>Check for understanding:</strong> thumbs up if students can name the force that squeezes a material. IEP/ELL anchor chart provided.
+          </div>
+        </div>
+
+        <div class="demo-phase">
+          <div class="demo-phase-head">
+            <span class="demo-phase-name">Guided Practice</span>
+            <span class="demo-phase-time">12–15 min</span>
+          </div>
+          <div class="demo-phase-body">
+            Pairs read the reading resource on Chromebooks and complete worksheet Part 1 and Part 2 together, sorting scenarios as internal or external and naming the specific force. <strong>Circulate for:</strong> students correctly distinguishing the external agent (wind) from the internal response (compression). Extension for early finishers: analyze forces on a real Ontario structure like the CN Tower.
+          </div>
+        </div>
+
+        <div class="demo-phase">
+          <div class="demo-phase-head">
+            <span class="demo-phase-name">Independent Work</span>
+            <span class="demo-phase-time">12–15 min</span>
+          </div>
+          <div class="demo-phase-body">
+            Students complete the rest of the worksheet individually on Chromebook. Teacher confers with students who struggled during guided practice, prompting with the anchor chart and gestures.
+          </div>
+        </div>
+
+        <div class="demo-phase">
+          <div class="demo-phase-head">
+            <span class="demo-phase-name">Consolidation</span>
+            <span class="demo-phase-time">5 min</span>
+          </div>
+          <div class="demo-phase-body">
+            <strong>Exit ticket:</strong> name one external and one internal force acting on a school building, and explain how the internal force is caused by the external force. <strong>Level 3 looks like:</strong> student identifies gravity or wind as external, names compression in walls or tension in roof beams, and connects the two.
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKSHEET -->
+      <div class="demo-panel" data-panel="ws">
+        <div class="demo-panel-caption">
+          <strong>A real student-facing worksheet.</strong> 14 questions across 4 sections. Fill-in-the-blank, multiple choice, sorting, and short-answer. Students submit on any device through a shareable link.
+        </div>
+        <div class="demo-ws-header">Forces Acting on Structures — Grade 5</div>
+        <div class="demo-ws-subhead">Student Worksheet</div>
+
+        <div class="demo-ws-section-label">🧠 Part 1 · What Do You Know?</div>
+        <div class="demo-wordbank">
+          <strong>Word Bank</strong>
+          compression · tension · shear · torsion · external · internal · gravity · load · wind
+        </div>
+        <div class="demo-q"><span class="demo-q-num">Q1.</span>Forces that come from <em>outside</em> a structure are called <span class="demo-q-blank"></span> forces.</div>
+        <div class="demo-q"><span class="demo-q-num">Q2.</span>Forces that develop <em>inside</em> the materials of a structure in response to outside forces are called <span class="demo-q-blank"></span> forces.</div>
+        <div class="demo-q"><span class="demo-q-num">Q3.</span>The constant external force that pulls every structure downward is called <span class="demo-q-blank"></span>.</div>
+
+        <div class="demo-ws-section-label">🏗️ Part 2 · Name That Force</div>
+        <div class="demo-q"><span class="demo-q-num">Q4.</span>Snow accumulates on a flat roof and pushes down on it. Is this an internal or external force? <br><em>A) Internal &nbsp;&nbsp; B) External</em></div>
+        <div class="demo-q"><span class="demo-q-num">Q5.</span>The concrete pillar of a bridge is being squeezed together by the weight of the bridge deck above it. Name this internal force.</div>
+        <div class="demo-q"><span class="demo-q-num">Q7.</span>A strong windstorm pushes sideways against a tall building. Is this an internal or external force? <br><em>A) Internal &nbsp;&nbsp; B) External</em></div>
+
+        <div class="demo-ws-section-label">🔍 Part 3 · Cause and Effect</div>
+        <div class="demo-q"><span class="demo-q-num">Q10.</span>A person stands on a wooden floor beam. Explain what external force is acting on the beam AND what internal force develops inside the beam as a result.</div>
+
+        <div class="demo-ws-section-label">🌍 Part 4 · Real-World Thinking</div>
+        <div class="demo-q"><span class="demo-q-num">Q13.</span>Engineers add steel rods inside concrete to make reinforced concrete. Using the words <em>compression</em> and <em>tension</em>, explain why using both materials together makes a stronger structure than using only one.</div>
+
+        <div class="demo-ws-section-label">✅ Exit Ticket</div>
+        <div class="demo-q"><span class="demo-q-num">Q14.</span>Name one external force and one internal force acting on a school building. Explain how the internal force is caused by the external force.</div>
+      </div>
+
+      <!-- ANSWER KEY -->
+      <div class="demo-panel" data-panel="key">
+        <div class="demo-panel-caption">
+          <strong>Teacher answer key with model responses.</strong> Short-answer questions include the key points students should cover, not just a single "correct" answer. Lets you mark consistently and quickly.
+        </div>
+        <div class="demo-ws-header">Answer Key — Teacher Reference</div>
+        <div class="demo-ws-subhead">Grade 5 Science · Forces on Structures</div>
+
+        <div class="demo-q"><span class="demo-q-num">Q1.</span>Forces from outside a structure are called <span class="demo-q-answer">external</span> forces.</div>
+        <div class="demo-q"><span class="demo-q-num">Q2.</span>Forces that develop inside materials in response are called <span class="demo-q-answer">internal</span> forces.</div>
+        <div class="demo-q"><span class="demo-q-num">Q3.</span>The constant external downward force is <span class="demo-q-answer">gravity</span>.</div>
+        <div class="demo-q"><span class="demo-q-num">Q4.</span>Snow pushing down on a roof is <span class="demo-q-answer">B) External</span></div>
+        <div class="demo-q"><span class="demo-q-num">Q5.</span>Concrete pillar being squeezed: <span class="demo-q-answer">compression</span></div>
+        <div class="demo-q"><span class="demo-q-num">Q7.</span>Windstorm against a tall building is <span class="demo-q-answer">B) External</span></div>
+        <div class="demo-q">
+          <span class="demo-q-num">Q10.</span>Person on a wooden floor beam:
+          <div class="demo-q-rationale"><strong>Key points:</strong> (1) External force is the person's weight due to gravity pushing down on the beam. (2) Compression develops in the top of the beam as it's squeezed together. (3) Tension develops along the bottom as the beam bends and stretches under the load.</div>
+        </div>
+        <div class="demo-q">
+          <span class="demo-q-num">Q13.</span>Why reinforced concrete is stronger:
+          <div class="demo-q-rationale"><strong>Key points:</strong> (1) Concrete is strong in compression but weak in tension, so it can crack when pulled. (2) Steel is strong in tension, covering concrete's weakness. (3) Together they resist both forces, making the structure much stronger than either alone.</div>
+        </div>
+      </div>
+
+      <!-- RUBRIC -->
+      <div class="demo-panel" data-panel="rub">
+        <div class="demo-panel-caption">
+          <strong>Ontario Achievement Chart, 4 levels.</strong> Science-specific categories: Knowledge &amp; Understanding, Thinking &amp; Investigation, Communication, Application. Defensible to admin, ready to use for assessment.
+        </div>
+        <table class="demo-rubric">
+          <thead>
+            <tr><th>Category</th><th>Level 1</th><th>Level 2</th><th>Level 3</th><th>Level 4</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="demo-rubric-cat">Knowledge &amp; Understanding<small>Knowledge of force types and their effects on structures</small></td>
+              <td>Identifies few force types; limited understanding of internal vs. external.</td>
+              <td>Identifies some force types; partial understanding of the distinction.</td>
+              <td>Identifies most force types; solid understanding of how internal forces arise from external ones.</td>
+              <td>Identifies nearly all force types; thorough, precise understanding with clear cause-and-effect articulation.</td>
+            </tr>
+            <tr>
+              <td class="demo-rubric-cat">Thinking &amp; Investigation<small>Analyzing scenarios and sorting forces into correct categories</small></td>
+              <td>Sorts scenarios with limited accuracy; relies on prompting.</td>
+              <td>Partial accuracy; occasionally distinguishes external source from internal response.</td>
+              <td>Sorts accurately in most cases; consistently distinguishes source from response.</td>
+              <td>Insightful, independent reasoning; precisely explains each external–internal relationship.</td>
+            </tr>
+            <tr>
+              <td class="demo-rubric-cat">Communication<small>Using scientific vocabulary accurately in writing and discussion</small></td>
+              <td>Little or no scientific vocabulary; unclear explanations.</td>
+              <td>Some vocabulary with partial accuracy; understandable but lacks detail.</td>
+              <td>Most vocabulary used correctly; clear, sufficiently detailed explanations.</td>
+              <td>Precise, confident use of vocabulary; thorough, well-organized explanations.</td>
+            </tr>
+            <tr>
+              <td class="demo-rubric-cat">Application<small>Connecting force concepts to real-world structures</small></td>
+              <td>Limited or unclear connections to real-world structures.</td>
+              <td>Some connections, mostly general or based only on examples from the lesson.</td>
+              <td>Meaningful connections to familiar structures beyond those modelled.</td>
+              <td>Accurate, insightful connections to new contexts; extends thinking independently.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SLIDES -->
+      <div class="demo-panel" data-panel="slides">
+        <div class="demo-panel-caption">
+          <strong>Ready-to-present classroom slides.</strong> Auto-generated from your lesson plan. Full colour, structured for the 4-part lesson flow. Present in browser or export to PowerPoint or Google Slides.
+        </div>
+        <div class="demo-slides-grid">
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 1</span><span class="demo-slide-title">Forces Acting on Structures</span></div>
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 2</span><span class="demo-slide-title">Learning Goals</span></div>
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 3</span><span class="demo-slide-title">Minds On</span></div>
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 4</span><span class="demo-slide-title">Key Vocabulary</span></div>
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 5</span><span class="demo-slide-title">What Is a Force on a Structure?</span></div>
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 6</span><span class="demo-slide-title">External Forces: From Outside</span></div>
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 7</span><span class="demo-slide-title">Internal Forces: Compression &amp; Tension</span></div>
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 8</span><span class="demo-slide-title">How Forces Affect Structure Design</span></div>
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 9</span><span class="demo-slide-title">Practice Questions</span></div>
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 10</span><span class="demo-slide-title">Discussion</span></div>
+          <div class="demo-slide-card"><span class="demo-slide-num">Slide 11</span><span class="demo-slide-title">Show What You Know</span></div>
+        </div>
+      </div>
+
+      <!-- AUTO-MARK -->
+      <div class="demo-panel" data-panel="mark">
+        <div class="demo-panel-caption">
+          <strong>AI suggests. You decide.</strong> Students submit their worksheet, AI drafts a level suggestion with a kind, concrete observation note and per-question feedback. You review, adjust, and save what goes in your gradebook.
+        </div>
+        <div class="demo-automark-wrap">
+          <img class="demo-automark-img" src="/automark-demo.png" alt="TeacherAI auto-mark interface showing a student submission with AI Suggestion of Level 2+, a detailed observation note, per-question feedback with correct and incorrect answers marked, and manual level selector buttons from 1- through 4+.">
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section-cta">
+      <a href="/app">✨ Draft your own lesson →</a>
+      <span class="demo-section-cta-note">Free during beta · No credit card</span>
+    </div>
+  </div>
+</section>
 
 <!-- ── Feature Strip ── -->
 <div class="strip">
@@ -809,7 +1313,7 @@
       <p class="bip-label">Built in the open</p>
       <h2 class="bip-headline">Made by Ontario teachers who got tired of waiting for someone else to build it.</h2>
       <p class="bip-body">
-        Every feature exists because a teacher asked for it. No VC funding, no growth hacking, no fake reviews. Just a tool built by teachers who wanted it to exist for their own classrooms.
+        Every feature exists because a teacher asked for it. Just a tool built by teachers who wanted it to exist for their own classrooms.
       </p>
       <p class="bip-body" style="border-left:3px solid var(--sage);padding-left:1.1rem;background:var(--sage-l);padding:1rem 1.1rem;border-radius:0 8px 8px 0;">
         <strong>TeacherAI drafts. You decide.</strong> Every lesson, assessment, and report card comment is yours to review, edit, or rewrite before it reaches a student or parent. Your professional judgment is the product — we just give you a head start so you're not working from a blank page at 9pm on a Sunday.
@@ -848,105 +1352,33 @@
 
 <script>
 (function() {
-  const form = document.getElementById('demoForm');
-  const input = document.getElementById('demoInput');
-  const output = document.getElementById('demoOutput');
-  const topicEcho = document.getElementById('demoTopicEcho');
-  const checks = [1,2,3,4].map(i => document.getElementById('demoCheck' + i));
-  const cta = document.getElementById('demoCta');
-  const ctaLink = document.getElementById('demoCtaLink');
-  const caption = document.getElementById('demoCaption');
+  const tabs = document.querySelectorAll('.demo-tab');
+  const panels = document.querySelectorAll('.demo-panel');
+  if (!tabs.length) return;
 
-  if (!form) return;
-
-  // Parse "Forces on Structures, Grade 5 Science" into {topic, grade}
-  // Tolerates "Grade 5", "Gr 5", "Gr. 5", "Grade K", or no grade at all.
-  function parseTopic(raw) {
-    const s = (raw || '').trim();
-    if (!s) return null;
-
-    // Find a grade marker anywhere in the string
-    const gradeMatch = s.match(/\b(?:grade|gr\.?)\s*(K|\d{1,2})\b/i);
-    let topic = s;
-    let grade = '';
-
-    if (gradeMatch) {
-      grade = gradeMatch[1].toUpperCase();
-      // Strip the whole "Grade X" chunk plus a trailing subject word if present
-      topic = s.replace(gradeMatch[0], '').replace(/,\s*,/g, ',').replace(/,\s*$/, '').trim();
-      // If user wrote "Topic, Grade 5 Science", subject word might be left dangling
-      // Leave it — the real app can handle it, and we want "Grade 5 Science" flavour visible.
-    }
-
-    // Clean trailing commas / whitespace
-    topic = topic.replace(/^[,\s]+|[,\s]+$/g, '');
-
-    return { topic: topic || s, grade };
+  function activate(tabKey) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabKey));
+    panels.forEach(p => p.classList.toggle('active', p.dataset.panel === tabKey));
   }
 
-  let submitted = false;
-
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    if (submitted) {
-      // Already ran — just send them to the app
-      window.location.href = ctaLink.getAttribute('href');
-      return;
-    }
-
-    const raw = input.value.trim() || input.placeholder.replace(/^Try:\s*/i, '');
-    const parsed = parseTopic(raw);
-
-    if (!parsed || !parsed.topic) {
-      form.classList.remove('demo-shake');
-      // Reflow trick to restart animation
-      void form.offsetWidth;
-      form.classList.add('demo-shake');
-      return;
-    }
-
-    submitted = true;
-    input.blur();
-
-    // Echo the topic back
-    topicEcho.textContent = parsed.topic + (parsed.grade ? ' · Grade ' + parsed.grade : '');
-
-    // Show output shell
-    output.classList.add('show');
-
-    // Cascade checkmarks
-    const CASCADE_DELAY = 400;
-    checks.forEach((el, i) => {
-      setTimeout(() => {
-        el.classList.add('show');
-      }, 250 + i * CASCADE_DELAY);
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => activate(tab.dataset.tab));
+    // Keyboard a11y: left/right arrows cycle tabs
+    tab.addEventListener('keydown', (e) => {
+      const keys = Array.from(tabs);
+      const idx = keys.indexOf(tab);
+      if (e.key === 'ArrowRight') {
+        const next = keys[(idx + 1) % keys.length];
+        next.focus(); activate(next.dataset.tab);
+      } else if (e.key === 'ArrowLeft') {
+        const prev = keys[(idx - 1 + keys.length) % keys.length];
+        prev.focus(); activate(prev.dataset.tab);
+      }
     });
-
-    // After cascade, swap form for CTA deep-link
-    const totalDelay = 250 + checks.length * CASCADE_DELAY + 200;
-    setTimeout(() => {
-      // Build deep link
-      const params = new URLSearchParams();
-      params.set('topic', parsed.topic);
-      if (parsed.grade) params.set('grade', parsed.grade);
-      ctaLink.setAttribute('href', '/app?' + params.toString());
-
-      cta.classList.add('show');
-      caption.style.display = 'block';
-      caption.style.animation = 'fadeUp .4s ease both';
-
-      // Disable the input so it doesn't look re-submittable
-      input.disabled = true;
-      form.querySelector('.demo-submit').disabled = true;
-      form.style.opacity = '.6';
-    }, totalDelay);
   });
 
-  // If input is empty on blur and user had typed nothing, no change.
-  // Purely cosmetic reset on ESC for teachers who want to try again before submitting.
-  input.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') input.value = '';
-  });
+  // If someone lands on #demo from the hero link, smooth-scroll handles it via CSS.
+  // No extra JS needed.
 })();
 </script>
 </body>
