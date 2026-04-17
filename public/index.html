@@ -178,39 +178,28 @@
 
   /* ── Demo trigger (connective tissue between hero and tabs) ── */
   .demo-trigger {
-    background: var(--cream);
-    padding: 4rem 2rem 3.5rem;
+    background: var(--amber-l);
+    border-top: 2px solid var(--amber);
+    padding: 3rem 2rem 2.25rem;
     text-align: center;
   }
   .demo-trigger-inner {
     max-width: 640px; margin: 0 auto;
   }
-  .demo-trigger-label {
-    font-family: 'DM Mono', monospace; font-size: .72rem;
-    letter-spacing: 2px; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 1rem; font-weight: 600;
-  }
-  .demo-trigger-title {
-    font-family: 'Fraunces', serif;
-    font-size: clamp(1.4rem, 2.8vw, 1.9rem);
-    font-weight: 700; line-height: 1.2;
-    letter-spacing: -.02em; color: var(--ink);
-    margin-bottom: 1.6rem;
-  }
-  .demo-trigger-title em {
-    font-style: italic; color: var(--sage); font-weight: 300;
+  .demo-trigger .demo-topic-chip {
+    margin-bottom: 1.1rem;
   }
   .demo-trigger-btn {
     position: relative;
     display: inline-flex; align-items: center; justify-content: center;
-    min-width: 220px; min-height: 54px;
+    min-width: 180px; min-height: 46px;
     background: var(--sage); color: white;
-    border: none; border-radius: 12px;
-    padding: 1rem 2.2rem;
+    border: none; border-radius: 10px;
+    padding: .8rem 1.8rem;
     font-family: 'DM Sans', sans-serif;
-    font-size: 1.02rem; font-weight: 600;
+    font-size: .98rem; font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 18px rgba(74,124,89,.32);
+    box-shadow: 0 4px 14px rgba(74,124,89,.28);
     transition: background .15s, transform .1s, box-shadow .15s;
   }
   .demo-trigger-btn:hover:not(:disabled) {
@@ -249,8 +238,14 @@
   @keyframes demoSpin {
     to { transform: rotate(360deg); }
   }
+  .demo-trigger-disclosure {
+    margin-top: 1rem;
+    font-size: .82rem; color: var(--muted);
+  }
+  .demo-trigger-disclosure em { font-style: italic; }
   @media (max-width: 700px) {
-    .demo-trigger { padding: 3rem 1.25rem 2.5rem; }
+    .demo-trigger { padding: 2.75rem 1.25rem 2rem; }
+    .demo-trigger-disclosure { font-size: .78rem; }
   }
 
   /* When the demo reveals itself after trigger */
@@ -271,37 +266,33 @@
   .demo-section-inner {
     max-width: 1080px; margin: 0 auto;
   }
-  .demo-section-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-  }
-  .demo-section-header .section-label {
-    margin-bottom: .8rem;
-  }
-  .demo-section-title {
-    font-family: 'Fraunces', serif;
-    font-size: clamp(1.8rem, 3.8vw, 2.6rem);
-    font-weight: 700;
-    line-height: 1.15; letter-spacing: -.02em;
-    color: var(--ink);
-    margin-bottom: .8rem;
-  }
-  .demo-section-title em {
-    font-style: italic; color: var(--sage); font-weight: 300;
-  }
-  .demo-section-sub {
-    font-size: 1rem; color: var(--muted);
-    line-height: 1.6; max-width: 620px;
-    margin: 0 auto;
-  }
   .demo-topic-chip {
-    display: inline-flex; align-items: center; gap: .5rem;
+    display: inline-flex; align-items: center; gap: .15rem;
     background: white; border: 1.5px solid var(--border);
-    border-radius: 20px; padding: .4rem 1rem;
+    border-radius: 20px; padding: .45rem 1.1rem;
     font-family: 'DM Mono', monospace;
     font-size: .72rem; letter-spacing: 1px; text-transform: uppercase;
     color: var(--sage-d); font-weight: 600;
     margin-bottom: 1.5rem;
+    min-height: 28px;
+  }
+  #demoChipText { white-space: nowrap; }
+  .demo-chip-caret {
+    display: inline-block;
+    width: 1.5px; height: 13px;
+    background: var(--sage-d);
+    margin-left: 2px;
+    animation: caretBlink 1s step-end infinite;
+    flex-shrink: 0;
+    vertical-align: middle;
+  }
+  .demo-chip-caret.done { animation: none; opacity: 0; }
+  @keyframes caretBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .demo-chip-caret { animation: none; opacity: 0; }
   }
 
   /* Tab bar */
@@ -653,28 +644,6 @@
   }
   .demo-automark-wrap { text-align: center; }
 
-  /* Demo CTA */
-  .demo-section-cta {
-    text-align: center;
-    margin-top: 2.2rem;
-  }
-  .demo-section-cta a {
-    display: inline-flex; align-items: center; gap: .5rem;
-    background: transparent; color: var(--sage-d);
-    padding: .85rem 1.8rem; border-radius: 10px;
-    font-size: .96rem; font-weight: 600; text-decoration: none;
-    border: 1.5px solid var(--sage);
-    transition: background .15s, color .15s;
-  }
-  .demo-section-cta a:hover { background: var(--sage); color: white; }
-  .demo-section-cta-note {
-    display: block;
-    margin-top: .9rem;
-    font-size: .72rem; color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 1px; text-transform: uppercase;
-  }
-
   @media (max-width: 760px) {
     .demo-section { padding: 3.5rem 1rem 4rem; }
     .demo-panel { padding: 1.5rem 1.2rem 1.8rem; min-height: 420px; }
@@ -682,35 +651,6 @@
     .demo-rubric { font-size: .72rem; }
     .demo-rubric th, .demo-rubric td { padding: .55rem .55rem; }
   }
-
-  /* ── Social proof bar ── */
-  .proof-bar {
-    background: var(--amber-l);
-    border-top: 2px solid var(--amber);
-    border-bottom: 1px solid var(--border);
-    padding: 1.25rem 2rem;
-  }
-  .proof-bar-inner {
-    max-width: 1100px; margin: 0 auto;
-    display: flex; align-items: center; justify-content: center;
-    flex-wrap: wrap; gap: 1rem 2.5rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .92rem; color: #6B4A1F;
-    text-align: center;
-  }
-  .proof-bar-item {
-    display: inline-flex; align-items: center; gap: .55rem;
-    color: #8B6A3F;
-  }
-  .proof-bar-item strong { color: #5B3E19; font-weight: 600; }
-  .proof-bar-dot {
-    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-    background: var(--amber); flex-shrink: 0;
-  }
-  @media (max-width: 700px) {
-    .proof-bar-inner { font-size: .82rem; gap: .75rem 1.5rem; }
-  }
-
 
   /* ── Pain section ── */
   .pain {
@@ -1019,42 +959,28 @@
     </p>
     <div class="hero-actions">
       <a href="/app" class="btn-primary">✨ Try TeacherAI free</a>
-      <a href="#pain" class="btn-secondary">See what it does</a>
     </div>
   </div>
 </section>
 
-<!-- ── Social proof bar ── -->
-<div class="proof-bar">
-  <div class="proof-bar-inner">
-    <span class="proof-bar-item"><span class="proof-bar-dot"></span><strong>In active beta</strong> with Ontario K–8 teachers</span>
-    <span class="proof-bar-item">🇨🇦 Built in Ontario, hosted in Canada</span>
-    <span class="proof-bar-item">👋 Made by Ontario classroom teachers</span>
-  </div>
-</div>
-
-<!-- ── Demo trigger ── -->
-<section class="demo-trigger">
+<!-- ── Demo trigger + tabs intro ── -->
+<section class="demo-trigger" id="demo">
   <div class="demo-trigger-inner">
-    <div class="demo-trigger-label">Don't take our word for it</div>
-    <h2 class="demo-trigger-title">Click generate. See what TeacherAI <em>actually makes.</em></h2>
+    <div class="demo-topic-chip" id="demoChip" aria-label="Grade 5 Science, Forces on Structures"><span id="demoChipText"></span><span class="demo-chip-caret" aria-hidden="true"></span></div>
     <button id="demoGenerateBtn" class="demo-trigger-btn" type="button">
       <span class="demo-trigger-btn-label">
         <span class="demo-trigger-btn-icon">✨</span>
-        Generate lesson
+        Generate sample lesson
       </span>
       <span class="demo-trigger-btn-spinner"></span>
     </button>
+    <p class="demo-trigger-disclosure"><em>Everything TeacherAI drafts is fully editable.</em></p>
   </div>
 </section>
 
 <!-- ── Demo section (tabbed real lesson preview) ── -->
-<section class="demo-section" id="demo">
+<section class="demo-section">
   <div class="demo-section-inner">
-    <div class="demo-section-header">
-      <div class="demo-topic-chip">Grade 5 · Science · Forces on Structures</div>
-      <p class="demo-section-sub"><em style="font-style:italic;color:var(--muted);">Sample preview. In the real app, you get every question, every slide, and every answer — all fully editable.</em></p>
-    </div>
 
     <div class="demo-tabs-wrap demo-locked">
       <div class="demo-tabs" role="tablist">
@@ -1070,7 +996,7 @@
       <!-- Locked placeholder (shown until generate is clicked) -->
       <div class="demo-placeholder">
         <div class="demo-placeholder-icon">↑</div>
-        <div class="demo-placeholder-title">Click <strong>Generate lesson</strong> to see the real output</div>
+        <div class="demo-placeholder-title">Click <strong>Generate sample lesson</strong> to see the real output</div>
         <div class="demo-placeholder-sub">Or click any tab above to reveal the full lesson preview.</div>
       </div>
 
@@ -1294,11 +1220,6 @@
         </div>
       </div>
     </div>
-
-    <div class="demo-section-cta">
-      <a href="/app">✨ Draft your own lesson →</a>
-      <span class="demo-section-cta-note">Free during beta · No credit card</span>
-    </div>
   </div>
 </section>
 
@@ -1312,17 +1233,17 @@
       <div class="pain-card">
         <div class="pain-emoji">✏️</div>
         <h3>Full lessons aligned to Ontario expectations.</h3>
-        <p class="pain-relief"><strong>→</strong> Type your topic. TeacherAI builds the lesson, worksheet, rubric, and slides in under 60 seconds. Or map out a full unit in one shot. You review, edit, and teach.</p>
+        <p class="pain-relief"><strong>→</strong> Type your topic. TeacherAI builds the lesson, worksheet, rubric, and answer key in seconds. Need more than one lesson? Plan a full unit automatically. You review, edit, and teach.</p>
       </div>
       <div class="pain-card">
         <div class="pain-emoji">📚</div>
         <h3>Marking a class set without losing your evening.</h3>
-        <p class="pain-relief"><strong>→</strong> Students submit on any device. AI suggests a level and observation note for each one. You review, adjust, and decide what to record.</p>
+        <p class="pain-relief"><strong>→</strong> Students submit answers to assessments on any device. AI suggests a level and writes observation feedback. You review, adjust, and save the mark.</p>
       </div>
       <div class="pain-card">
         <div class="pain-emoji">📝</div>
         <h3>Report card comments that actually reflect the term.</h3>
-        <p class="pain-relief"><strong>→</strong> Expectation tracking all term feeds directly into draft comments for every student, sorted A–Z, within your board's character limit.</p>
+        <p class="pain-relief"><strong>→</strong> Expectation tracking all term feeds directly into draft comments for every student. Strengths, next steps, and Growing Success-aligned language, within your board's character limit.</p>
       </div>
       <div class="pain-card">
         <div class="pain-emoji">🏫</div>
@@ -1368,6 +1289,15 @@
       </details>
       <details class="faq-item">
         <summary>
+          <span class="faq-q">Does it do full unit plans, not just single lessons?</span>
+          <span class="faq-icon">+</span>
+        </summary>
+        <div class="faq-a">
+          <p>Yes. Pick a unit topic and TeacherAI drafts a scope and sequence with expectations coverage, big ideas, and an assessment plan. You choose how many lessons — anywhere from 2 to 12. Each lesson in the unit can then be expanded into a full lesson plan with worksheet, rubric, and answer key. The whole unit prints as a single PDF, useful for TPA evidence or long-range binder documentation.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
           <span class="faq-q">Does it really work for split grades?</span>
           <span class="faq-icon">+</span>
         </summary>
@@ -1401,9 +1331,8 @@
         <strong>TeacherAI drafts. You decide.</strong> Every lesson, assessment, and report card comment is yours to review, edit, or rewrite before it reaches a student or parent. Your professional judgment is the product — we just give you a head start so you're not working from a blank page at 9pm on a Sunday.
       </p>
       <p class="bip-body">
-        If you'd like to try it, the door is open. Tell us what's missing and we'll build it.
+        If you'd like to try it, the door is open. Built with Ontario teachers, for Ontario teachers.
       </p>
-      <a href="/app" class="btn-primary" style="display:inline-flex;margin-top:.6rem;">Try TeacherAI free →</a>
     </div>
   </div>
 </section>
@@ -1414,7 +1343,7 @@
   <div class="cta-deco cta-deco-2"></div>
   <div class="cta-inner">
     <h2>Get your weekends <em>back.</em></h2>
-    <p>Type a topic. Get a full lesson, worksheets, rubric, and slides, ready for Monday morning. Free during beta. No credit card.</p>
+    <p>Type a topic. Get a full lesson, worksheets, rubric, and slides, ready for Monday morning. Free tier available. No credit card.</p>
     <a href="/app" class="btn-white">✨ Start for free</a>
     <p class="cta-note">CANADIAN SERVERS · ONTARIO CURRICULUM · MFIPPA-AWARE</p>
   </div>
@@ -1513,6 +1442,46 @@
       });
     }, { threshold: 0 });
     heroObserver.observe(hero);
+  }
+
+  // Typing animation on the demo chip - fires once when scrolled into view
+  const chip = document.getElementById('demoChip');
+  const chipText = document.getElementById('demoChipText');
+  if (chip && chipText && 'IntersectionObserver' in window) {
+    const fullText = 'Grade 5 · Science · Forces on Structures';
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      // A11y: show final state immediately
+      chipText.textContent = fullText;
+    } else {
+      let typed = false;
+      const chipObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !typed) {
+            typed = true;
+            chipObserver.disconnect();
+            // Type out character by character
+            let i = 0;
+            const typeStep = () => {
+              if (i <= fullText.length) {
+                chipText.textContent = fullText.slice(0, i);
+                i++;
+                setTimeout(typeStep, 35);
+              } else {
+                // Stop caret blinking after ~1.5s pause
+                setTimeout(() => {
+                  const caret = chip.querySelector('.demo-chip-caret');
+                  if (caret) caret.classList.add('done');
+                }, 1500);
+              }
+            };
+            typeStep();
+          }
+        });
+      }, { threshold: 0.4 });
+      chipObserver.observe(chip);
+    }
   }
 })();
 </script>
