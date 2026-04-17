@@ -301,6 +301,35 @@
   .demo-section-inner {
     max-width: 1080px; margin: 0 auto;
   }
+  .demo-intro {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .demo-intro .section-label {
+    color: var(--amber);
+    justify-content: center;
+  }
+  .demo-intro-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+    font-weight: 700; line-height: 1.2;
+    letter-spacing: -.02em; color: var(--ink);
+    margin-top: .8rem; margin-bottom: .7rem;
+  }
+  .demo-intro-title em {
+    font-style: italic; color: var(--sage); font-weight: 300;
+  }
+  .demo-intro-sub {
+    font-size: .98rem; color: var(--muted);
+    line-height: 1.6;
+  }
+  @media (max-width: 700px) {
+    .demo-intro { margin-bottom: 1.8rem; }
+    .demo-intro-sub { font-size: .9rem; }
+  }
   .demo-topic-chip {
     display: inline-flex; align-items: center; gap: .15rem;
     background: white; border: 1.5px solid var(--border);
@@ -1036,6 +1065,12 @@
 <!-- ── Demo section (tabbed real lesson preview) ── -->
 <section class="demo-section" id="demo">
   <div class="demo-section-inner">
+
+    <div class="demo-intro">
+      <div class="section-label">See it in action</div>
+      <h2 class="demo-intro-title">Here's what TeacherAI actually <em>makes.</em></h2>
+      <p class="demo-intro-sub">Click Generate to load a sample Grade 5 Science lesson, then explore all 7 pieces TeacherAI creates.</p>
+    </div>
 
     <div class="demo-tabs-wrap demo-locked">
       <!-- Input-style form bar: looks like a Plan form, makes clear pressing Generate does something HERE -->
