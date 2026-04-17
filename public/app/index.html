@@ -10334,7 +10334,16 @@ async function renderLessonsList() {
   savedLessons = data || [];
   _renderLessonsUI();
   // BUILD AL+: refresh the plan welcome banner — it shows only when 0 lessons saved.
-  if (typeof maybeShowPlanWelcome === 'function') maybeShowPlanWelcome();
+  // BUT: only if the user is currently viewing step 1. If they've advanced to
+  // step 2 or later (e.g. right after generating a lesson), re-showing the
+  // Plan form would push the generated content out of view. This used to be
+  // a race condition that intermittently hid the lesson behind the Plan form.
+  if (typeof maybeShowPlanWelcome === 'function') {
+    const s1 = document.getElementById('s1');
+    const s2 = document.getElementById('s2');
+    const userOnStep1 = s1 && s1.style.display !== 'none' && (!s2 || s2.style.display === 'none');
+    if (userOnStep1) maybeShowPlanWelcome();
+  }
 }
 
 function _renderLessonsUI() {
