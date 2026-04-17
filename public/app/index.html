@@ -5016,7 +5016,7 @@ button{display:none;}@media print{body{padding:16px 20px;}}
 </style></head><body>
 <h1>${topic} — ${label}</h1>
 <div>${htmlContent}</div>
-<div class="meta">TeacherAI · Ontario Curriculum · ${new Date().toLocaleDateString('en-CA')}</div>
+<div class="meta">Ontario Curriculum · ${new Date().toLocaleDateString('en-CA')}</div>
 <` + `script>window.onload=()=>window.print()<\/script>
 
 </body></html>`;
@@ -5185,7 +5185,7 @@ button{display:none;}
 <h1>${escHTML(topic)} — ${escHTML(label)}</h1>
 <div style="margin:0 0 18px;font-size:.95rem;"><strong>Name:</strong> _______________________________&nbsp;&nbsp;&nbsp;<strong>Date:</strong> ______________</div>
 ${body}
-<div class="meta">TeacherAI · Ontario Curriculum · ${new Date().toLocaleDateString('en-CA')}</div>
+<div class="meta">Ontario Curriculum · ${new Date().toLocaleDateString('en-CA')}</div>
 <` + `script>window.onload=()=>window.print()<\/script>
 </body></html>`;
   openPrintWindow(fullHtml);
@@ -5277,7 +5277,7 @@ button{display:none;}
 </style></head><body>
 <h1>${escHTML(topic)} — ${escHTML(label)}</h1>
 ${body}
-<div class="meta">TeacherAI · Ontario Curriculum · ${new Date().toLocaleDateString('en-CA')}</div>
+<div class="meta">Ontario Curriculum · ${new Date().toLocaleDateString('en-CA')}</div>
 <` + `script>window.onload=()=>window.print()<\/script>
 </body></html>`;
   openPrintWindow(fullHtml);
@@ -5372,9 +5372,9 @@ ${bigIdea ? `<div class="section">
 </div>
 
 <div class="footer-note">
-  <strong>Note:</strong> This unit plan provides the scope and sequence. Detailed lesson plans (with curriculum expectations, materials, differentiation, and assessment) are generated per lesson in TeacherAI and can be printed individually for evidence of full planning.
+  <strong>Note:</strong> This unit plan provides the scope and sequence. Detailed lesson plans (with curriculum expectations, materials, differentiation, and assessment) are generated per lesson and can be printed individually for evidence of full planning.
   <br><br>
-  Generated with TeacherAI · Aligned to the Ontario Curriculum · ${new Date().toLocaleDateString('en-CA')}
+  Aligned to the Ontario Curriculum · ${new Date().toLocaleDateString('en-CA')}
 </div>
 
 <` + `script>window.onload=()=>window.print()<\/script>
@@ -5643,7 +5643,7 @@ button.print-btn{position:fixed;top:14px;right:14px;background:#000;color:white;
 <h1>${escHTML(topic)}</h1>
 <div class="name-line"><span>Name:</span><span class="blank"></span><span>Date:</span><span class="blank" style="max-width:130px;"></span></div>
 ${body}
-<div class="meta">TeacherAI · Ontario Kindergarten Curriculum 2026</div>
+<div class="meta">Ontario Kindergarten Curriculum 2026</div>
 <` + `script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
 </body></html>`;
   openPrintWindow(fullHtml);
@@ -5679,7 +5679,7 @@ p{margin:2px 0;line-height:1.65;}li{margin-bottom:2px;}ul{padding-left:17px;marg
 <button class="print-btn" onclick="window.print()">🖨️ Print</button>
 <div class="pg"><div class="hd"><div class="ti">${topic}</div></div>
 ${renderWS(txt)}
-<div style="margin-top:30px;padding-top:14px;border-top:1px solid #E0D8CC;font-size:.72rem;color:#9CA3AF;text-align:center;">TeacherAI · Ontario Curriculum</div>
+<div style="margin-top:30px;padding-top:14px;border-top:1px solid #E0D8CC;font-size:.72rem;color:#9CA3AF;text-align:center;">Ontario Curriculum</div>
 </div></body></html>`;
   openPrintWindow(fullHtml);
 }
@@ -8645,7 +8645,7 @@ window.addEventListener('message',function(e){
 
   const html=`<!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(topic)} — TeacherAI</title>
+<title>${esc(topic)}</title>
 <style>${CSS}</style></head><body>
 <div id="progress"></div>
 <div id="deckWrap"><div id="deck">${allSlides.map(s=>s.replace(/`/g,'&#96;')).join('\n')}</div></div>
@@ -8792,7 +8792,7 @@ async function downloadSlidesPPTX() {
     const { sd, topic, subject, gradeStr, mindsonImg, slideImgs } = window._slideData;
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
-    pptx.title = topic || 'TeacherAI Lesson';
+    pptx.title = topic || 'Lesson';
 
     const W = 13.3, H = 7.5, HEADER_H = 0.85;
     const TEAL = '3BBFAD', NAVY = '1D3461', YELLOW = 'F5C842', GREY = 'F4F3EF', WHITE = 'FFFFFF';
@@ -8981,7 +8981,7 @@ async function downloadSlidesPPTX() {
     }
 
     // ── Write file ──
-    const filename = (topic || 'TeacherAI_Slides').replace(/[^a-z0-9]/gi, '_') + '.pptx';
+    const filename = (topic || 'Lesson_Slides').replace(/[^a-z0-9]/gi, '_') + '.pptx';
     await pptx.writeFile({ fileName: filename });
     showToast('✅ PPTX downloaded — open in PowerPoint or import to Google Slides');
   } catch(e) {
@@ -9033,7 +9033,7 @@ async function exportToGoogleSlides() {
     const createRes = await fetch('https://slides.googleapis.com/v1/presentations', {
       method:'POST',
       headers:{'Authorization':'Bearer '+_gToken,'Content-Type':'application/json'},
-      body: JSON.stringify({title: topic+(gradeStr?' — '+gradeStr:'')+' | TeacherAI'})
+      body: JSON.stringify({title: topic+(gradeStr?' — '+gradeStr:'')})
     });
     if (!createRes.ok) throw new Error('Could not create presentation');
     const pres = await createRes.json();
@@ -9042,7 +9042,7 @@ async function exportToGoogleSlides() {
 
     const requests = [];
     const slides = [];
-    slides.push({title:topic, subtitle:(gradeStr||'')+' · '+subject+'\nTeacherAI · Ontario Curriculum', type:'title'});
+    slides.push({title:topic, subtitle:(gradeStr||'')+' · '+subject+'\nOntario Curriculum', type:'title'});
     if (sd.learning_goals?.length) slides.push({title:'Learning Goals', body:sd.learning_goals.map((g,i)=>(i+1)+'. '+g).join('\n'), type:'content'});
     if (sd.minds_on) slides.push({title:'Minds On', body:(sd.minds_on.hook||'')+(sd.minds_on.prompt?'\n\nThink / Pair / Share\n'+sd.minds_on.prompt:''), type:'content'});
     if (sd.vocabulary?.length) slides.push({title:'Key Vocabulary', body:sd.vocabulary.slice(0,4).map(v=>v.word+'\n'+v.definition+(v.example?' ('+v.example+')':'')).join('\n\n'), type:'content'});
@@ -10122,7 +10122,7 @@ function exportCSV() {
   });
   const a = document.createElement('a');
   a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));
-  a.download='TeacherAI_Grades.csv'; a.click();
+  a.download='Student_Grades.csv'; a.click();
 }
 
 function exportAllData() {
@@ -10134,7 +10134,7 @@ function exportAllData() {
   const csv=[...stuRows,...markRows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download=`TeacherAI_AllData_${new Date().toLocaleDateString('en-CA')}.csv`; a.click();
+  a.download=`Class_Data_${new Date().toLocaleDateString('en-CA')}.csv`; a.click();
 }
 
 // ============================================================
@@ -11687,9 +11687,9 @@ p,li{line-height:1.75;margin:3px 0;}li{margin-left:18px;}strong{font-weight:600;
 .meta{font-size:.7rem;color:#9CA3AF;margin-top:24px;border-top:1px solid #E0D8CC;padding-top:8px;}
 @media print{body{padding:16px 20px;}}</style></head><body>
 <h1>${topic} — Unit Assessment</h1>
-<div style="font-size:.8rem;color:#7A726A;margin-bottom:16px;">${grades} · TeacherAI · ${new Date().toLocaleDateString('en-CA')}</div>
+<div style="font-size:.8rem;color:#7A726A;margin-bottom:16px;">${grades} · ${new Date().toLocaleDateString('en-CA')}</div>
 <div style="white-space:pre-wrap;">${text}</div>
-<div class="meta">Generated by TeacherAI · Ontario Curriculum</div>
+<div class="meta">Ontario Curriculum</div>
 <` + `script>window.onload=()=>window.print()<\/script></body></html>`;
   openPrintWindow(html);
 }
