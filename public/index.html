@@ -797,6 +797,38 @@
     font-weight: 600;
     margin-right: 2px;
   }
+  .pain-extra {
+    margin-top: 1.4rem;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.8rem 1.6rem 1.6rem;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+  }
+  .pain-extra:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(74,124,89,.08);
+    border-color: var(--sage);
+  }
+  .pain-extra-inner {
+    display: flex; align-items: flex-start; gap: 1.2rem;
+  }
+  .pain-extra-emoji {
+    font-size: 2.2rem; line-height: 1; flex-shrink: 0; margin-top: .1rem;
+  }
+  .pain-extra-text {
+    color: var(--muted); line-height: 1.65; font-size: .95rem;
+  }
+  .pain-extra-text strong {
+    display: block; color: var(--ink); font-weight: 600;
+    font-family: 'Fraunces', serif; font-size: 1.12rem;
+    margin-bottom: .85rem; line-height: 1.35;
+  }
+  @media (max-width: 700px) {
+    .pain-extra { padding: 1.6rem 1.3rem 1.4rem; }
+    .pain-extra-inner { gap: 1rem; }
+    .pain-extra-emoji { font-size: 1.9rem; }
+  }
 
   /* ── How it works ── */
   .section {
@@ -1035,7 +1067,7 @@
     </div>
     <h1>You didn't become a teacher<br>to spend Sunday night <em>planning.</em></h1>
     <p class="hero-sub">
-      Lessons, worksheets, assessments, and report card comments — drafted in seconds. Built for real Ontario classrooms, splits included.
+      Plan a full week of lessons in minutes. Worksheets, assessments, and report card comments included. Built for real Ontario classrooms, splits included.
     </p>
     <div class="hero-actions">
       <a href="/app" class="btn-primary">✨ Try TeacherAI free</a>
@@ -1345,6 +1377,15 @@
         <p class="pain-relief"><strong>→</strong> 1/2? 4/5? 6/7? TeacherAI generates separate worksheets and answer keys per grade in one click, each student tracked against their own grade's expectations.</p>
       </div>
     </div>
+    <div class="pain-extra">
+      <div class="pain-extra-inner">
+        <span class="pain-extra-emoji">🤒</span>
+        <div class="pain-extra-text">
+          <strong>Sick day tomorrow? Sub plans, sorted.</strong>
+          Generate a full day of lessons, worksheets, and answer keys for any grade — ready to leave for a supply teacher in the time it takes to make tea.
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1406,6 +1447,15 @@
         </summary>
         <div class="faq-a">
           <p>Yes. TeacherAI supports the new Ontario Kindergarten Curriculum (2026) with play-based "Play Invitation" lesson plans, K-specific worksheets with images, and observation-based assessment instead of Level 1-4 rubrics. Activities are designed for print-and-write. Kids draw, trace, and circle on paper while you observe.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span class="faq-q">How is this different from TeachersPayTeachers?</span>
+          <span class="faq-icon">+</span>
+        </summary>
+        <div class="faq-a">
+          <p>TPT is a marketplace — you search for something close to what you need, hope it fits your class, and pay per unit. TeacherAI generates lessons, worksheets, and rubrics made for your exact topic, grade, and split. No hunting through listings, no "almost right" PDFs. Everything is aligned to the current Ontario curriculum and fully editable in your browser. Many teachers use both — TPT for pre-built thematic units, TeacherAI for everything in between.</p>
         </div>
       </details>
     </div>
