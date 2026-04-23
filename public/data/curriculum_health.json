@@ -1,0 +1,1938 @@
+[
+  {
+    "code": "A1.1",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them identify and manage emotions as they participate in learning experiences in health and physical education, in order to improve their ability to express their own feelings and understand and respond to the feelings of others"
+  },
+  {
+    "code": "A1.2",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them to recognize sources of stress and to cope with challenges, including help-seeking behaviours, as they participate in learning experiences in health and physical education, in order to support the development of personal resilience"
+  },
+  {
+    "code": "A1.3",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop habits of mind that support positive motivation and perseverance as they participate in learning experiences in health and physical education, in order to promote a sense of optimism and hope"
+  },
+  {
+    "code": "A1.4",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them build relationships, develop empathy, and communicate with others as they participate in learning experiences in health and physical education, in order to support healthy relationships, a sense of belonging, and respect for diversity"
+  },
+  {
+    "code": "A1.5",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop self-awareness and self-confidence as they participate in learning experiences in health and physical education, in order to support the development of a sense of identity and a sense of belonging"
+  },
+  {
+    "code": "A1.6",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them think critically and creatively as they participate in learning experiences in health and physical education, in order to support making connections, analysing, evaluating, problem solving, and decision making"
+  },
+  {
+    "code": "B1.1",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "actively participate in a wide variety of program activities"
+  },
+  {
+    "code": "B1.3",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "identify a variety of ways to be physically active at school and at home every day"
+  },
+  {
+    "code": "B2.1",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "Daily physical activity (DPA): participate in moderate to vigorous physical activity, with appropriate warm-up and cool-down activities, to the best of their ability for a minimum of twenty minutes each day"
+  },
+  {
+    "code": "B2.2",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "demonstrate an understanding of how being active helps them to be healthy, both physically and mentally [A1.2 Coping]"
+  },
+  {
+    "code": "B2.3",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "identify the physical signs of exertion during a variety of physical activities"
+  },
+  {
+    "code": "B3.1",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate behaviours and apply procedures that maximize safety and lessen the risk of injury, including the risk of concussion, for themselves and others during physical activity"
+  },
+  {
+    "code": "B3.2",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "identify environmental factors that pose safety risks, including the risk of concussion, during their participation in physical activity"
+  },
+  {
+    "code": "C1.1",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "perform a variety of static balances, using different body parts at different levels"
+  },
+  {
+    "code": "C1.3",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "perform a variety of locomotor movements, travelling in different directions and using different body parts"
+  },
+  {
+    "code": "C1.4",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "send objects of different shapes and sizes at different levels and in different ways, using different body parts"
+  },
+  {
+    "code": "C1.5",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "receive objects of different shapes and sizes at different levels and in different ways, using different body parts"
+  },
+  {
+    "code": "C2.1",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "demonstrate an understanding that different physical activities have different components"
+  },
+  {
+    "code": "C2.2",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "apply a variety of simple tactics to increase their chances of success while participating in and exploring physical activities"
+  },
+  {
+    "code": "D1.1",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Healthy Eating explain why people need food to have healthy bodies and minds"
+  },
+  {
+    "code": "D1.2",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Personal Safety and Injury Prevention demonstrate an understanding of essential knowledge and practices for ensuring their personal safety"
+  },
+  {
+    "code": "D1.3",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Human Development and Sexual Health identify body parts, including genitalia"
+  },
+  {
+    "code": "D1.5",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Mental Health Literacy demonstrate an understanding that mental health is a part of overall health and reflect on the things they can do to appreciate and take care of their body and mind [A1.2 Coping, 1.4 Relationships, 1.5 Self]"
+  },
+  {
+    "code": "D2.1",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Healthy Eating describe how Canada’s Food Guide can help them develop healthy eating habits [A1.6 Thinking]"
+  },
+  {
+    "code": "D2.2",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "know and recognize cues to hunger, thirst, and the feeling of fullness, and explain how they can use these cues to develop healthy eating habits [A1.5 Self]"
+  },
+  {
+    "code": "D2.3",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Personal Safety and Injury Prevention demonstrate the ability to recognize caring behaviours"
+  },
+  {
+    "code": "D2.4",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "apply their knowledge of essential safety practices to take an active role in their own safety at school"
+  },
+  {
+    "code": "D2.5",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Human Development and Sexual Health demonstrate an understanding of and apply proper hygienic procedures for protecting their own health and preventing the transmission of disease to others"
+  },
+  {
+    "code": "D3.1",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Personal Safety and Injury Prevention demonstrate an understanding of how to stay safe and avoid injuries to themselves and others in a variety of situations, using knowledge about potential risks at home, in the community, when online, and outdoors"
+  },
+  {
+    "code": "D3.2",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Substance Use, Addictions, and Related Behaviours identify habits and behaviours"
+  },
+  {
+    "code": "D3.3",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Mental Health Literacy demonstrate an understanding that a person’s thoughts, emotions, and actions can affect mental health [A1.6 Thinking]"
+  },
+  {
+    "code": "A1.1",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them identify and manage emotions as they participate in learning experiences in health and physical education, in order to improve their ability to express their own feelings and understand and respond to the feelings of others"
+  },
+  {
+    "code": "A1.2",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them to recognize sources of stress and to cope with challenges, including help-seeking behaviours, as they participate in learning experiences in health and physical education, in order to support the development of personal resilience"
+  },
+  {
+    "code": "A1.3",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop habits of mind that support positive motivation and perseverance as they participate in learning experiences in health and physical education, in order to promote a sense of optimism and hope"
+  },
+  {
+    "code": "A1.4",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them build relationships, develop empathy, and communicate with others as they participate in learning experiences in health and physical education, in order to support healthy relationships, a sense of belonging, and respect for diversity"
+  },
+  {
+    "code": "A1.5",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop self-awareness and self-confidence as they participate in learning experiences in health and physical education, in order to support the development of a sense of identity and a sense of belonging"
+  },
+  {
+    "code": "A1.6",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them think critically and creatively as they participate in learning experiences in health and physical education, in order to support making connections, analysing, evaluating, problem solving, and decision making"
+  },
+  {
+    "code": "B1.1",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "actively participate in a wide variety of program activities, according to their capabilities"
+  },
+  {
+    "code": "B1.3",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "identify reasons for participating in physical activity every day"
+  },
+  {
+    "code": "B2.1",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "Daily physical activity (DPA): participate in moderate to vigorous physical activity, with appropriate warm-up and cool-down activities, to the best of their ability for a minimum of twenty minutes each day"
+  },
+  {
+    "code": "B2.3",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "recognize their degree of exertion in physical activities by using simple assessment methods"
+  },
+  {
+    "code": "B2.4",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "participate in setting and achieving realistic personal and group goals related to physical activity"
+  },
+  {
+    "code": "B3.1",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate behaviours and apply procedures that maximize safety and lessen the risk of injury, including the risk of concussion, for themselves and others during physical activity"
+  },
+  {
+    "code": "B3.2",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "identify ways of protecting themselves and others, including those with medical conditions, from safety risks while participating in physical activity"
+  },
+  {
+    "code": "C1.2",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "demonstrate the ability to jump, hop, and land safely and in control, taking off from one foot or from two feet [A1.3 Motivation]"
+  },
+  {
+    "code": "C1.3",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "perform a variety of locomotor movements with and without equipment, travelling in different directions and at different speeds, and using different pathways"
+  },
+  {
+    "code": "C1.4",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "send objects of different shapes and sizes at different levels and in different ways, using different body parts"
+  },
+  {
+    "code": "C1.5",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "receive objects of different shapes and sizes at different levels and in various ways, using different body parts"
+  },
+  {
+    "code": "C2.1",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "demonstrate an understanding that different physical activities have different components"
+  },
+  {
+    "code": "C2.2",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "apply a variety of simple tactics to increase their chances of success during physical activities"
+  },
+  {
+    "code": "D1.1",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Personal Safety and Injury Prevention demonstrate an understanding of practices that enhance personal safety in the home"
+  },
+  {
+    "code": "D1.2",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "identify common food allergies and sensitivities"
+  },
+  {
+    "code": "D1.3",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Substance Use, Addictions, and Related Behaviours describe the difference between prescription medicines and non-prescription medicines, giving examples of each, and identify rules for the proper use of all medicines [A1.6 Thinking]"
+  },
+  {
+    "code": "D1.4",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Human Development and Sexual Health outline the basic stages of human development"
+  },
+  {
+    "code": "D1.5",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "demonstrate the ability to identify and appreciate aspects of how their bodies work and describe what they can do to ensure that they will continue to appreciate their bodies as they grow and change [A1.1 Emotions, 1.3 Motivation, 1.5 Self]"
+  },
+  {
+    "code": "D1.6",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Mental Health Literacy demonstrate an understanding of how a person’s body and brain respond to challenging or uncomfortable situations"
+  },
+  {
+    "code": "D2.1",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Healthy Eating use Canada’s Food Guide to identify food and beverage choices that contribute to healthy eating patterns"
+  },
+  {
+    "code": "D2.2",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "demonstrate an understanding of how to make healthy food choices for meals and snacks, considering the factors they can and cannot control"
+  },
+  {
+    "code": "D2.3",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Personal Safety and Injury Prevention explain the importance of consent and demonstrate the ability to stand up for themselves and others, to enhance well-being and safety"
+  },
+  {
+    "code": "D2.5",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Mental Health Literacy explain how understanding and being able to name their feelings"
+  },
+  {
+    "code": "D3.1",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Personal Safety and Injury Prevention describe how to relate positively to family members, caregivers, and others"
+  },
+  {
+    "code": "D3.2",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Substance Use, Addictions, and Related Behaviours describe methods that may be used instead of or in combination with medication to maintain good physical and mental health and prevent or treat various health problems"
+  },
+  {
+    "code": "A1.1",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them identify and manage emotions as they participate in learning experiences in health and physical education, in order to improve their ability to express their own feelings and understand and respond to the feelings of others"
+  },
+  {
+    "code": "A1.2",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them to recognize sources of stress and to cope with challenges, including help-seeking behaviours, as they participate in learning experiences in health and physical education, in order to support the development of personal resilience"
+  },
+  {
+    "code": "A1.3",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop habits of mind that support positive motivation and perseverance as they participate in learning experiences in health and physical education, in order to promote a sense of optimism and hope"
+  },
+  {
+    "code": "A1.4",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them build relationships, develop empathy, and communicate with others as they participate in learning experiences in health and physical education, in order to support healthy relationships, a sense of belonging, and respect for diversity"
+  },
+  {
+    "code": "A1.5",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop self-awareness and self-confidence as they participate in learning experiences in health and physical education, in order to support the development of a sense of identity and a sense of belonging"
+  },
+  {
+    "code": "A1.6",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them think critically and creatively as they participate in learning experiences in health and physical education, in order to support making connections, analysing, evaluating, problem solving, and decision making"
+  },
+  {
+    "code": "B1.1",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "actively participate in a wide variety of program activities"
+  },
+  {
+    "code": "B1.2",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of factors that contribute to their personal enjoyment of being active"
+  },
+  {
+    "code": "B1.3",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "describe the physical and mental benefits of participating in physical activity every day"
+  },
+  {
+    "code": "B2.1",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "Daily physical activity (DPA): participate in moderate to vigorous physical activity, with appropriate warm-up and cool-down activities, to the best of their ability for a minimum of twenty minutes each day"
+  },
+  {
+    "code": "B2.2",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "identify new capabilities and other benefits that may result from improved cardiorespiratory fitness"
+  },
+  {
+    "code": "B2.3",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "assess their degree of physical exertion during cardiorespiratory fitness activities, using simple self-assessment methods"
+  },
+  {
+    "code": "B2.4",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "develop and act on personal goals related to physical activity"
+  },
+  {
+    "code": "B3.1",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate behaviours and apply procedures that maximize safety and lessen the risk of injury, including the risk of concussion, for themselves and others during physical activity"
+  },
+  {
+    "code": "B3.2",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "describe how to respond to accidents or injuries, including concussions, that are incurred while participating in physical activity"
+  },
+  {
+    "code": "C1.1",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "perform controlled transitions between static positions, using different body parts and shapes and different levels, with and without equipment"
+  },
+  {
+    "code": "C1.3",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "perform a variety of locomotor movements with and without equipment, alone and with others, moving at different levels, using different pathways, and travelling in different directions"
+  },
+  {
+    "code": "C2.1",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "demonstrate an understanding that different physical activities have different components"
+  },
+  {
+    "code": "C2.2",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "apply a variety of simple tactics to increase their chances of success during physical activities"
+  },
+  {
+    "code": "D1.1",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Healthy Eating demonstrate an understanding of how the origins of food"
+  },
+  {
+    "code": "D1.2",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Personal Safety and Injury Prevention demonstrate an understanding of concussions and how they occur, as well as an awareness of the school board’s concussion protocol [A1.5 Self, 1.6 Thinking]"
+  },
+  {
+    "code": "D1.3",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Substance Use, Addictions, and Related Behaviours demonstrate an understanding of different types of legal and illegal substance use"
+  },
+  {
+    "code": "D1.4",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Human Development and Sexual Health identify the characteristics of healthy relationships"
+  },
+  {
+    "code": "D1.5",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "identify factors (e.g., sleep, food, physical activity, heredity, environment, support from a caring adult, sense of belonging, peer influence) that affect physical development (e.g., of hair, skin, teeth, body size and shape), social-emotional development (e.g., of self-awareness, adaptive skills, social skills), and the development of a healthy body image (e.g., of the ability to enjoy, respect, and celebrate one’s body, to acknowledge one’s thoughts and feelings about it, to accept its shape and size and to focus instead on what it can do) [A1.1 Emotions, 1.2 Coping, 1.3 Motivation, 1.5 Self]"
+  },
+  {
+    "code": "D1.6",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Mental Health Literacy explain how the brain responds (i.e., the brain’s stress response – fight, flight, freeze) when it thinks there is a threat and how that response might affect thoughts, emotions, and actions [A1.1 Emotions]"
+  },
+  {
+    "code": "D2.1",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Healthy Eating demonstrate an understanding of the importance of good oral health to overall health, and assess the effect of different food choices on oral health [A1.3 Motivation, 1.5 Self]"
+  },
+  {
+    "code": "D2.2",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Personal Safety and Injury Prevention apply their understanding of good safety practices by developing safety guidelines for a variety of places and situations outside the classroom, including online"
+  },
+  {
+    "code": "D2.3",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Substance Use, Addictions, and Related Behaviours apply decision-making strategies to make healthy choices about behaviours and the use of various substances in ways that could lead to dependencies, identifying factors that should be considered"
+  },
+  {
+    "code": "D3.1",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Healthy Eating explain how local foods and foods from various cultures"
+  },
+  {
+    "code": "D3.2",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Personal Safety and Injury Prevention explain how the portrayal of fictional violence in various media, both onand offline"
+  },
+  {
+    "code": "A1.1",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them identify and manage emotions as they participate in learning experiences in health and physical education, in order to improve their ability to express their own feelings and understand and respond to the feelings of others"
+  },
+  {
+    "code": "A1.2",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them to recognize sources of stress and to cope with challenges, including help-seeking behaviours, as they participate in learning experiences in health and physical education, in order to support the development of personal resilience"
+  },
+  {
+    "code": "A1.3",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop habits of mind that support positive motivation and perseverance as they participate in learning experiences in health and physical education, in order to promote a sense of optimism and hope"
+  },
+  {
+    "code": "A1.4",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them build relationships, develop empathy, and communicate with others as they participate in learning experiences in health and physical education, in order to support healthy relationships, a sense of belonging, and respect for diversity"
+  },
+  {
+    "code": "A1.5",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop self-awareness and self-confidence as they participate in learning experiences in health and physical education, in order to support the development of a sense of identity and a sense of belonging"
+  },
+  {
+    "code": "A1.6",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them think critically and creatively as they participate in learning experiences in health and physical education, in order to support making connections, analysing, evaluating, problem solving, and decision making"
+  },
+  {
+    "code": "B1.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "actively participate in a wide variety of program activities"
+  },
+  {
+    "code": "B1.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of factors that contribute to their personal enjoyment of being active"
+  },
+  {
+    "code": "B1.3",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "identify factors that motivate participation in physical activity every day at school, at home, or in their communities"
+  },
+  {
+    "code": "B2.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "Daily physical activity (DPA): participate in moderate to vigorous physical activity, with appropriate warm-up and cool-down activities, to the best of their ability for a minimum of twenty minutes each day"
+  },
+  {
+    "code": "B2.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "identify how different physical activities affect the body and contribute to physical fitness and good physical and mental health"
+  },
+  {
+    "code": "B2.4",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "develop and act on personal fitness goals based on their interests, self-assessments, and feelings when participating in physical activity [A1.1 Emotions, 1.3 Motivation, 1.5 Self, 1.6 Thinking]"
+  },
+  {
+    "code": "B3.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate behaviours and apply procedures that maximize safety and lessen the risk of injury, including the risk of concussion, for themselves and others during physical activity"
+  },
+  {
+    "code": "B3.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "describe common precautions for preventing accidents and injuries, including concussions, while participating in different types of physical activity"
+  },
+  {
+    "code": "C1.1",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "perform a variety of controlled static balances and transitions between balances, using a variety of body parts and shapes, at different levels, individually, and with partners and equipment"
+  },
+  {
+    "code": "C1.2",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "demonstrate the ability to jump and land, in control, from a low height"
+  },
+  {
+    "code": "C1.3",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "perform different combinations of locomotor movements with and without equipment, alone and with others, moving at different speeds and levels, using different pathways, and going in different directions"
+  },
+  {
+    "code": "C1.4",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "send and receive objects of a variety of shapes and sizes at different levels and speeds, using different body parts and equipment, while applying basic principles of movement"
+  },
+  {
+    "code": "C1.5",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "retain objects of various shapes and sizes in different ways, using different body parts, with and without equipment, while moving around others and equipment"
+  },
+  {
+    "code": "C2.1",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "demonstrate an understanding of the basic components of physical activities"
+  },
+  {
+    "code": "C2.2",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "identify common features of specific categories of physical activities"
+  },
+  {
+    "code": "C2.3",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "apply a variety of tactical solutions to increase their chances of success as they participate in physical activities"
+  },
+  {
+    "code": "D1.1",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Healthy Eating identify the key nutrients"
+  },
+  {
+    "code": "D1.2",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Personal Safety and Injury Prevention identify risks associated with the use of communications technology, including Internet use, texting, and gaming"
+  },
+  {
+    "code": "D1.3",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "describe various types of bullying, abuse, and other non-consensual behaviour"
+  },
+  {
+    "code": "D1.4",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Substance Use, Addictions, and Related Behaviours identify substances"
+  },
+  {
+    "code": "D1.5",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Human Development and Sexual Health describe the physical changes that occur at puberty"
+  },
+  {
+    "code": "D2.1",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Healthy Eating identify personal eating habits through self-monitoring over time, and set a goal for developing healthier eating habits, on the basis of the recommendations and guidelines in Canada’s Food Guides"
+  },
+  {
+    "code": "D2.2",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Personal Safety and Injury Prevention apply a decision-making process"
+  },
+  {
+    "code": "D2.3",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Substance Use, Addictions, and Related Behaviours demonstrate the ability to make and support healthy, informed choices about smoking and vaping, using their understanding of factors that affect decisions about smoking and vaping and a variety of social-emotional learning skills"
+  },
+  {
+    "code": "D2.4",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Human Development and Sexual Health demonstrate an understanding of personal care needs and the application of personal hygienic practices associated with the onset of puberty"
+  },
+  {
+    "code": "D2.5",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Mental Health Literacy demonstrate an understanding of how choices they make every day can have a positive impact on their mental health"
+  },
+  {
+    "code": "D3.1",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Healthy Eating identify ways of promoting healthier eating habits in a variety of settings and situations"
+  },
+  {
+    "code": "D3.2",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Substance Use, Addictions, and Related Behaviours describe the shortand long-term effects of firstand second-hand smoke on smokers and on people around them, and the effects of vaping"
+  },
+  {
+    "code": "D3.3",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Mental Health Literacy demonstrate an understanding of different strategies they can use to manage stress in situations in which they have some control"
+  },
+  {
+    "code": "A1.1",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them identify and manage emotions as they participate in learning experiences in health and physical education, in order to improve their ability to express their own feelings and understand and respond to the feelings of others"
+  },
+  {
+    "code": "A1.2",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them to recognize sources of stress and to cope with challenges, including help-seeking behaviours, as they participate in learning experiences in health and physical education, in order to support the development of personal resilience"
+  },
+  {
+    "code": "A1.3",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop habits of mind that support positive motivation and perseverance as they participate in learning experiences in health and physical education, in order to promote a sense of optimism and hope"
+  },
+  {
+    "code": "A1.4",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them build relationships, develop empathy, and communicate with others as they participate in learning experiences in health and physical education, in order to support healthy relationships, a sense of belonging, and respect for diversity"
+  },
+  {
+    "code": "A1.5",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop self-awareness and self-confidence as they participate in learning experiences in health and physical education, in order to support the development of a sense of identity and a sense of belonging"
+  },
+  {
+    "code": "A1.6",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them think critically and creatively as they participate in learning experiences in health and physical education, in order to support making connections, analysing, evaluating, problem solving, and decision making"
+  },
+  {
+    "code": "B1.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "actively participate in a wide variety of program activities"
+  },
+  {
+    "code": "B1.2",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of factors that contribute to their personal enjoyment of being active"
+  },
+  {
+    "code": "B1.3",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "identify factors that can either motivate or make it difficult for people to be physically active every day"
+  },
+  {
+    "code": "B2.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "Daily physical activity (DPA): participate in moderate to vigorous physical activity, with appropriate warm-up and cool-down activities, to the best of their ability for a minimum of twenty minutes each day"
+  },
+  {
+    "code": "B2.2",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "identify the components of health-related fitness"
+  },
+  {
+    "code": "B2.3",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "assess a specific component of their health-related fitness"
+  },
+  {
+    "code": "B2.4",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "develop and implement personal plans relating to a specific component of healthrelated fitness, chosen on the basis of their personal fitness assessments and interests [A1.3 Motivation, 1.5 Self]"
+  },
+  {
+    "code": "B3.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate behaviours and apply procedures that maximize safety and lessen the risk of injury, including the risk of concussion, for themselves and others during physical activity"
+  },
+  {
+    "code": "B3.2",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate an understanding of proactive measures that should be taken to minimize environmental health risks that may interfere with their safe participation in and enjoyment of outdoor physical activities"
+  },
+  {
+    "code": "C1.3",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "explore different combinations of locomotor movements with and without equipment, alone and with others, moving at different speeds and levels, and using different pathways"
+  },
+  {
+    "code": "C1.4",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "send and receive objects using different body parts and equipment, adjusting for speed, while applying basic principles of movement"
+  },
+  {
+    "code": "C1.5",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "retain objects with and without equipment in a variety of situations while moving in different pathways around others and equipment"
+  },
+  {
+    "code": "C2.1",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "demonstrate an understanding of the components of physical activities"
+  },
+  {
+    "code": "C2.2",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "describe common features of specific categories of physical activities"
+  },
+  {
+    "code": "C2.3",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "apply a variety of tactical solutions to increase their chances of success as they participate in physical activities"
+  },
+  {
+    "code": "D1.1",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Personal Safety and Injury Prevention identify trusted people"
+  },
+  {
+    "code": "D1.2",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Substance Use, Addictions, and Related Behaviours describe the shortand long-term effects of alcohol use, and identify factors that can affect intoxication"
+  },
+  {
+    "code": "D1.3",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Human Development and Sexual Health identify the parts of the reproductive system, and describe how the body changes during puberty [A1.5 Self]"
+  },
+  {
+    "code": "D1.4",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "describe the processes of menstruation and spermatogenesis, and explain how these processes relate to reproduction and overall development"
+  },
+  {
+    "code": "D2.1",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Healthy Eating explain how to use nutrition fact tables and ingredient lists on food labels to make informed choices about healthy and safe foods [A1.6 Thinking]"
+  },
+  {
+    "code": "D2.2",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Personal Safety and Injury Prevention demonstrate the ability to deal with threatening situations by applying socialemotional learning skills"
+  },
+  {
+    "code": "D2.4",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Human Development and Sexual Health identify intersecting factors that affect the development of a person’s self-concept, including their sexual orientation"
+  },
+  {
+    "code": "D2.6",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Mental Health Literacy demonstrate an understanding of their role, and the limits of their role, in helping others who may need mental health support [A1.2 Coping, 1.4 Relationships, 1.5 Self]"
+  },
+  {
+    "code": "D3.1",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Healthy Eating describe how advertising, food marketing, and media affect food choices"
+  },
+  {
+    "code": "D3.2",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Personal Safety and Injury Prevention explain how a person’s actions, either in person or online, including making homophobic or other hurtful comments, can affect their own and others’ feelings, selfconcept, mental health and emotional well-being, and reputation"
+  },
+  {
+    "code": "A1.1",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them identify and manage emotions as they participate in learning experiences in health and physical education, in order to improve their ability to express their own feelings and understand and respond to the feelings of others"
+  },
+  {
+    "code": "A1.2",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them to recognize sources of stress and to cope with challenges, including help-seeking behaviours, as they participate in learning experiences in health and physical education, in order to support the development of personal resilience"
+  },
+  {
+    "code": "A1.3",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop habits of mind that support positive motivation and perseverance as they participate in learning experiences in health and physical education, in order to promote a sense of optimism and hope"
+  },
+  {
+    "code": "A1.4",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them build relationships, develop empathy, and communicate with others as they participate in learning experiences in health and physical education, in order to support healthy relationships, a sense of belonging, and respect for diversity"
+  },
+  {
+    "code": "A1.5",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop self-awareness and self-confidence as they participate in learning experiences in health and physical education, in order to support the development of a sense of identity and a sense of belonging"
+  },
+  {
+    "code": "A1.6",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them think critically and creatively as they participate in learning experiences in health and physical education, in order to support making connections, analysing, evaluating, problem solving, and decision making"
+  },
+  {
+    "code": "B1.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "actively participate in a wide variety of program activities"
+  },
+  {
+    "code": "B1.2",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of factors that contribute to their personal enjoyment of being active"
+  },
+  {
+    "code": "B1.3",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "describe factors that motivate them to participate in physical activity every day, at school and during leisure time, and that influence their choice of activities"
+  },
+  {
+    "code": "B2.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "Daily physical activity (DPA): participate in moderate to vigorous physical activity, with appropriate warm-up and cool-down activities, to the best of their ability for a minimum of twenty minutes each day"
+  },
+  {
+    "code": "B2.4",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "develop and implement plans of action based on both their assessments of their healthrelated components of fitness (i.e., cardiorespiratory endurance, muscular strength, muscular endurance, flexibility) and their interests, in order to achieve personal fitness goals"
+  },
+  {
+    "code": "B3.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate behaviours and apply procedures that maximize safety and lessen the risk of injury, including the risk of concussion, for themselves and others during physical activity"
+  },
+  {
+    "code": "B3.2",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "describe appropriate methods for treating minor injuries that may occur while participating in physical activity"
+  },
+  {
+    "code": "C1.3",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "send and receive a variety of objects (e.g., rubber chickens, rings, beanbags, soft foam balls, discs, tennis balls, utility balls), adjusting for speed and distance, while applying basic principles of movement (e.g., use different amounts of force to send an object to a teammate, with an awareness of the weight of the object thrown and the force of its impact when the teammate receives it, depending on relative positions and type of object being thrown, batted, or kicked; send an object through a hoop, into a bucket, to a target on a wall, to a specific spot on the other side of a net, to a partner; bend knees, keeping arms out and head up in a ready position to prepare to receive an object; use the body to absorb an object that is sent with greater force; follow through in the direction of the target to improve aim and accuracy) [A1.1 Emotions, 1.4 Relationships, 1.5 Self]"
+  },
+  {
+    "code": "C1.4",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "retain objects in a variety of situations while travelling in different pathways and at different speeds in relation to others and equipment"
+  },
+  {
+    "code": "C2.1",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "demonstrate an understanding of the basic components of physical activities"
+  },
+  {
+    "code": "C2.2",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "describe common features of specific categories of physical activities"
+  },
+  {
+    "code": "C2.3",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "apply a variety of tactical solutions to increase their chances of success as they participate in physical activities"
+  },
+  {
+    "code": "D1.1",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Personal Safety and Injury Prevention demonstrate ways of being inclusive, respectful, and accepting, and describe how this benefits everyone, including themselves [A1.1 Emotions, 1.4 Relationships, 1.5 Self]"
+  },
+  {
+    "code": "D1.2",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Substance Use, Addictions, and Related Behaviours describe the range of effects associated with using cannabis, other drugs"
+  },
+  {
+    "code": "D1.3",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Human Development and Sexual Health demonstrate an understanding of the impacts of viewing sexually explicit media, including pornography"
+  },
+  {
+    "code": "D1.4",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Mental Health Literacy identify people, resources, and services in the school and the community"
+  },
+  {
+    "code": "D1.5",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "demonstrate an understanding of the interconnections between a person’s thoughts, emotions, and actions, and of the potential impact of positive and negative thinking on mental health [A1.1 Emotions, 1.5 Self, 1.6 Thinking]"
+  },
+  {
+    "code": "D2.1",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Healthy Eating apply their knowledge of medical, emotional, practical, and societal factors that influence eating habits and food choices"
+  },
+  {
+    "code": "D2.2",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "apply their recognition of internal hunger and thirst cues and their knowledge of physical factors that influence the desire to eat and drink"
+  },
+  {
+    "code": "D2.4",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Substance Use, Addictions, and Related Behaviours use decision-making strategies and skills and an understanding of factors influencing drug use"
+  },
+  {
+    "code": "D2.5",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Human Development and Sexual Health describe how they can build confidence and lay a foundation for healthy relationships by acquiring a clearer understanding of the physical, social, and emotional changes that occur during adolescence"
+  },
+  {
+    "code": "A1.1",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them identify and manage emotions as they participate in learning experiences in health and physical education, in order to improve their ability to express their own feelings and understand and respond to the feelings of others"
+  },
+  {
+    "code": "A1.2",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them to recognize sources of stress and to cope with challenges, including help-seeking behaviours, as they participate in learning experiences in health and physical education, in order to support the development of personal resilience"
+  },
+  {
+    "code": "A1.3",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop habits of mind that support positive motivation and perseverance as they participate in learning experiences in health and physical education, in order to promote a sense of optimism and hope"
+  },
+  {
+    "code": "A1.4",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them build relationships, develop empathy, and communicate with others as they participate in learning experiences in health and physical education, in order to support healthy relationships, a sense of belonging, and respect for diversity"
+  },
+  {
+    "code": "A1.5",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop self-awareness and self-confidence as they participate in learning experiences in health and physical education, in order to support the development of a sense of identity and a sense of belonging"
+  },
+  {
+    "code": "A1.6",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them think critically and creatively as they participate in learning experiences in health and physical education, in order to support making connections, analysing, evaluating, problem solving, and decision making"
+  },
+  {
+    "code": "B1.1",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "actively participate in a wide variety of program activities, according to their capabilities"
+  },
+  {
+    "code": "B1.2",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of factors that contribute to their personal enjoyment of being active"
+  },
+  {
+    "code": "B1.3",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of the factors that motivate or impede participation in physical activity every day"
+  },
+  {
+    "code": "B2.1",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "Daily physical activity (DPA): participate in moderate to vigorous physical activity, with appropriate warm-up and cool-down activities, to the best of their ability for a minimum of twenty minutes each day"
+  },
+  {
+    "code": "B2.2",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "identify factors that can affect health-related fitness"
+  },
+  {
+    "code": "B2.3",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "assess their level of health-related fitness (i.e., cardiorespiratory endurance, muscular strength, muscular endurance, flexibility) during various physical activities and monitor changes in fitness levels over time"
+  },
+  {
+    "code": "B3.1",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate behaviours and apply procedures that maximize safety and lessen the risk of injury, including the risk of concussion, for themselves and others during physical activity"
+  },
+  {
+    "code": "B3.2",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate an understanding of procedures for anticipating and responding to hazards that may lead to sickness or injury, including concussion, while participating in physical activity outdoors"
+  },
+  {
+    "code": "C1.1",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "perform smooth transfers of weight and rotations, in relation to others and equipment, in a variety of situations involving static and dynamic balance"
+  },
+  {
+    "code": "C1.3",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "send, receive, and retain a variety of objects, while taking into account their position and motion in relation to others, equipment, and boundaries, while applying basic principles of movement"
+  },
+  {
+    "code": "C1.4",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "demonstrate an understanding of the phases of movement (i.e., preparation, execution, follow-through), and apply this understanding to the refinement of movement skills as they participate in a variety of physical activities"
+  },
+  {
+    "code": "C2.1",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "demonstrate an understanding of the components of a range of physical activities"
+  },
+  {
+    "code": "C2.3",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "apply a variety of tactical solutions to increase chances of success as they participate in physical activities"
+  },
+  {
+    "code": "D1.1",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Personal Safety and Injury Prevention describe benefits and dangers, for themselves and others, that are associated with the use of computers and other digital technologies"
+  },
+  {
+    "code": "D1.2",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Substance Use, Addictions, and Related Behaviours demonstrate an understanding of linkages between mental health problems and problematic substance use, as well as between brain development and cannabis use, and identify school and community resources"
+  },
+  {
+    "code": "D1.3",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Human Development and Sexual Health explain the importance of having a shared understanding with a partner about the following: delaying sexual activity until they are older"
+  },
+  {
+    "code": "D1.5",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "identify ways of preventing STBBIs and/or unplanned pregnancy, such as delaying first intercourse and other sexual activities until a person is older and using condoms and other forms of protection consistently [A1.2 Coping, 1.4 Relationships, 1.5 Self]"
+  },
+  {
+    "code": "D1.6",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Mental Health Literacy demonstrate an understanding of the relationship between mental health and mental illness and identify possible signs of mental health problems [A1.6 Thinking]"
+  },
+  {
+    "code": "D2.1",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Healthy Eating demonstrate the ability to develop healthier eating patterns, using information about the role that different foods play as contributing or preventive factors in a variety of health disorders"
+  },
+  {
+    "code": "D2.2",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Personal Safety and Injury Prevention assess the potential impact on themselves and others of various types of bullying, abuse, exploitation, or harassment, including homophobic bullying or harassment and other forms of identity-based bullying, and of the type of coercion that can occur in connection with sexting and online activities, and identify ways of preventing or resolving such incidents"
+  },
+  {
+    "code": "D2.4",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Human Development and Sexual Health demonstrate an understanding of physical, emotional, social, and cognitive factors that need to be considered when making decisions related to sexual health"
+  },
+  {
+    "code": "D3.1",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Healthy Eating demonstrate an understanding of personal and external factors that affect people’s food choices and eating habits"
+  },
+  {
+    "code": "D3.2",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Substance Use, Addictions, and Related Behaviours analyse the personal and societal implications of issues related to substance use, addictions, and related behaviours"
+  },
+  {
+    "code": "A1.1",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them identify and manage emotions as they participate in learning experiences in health and physical education, in order to improve their ability to express their own feelings and understand and respond to the feelings of others"
+  },
+  {
+    "code": "A1.2",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them to recognize sources of stress and to cope with challenges, including help-seeking behaviours, as they participate in learning experiences in health and physical education, in order to support the development of personal resilience"
+  },
+  {
+    "code": "A1.3",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop habits of mind that support positive motivation and perseverance as they participate in learning experiences in health and physical education, in order to promote a sense of optimism and hope"
+  },
+  {
+    "code": "A1.4",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them build relationships, develop empathy, and communicate with others as they participate in learning experiences in health and physical education, in order to support healthy relationships, a sense of belonging, and respect for diversity"
+  },
+  {
+    "code": "A1.5",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them develop self-awareness and self-confidence as they participate in learning experiences in health and physical education, in order to support the development of a sense of identity and a sense of belonging"
+  },
+  {
+    "code": "A1.6",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Social-Emotional Learning Skills",
+    "overall": "A1",
+    "desc": "apply skills that help them think critically and creatively as they participate in learning experiences in health and physical education, in order to support making connections, analysing, evaluating, problem solving, and decision making"
+  },
+  {
+    "code": "B1.1",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "actively participate according to their capabilities in a wide variety of program activities"
+  },
+  {
+    "code": "B1.3",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of factors that motivate personal participation in physical activities every day"
+  },
+  {
+    "code": "B2.1",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "Daily physical activity (DPA): participate in moderate to vigorous physical activity, with appropriate warm-up and cool-down activities, to the best of their ability for a minimum of twenty minutes each day"
+  },
+  {
+    "code": "B2.2",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "recognize the difference between health-related components of personal fitness (i.e., cardiorespiratory endurance, muscular strength, muscular endurance, flexibility) and skill-related components (i.e., balance, agility, power, reaction time, speed, and coordination), and explain how to use training principles to enhance both components [A1.6 Thinking]"
+  },
+  {
+    "code": "B2.3",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "assess their level of health-related fitness (i.e., cardiorespiratory endurance, muscular strength, muscular endurance, flexibility) during various physical activities and monitor changes in fitness levels over time"
+  },
+  {
+    "code": "B2.4",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B2",
+    "desc": "develop, implement, and revise a personal plan to meet shortand long-term healthrelated fitness and physical activity goals [A1.3 Motivation, 1.5 Self, 1.6 Thinking]"
+  },
+  {
+    "code": "B3.1",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate behaviours and apply procedures that maximize safety and lessen the risk of injury, including the risk of concussion, for themselves and others during physical activity"
+  },
+  {
+    "code": "B3.2",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Active Living",
+    "overall": "B3",
+    "desc": "demonstrate a basic understanding of how to deal with emergency situations that may occur while participating in physical activity, including situations involving suspected concussions"
+  },
+  {
+    "code": "C1.1",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "perform smooth transfers of weight and rotations, in relation to others and equipment, in a variety of situations involving static and dynamic balance"
+  },
+  {
+    "code": "C1.2",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "perform a wide variety of locomotor movements, with and without equipment, while responding to a variety of external stimuli"
+  },
+  {
+    "code": "C1.4",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C1",
+    "desc": "demonstrate an understanding of the phases of movement (i.e., preparation, execution, follow-through) and apply this understanding to the refinement of movement skills in a variety of physical activities"
+  },
+  {
+    "code": "C2.3",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Movement Competence",
+    "overall": "C2",
+    "desc": "apply a variety of tactical solutions to increase chances of success as they participate in physical activities"
+  },
+  {
+    "code": "D1.1",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Personal Safety and Injury Prevention describe the signs and symptoms of concussions, as well as strategies that support healthy recovery [A1.2 Coping, 1.5 Self]"
+  },
+  {
+    "code": "D1.2",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "identify situations that could lead to injury or death"
+  },
+  {
+    "code": "D1.4",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "Substance Use, Addictions, and Related Behaviours identify and describe the warning signs of problematic substance use and related behaviours for a variety of activities and substances, including cannabis"
+  },
+  {
+    "code": "D1.5",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D1",
+    "desc": "demonstrate an understanding of gender identity"
+  },
+  {
+    "code": "D2.1",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Healthy Eating evaluate personal eating habits and food choices on the basis of the recommendations in Canada’s Food Guide, taking into account behaviours that support healthy eating"
+  },
+  {
+    "code": "D2.2",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Personal Safety and Injury Prevention demonstrate the ability to assess situations for potential dangers"
+  },
+  {
+    "code": "D2.3",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Human Development and Sexual Health demonstrate an understanding of abstinence, contraception and the use of effective and suitable protection to prevent pregnancy and STBBIs, and the concept of consent, as well as the skills"
+  },
+  {
+    "code": "D2.4",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D2",
+    "desc": "Mental Health Literacy demonstrate an understanding of how incorporating healthy habits and coping strategies into daily routines"
+  },
+  {
+    "code": "D3.1",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Healthy Eating identify strategies for promoting healthy eating habits and food choices within the school, home, and community"
+  },
+  {
+    "code": "D3.2",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Healthy Living",
+    "overall": "D3",
+    "desc": "Personal Safety and Injury Prevention analyse the impact of violent behaviours, including bullying (online or in-person), violence in intimate and sexual relationships, and gender-based violence"
+  }
+]

@@ -1,0 +1,1210 @@
+[
+  {
+    "code": "A1.1",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A1",
+    "desc": "Utilisation de stratégies de compréhension orale : connaîtra une gamme de stratégies de compréhension orale et les utilisera de façon appropriée avant, pendant et après l’écoute pour comprendre des textes oraux en français"
+  },
+  {
+    "code": "A1.2",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A1",
+    "desc": "Démonstration de la compréhension : démontrera sa compréhension de l’objet et du sens de textes oraux en français qui contiennent des mots et des expressions familiers sur des sujets et des situations courants en se servant d’aides contextuelles et visuelles"
+  },
+  {
+    "code": "A2.1",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Utilisation de stratégies d’écoute interactives : connaîtra et utilisera des stratégies d’écoute interactives convenant à diverses situations tout en participant à des interactions sociales et scolaires"
+  },
+  {
+    "code": "A2.2",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Interaction : réagira avec compréhension à ce que les autres disent tout en participant à de courtes interactions structurées portant sur lui-même, sa famille, ses amis et son environnement immédiat en se servant d’aides contextuelles et visuelles"
+  },
+  {
+    "code": "A2.3",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, certaines stratégies jugées utiles avant, pendant et après l’écoute; (b) cernera ses forces et ses faiblesses en tant qu’auditeur et prévoira les mesures à adopter pour améliorer ses compétences en matière d’écoute"
+  },
+  {
+    "code": "A3.1",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A3",
+    "desc": "Sensibilisation interculturelle : à partir de l’information tirée de textes oraux en français, identifiera les communautés francophones de l’Ontario, découvrira des aspects de leurs cultures et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "A3.2",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : en utilisant des renseignements tirés de textes oraux en français, déterminera les conventions sociolinguistiques utilisées dans un éventail de situations dans diverses communautés francophones* et en démontrera sa compréhension"
+  },
+  {
+    "code": "B1.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Utilisation de stratégies de communication orale : connaîtra une gamme de stratégies d’expression orale et les utilisera de façon appropriée pour s’exprimer de manière claire et cohérente en français à diverses fins et auprès de différents auditoires"
+  },
+  {
+    "code": "B1.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Production de communications orales : à l’aide d’expressions et de mots familiers, produira de courts messages répétés en français contenant des renseignements et des idées sur lui-même, sa famille, ses amis et son environnement immédiat en utilisant un soutien contextuel, auditif et visuel"
+  },
+  {
+    "code": "B1.3",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Expression orale fluide : parlera à un rythme régulier, en utilisant l’intonation appropriée et en prononçant correctement, dans le cadre de courtes communications répétées portant sur des sujets personnels et familiers"
+  },
+  {
+    "code": "B2.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Utilisation de stratégies d’interaction orale : démontrera sa compréhension des comportements appropriés en matière d’expression orale dans une variété de situations"
+  },
+  {
+    "code": "B2.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Interaction : participera à de courtes interactions orales structurées en utilisant des mots et des expressions familiers, avec des exemples et le soutien de l’enseignant"
+  },
+  {
+    "code": "B2.3",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, quelques stratégies jugées utiles avant, pendant et après l’expression orale afin de communiquer efficacement; (b) cernera ses forces et ses faiblesses en tant que locuteur et prévoira les mesures à adopter pour améliorer ses compétences en matière d’expression orale"
+  },
+  {
+    "code": "B3.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B3",
+    "desc": "Sensibilisation interculturelle : communiquera oralement des renseignements sur des communautés francophones de l’Ontario, y compris des aspects de leurs cultures et leur contribution à la francophonie et au monde, et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "C1.1",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Utilisation de stratégies de compréhension de lecture : connaîtra quelques stratégies de compréhension de lecture et les utilisera avant, pendant et après la lecture pour comprendre des textes"
+  },
+  {
+    "code": "C1.2",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Lecture du sens : démontrera sa compréhension de textes en français contenant des éléments visuels ainsi que des noms, des mots et des expressions familiers, avec le soutien de l’enseignant au besoin"
+  },
+  {
+    "code": "C1.3",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Lecture fluide : lira des textes qui contiennent des expressions et des mots courants à un débit acceptable et avec une aisance suffisante pour démontrer sa compréhension de l’idée générale du texte"
+  },
+  {
+    "code": "C1.4",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Enrichissement du vocabulaire : utilisera quelques stratégies d’acquisition de vocabulaire avant, pendant et après la lecture afin de déterminer ou de confirmer le sens des mots nouveaux et inconnus"
+  },
+  {
+    "code": "C2.1",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Objets des types de textes : définira le ou les objets de certains types de textes familiers, y compris les formes fictives, informatives, illustrées et médiatiques"
+  },
+  {
+    "code": "C2.2",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Caractéristiques des types de textes : définira certaines caractéristiques et (ou) certains éléments stylistiques des types de textes familiers, y compris les formes fictives, informatives, illustrées et médiatiques"
+  },
+  {
+    "code": "C2.3",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, quelques stratégies jugées utiles avant, pendant et après la lecture pour comprendre les textes; (b) cernera ses forces et ses faiblesses en tant que lecteur et prévoira les mesures à adopter pour améliorer ses compétences en matière de lecture"
+  },
+  {
+    "code": "C3.1",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C3",
+    "desc": "Sensibilisation interculturelle : à l’aide de renseignements tirés de divers textes en français, déterminera les communautés francophones de l’Ontario, s’informera sur certains aspects de leurs cultures et fera des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "C3.2",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : cernera, dans des textes en français adaptés à l’âge et au niveau scolaire des élèves, des exemples de conventions sociolinguistiques associées à une variété de situations sociales dans diverses communautés francophones*"
+  },
+  {
+    "code": "D1.1",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Détermination de l’objet et de l’auditoire : déterminera, avec l’aide de l’enseignant, l’objet de la rédaction et l’auditoire des textes en français qu’il prévoit de créer"
+  },
+  {
+    "code": "D2.1",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Génération, développement et organisation du contenu : générera, développera et organisera des idées à des fins de rédaction au moyen d’une variété de stratégies et de ressources préalables à la rédaction durant des activités de rédaction modélisée, partagée, dirigée et autonome"
+  },
+  {
+    "code": "D2.2",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Rédaction d’un brouillon et révision : planifiera et rédigera des brouillons en suivant un modèle"
+  },
+  {
+    "code": "D2.3",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Production de travaux finis : apportera des améliorations à son travail écrit en utilisant ses connaissances de quelques conventions du français écrit"
+  },
+  {
+    "code": "D2.4",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, quelques stratégies jugées utiles avant, pendant et après la rédaction; (b) cernera ses forces et ses faiblesses en tant que rédacteur et prévoira les mesures à adopter pour améliorer ses compétences en matière de rédaction"
+  },
+  {
+    "code": "D3.1",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D3",
+    "desc": "Sensibilisation interculturelle : dans ses travaux écrits, communiquera des renseignements sur des communautés francophones de l’Ontario, y compris des aspects de leurs cultures et leurs apports à la francophonie et dans le monde, et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "A1.1",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A1",
+    "desc": "Utilisation de stratégies de compréhension orale : connaîtra une gamme de stratégies de compréhension orale et les utilisera de façon appropriée avant, pendant et après l’écoute pour comprendre des textes oraux en français"
+  },
+  {
+    "code": "A1.2",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A1",
+    "desc": "Démonstration de la compréhension : démontrera sa compréhension de l’objet et du sens de textes oraux en français contenant des mots et des expressions familiers à propos de lui-même, de sa famille, de ses amis et de son environnement immédiat en se servant d’aides contextuelles et visuelles"
+  },
+  {
+    "code": "A2.1",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Utilisation de stratégies d’écoute interactives : connaîtra et utilisera des stratégies d’écoute interactives convenant à diverses situations tout en participant à des interactions sociales et scolaires ainsi qu’à des interactions sur des sujets courants"
+  },
+  {
+    "code": "A2.3",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, certaines stratégies jugées utiles avant, pendant et après l’écoute; (b) cernera ses forces et ses faiblesses en tant qu’auditeur et prévoira les mesures à adopter pour améliorer ses compétences en matière d’écoute"
+  },
+  {
+    "code": "A3.1",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A3",
+    "desc": "Sensibilisation interculturelle : à partir de l’information tirée de textes oraux en français, identifiera les communautés francophones du Québec, découvrira des aspects de leurs cultures et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "A3.2",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : en utilisant des renseignements tirés de textes oraux en français, déterminera les conventions sociolinguistiques utilisées dans un éventail de situations dans diverses communautés francophones et en démontrera sa compréhension*"
+  },
+  {
+    "code": "B1.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Utilisation de stratégies de communication orale : connaîtra une gamme de stratégies d’expression orale et les utilisera de manière appropriée pour s’exprimer manière claire et cohérente en français à diverses fins et auprès de différents auditoires"
+  },
+  {
+    "code": "B1.3",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Expression orale fluide : parlera en utilisant un rythme régulier, l’intonation appropriée et la prononciation exacte dans le cadre de communications courtes et préparées portant sur des sujets personnels et familiers"
+  },
+  {
+    "code": "B2.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Utilisation de stratégies d’interaction orale : démontrera sa compréhension des comportements appropriés en matière d’expression orale dans une variété de situations"
+  },
+  {
+    "code": "B2.2",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Interaction : participera à de courtes interactions orales structurées avec ses pairs et le personnel enseignant en utilisant des mots et des expressions familiers, avec des exemples et le soutien de l’enseignant"
+  },
+  {
+    "code": "B2.3",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, quelques stratégies jugées utiles avant, pendant et après l’expression orale afin de communiquer efficacement; (b) cernera ses forces et ses faiblesses en tant que locuteur et prévoira les mesures à adopter pour améliorer ses compétences en matière d’expression orale"
+  },
+  {
+    "code": "B3.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B3",
+    "desc": "Sensibilisation interculturelle : communiquera oralement de l’information sur les communautés francophones du Québec, y compris les aspects de leurs cultures et leurs contributions à la francophonie et au monde, et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "C1.1",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Utilisation de stratégies de compréhension de lecture : connaîtra quelques stratégies de compréhension de lecture et les utilisera avant, pendant et après la lecture pour comprendre des textes"
+  },
+  {
+    "code": "C1.2",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Lecture du sens : démontrera sa compréhension de textes en français contenant des éléments visuels ainsi que des noms, des mots et des expressions familiers, avec le soutien de l’enseignant au besoin"
+  },
+  {
+    "code": "C1.3",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Lecture fluide : lira des textes qui contiennent des expressions et des mots courants à un débit acceptable et avec une aisance suffisante pour démontrer sa compréhension de l’idée générale du texte"
+  },
+  {
+    "code": "C2.1",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Objets des types de textes : définira le ou les objets de certains types de textes familiers, y compris les formes fictives, informatives, illustrées et médiatiques"
+  },
+  {
+    "code": "C2.2",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Caractéristiques des types de textes : définira certaines caractéristiques et (ou) certains éléments stylistiques des types de textes familiers, y compris les formes fictives, informatives, illustrées et médiatiques"
+  },
+  {
+    "code": "C2.3",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, quelques stratégies jugées utiles avant, pendant et après la lecture pour comprendre les textes; (b) cernera ses forces et ses faiblesses en tant que lecteur et prévoira les mesures à adopter pour améliorer ses compétences en matière de lecture"
+  },
+  {
+    "code": "C3.1",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C3",
+    "desc": "Sensibilisation interculturelle : utilisera des renseignements tirés d’une variété de textes en français, reconnaîtra les communautés francophones du Québec, découvrira des aspects de leurs cultures et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "C3.2",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : cernera, dans des textes en français adaptés à l’âge et au niveau scolaire, des exemples de conventions sociolinguistiques associées à différentes situations sociales dans diverses communautés francophones*"
+  },
+  {
+    "code": "D1.1",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Détermination de l’objet et de l’auditoire : déterminera, avec l’aide de l’enseignant, l’objet de la rédaction et l’auditoire des textes en français qu’il prévoit de créer"
+  },
+  {
+    "code": "D1.2",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Rédaction dans une variété de formes : rédigera une variété de textes en français adaptés à l’âge ainsi qu’au niveau scolaire en mettant en pratique ses connaissances des éléments stylistiques et structurels de base de chaque forme"
+  },
+  {
+    "code": "D2.1",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Génération, développement et organisation du contenu : générera, développera et organisera des idées à des fins de rédaction au moyen d’une variété de stratégies et de ressources préalables à la rédaction durant des activités de rédaction modélisée, partagée, dirigée et autonome"
+  },
+  {
+    "code": "D2.2",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Rédaction d’un brouillon et révision : planifiera et rédigera des brouillons en suivant un modèle"
+  },
+  {
+    "code": "D2.3",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Production de travaux finis : apportera des améliorations à son travail écrit en utilisant ses connaissances de quelques conventions du français écrit"
+  },
+  {
+    "code": "D2.4",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, quelques stratégies jugées utiles avant, pendant et après la rédaction; (b) cernera ses forces et ses faiblesses en tant que rédacteur et prévoira les mesures à adopter pour améliorer ses compétences en matière de rédaction"
+  },
+  {
+    "code": "D3.1",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D3",
+    "desc": "Sensibilisation interculturelle : dans ses travaux écrits, communiquera des renseignements sur des communautés francophones du Québec, y compris des aspects de leurs cultures et leurs apports à la francophonie et dans le monde, et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "D3.2",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : découvrira les conventions sociolinguistiques associées à une variété de situations sociales existant au sein de diverses communautés francophones* et les utilisera de façon appropriée dans ses travaux écrits"
+  },
+  {
+    "code": "A1.1",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A1",
+    "desc": "Utilisation de stratégies de compréhension orale : connaîtra une gamme de stratégies de compréhension orale et les utilisera avant, pendant et après l’écoute pour comprendre des textes oraux en français"
+  },
+  {
+    "code": "A2.1",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Utilisation de stratégies d’écoute interactives : connaîtra et utilisera des stratégies d’écoute interactives convenant à diverses situations tout en participant à des interactions sociales et scolaires"
+  },
+  {
+    "code": "A2.2",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Interaction : réagira avec compréhension à ce que les autres disent tout en participant à des interactions dirigées à propos de sujets familiers en utilisant des aides contextuelles et visuelles"
+  },
+  {
+    "code": "A2.3",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, les facteurs qui l’empêchent d’écouter efficacement"
+  },
+  {
+    "code": "A3.1",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A3",
+    "desc": "Sensibilisation interculturelle : à l’aide de renseignements tirés de textes oraux en français, reconnaîtra les communautés francophones de l’Est, de l’Ouest et du Nord du Canada, découvrira des aspects de leurs cultures et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "A3.2",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : en utilisant des renseignements tirés de textes oraux en français, déterminera les conventions sociolinguistiques utilisées dans un éventail de situations dans diverses communautés francophones* et en démontrera sa compréhension"
+  },
+  {
+    "code": "B1.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Utilisation de stratégies de communication orale : connaîtra une gamme de stratégies d’expression orale et les utilisera de manière appropriée pour s’exprimer de manière claire et cohérente en français à diverses fins et auprès d’une variété d’auditoires"
+  },
+  {
+    "code": "B1.2",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Production de communications orales : à l’aide d’expressions et de mots familiers, produira de courts messages répétés en français contenant des idées et des renseigne-"
+  },
+  {
+    "code": "B1.3",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Expression orale fluide : parlera à un rythme régulier, avec l’intonation appropriée et en prononçant correctement dans le cadre de communications préparées portant sur des sujets personnels et familiers"
+  },
+  {
+    "code": "B2.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Utilisation de stratégies d’interaction orale : démontrera sa compréhension des comportements appropriés en matière d’expression orale dans une variété de situations"
+  },
+  {
+    "code": "B2.2",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Interaction : participera à des interactions orales dirigées avec ses pairs et le personnel enseignant en utilisant des mots et des expressions familiers, avec des exemples et le soutien de l’enseignant"
+  },
+  {
+    "code": "B2.3",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, quelques stratégies jugées utiles avant, pendant et après l’expression orale afin de communiquer efficacement; cernera ses forces et ses faiblesses en tant que locuteur et prévoira les mesures à adopter pour améliorer ses compétences en matière d’expression orale"
+  },
+  {
+    "code": "B3.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B3",
+    "desc": "Sensibilisation interculturelle : communiquera oralement de l’information sur les communautés francophones de l’Est, de l’Ouest et du Nord du Canada, y compris des aspects de leurs cultures et leurs contributions à la francophonie et au monde, et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "C1.1",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Utilisation de stratégies de compréhension de lecture : connaîtra quelques stratégies de compréhension de lecture et les utilisera avant, pendant et après la lecture pour comprendre des textes"
+  },
+  {
+    "code": "C1.2",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Lecture du sens : démontrera sa compréhension de textes en français contenant des éléments visuels ainsi que des noms, des mots et des expressions familiers, avec le soutien de l’enseignant au besoin"
+  },
+  {
+    "code": "C1.3",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Lecture fluide : lira des textes qui contiennent des expressions et des mots familiers à un débit acceptable et avec une aisance suffisante pour démontrer sa compréhension de l’idée générale du texte"
+  },
+  {
+    "code": "C1.4",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Enrichissement du vocabulaire : utilisera quelques stratégies d’acquisition de vocabulaire avant, pendant et après la lecture afin de déterminer ou de confirmer le sens des mots nouveaux, inconnus ou récemment appris"
+  },
+  {
+    "code": "C2.1",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Objets des types de textes : définira le ou les objets de certains types de textes familiers, y compris les formes fictives, informatives, illustrées et médiatiques"
+  },
+  {
+    "code": "C2.2",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Caractéristiques des types de textes : définira certaines caractéristiques et (ou) certains éléments stylistiques des types de textes familiers, y compris les formes fictives, informatives, illustrées et médiatiques"
+  },
+  {
+    "code": "C2.3",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, quelques stratégies jugées utiles avant, pendant et après la lecture pour comprendre les textes; (b) cernera ses forces et ses faiblesses en tant que lecteur et prévoira les mesures à adopter pour améliorer ses compétences en matière de lecture"
+  },
+  {
+    "code": "C3.1",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C3",
+    "desc": "Sensibilisation interculturelle : utilisera des renseignements tirés d’une variété de textes en français, reconnaîtra les communautés francophones de l’Est, de l’Ouest et du Nord du Canada, découvrira des aspects de leurs cultures et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "C3.2",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : cernera, dans des textes en français adaptés à l’âge et au niveau scolaire des élèves, des exemples de conventions sociolinguistiques associées à une variété de situations sociales dans diverses communautés francophones*"
+  },
+  {
+    "code": "D1.1",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Détermination de l’objet et de l’auditoire : déterminera, avec l’aide de l’enseignant, l’objet de la rédaction et l’auditoire des textes en français qu’il prévoit de créer"
+  },
+  {
+    "code": "D1.2",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Rédaction dans une variété de formes : rédigera une variété de textes en français adaptés à l’âge ainsi qu’au niveau scolaire des élèves en mettant en pratique ses connaissances des éléments stylistiques et structurels de base de chaque forme"
+  },
+  {
+    "code": "D2.1",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Génération, développement et organisation du contenu : générera, développera et organisera des idées à des fins de rédaction au moyen d’une variété de stratégies et de ressources préalables à la rédaction durant des activités de rédaction modélisée, partagée, dirigée et autonome"
+  },
+  {
+    "code": "D2.2",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Rédaction d’un brouillon et révision : planifiera et rédigera des brouillons en suivant un modèle"
+  },
+  {
+    "code": "D2.3",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Production de travaux finis : apportera des améliorations à son travail écrit en utilisant ses connaissances de certaines conventions du français écrit"
+  },
+  {
+    "code": "D2.4",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, certaines stratégies jugées utiles avant, pendant et après la rédaction; (b) cernera ses forces et ses faiblesses en tant que rédacteur et prévoira les mesures à adopter pour améliorer ses compétences en matière de rédaction"
+  },
+  {
+    "code": "D3.1",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D3",
+    "desc": "Sensibilisation interculturelle : dans ses travaux écrits, communiquera des renseignements sur des communautés francophones de l’Est, de l’Ouest et du Nord du Canada, y compris des aspects de leurs cultures et leurs apports à la francophonie et dans le monde, et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "D3.2",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : découvrira des exemples de conventions sociolinguistiques associées aux diverses situations sociales existant au sein d’une variété de communautés francophones* et les utilisera de façon appropriée dans ses travaux écrits"
+  },
+  {
+    "code": "A1.1",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A1",
+    "desc": "Utilisation de stratégies de compréhension orale : connaîtra une gamme de stratégies de compréhension orale et les utilisera avant, pendant et après l’écoute pour comprendre des textes oraux en français"
+  },
+  {
+    "code": "A1.2",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A1",
+    "desc": "Démonstration de la compréhension : démontrer sa compréhension de l’objet et du sens de textes oraux en français qui contiennent des messages de plus en plus complexes sur des sujets courants et des questions d’intérêt personnel en se servant d’aides contextuelles et visuelles"
+  },
+  {
+    "code": "A2.1",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Utilisation de stratégies d’écoute interactive : connaîtra et utilisera des stratégies d’écoute interactive convenant à diverses situations tout en participant à des interactions sociales et scolaires"
+  },
+  {
+    "code": "A2.2",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Interaction : répondra avec compréhension à ce que disent les autres en participant à des interactions plus ou moins longues sur des sujets courants et des questions d’intérêt personnel"
+  },
+  {
+    "code": "A2.3",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, les facteurs qui l’empêchent d’écouter efficacement"
+  },
+  {
+    "code": "A3.1",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A3",
+    "desc": "Sensibilisation interculturelle : à l’aide de renseignements tirés de textes oraux en français, reconnaîtra les communautés francophones des Amériques à l’extérieur du Canada, découvrira des aspects de leurs cultures et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "B1.1",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Utilisation de stratégies de communication orale : connaîtra une gamme de stratégies d’expression orale et les utilisera de façon appropriée pour s’exprimer clairement et de manière cohérente en français à diverses fins et auprès de différents auditoires"
+  },
+  {
+    "code": "B1.2",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Production de communications orales : à l’aide d’expressions et de mots familiers, produira des messages en français répétés et de plus en plus spontanés sur des questions d’intérêt personnel immédiat en utilisant un soutien contextuel, auditif et visuel"
+  },
+  {
+    "code": "B1.3",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Expression orale fluide : parlera en utilisant un rythme régulier, l’intonation appropriée et la prononciation exacte dans le cadre de communications répétées portant sur des sujets personnels et familiers"
+  },
+  {
+    "code": "B2.1",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Utilisation de stratégies d’interaction orale : démontrera sa compréhension des comportements appropriés en matière d’expression orale dans une variété de situations"
+  },
+  {
+    "code": "B2.2",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Interaction : participera à une variété d’interactions orales dirigées avec ses pairs et l’enseignant en utilisant des structures de phrase et des expressions familières, avec des exemples et le soutien approprié de l’enseignant"
+  },
+  {
+    "code": "B3.1",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B3",
+    "desc": "Sensibilisation interculturelle : communiquera oralement de l’information sur les communautés francophones des Amériques à l’extérieur du Canada, y compris des aspects de leurs cultures et leurs contributions à la francophonie et au monde, et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "B3.2",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : découvrira les conventions sociolinguistiques associées aux diverses situations sociales existant au sein de différentes communautés francophones* et les utilisera de façon appropriée dans des interactions orales"
+  },
+  {
+    "code": "C1.1",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Utilisation de stratégies de compréhension de lecture : connaîtra une variété de stratégies de compréhension de lecture et les utilisera avant, pendant et après la lecture pour comprendre des textes dans des contextes de lecture modélisée, partagée, dirigée et autonome"
+  },
+  {
+    "code": "C1.2",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Lecture du sens : démontrera sa compréhension de divers textes en français contenant des éléments visuels et des noms, des mots et des expressions familiers, avec des exemples et des directives du personnel enseignant au besoin"
+  },
+  {
+    "code": "C1.3",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Lecture fluide : lire divers textes qui contiennent des noms, des expressions et des mots familiers à un débit acceptable et avec une aisance suffisante pour démontrer sa compréhension de l’idée générale du texte"
+  },
+  {
+    "code": "C1.4",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Enrichissement du vocabulaire : utilisera une variété de stratégies d’acquisition de vocabulaire avant, pendant et après la lecture afin de déterminer ou de confirmer le sens des expressions et des mots nouveaux, inconnus ou récemment appris"
+  },
+  {
+    "code": "C2.1",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Objets des types de textes : définira le ou les objets d’une variété de types de textes, y compris les formes fictives, informatives, illustrées et médiatiques"
+  },
+  {
+    "code": "C2.2",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Caractéristiques des types de textes : définira certaines caractéristiques et (ou) certains éléments stylistiques d’une variété de types de textes, y compris les formes fictives, informatives, illustrées et médiatiques"
+  },
+  {
+    "code": "C2.3",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, certaines stratégies jugées utiles avant, pendant et après la lecture pour comprendre les textes; (b) cernera ses forces et ses faiblesses en tant que lecteur et prévoira les mesures à adopter pour améliorer ses compétences en matière de lecture"
+  },
+  {
+    "code": "C3.1",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C3",
+    "desc": "Sensibilisation interculturelle : utilisera des renseignements tirés d’une variété de textes en français, reconnaîtra les communautés francophones des Amériques à l’extérieur du Canada, découvrira des aspects de leurs cultures et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "C3.2",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : cernera, dans des textes en français adaptés à l’âge et au niveau scolaire des élèves, des exemples de conventions sociolinguistiques associées à une variété de situations sociales dans diverses communautés francophones*"
+  },
+  {
+    "code": "D1.1",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Détermination de l’objet et de l’auditoire : déterminera, avec l’aide de l’enseignant, l’objet de la rédaction et l’auditoire des textes français qu’il prévoit de créer"
+  },
+  {
+    "code": "D1.2",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Écriture dans une variété de formes : écrira divers textes en français adaptés à l’âge et au niveau scolaire des élèves mettant en pratique ses connaissances des éléments structurels et stylistiques fondamentaux de chaque forme"
+  },
+  {
+    "code": "D1.3",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Utilisation des conventions linguistiques : communiquera clairement le sens en utilisant les éléments du discours de manière appropriée et en respectant les conventions relatives à l’orthographe, à l’ordre des mots et à la ponctuation appropriés"
+  },
+  {
+    "code": "D2.1",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Génération, développement et organisation du contenu : générera, développera et organisera des idées à des fins de rédaction au moyen d’une variété de stratégies et de ressources préalables à la rédaction"
+  },
+  {
+    "code": "D2.2",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Rédaction d’un brouillon et révision : planifiera et rédigera des brouillons et révisera son travail au moyen d’une variété de stratégies indépendantes et proposées par le personnel enseignant"
+  },
+  {
+    "code": "D2.3",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Production de travaux finis : apportera des améliorations afin de clarifier son travail écrit et d’en faciliter la lecture et utilisera quelques éléments de présentation efficace pour produire un travail impeccable aux fins de publication"
+  },
+  {
+    "code": "D2.4",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, certaines stratégies jugées utiles avant, pendant et après la rédaction; (b) cernera ses forces et ses faiblesses en tant que rédacteur et prévoira les mesures à adopter pour améliorer ses compétences en matière de rédaction"
+  },
+  {
+    "code": "D3.1",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D3",
+    "desc": "Sensibilisation interculturelle : dans ses travaux écrits, communiquera des renseignements sur des communautés francophones des Amériques à l’extérieur du Canada, y compris des aspects de leurs cultures et leurs apports à la francophonie et dans le monde, et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "D3.2",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : découvrira les conventions sociolinguistiques associées à une variété de situations sociales existant au sein de diverses communautés francophones* et les utilisera de façon appropriée dans ses travaux écrits"
+  },
+  {
+    "code": "A1.1",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A1",
+    "desc": "Utilisation de stratégies de compréhension orale : connaîtra une gamme de stratégies de compréhension orale et les utilisera avant, pendant et après l’écoute pour comprendre des textes oraux en français"
+  },
+  {
+    "code": "A1.2",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A1",
+    "desc": "Démonstration de la compréhension : démontrera sa compréhension de l’objet et du sens de textes oraux en français qui contiennent des messages de plus en plus complexes sur des sujets courants et des questions d’intérêt personnel en se servant d’aides contextuelles et visuelles"
+  },
+  {
+    "code": "A2.1",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Utilisation de stratégies d’écoute interactives : connaîtra et utilisera des stratégies d’écoute interactives convenant à diverses situations tout en participant à des interactions sociales et scolaires"
+  },
+  {
+    "code": "A2.2",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Interaction : réagira avec compréhension à ce que les autres disent tout en participant à des interactions de longueurs variées sur des sujets courants et des questions d’intérêt personnel"
+  },
+  {
+    "code": "A2.3",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, les facteurs qui l’empêchent d’écouter efficacement"
+  },
+  {
+    "code": "A3.1",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A3",
+    "desc": "Sensibilisation interculturelle : à partir de l’information tirée de textes oraux en français, identifiera les communautés francophones d’Europe, découvrira les aspects de leurs cultures et établira des liens avec ses expériences personnelles et sa propre communauté ainsi que d’autres"
+  },
+  {
+    "code": "A3.2",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Écoute",
+    "overall": "A3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : en utilisant des renseignements tirés de textes oraux en français, déterminera les conventions sociolinguistiques utilisées dans un éventail de situations dans diverses communautés francophones* et en démontrera sa compréhension"
+  },
+  {
+    "code": "B1.1",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Utilisation de stratégies de communication orale : connaîtra une gamme de stratégies d’expression orale et les utilisera de façon appropriée pour s’exprimer clairement et de manière cohérente en français à diverses fins et auprès d’une variété d’auditoires"
+  },
+  {
+    "code": "B1.2",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Production de communications orales : produira des messages répétés et de plus en plus spontanés en français pour communiquer des idées et des renseignements sur des"
+  },
+  {
+    "code": "B1.3",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B1",
+    "desc": "Expression orale fluide : parlera en utilisant un rythme régulier, l’intonation appropriée et la prononciation exacte dans le cadre de communications répétées portant sur une gamme de sujets familiers"
+  },
+  {
+    "code": "B2.1",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Utilisation de stratégies d’interaction orale : démontrera sa compréhension des comportements appropriés en matière d’expression orale dans une variété de situations"
+  },
+  {
+    "code": "B2.2",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Interaction : échangera des renseignements et des idées avec l’enseignant et ses pairs dans le cadre d’interactions orales dirigées et de plus en plus spontanées sur des questions d’intérêt personnel, avec des exemples et le soutien de l’enseignant au besoin"
+  },
+  {
+    "code": "B2.3",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, certaines stratégies jugées utiles avant, pendant et après l’expression orale afin de communiquer efficacement; (b)cernera ses forces et ses faiblesses en tant que locuteur et planifiera les étapes à suivre afin d’améliorer ses compétences en expression orale"
+  },
+  {
+    "code": "B3.1",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B3",
+    "desc": "Sensibilisation interculturelle : communiquera oralement des renseignements sur des communautés francophones d’Europe, y compris des aspects de leurs cultures et leur contribution à la francophonie et au monde, et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "B3.2",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Expression orale",
+    "overall": "B3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : découvrira les conventions sociolinguistiques associées aux diverses situations sociales existant au sein de différentes communautés francophones et les utilisera de façon appropriée dans le cadre d’interactions orales*"
+  },
+  {
+    "code": "C1.1",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Utilisation de stratégies de compréhension de lecture : connaîtra une variété de stratégies de compréhension de lecture et les utilisera avant, pendant et après la lecture pour comprendre des textes dans des contextes de lecture modélisée, partagée, dirigée et autonome"
+  },
+  {
+    "code": "C1.2",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Lecture du sens : démontrera sa compréhension de divers textes en français contenant des éléments visuels et des noms, des mots et des expressions familiers, avec des exemples et des directives du personnel enseignant au besoin"
+  },
+  {
+    "code": "C1.3",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Lecture fluide : lira divers textes qui contiennent des noms, des expressions et des mots familiers à un débit acceptable et avec une aisance suffisante pour démontrer sa compréhension de l’idée générale du texte"
+  },
+  {
+    "code": "C1.4",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C1",
+    "desc": "Enrichissement du vocabulaire : utilisera une variété de stratégies d’acquisition de vocabulaire avant, pendant et après la lecture afin de déterminer ou de confirmer le sens des mots nouveaux, inconnus ou récemment appris"
+  },
+  {
+    "code": "C2.1",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Objets des types de textes : définira le ou les objets d’une variété de types de textes, y compris les formes fictives, informatives, illustrées et médiatiques"
+  },
+  {
+    "code": "C2.2",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Caractéristiques des types de textes : définira certaines caractéristiques et (ou) certains éléments stylistiques d’une variété de types de textes, y compris les formes fictives, informatives, illustrées et médiatiques"
+  },
+  {
+    "code": "C2.3",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, certaines stratégies jugées utiles avant, pendant et après la lecture pour comprendre les textes; (b) cernera ses forces et ses faiblesses en tant que lecteur et prévoira les mesures à adopter pour améliorer ses compétences en matière de lecture"
+  },
+  {
+    "code": "C3.1",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C3",
+    "desc": "Sensibilisation interculturelle : utilisera des renseignements tirés d’une variété de textes en français, reconnaîtra les communautés francophones d’Europe, découvrira des aspects de leurs cultures et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "C3.2",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Lecture",
+    "overall": "C3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : cernera, dans des textes en français adaptés à l’âge et au niveau scolaire des élèves, des exemples de conventions sociolinguistiques associées à différentes situations sociales dans diverses communautés francophones*"
+  },
+  {
+    "code": "D1.1",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Détermination de l’objet et de l’auditoire : déterminera, avec l’aide de l’enseignant, l’objet de la rédaction et l’auditoire des textes en français qu’il prévoit de créer"
+  },
+  {
+    "code": "D1.2",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Rédaction dans une variété de formes : rédigera une variété de textes en français adaptés à l’âge ainsi qu’au niveau scolaire des élèves en mettant en pratique ses connaissances des éléments stylistiques et structurels de base de chaque forme"
+  },
+  {
+    "code": "D1.3",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D1",
+    "desc": "Utilisation des conventions linguistiques : communiquera clairement le sens en utilisant les éléments du discours de manière appropriée et en respectant les conventions relatives à l’orthographe, à l’ordre des mots et à la ponctuation appropriés"
+  },
+  {
+    "code": "D2.1",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Génération, développement et organisation du contenu : générera, développera et organisera des idées à des fins de rédaction au moyen d’une variété de stratégies et de ressources préalables à la rédaction"
+  },
+  {
+    "code": "D2.2",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Rédaction d’un brouillon et révision : planifiera et rédigera des brouillons et révisera son travail au moyen d’une variété de stratégies indépendantes et proposées par le personnel enseignant"
+  },
+  {
+    "code": "D2.3",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Production de travaux finis : apportera des améliorations afin de clarifier son travail écrit et d’en faciliter la lecture et utilisera quelques éléments de présentation efficace pour produire un travail impeccable aux fins de publication"
+  },
+  {
+    "code": "D2.4",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D2",
+    "desc": "Métacognition : (a) décrira, dans le cadre d’une conversation avec l’enseignant et ses pairs, certaines stratégies jugées utiles avant, pendant et après la rédaction; (b) cernera ses forces et ses faiblesses en tant que rédacteur et prévoira les mesures à adopter pour améliorer ses compétences en matière de rédaction"
+  },
+  {
+    "code": "D3.1",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D3",
+    "desc": "Sensibilisation interculturelle : dans ses travaux écrits, communiquera des renseignements sur des communautés francophones d’Europe, y compris des aspects de leurs cultures et leurs apports à la francophonie et dans le monde, et établira des liens avec ses expériences personnelles ainsi que sa propre communauté et d’autres"
+  },
+  {
+    "code": "D3.2",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Rédaction",
+    "overall": "D3",
+    "desc": "Sensibilisation aux conventions sociolinguistiques : découvrira des exemples de conventions sociolinguistiques associées aux diverses situations sociales existant au sein d’une variété de communautés francophones* et les utilisera de façon appropriée dans ses travaux écrits"
+  }
+]
