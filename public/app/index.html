@@ -144,6 +144,14 @@ select, input[type="text"], input[type="email"], input[type="password"], textare
   border: 1.5px solid var(--border); border-radius: 7px; background: var(--cream);
   color: var(--ink); outline: none; transition: border-color 0.2s; width: 100%;
 }
+/* Strip native chrome from selects (macOS/Safari adds chevron + inset shadow) */
+select {
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+  padding-right: 32px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%237A726A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
 select:focus, input:focus, textarea:focus { border-color: var(--sage); }
 textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
@@ -629,7 +637,45 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
           onblur="this.style.borderColor='var(--border)';this.style.boxShadow='0 1px 2px rgba(22,18,14,.02) inset';"
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();smartGenerate();}"></textarea>
         <div id="planInputHint" style="margin-top:10px;font-size:.8rem;color:var(--muted);line-height:1.55;">
-          <span style="color:var(--sage);">✦</span> Include the grade and subject if you can. Examples: <em>"Grade 4 fractions introduction"</em> · <em>"Gr 6 persuasive writing"</em> · <em>"Kindergarten patterns"</em>
+          <span style="color:var(--sage);">✦</span> Try: <em>"Grade 4 fractions introduction"</em> or <em>"Gr 6 persuasive writing"</em>
+        </div>
+      </div>
+
+      <!-- BUILD AN: PDF upload. Teachers drop in a unit outline, textbook
+           pages, or reference doc and TeacherAI extracts text to use as
+           additional context for lesson generation. PDF.js runs entirely in
+           the browser — the file never leaves the user's device until they
+           click Generate (at which point a text excerpt is sent). Privacy
+           story is important in Ontario boards. -->
+      <div id="pdfUploadSection" style="margin-bottom:18px;">
+        <!-- Collapsed state: just a small "add a PDF" button -->
+        <div id="pdfUploadCollapsed">
+          <label for="pdfFileInput" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1.5px dashed var(--border);border-radius:10px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--muted);cursor:pointer;transition:border-color .15s, color .15s;"
+            onmouseover="this.style.borderColor='var(--sage)';this.style.color='var(--ink)';"
+            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">
+            <span style="font-size:.95rem;">📎</span>
+            <span>Add a PDF for context</span>
+            <span style="color:var(--muted);font-size:.72rem;font-style:italic;">(optional)</span>
+          </label>
+          <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" onchange="handlePdfUpload(event)" style="display:none;">
+          <div style="margin-top:6px;font-size:.72rem;color:var(--muted);line-height:1.5;">
+            Unit outlines, textbook pages, board docs. Stays on your device until you Draft.
+          </div>
+        </div>
+        <!-- Expanded state: attached file card, shown when a PDF is loaded -->
+        <div id="pdfUploadAttached" style="display:none;padding:12px 14px;background:var(--sage-l);border:1px solid rgba(74,124,89,.25);border-radius:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+              <span style="font-size:1.1rem;flex-shrink:0;">📄</span>
+              <div style="min-width:0;flex:1;">
+                <div id="pdfFileName" style="font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+                <div id="pdfFileMeta" style="font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);margin-top:2px;"></div>
+              </div>
+            </div>
+            <button onclick="clearPdfUpload()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:4px 8px;border-radius:6px;flex-shrink:0;transition:background .15s, color .15s;" onmouseover="this.style.background='rgba(22,18,14,.06)';this.style.color='var(--ink)';" onmouseout="this.style.background='none';this.style.color='var(--muted)';" title="Remove">✕</button>
+          </div>
+          <div id="pdfExtractPreview" style="display:none;margin-top:10px;padding:10px 12px;background:rgba(255,255,255,.6);border-radius:8px;font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);line-height:1.5;max-height:80px;overflow-y:auto;"></div>
+          <div id="pdfExtractStatus" style="margin-top:8px;font-size:.72rem;color:var(--sage);font-style:italic;"></div>
         </div>
       </div>
 
@@ -3029,6 +3075,221 @@ function applyParsedPlanToForm(parsed) {
   return true;
 }
 
+// ════════════════════════════════════════════════════════════════════════
+// BUILD AN: PDF upload → inline text extraction → context injection
+// ════════════════════════════════════════════════════════════════════════
+// Teachers drop in a unit outline, textbook pages, or reference doc.
+// PDF.js runs entirely client-side (never sent to our server during
+// extraction). On Generate, the extracted text is injected into the legacy
+// #ctx field so the existing /api/generate pipeline treats it as additional
+// class/unit context — no backend changes needed.
+//
+// Limits:
+//   - 10MB file size cap (enforced)
+//   - First 10 pages only (prevents token blow-up on long PDFs)
+//   - ~4000 chars final excerpt (keeps per-generation token cost bounded)
+//   - PDF only (MIME + extension check)
+// ════════════════════════════════════════════════════════════════════════
+
+// Global state: extracted PDF text for the current session
+window._pdfContext = null;          // { filename, text, pageCount, extractedPages }
+let _pdfjsLoadPromise = null;       // memoized lazy-load
+
+const PDF_MAX_SIZE_MB = 10;
+const PDF_MAX_PAGES = 10;
+const PDF_MAX_CHARS = 4000;
+const PDFJS_VERSION = '3.11.174';   // stable; same jsdelivr CDN as pptxgenjs
+
+/**
+ * Lazy-load PDF.js. Only fires when the teacher actually uploads a PDF.
+ * Returns the pdfjsLib global for use.
+ */
+async function loadPdfJs() {
+  if (window.pdfjsLib) return window.pdfjsLib;
+  if (_pdfjsLoadPromise) return _pdfjsLoadPromise;
+  _pdfjsLoadPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.min.js`;
+    s.onload = () => {
+      if (window.pdfjsLib) {
+        // Worker must be configured — use the matching version from the same CDN
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.worker.min.js`;
+        resolve(window.pdfjsLib);
+      } else {
+        reject(new Error('PDF.js loaded but pdfjsLib global missing'));
+      }
+    };
+    s.onerror = () => reject(new Error('Failed to load PDF.js from CDN'));
+    document.head.appendChild(s);
+  });
+  return _pdfjsLoadPromise;
+}
+
+/**
+ * File input onchange handler. Validates, extracts, and populates the
+ * attached file card.
+ */
+async function handlePdfUpload(event) {
+  const file = event?.target?.files?.[0];
+  if (!file) return;
+
+  // --- Validation
+  const sizeMB = file.size / (1024 * 1024);
+  if (sizeMB > PDF_MAX_SIZE_MB) {
+    alert(`That PDF is ${sizeMB.toFixed(1)} MB. The limit is ${PDF_MAX_SIZE_MB} MB — try splitting it into smaller sections.`);
+    event.target.value = '';
+    return;
+  }
+  const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+  if (!isPdf) {
+    alert('Please upload a PDF file. (Word docs, Google Docs, and images aren\'t supported yet.)');
+    event.target.value = '';
+    return;
+  }
+
+  // --- Swap UI to loading state
+  const collapsed = document.getElementById('pdfUploadCollapsed');
+  const attached = document.getElementById('pdfUploadAttached');
+  const nameEl = document.getElementById('pdfFileName');
+  const metaEl = document.getElementById('pdfFileMeta');
+  const previewEl = document.getElementById('pdfExtractPreview');
+  const statusEl = document.getElementById('pdfExtractStatus');
+  if (collapsed) collapsed.style.display = 'none';
+  if (attached) attached.style.display = 'block';
+  if (nameEl) nameEl.textContent = file.name;
+  if (metaEl) metaEl.textContent = `${sizeMB.toFixed(1)} MB · reading...`;
+  if (previewEl) { previewEl.style.display = 'none'; previewEl.textContent = ''; }
+  if (statusEl) { statusEl.textContent = '⏳ Extracting text...'; statusEl.style.color = 'var(--muted)'; }
+
+  try {
+    const pdfjs = await loadPdfJs();
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+
+    const totalPages = pdf.numPages;
+    const pagesToRead = Math.min(totalPages, PDF_MAX_PAGES);
+    const textChunks = [];
+    let totalChars = 0;
+
+    for (let p = 1; p <= pagesToRead; p++) {
+      const page = await pdf.getPage(p);
+      const content = await page.getTextContent();
+      // Join text items on the page with spaces; line breaks tend to be noisy in PDFs
+      const pageText = content.items
+        .map(it => it.str || '')
+        .filter(s => s.length)
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (pageText) {
+        textChunks.push(pageText);
+        totalChars += pageText.length;
+      }
+      // Bail early if we've collected plenty of text
+      if (totalChars > PDF_MAX_CHARS * 1.5) break;
+    }
+
+    let fullText = textChunks.join('\n\n').trim();
+
+    // --- Detect scanned PDFs (very little extractable text)
+    if (fullText.length < 50) {
+      clearPdfUpload();
+      alert('This looks like a scanned document — TeacherAI can only read text PDFs right now. Try a text-based PDF (one where you can select and copy words).');
+      return;
+    }
+
+    // --- Truncate to budget
+    let wasTruncated = false;
+    if (fullText.length > PDF_MAX_CHARS) {
+      fullText = fullText.slice(0, PDF_MAX_CHARS).trim();
+      wasTruncated = true;
+    }
+
+    // --- Store in global state for injection at Generate time
+    window._pdfContext = {
+      filename: file.name,
+      text: fullText,
+      pageCount: totalPages,
+      extractedPages: pagesToRead,
+      truncated: wasTruncated,
+    };
+
+    // --- Update UI
+    if (metaEl) {
+      const parts = [];
+      parts.push(`${pagesToRead} of ${totalPages} page${totalPages === 1 ? '' : 's'} read`);
+      parts.push(`${fullText.length.toLocaleString()} chars`);
+      if (wasTruncated) parts.push('truncated');
+      metaEl.textContent = parts.join(' · ');
+    }
+    if (previewEl) {
+      previewEl.textContent = fullText.slice(0, 300) + (fullText.length > 300 ? '…' : '');
+      previewEl.style.display = 'block';
+    }
+    if (statusEl) {
+      statusEl.textContent = '✓ Ready — will be used as reference when you draft';
+      statusEl.style.color = 'var(--sage)';
+    }
+  } catch (err) {
+    console.error('PDF extraction failed:', err);
+    clearPdfUpload();
+    const msg = /password|encrypt/i.test(err?.message || '')
+      ? 'This PDF is password-protected. Please remove the password and try again.'
+      : 'Couldn\'t read that PDF. It might be corrupted or in an unsupported format.';
+    alert(msg);
+  }
+}
+
+/**
+ * Remove the attached PDF and reset UI to collapsed state.
+ */
+function clearPdfUpload() {
+  window._pdfContext = null;
+  const collapsed = document.getElementById('pdfUploadCollapsed');
+  const attached = document.getElementById('pdfUploadAttached');
+  const input = document.getElementById('pdfFileInput');
+  if (collapsed) collapsed.style.display = 'block';
+  if (attached) attached.style.display = 'none';
+  if (input) input.value = '';
+}
+
+/**
+ * Inject current PDF text into the legacy #ctx field so generate() picks it
+ * up as additional context. Preserves any pre-existing class context by
+ * prepending the PDF reference block ABOVE the existing value.
+ *
+ * Returns the original ctx value (for restoration after generation), or null
+ * if no PDF was injected.
+ */
+function injectPdfContextIntoCtx() {
+  if (!window._pdfContext || !window._pdfContext.text) return null;
+  const ctxEl = document.getElementById('ctx');
+  if (!ctxEl) return null;
+  const originalValue = ctxEl.value || '';
+  const block = [
+    '=== REFERENCE MATERIAL PROVIDED BY TEACHER ===',
+    `(from "${window._pdfContext.filename}", ${window._pdfContext.extractedPages} of ${window._pdfContext.pageCount} pages)`,
+    window._pdfContext.text,
+    '=== END REFERENCE MATERIAL ===',
+  ].join('\n');
+  ctxEl.value = originalValue
+    ? block + '\n\n' + originalValue
+    : block;
+  return originalValue;
+}
+
+/**
+ * Restore the #ctx field to its pre-injection value. Called after generate()
+ * so the PDF reference block doesn't persist into subsequent generations
+ * (unless the teacher re-uploads).
+ */
+function restoreCtxAfterPdfInjection(originalValue) {
+  if (originalValue === null || originalValue === undefined) return;
+  const ctxEl = document.getElementById('ctx');
+  if (ctxEl) ctxEl.value = originalValue;
+}
+
 /**
  * Entry point from the simplified Plan form. Parses the input, populates
  * the hidden form, and calls the existing generate().
@@ -3061,13 +3322,113 @@ async function smartGenerate() {
     return;
   }
 
+  // BUILD AO: Grade-vs-class conflict detection. If the teacher typed a grade
+  // in the input AND has a class selected whose grade differs, don't silently
+  // overwrite. Show a one-tap inline confirm: "You typed Gr 3 but your Gr 5
+  // class is selected — use which?"
+  const classGrades = getActiveClassGrades();
+  if (classGrades.length && parsed.grades?.length) {
+    const conflict = !parsed.grades.every(g => classGrades.includes(g));
+    if (conflict) {
+      showGradeConflictPrompt(parsed, classGrades);
+      return;
+    }
+  }
+
   if (!applyParsedPlanToForm(parsed)) {
     alert('Couldn\'t fully understand that — please try including the grade and subject (e.g. "Grade 3 Social Studies — pioneers").');
     return;
   }
 
-  // All fields populated. Hand off to existing generator.
-  await generate();
+  // BUILD AN: Inject PDF text (if attached) into the legacy #ctx field so
+  // generate() picks it up as reference context. Restore original value
+  // after generation to avoid the reference block persisting into subsequent
+  // lessons unless the teacher re-uploads.
+  const originalCtx = injectPdfContextIntoCtx();
+  try {
+    await generate();
+  } finally {
+    restoreCtxAfterPdfInjection(originalCtx);
+  }
+}
+
+/**
+ * Returns an array of grade strings for the currently-selected class, or []
+ * if no class is selected. Used by smartGenerate to detect typed-grade vs
+ * class-grade conflicts.
+ */
+function getActiveClassGrades() {
+  if (!activeClassId) return [];
+  const classStudents = students.filter(s => s.classId === activeClassId);
+  const gradeOrder = ['Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8'];
+  const uniq = [...new Set(classStudents.map(s => s.grade))].filter(Boolean);
+  if (uniq.length) return uniq.sort((a,b) => gradeOrder.indexOf(a) - gradeOrder.indexOf(b));
+  // No students yet — try parsing the class name
+  const cls = (typeof classes !== 'undefined' ? classes : []).find(c => c.id === activeClassId);
+  const name = cls?.name || '';
+  const parsed = [];
+  if (/kindergarten|\bK\b/i.test(name)) parsed.push('Kindergarten');
+  (name.match(/\b([1-8])\b/g) || []).forEach(n => {
+    const g = 'Grade ' + n;
+    if (!parsed.includes(g)) parsed.push(g);
+  });
+  return parsed.sort((a,b) => gradeOrder.indexOf(a) - gradeOrder.indexOf(b));
+}
+
+/**
+ * Inline non-blocking confirm when the typed grade differs from the selected
+ * class's grade. Renders two pill buttons: "Use <typed>" and "Use <class>".
+ * Either choice proceeds immediately to generate.
+ */
+function showGradeConflictPrompt(parsed, classGrades) {
+  const hintEl = document.getElementById('planInputHint');
+  if (!hintEl) return;
+  const typedLabel = parsed.grades.length === 1 ? parsed.grades[0] : parsed.grades.join(' + ');
+  const classLabel = classGrades.length === 1 ? classGrades[0] : classGrades.join(' + ');
+  hintEl.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;background:var(--amber-l);border:1px solid rgba(196,123,42,.3);border-radius:10px;">
+      <span style="color:var(--ink);font-weight:500;">You typed <strong>${typedLabel}</strong> but your class is <strong>${classLabel}</strong>.</span>
+      <button onclick="resolveGradeConflict('typed')" style="background:var(--sage);color:white;border:none;padding:6px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;">Use ${typedLabel}</button>
+      <button onclick="resolveGradeConflict('class')" style="background:var(--paper);color:var(--ink);border:1.5px solid var(--border);padding:5px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;">Use ${classLabel}</button>
+    </div>
+  `;
+  hintEl.style.color = '';
+  // Stash parsed state for the resolver to pick up
+  window._pendingConflictParsed = parsed;
+  window._pendingConflictClassGrades = classGrades;
+}
+
+/**
+ * Resolver for the grade-conflict pill click. choice = 'typed' (use what
+ * the teacher typed) or 'class' (use the class's grade).
+ */
+async function resolveGradeConflict(choice) {
+  const parsed = window._pendingConflictParsed;
+  const classGrades = window._pendingConflictClassGrades;
+  if (!parsed) return;
+  if (choice === 'class') {
+    parsed.grades = classGrades;
+  }
+  window._pendingConflictParsed = null;
+  window._pendingConflictClassGrades = null;
+
+  // Reset hint to default
+  const hintEl = document.getElementById('planInputHint');
+  if (hintEl) {
+    hintEl.innerHTML = '<span style="color:var(--sage);">✦</span> Try: <em>"Grade 4 fractions introduction"</em> or <em>"Gr 6 persuasive writing"</em>';
+    hintEl.style.color = 'var(--muted)';
+  }
+
+  if (!applyParsedPlanToForm(parsed)) {
+    alert('Couldn\'t fully understand that — please try again.');
+    return;
+  }
+  const originalCtx = injectPdfContextIntoCtx();
+  try {
+    await generate();
+  } finally {
+    restoreCtxAfterPdfInjection(originalCtx);
+  }
 }
 
 /**
