@@ -3797,7 +3797,17 @@ function buildEditBlocks(outputs, gradeDesc, subj, topic, expectations, unitInfo
     const isRubric = k==='assessment_rubric';
     const isAK = k==='answer_key'||k.startsWith('answer_key_');
     if (!genC[k]) return;
-    const rendered = isWS ? renderWSAuto(genC[k].cur) : isRubric ? renderRubric(genC[k].cur) : isAK ? renderAnswerKey(genC[k].cur) : renderMD(genC[k].cur);
+    // BUILD AM: when content is a placeholder (spinner or error message), render
+    // as plain markdown regardless of the specialized renderer that would
+    // normally apply. The rubric/worksheet/answer-key renderers look for
+    // specific header patterns (## Knowledge and Understanding, Q1:, etc.)
+    // and return nothing useful for plain placeholder text — which was making
+    // the block appear empty while regen was in flight.
+    const _curText = genC[k].cur || '';
+    const _isPlaceholder = /^[⏳⚠️]/.test(_curText.trim());
+    const rendered = _isPlaceholder
+      ? renderMD(_curText)
+      : isWS ? renderWSAuto(_curText) : isRubric ? renderRubric(_curText) : isAK ? renderAnswerKey(_curText) : renderMD(_curText);
 
     const slideBtns = k==='lesson_plan' ? `
       <button class="btn b-sage b-sm" onclick="presentSlides(event)" style="white-space:nowrap;" title="Build slides and open the presenter">🎬 Build Slides</button>
@@ -8951,8 +8961,11 @@ function stripForeignObject(svgStr) {
       if (t) lines.push(t);
     }
     if (!lines.length) return '';
-    // Use a clipPath so text stays inside the box bounds
-    const cid = 'fo_clip_' + (clipId++);
+    // BUILD AM: the former clipPath approach was abandoned; wrappedLines
+    // below handle overflow via word-wrap instead. Dead `clipId++` line
+    // removed — it referenced an undeclared variable, crashing every
+    // svgToPng call with "Can't find variable: clipId" and breaking all
+    // PPTX slide diagrams.
     const fs = Math.min(13, Math.floor(h / Math.max(lines.length, 1) / 1.4));
     const lh = fs * 1.4;
     // Word-wrap each line to fit within the box width, no truncation
@@ -8989,19 +9002,16 @@ function stripForeignObject(svgStr) {
 // Render an SVG string to PNG base64 using canvg
 async function svgToPng(svgStr, width, height) {
   try {
-    // Diagnostic logging (remove once cause identified).
     if (!svgStr || !svgStr.trim()) {
       console.warn('[svgToPng] empty SVG string received');
       return null;
     }
-    console.log('[svgToPng] start — svg length:', svgStr.length, 'target:', width + 'x' + height);
     // canvg is at /canvg.js (self-hosted)
     if (!window.canvg) {
-      console.log('[svgToPng] loading canvg library...');
       await new Promise((resolve, reject) => {
         const s = document.createElement('script');
         s.src = '/canvg.js';
-        s.onload = () => { console.log('[svgToPng] canvg loaded'); resolve(); };
+        s.onload = resolve;
         s.onerror = () => { console.error('[svgToPng] canvg FAILED to load (check /canvg.js is deployed)'); reject(new Error('canvg load failed')); };
         document.head.appendChild(s);
       });
@@ -9017,14 +9027,12 @@ async function svgToPng(svgStr, width, height) {
     ctx.fillStyle = '#F4F3EF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     const cleaned = stripForeignObject(svgStr);
-    console.log('[svgToPng] calling canvg.Canvg.from...');
     const v = await canvg.Canvg.from(ctx, cleaned, { ignoreAnimation: true, ignoreMouse: true });
-    console.log('[svgToPng] rendering...');
     await v.render();
-    console.log('[svgToPng] ✓ SUCCESS');
     return canvas.toDataURL('image/png');
   } catch(e) {
-    console.error('[svgToPng] FAILED:', e.message, e);
+    // Keep error logs — if another bug like the clipId one appears, we'll see it.
+    console.error('[svgToPng] FAILED:', e.message);
     console.error('[svgToPng] SVG preview:', (svgStr||'').slice(0, 200));
     return null;
   }
