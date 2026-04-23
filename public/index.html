@@ -35,6 +35,16 @@
     background: rgba(249,245,240,.9);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  nav.nav-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    nav { transition: none; }
   }
   .nav-logo {
     font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 700;
@@ -116,9 +126,14 @@
   }
 
   .hero-sub {
-    font-size: 1.15rem; color: var(--muted);
-    line-height: 1.7; max-width: 540px; margin: 0 auto 2.8rem;
+    font-size: 1.55rem; color: var(--ink);
+    line-height: 1.45; max-width: 640px; margin: 0 auto 2.8rem;
+    font-family: 'Fraunces', serif; font-weight: 400;
+    letter-spacing: -.01em;
     animation: fadeUp .7s .2s ease both;
+  }
+  @media (max-width: 700px) {
+    .hero-sub { font-size: 1.25rem; line-height: 1.4; }
   }
 
   .hero-actions {
@@ -1053,9 +1068,9 @@
     <div class="hero-badge">
       We draft. You teach.
     </div>
-    <h1>You didn't become a teacher<br>to spend Sunday night <em>planning.</em></h1>
+    <h1>Tell us your topic. We'll draft the <em>rest.</em></h1>
     <p class="hero-sub">
-      Plan a full week of lessons in minutes. Worksheets, assessments, and report card comments included. Built for real Ontario classrooms, splits included.
+      Lesson plan, worksheets, rubric, answer key, slides, and report card comments. All tailored to your class, aligned to Ontario curriculum. Splits included.
     </p>
     <div class="hero-actions">
       <a href="/app" class="btn-primary">✨ Try TeacherAI free</a>
@@ -1567,11 +1582,16 @@
   }
 
   // Pause hero animations when scrolled out of view (scroll perf)
+  // Also: fade the fixed nav in/out based on hero visibility. Nav hides over
+  // the hero so the H1 gets uncontested attention, then fades in once the
+  // teacher scrolls past so a persistent CTA is always available.
   const hero = document.querySelector('.hero');
+  const topNav = document.querySelector('nav');
   if (hero && 'IntersectionObserver' in window) {
     const heroObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         hero.classList.toggle('hero-paused', !entry.isIntersecting);
+        if (topNav) topNav.classList.toggle('nav-visible', !entry.isIntersecting);
       });
     }, { threshold: 0 });
     heroObserver.observe(hero);
