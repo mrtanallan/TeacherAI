@@ -575,6 +575,13 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
        this when savedLessons > 0, otherwise shows the empty-state banner above. ── -->
   <div id="s1" style="display:none;">
     <div class="card">
+      <!-- Landing-page voice bridge: teachers arriving from teacherai.ca read
+           "Tell us your topic. We'll draft the rest." Echo that promise at the
+           top of the app's first-ask form so the experience feels continuous. -->
+      <div style="text-align:center;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border);">
+        <p style="font-family:'Fraunces',serif;font-size:1.25rem;line-height:1.35;color:var(--ink);margin:0 0 6px;"><em style="color:var(--sage);font-weight:400;">Tell us your topic.</em> <span style="color:var(--ink);">We'll draft the rest.</span></p>
+        <p style="font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--muted);margin:0;">A full lesson in minutes, tailored to your class.</p>
+      </div>
       <!-- Hidden grade selects for JS compatibility -->
       <select id="gA" style="display:none;"><option value="">Select grade...</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select>
       <select id="gB" style="display:none;"><option value="">— None —</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select>
@@ -2071,7 +2078,7 @@ async function loadUsageMeter() {
       if (upgradeBtn) upgradeBtn.style.display = 'none';
     } else if (plan === 'beta') {
       countEl.textContent = used + ' lesson' + (used !== 1 ? 's' : '') + ' generated · last 30 days';
-      if (noteEl) { noteEl.textContent = 'Beta — unlimited monthly lessons'; noteEl.style.color = 'var(--sage)'; }
+      if (noteEl) { noteEl.textContent = ''; }
       if (upgradeBtn) upgradeBtn.style.display = 'none';
     } else {
       const FREE_LIMIT = 5;
