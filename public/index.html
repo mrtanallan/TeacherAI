@@ -41,12 +41,6 @@
     color: var(--ink); text-decoration: none;
   }
   .nav-logo span { color: #E07B39; }
-  .nav-links { display: flex; align-items: center; gap: 2rem; }
-  .nav-links a {
-    font-size: .88rem; color: var(--muted); text-decoration: none;
-    transition: color .15s;
-  }
-  .nav-links a:hover { color: var(--ink); }
   .nav-cta {
     background: var(--sage); color: white; border: none;
     padding: .55rem 1.4rem; border-radius: 8px;
@@ -1037,7 +1031,6 @@
 
   /* ── Responsive ── */
   @media (max-width: 768px) {
-    .nav-links { display: none; }
     footer { grid-template-columns: 1fr; text-align: center; } .foot-logo { justify-self: center; } .foot-links { justify-self: center; } .foot-right { justify-self: center; text-align: center; }
   }
 </style>
@@ -1047,11 +1040,6 @@
 <!-- ── Nav ── -->
 <nav>
   <a href="/" class="nav-logo">Teacher<span>AI</span></a>
-  <div class="nav-links">
-    <a href="#demo">See it work</a>
-    <a href="#faq">FAQ</a>
-    <a href="/privacy.html">Privacy</a>
-  </div>
   <a href="/app" class="nav-cta">Start free →</a>
 </nav>
 
@@ -1382,7 +1370,7 @@
         <span class="pain-extra-emoji">🤒</span>
         <div class="pain-extra-text">
           <strong>Sick day tomorrow? Sub plans, sorted.</strong>
-          Generate a full day of lessons, worksheets, and answer keys for any grade — ready to leave for a supply teacher in the time it takes to make tea.
+          Generate a full day of lessons, worksheets, and answer keys for any grade. Ready to leave for a supply teacher in the time it takes to make tea.
         </div>
       </div>
     </div>
@@ -1401,7 +1389,7 @@
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-a">
-          <p>Yes. TeacherAI runs on Supabase Canada Central — your data stays in Canada. Student names are never sent to the AI; only anonymized accommodation notes (e.g. "ELL Level 2") are used for personalization. Designed with Ontario's MFIPPA in mind from day one.</p>
+          <p>Yes. Your data stays in Canada on Supabase's Canada Central servers. Student names are never sent to the AI. Only anonymized accommodation notes like "ELL Level 2" are used for personalization. Built with Ontario's MFIPPA in mind from day one.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -1410,7 +1398,7 @@
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-a">
-          <p>Your professional judgment is what makes a lesson work. TeacherAI doesn't replace it; it gives you a starting draft instead of a blank page. Every lesson, assessment, and comment is yours to review, edit, or rewrite before it reaches a student or parent. The AI drafts. You decide.</p>
+          <p>TeacherAI doesn't replace your professional judgment; it gives you a starting draft instead of a blank page. Every lesson, assessment, and comment is yours to review, edit, or rewrite before it reaches a student or parent. The AI drafts. You decide.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -1419,7 +1407,7 @@
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-a">
-          <p>Edit it. Every lesson, worksheet, rubric, and comment is fully editable in your browser. Tweak the wording, swap questions, fix anything. Worksheets have a "More Questions" button if you need extras, and report card comments can be regenerated per student. You're never stuck with what the AI gave you on the first try.</p>
+          <p>Edit it. Every lesson, worksheet, rubric, and comment is fully editable in your browser. Worksheets have a "More Questions" button if you need extras. Report card comments regenerate per student. You're never stuck with the first draft.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -1428,7 +1416,7 @@
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-a">
-          <p>Yes. Pick a unit topic and TeacherAI drafts a scope and sequence with expectations coverage, big ideas, and an assessment plan. You choose how many lessons — anywhere from 2 to 12. Each lesson in the unit can then be expanded into a full lesson plan with worksheet, rubric, and answer key. The whole unit prints as a single PDF, useful for TPA evidence or long-range binder documentation.</p>
+          <p>Yes. Pick a unit topic and TeacherAI drafts a scope and sequence with expectations coverage, big ideas, and an assessment plan. Choose anywhere from 2 to 12 lessons. Each lesson can be expanded into a full plan with worksheet, rubric, and answer key. The whole unit prints as a single PDF for TPA evidence or long-range binders.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -1437,7 +1425,7 @@
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-a">
-          <p>Yes. This is one of the things TeacherAI was built for. Pick multiple grades (1/2, 4/5, 6/7) and you get separate worksheets per grade with grade-appropriate expectations for each. The lesson plan handles the differentiation, and the grade tracker records each student's level against their own grade's expectations once you've approved it. Works for any split grade configuration from Grades 1 through 8.</p>
+          <p>Yes. This is one of the things TeacherAI was built for. Pick multiple grades (1/2, 4/5, 6/7) and get separate worksheets per grade with grade-appropriate expectations. The lesson plan handles differentiation. Each student is tracked against their own grade's expectations. Works for any split from Grades 1 through 8.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -1455,7 +1443,7 @@
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-a">
-          <p>TPT is a marketplace — you search for something close to what you need, hope it fits your class, and pay per unit. TeacherAI generates lessons, worksheets, and rubrics made for your exact topic, grade, and split. No hunting through listings, no "almost right" PDFs. Everything is aligned to the current Ontario curriculum and fully editable in your browser. Many teachers use both — TPT for pre-built thematic units, TeacherAI for everything in between.</p>
+          <p>TPT is a marketplace. You search for something close to what you need, hope it fits your class, and pay per unit. TeacherAI generates lessons, worksheets, and rubrics for your exact topic, grade, and split. Everything aligns to the current Ontario curriculum and is fully editable. Many teachers use both: TPT for pre-built thematic units, TeacherAI for everything in between.</p>
         </div>
       </details>
     </div>
@@ -1469,13 +1457,10 @@
       <p class="bip-label">Built in the open</p>
       <h2 class="bip-headline">Made by Ontario teachers who got tired of waiting for someone else to build it.</h2>
       <p class="bip-body">
-        Every feature exists because a teacher asked for it. Just a tool built by teachers who wanted it to exist for their own classrooms.
+        Every feature exists because a teacher asked for it. If you'd like to try it, the door is open.
       </p>
       <p class="bip-body" style="border-left:3px solid var(--sage);padding-left:1.1rem;background:var(--sage-l);padding:1rem 1.1rem;border-radius:0 8px 8px 0;">
-        <strong>TeacherAI drafts. You decide.</strong> Every lesson, assessment, and report card comment is yours to review, edit, or rewrite before it reaches a student or parent. Your professional judgment is the product — we just give you a head start so you're not working from a blank page at 9pm on a Sunday.
-      </p>
-      <p class="bip-body">
-        If you'd like to try it, the door is open. Built with Ontario teachers, for Ontario teachers.
+        <strong>TeacherAI drafts. You decide.</strong> Every lesson, assessment, and report card comment is yours to review, edit, or rewrite before it reaches a student or parent. Your professional judgment is the product. We just give you a head start so you're not working from a blank page at 9pm on a Sunday.
       </p>
     </div>
   </div>
@@ -1487,7 +1472,7 @@
   <div class="cta-deco cta-deco-2"></div>
   <div class="cta-inner">
     <h2>Your week, <em>handled.</em></h2>
-    <p>Draft lessons in seconds. Mark without the marathon. Write report card comments that reflect the term — all without losing your evenings.</p>
+    <p>Draft lessons in seconds. Mark without the marathon. Write report card comments that reflect the term, all without losing your evenings.</p>
     <a href="/app" class="btn-white">✨ Start for free</a>
     <p class="cta-note">CANADIAN SERVERS · ONTARIO CURRICULUM · MFIPPA-AWARE</p>
   </div>
