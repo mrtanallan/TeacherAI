@@ -8022,23 +8022,30 @@ const SVG_RENDERERS = {
     const connections = (p.connections || []).slice(0, 6);
     const accentColor = p.color || DT.ACCENT;
 
-    const W = DT.W, H = 360;
+    const W = DT.W, H = 380;
     const cx = W / 2, cy = H / 2 + 4;
     const centerR = 50;
     const count = connections.length || 1;
-    const orbitR = count <= 4 ? 125 : 115;
-    const nodeW = 115;
-    const nodeH = 58;
+    const orbitR = count <= 4 ? 130 : 120;
+    const nodeW = 140;
+    const nodeH = 78;
 
     const angleStep = (2 * Math.PI) / count;
     const startAngle = -Math.PI / 2;
+
+    // BUILD AM: cap label/detail lengths at render time so long strings don't
+    // overflow the node box. LLM sometimes emits "detail" phrases up to 8-10
+    // words which get clipped. Truncation with ellipsis is a last resort;
+    // most real input fits within these limits.
+    const capLabel  = (s) => { const t = String(s||'').trim(); return t.length > 22 ? t.slice(0, 20).trimEnd() + '…' : t; };
+    const capDetail = (s) => { const t = String(s||'').trim(); return t.length > 44 ? t.slice(0, 42).trimEnd() + '…' : t; };
 
     const nodesSVG = connections.map((conn, i) => {
       const angle = startAngle + i * angleStep;
       const nx = cx + orbitR * Math.cos(angle);
       const ny = cy + orbitR * Math.sin(angle);
-      const label = conn.label || conn || '';
-      const detail = conn.detail || '';
+      const label = capLabel(conn.label || conn || '');
+      const detail = capDetail(conn.detail || '');
 
       const margin = nodeW / 2 + 6;
       const clampedNx = Math.max(margin, Math.min(W - margin, nx));
@@ -8055,9 +8062,9 @@ const SVG_RENDERERS = {
         <line x1="${lx1.toFixed(1)}" y1="${ly1.toFixed(1)}" x2="${lx2.toFixed(1)}" y2="${ly2.toFixed(1)}" stroke="${accentColor}" stroke-width="2" opacity="0.5" stroke-dasharray="4,3"/>
         <rect x="${(clampedNx - nodeW/2).toFixed(1)}" y="${(clampedNy - nodeH/2).toFixed(1)}" width="${nodeW}" height="${nodeH}" rx="${DT.RAD}" fill="white" stroke="${accentColor}" stroke-width="2"/>
         <foreignObject x="${(clampedNx - nodeW/2 + 5).toFixed(1)}" y="${(clampedNy - nodeH/2 + 4).toFixed(1)}" width="${nodeW - 10}" height="${nodeH - 8}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:${DT.FONT};font-size:${DT.CAPTION}px;font-weight:700;color:${DT.PRIMARY};text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;width:${nodeW-10}px;height:${nodeH-8}px;word-wrap:break-word;overflow:visible;line-height:1.3">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:${DT.FONT};font-size:${DT.CAPTION}px;font-weight:700;color:${DT.PRIMARY};text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;width:${nodeW-10}px;height:${nodeH-8}px;word-wrap:break-word;overflow:hidden;line-height:1.25">
             <span style="display:block">${label}</span>
-            ${detail ? `<span style="font-weight:400;font-size:12px;color:${DT.SECONDARY};display:block;margin-top:2px">${detail}</span>` : ''}
+            ${detail ? `<span style="font-weight:400;font-size:11px;color:${DT.SECONDARY};display:block;margin-top:3px;line-height:1.25">${detail}</span>` : ''}
           </div>
         </foreignObject>`;
     }).join('');
