@@ -1,0 +1,578 @@
+[
+  {
+    "code": "B1.1",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "engage in dramatic play and role play, with a focus on exploring a variety of sources from diverse communities, times, and places"
+  },
+  {
+    "code": "B1.2",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of the element of character by adopting thoughts, feelings, and gestures relevant to the role being played"
+  },
+  {
+    "code": "B1.3",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "plan and shape dramatic play by building on the ideas of others, both in and out of role"
+  },
+  {
+    "code": "B1.4",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "communicate feelings and ideas to a familiar audience"
+  },
+  {
+    "code": "B2.1",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "express feelings and ideas about a drama experience or performance in a variety of ways, making personal connections to the characters and themes in the story"
+  },
+  {
+    "code": "B2.2",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "demonstrate an understanding of how the element of character/role is used in shared classroom drama experiences and theatre to"
+  },
+  {
+    "code": "B2.3",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "identify and give examples of their strengths, interests, and areas for improvement as drama participants and audience members"
+  },
+  {
+    "code": "B3.1",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "identify and describe drama and theatre forms, events, and activities that they experience in their home, school, and community"
+  },
+  {
+    "code": "B3.2",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "demonstrate an awareness of a variety of roles, themes, and subjects in dramas and stories from different communities around the world"
+  },
+  {
+    "code": "B1.1",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "engage in dramatic play and role play, with a focus on exploring main ideas and central characters in stories from diverse communities, times, and places"
+  },
+  {
+    "code": "B1.2",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of the element of role by communicating thoughts, feelings, and perspectives appropriate to the role being played"
+  },
+  {
+    "code": "B1.3",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "plan and shape the direction of a dramatic play or role play, building on their own and others’ ideas both in and out of role, with support"
+  },
+  {
+    "code": "B1.4",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "communicate feelings and ideas to a familiar audience"
+  },
+  {
+    "code": "B2.1",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "express thoughts, feelings, and ideas about drama experiences and performances in a variety of ways"
+  },
+  {
+    "code": "B2.2",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "identify, using drama terminology, the elements and conventions of drama used in shared drama experiences and theatre and describe how they help communicate ideas and feelings and create interest"
+  },
+  {
+    "code": "B2.3",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "identify and give examples of their strengths, interests, and areas for improvement as drama participants and audience members"
+  },
+  {
+    "code": "B3.1",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "identify and describe a variety of drama and theatre forms they experience in their home, school, and community, and in the media"
+  },
+  {
+    "code": "B3.2",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "demonstrate an awareness of some drama and theatre traditions of communities around the world"
+  },
+  {
+    "code": "B1.1",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "engage in dramatic play and role play, with a focus on exploring themes, ideas, characters, and issues from imagination or in stories from diverse communities, times, and places"
+  },
+  {
+    "code": "B1.2",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of how the element of time and place can support the development of role"
+  },
+  {
+    "code": "B1.3",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "plan and shape the direction of a dramatic play or role play by building on their own and others’ ideas, both in and out of role"
+  },
+  {
+    "code": "B1.4",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "communicate feelings and ideas to a familiar audience"
+  },
+  {
+    "code": "B2.1",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "express thoughts, feelings, and ideas about a variety of drama experiences and performances"
+  },
+  {
+    "code": "B2.2",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "describe, using drama terminology, how elements and conventions of drama are used to shape their own and others’ work"
+  },
+  {
+    "code": "B2.3",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "identify and give examples of their strengths, interests, and areas for growth as drama participants and audience members"
+  },
+  {
+    "code": "B3.1",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "identify some distinct stylistic features of a few drama and theatre forms they experience in their home, school, and community, and in the media"
+  },
+  {
+    "code": "B3.2",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "demonstrate an awareness of ideas and emotions expressed in drama works from communities around the world"
+  },
+  {
+    "code": "B1.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "engage actively in drama exploration and role play, with a focus on exploring drama structures, key ideas, and pivotal moments in their own stories and stories from diverse communities, times, and places"
+  },
+  {
+    "code": "B1.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of the element of role by selectively using a few other elements of drama"
+  },
+  {
+    "code": "B1.3",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "plan and shape the direction of the drama or role play by posing questions and working with others to find solutions, both in and out of role"
+  },
+  {
+    "code": "B1.4",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "communicate thoughts, feelings, and ideas to a specific audience, using audio, visual, and/or technological aids to enhance their drama work"
+  },
+  {
+    "code": "B2.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "express personal responses and make connections to characters, themes, and issues presented in their own and others’ drama works"
+  },
+  {
+    "code": "B2.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "explain, using drama terminology, how elements and drama conventions are used to produce specific effects and/or audience responses in their own and others’ drama works"
+  },
+  {
+    "code": "B2.3",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "identify and give examples of their strengths, interests, and areas for growth as drama participants and audience members"
+  },
+  {
+    "code": "B3.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "identify and describe some similarities in the purposes of process drama and more formal, traditional theatre productions"
+  },
+  {
+    "code": "B3.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "demonstrate an awareness of different kinds of drama and theatre from different times and places and of how they reflect their contexts"
+  },
+  {
+    "code": "B1.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "engage actively in drama exploration and role play, with a focus on examining issues and themes in fiction and non-fiction sources from diverse communities, times, and places"
+  },
+  {
+    "code": "B1.2",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of the element of role by selectively using some other elements of drama"
+  },
+  {
+    "code": "B1.3",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "plan and shape the direction of the drama or role play by collaborating with others to develop ideas, both in and out of role"
+  },
+  {
+    "code": "B1.4",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "communicate thoughts, feelings, and ideas to a specific audience, using audio, visual, and/or technological aids to achieve specific dramatic effects"
+  },
+  {
+    "code": "B2.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "express personal responses and make connections to characters, themes, and issues presented in their own and others’ drama works"
+  },
+  {
+    "code": "B2.2",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "explain, using drama terminology, how different elements are used to communicate and reinforce the intended message in their own and others’ drama works"
+  },
+  {
+    "code": "B2.3",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "identify and give examples of their strengths, interests, and areas for improvement as drama creators, performers, and audience members"
+  },
+  {
+    "code": "B3.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "describe forms of process drama, theatre, storytelling, and visual representation from diverse communities around the world, and explain how they may reflect some beliefs and traditions of their communities"
+  },
+  {
+    "code": "B3.2",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "demonstrate an understanding of the broader world of drama and theatre by identifying and describing the roles and responsibilities of key theatre personnel"
+  },
+  {
+    "code": "B1.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "engage actively in drama exploration and role play, with a focus on identifying and examining a range of issues, themes, and ideas from a variety of fiction and non-fiction sources and diverse communities, times, and places"
+  },
+  {
+    "code": "B1.2",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of the element of role by selectively using other elements"
+  },
+  {
+    "code": "B1.3",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "plan and shape the direction of the drama or role play by introducing new perspectives and ideas, both in and out of role"
+  },
+  {
+    "code": "B1.4",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "communicate feelings, thoughts, and ideas to a specific audience, using audio, visual, and/or technological aids to strengthen the impact on the viewer"
+  },
+  {
+    "code": "B2.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "express personal responses and preferences and make connections to themes and issues presented in their own and others’ drama works"
+  },
+  {
+    "code": "B2.2",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "identify a favourite scene and give reasons for their preference, using correct drama terminology to describe how the elements of drama contribute to its effectiveness"
+  },
+  {
+    "code": "B2.3",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "identify and give examples of their strengths, interests, and areas for improvement as drama creators, performers, and audience members"
+  },
+  {
+    "code": "B3.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "demonstrate an understanding of some drama and theatre themes and traditions from a variety of times, communities, and places"
+  },
+  {
+    "code": "B3.2",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "identify and describe key contributions drama and theatre make to the community"
+  },
+  {
+    "code": "B1.1",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "engage actively in drama exploration and role play, with a focus on examining multiple perspectives related to current issues, themes, and relationships from a wide variety of sources and diverse communities"
+  },
+  {
+    "code": "B1.2",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of the elements of drama by selecting and combining several elements and conventions to create dramatic effects"
+  },
+  {
+    "code": "B1.3",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "plan and shape the direction of the drama by working with others, both in and out of role, to generate ideas and explore multiple perspectives"
+  },
+  {
+    "code": "B1.4",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "communicate feelings, thoughts, and abstract ideas through drama works, using audio, visual, and/or technological aids to heighten the dramatic experience"
+  },
+  {
+    "code": "B2.1",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "construct personal interpretations of drama works, connecting drama issues and themes to their own and others’ ideas, feelings, and experiences"
+  },
+  {
+    "code": "B2.2",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "analyse and describe, using drama terminology, how drama elements are used to communicate meaning in a variety of drama works and shared drama experiences"
+  },
+  {
+    "code": "B2.3",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "identify and give examples of their strengths, interests, and areas for improvement as drama creators, performers, and audience members"
+  },
+  {
+    "code": "B3.1",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "compare and contrast how social values are communicated in several different drama forms and/or styles of live theatre from different times and places"
+  },
+  {
+    "code": "B3.2",
+    "grade": 7,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "identify and describe several ways in which drama and theatre"
+  },
+  {
+    "code": "B1.1",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "engage actively in drama exploration and role play, with a focus on examining multiple perspectives and possible outcomes related to complex issues, themes, and relationships from a wide variety of sources and diverse communities"
+  },
+  {
+    "code": "B1.2",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of the elements of drama by selecting and manipulating multiple elements and conventions to create and enhance a variety of drama works and shared drama experiences"
+  },
+  {
+    "code": "B1.3",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "plan and shape the direction of the drama by negotiating ideas and perspectives with others, both in and out of role"
+  },
+  {
+    "code": "B1.4",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Creating and Presenting",
+    "overall": "B1",
+    "desc": "communicate feelings, thoughts, and abstract ideas through drama works, using audio, visual, and/or technological aids for specific purposes and audiences"
+  },
+  {
+    "code": "B2.1",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "construct personal interpretations of drama works, connecting drama issues and themes to social concerns at both the local and global level"
+  },
+  {
+    "code": "B2.2",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "evaluate, using drama terminology, how effectively drama works and shared drama experiences use the elements of drama to engage the audience and communicate a theme or message"
+  },
+  {
+    "code": "B2.3",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "B2",
+    "desc": "identify and give examples of their strengths, interests, and areas for improvement as drama creators, performers, and audience members"
+  },
+  {
+    "code": "B3.1",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "analyse the influence of the media on a wide variety of drama forms and/or styles of live theatre"
+  },
+  {
+    "code": "B3.2",
+    "grade": 8,
+    "strand": "B",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "B3",
+    "desc": "identify and describe a wide variety of ways in which drama and theatre make or have made contributions to social, cultural, and economic life in a variety of times and places"
+  }
+]

@@ -1,0 +1,1698 @@
+[
+  {
+    "code": "A1.1",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "describe how and why a person’s roles, relationships, and responsibilities, in relation to others and to the environment, may change in different places or situations and at different times"
+  },
+  {
+    "code": "A1.2",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "describe how some significant events in their lives"
+  },
+  {
+    "code": "A1.3",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "compare some of the significant events in their own lives and/or the lives of their family members with those in the lives of their peers"
+  },
+  {
+    "code": "A1.4",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "describe the impact that people can have on each other in some different situations"
+  },
+  {
+    "code": "A1.5",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "identify some of the ways in which First Nations, Métis, and Inuit individuals and communities are reclaiming and revitalizing aspects of their identity that were lost or taken away due to colonization, including the residential school system"
+  },
+  {
+    "code": "A2.1",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "formulate questions to guide investigations into some aspects of the interrelationship between events, people, and/or places in their lives and their own roles, relationships, responsibilities, and identity/sense of self"
+  },
+  {
+    "code": "A2.2",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "gather and organize information on significant events, people, and/or places in their lives that contribute or have contributed to the development of their roles, relationships, responsibilities, and identity/sense of self"
+  },
+  {
+    "code": "A2.3",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "analyse and construct simple maps as part of their investigations into places that are significant to them or to their family"
+  },
+  {
+    "code": "A2.4",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "interpret and analyse information relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "A2.5",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "evaluate evidence and draw conclusions about some aspects of the interrelationship between events, people, and/or places in their lives and their own roles, relationships, responsibilities, and identity/sense of self"
+  },
+  {
+    "code": "A2.6",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "communicate the results of their inquiries, using appropriate vocabulary"
+  },
+  {
+    "code": "A3.1",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe some of their own roles, relationships, and responsibilities"
+  },
+  {
+    "code": "A3.2",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify some of the significant people, places, and things in their life, including their life in the community"
+  },
+  {
+    "code": "A3.3",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "demonstrate an understanding of simple chronology by identifying and organizing chronologically some significant events related to their personal experience"
+  },
+  {
+    "code": "A3.4",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify some elements of positive and inclusive behaviour and actions that they can practise in their everyday life"
+  },
+  {
+    "code": "A3.5",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "demonstrate an understanding that it is important to treat other people and the environment with respect"
+  },
+  {
+    "code": "B1.1",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "describe some of the ways in which people interact with the natural environment and the built features of, and human services in, the local community to meet their needs, and what might happen if these features/services did not exist"
+  },
+  {
+    "code": "B1.2",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "identify some services and service-related occupations in their community"
+  },
+  {
+    "code": "B1.3",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "create a plan that outlines some specific ways in which they can responsibly interact with the built and/or natural environment in the local community"
+  },
+  {
+    "code": "B2.1",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "formulate questions to guide investigations into some aspects of the interrelationship between people and the natural and built features of their community, with a focus on some of the short- and long-term effects of this interrelationship"
+  },
+  {
+    "code": "B2.2",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "gather and organize information on the interrelationship between people and the natural and built features of their community, and on the effects of this interrelationship, using sources that they have located themselves or that have been provided to them"
+  },
+  {
+    "code": "B2.3",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "analyse maps, and construct simple maps using appropriate elements, as part of their investigations into the interrelationship between people and significant natural and built features in their community"
+  },
+  {
+    "code": "B2.4",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "interpret and analyse information and data relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "B2.5",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "evaluate evidence and draw conclusions about some aspects of the interrelationship between people and natural and built features of their local community, and some of the effects of this interrelationship"
+  },
+  {
+    "code": "B2.6",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "communicate the results of their inquiries using appropriate vocabulary"
+  },
+  {
+    "code": "B3.1",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify the traditional Indigenous and treaty territory or territories on which their school is located"
+  },
+  {
+    "code": "B3.2",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify some of the natural and built features of their community"
+  },
+  {
+    "code": "B3.3",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify some distinct areas in the local community"
+  },
+  {
+    "code": "B3.4",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe the location of some significant places in their community, using relative location"
+  },
+  {
+    "code": "B3.5",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "demonstrate an understanding of the basic elements of a map"
+  },
+  {
+    "code": "B3.6",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "demonstrate an understanding of some common non-standard units of measurement"
+  },
+  {
+    "code": "B3.7",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "demonstrate the ability to construct simple maps of places they have visited, using symbols and non-standard units"
+  },
+  {
+    "code": "B3.8",
+    "grade": 1,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify some of the services in the community for which the government and/or community is responsible"
+  },
+  {
+    "code": "A1.1",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "compare ways in which some traditions have been celebrated over multiple generations in their family"
+  },
+  {
+    "code": "A1.2",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "compare their family structure and some of their traditions and celebrations with those of their peers’ families"
+  },
+  {
+    "code": "A1.3",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "compare some of the past and present traditions and celebrations of various ethnocultural groups in their local community, and identify some of the main reasons for the change"
+  },
+  {
+    "code": "A1.4",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "identify some ways in which First Nations, Métis, and/or Inuit individuals, communities, and nations are reclaiming traditions, customs, teachings, and celebrations"
+  },
+  {
+    "code": "A2.1",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "formulate questions to guide investigations into some of the past and present traditions and celebrations in their own family and the communities to which they belong"
+  },
+  {
+    "code": "A2.2",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "gather and organize information on some of the past and present traditions and celebrations within their family and the community to which they belong, using primary and/or secondary sources that they have gathered themselves or that have been provided to them"
+  },
+  {
+    "code": "A2.3",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "analyse and construct simple maps as part of their investigations into past and present traditions and celebrations in their local community"
+  },
+  {
+    "code": "A2.4",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "interpret and analyse information relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "A2.5",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "evaluate evidence and draw conclusions about past and present traditions and celebrations in their own families and the communities to which they belong"
+  },
+  {
+    "code": "A2.6",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "communicate the results of their inquiries, using appropriate vocabulary"
+  },
+  {
+    "code": "A3.1",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify and describe different types of families"
+  },
+  {
+    "code": "A3.2",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify various groups in their community"
+  },
+  {
+    "code": "A3.3",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify places and/or countries of personal or familial significance, and locate them on a globe and/or print, digital, or interactive map"
+  },
+  {
+    "code": "A3.4",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe some significant traditions and celebrations of their families, their peers, and their own communities, as well as of some other communities in Canada, including First Nations, Métis, and/or Inuit communities"
+  },
+  {
+    "code": "A3.5",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "demonstrate an understanding of simple chronology by identifying and organizing chronologically some important events and/or people from multiple generations in their family and/or community"
+  },
+  {
+    "code": "A3.6",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify some ways in which heritage is passed on through various community celebrations, traditions, teachings, ceremonies, and events"
+  },
+  {
+    "code": "A3.7",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify some ways in which heritage is passed on through various family celebrations and practices, including at least one First Nation, Métis, and/or Inuit family celebration or practice"
+  },
+  {
+    "code": "B1.1",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "compare selected communities from around the world, including their own community, in terms of the lifestyles of people in those communities and some ways in which the people meet their needs"
+  },
+  {
+    "code": "B1.2",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "describe some of the ways in which two or more distinct communities have adapted to their location, climate, and physical features"
+  },
+  {
+    "code": "B1.3",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "demonstrate an understanding of the importance of sustainability in people’s interrelationship with their natural environment and of some of the consequences of sustainable and/or non-sustainable actions"
+  },
+  {
+    "code": "B2.1",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "formulate questions to guide investigations into some aspects of the interrelationship between the natural environment of selected communities, including at least one contemporary First Nation, Métis, or Inuit community, and the ways in which people live"
+  },
+  {
+    "code": "B2.2",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "gather and organize information and data about some communities’ locations, climate, and physical features, and the ways of life of people in these communities, including at least one contemporary First Nation, Métis, or Inuit community"
+  },
+  {
+    "code": "B2.3",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "analyse and construct simple maps to determine and illustrate patterns in the interrelationship between the location of some communities and human activities in those communities"
+  },
+  {
+    "code": "B2.4",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "interpret and analyse information relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "B2.5",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "evaluate evidence and draw conclusions about some aspects of the interrelationship between communities’ natural environment and the ways of life of people in those communities, including at least one contemporary First Nation, Métis, or Inuit community"
+  },
+  {
+    "code": "B2.6",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "communicate the results of their inquiries, using appropriate vocabulary"
+  },
+  {
+    "code": "B3.1",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "demonstrate an understanding that there are a variety of countries, continents, physical features, and bodies of water around the world and that their locations can be represented in different ways"
+  },
+  {
+    "code": "B3.2",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify continents, significant bodies of water, the equator, poles, and hemispheres, using a globe, print, digital, or interactive maps, and/or a mapping program"
+  },
+  {
+    "code": "B3.3",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify cardinal directions on a map (i.e., N, S, E, W), and use these directions when locating selected communities, countries, and/or continents"
+  },
+  {
+    "code": "B3.4",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify the location of selected countries, cities, and/or towns around the world, including at least one contemporary First Nation, Métis, or Inuit community, and describe how their location and climate are related"
+  },
+  {
+    "code": "B3.5",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "demonstrate the ability to extract information on the location and climate of a region from photographs and print, digital, and/or interactive maps"
+  },
+  {
+    "code": "B3.6",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify basic human needs (e.g., for food, water, clothing, transportation, shelter), and describe some ways in which people in communities around the world meet these needs (e.g., food: hunting, fishing, farming, shopping at grocery stores; water: taps, water treatment facilities, wells, rivers, freshwater lakes; transportation: on foot, using animals, using motorized vehicles, using bicycles, by water)"
+  },
+  {
+    "code": "B3.7",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe selected communities around the world, including at least one contemporary First Nation, Métis, or Inuit community, with reference to their major physical features, wildlife, and some aspects of their culture"
+  },
+  {
+    "code": "B3.8",
+    "grade": 2,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe similarities and differences between their community and a community in a different region in the world"
+  },
+  {
+    "code": "A1.1",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "describe some of the similarities and differences in various aspects of everyday life"
+  },
+  {
+    "code": "A1.2",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "compare what life was like between 1780 and 1850 in a few First Nations, Métis, and Inuit communities"
+  },
+  {
+    "code": "A1.3",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "compare some of the roles of and challenges facing people living in Canada between 1780 and 1850 with those in the present day, including people in a few First Nations, Métis, and/or Inuit communities"
+  },
+  {
+    "code": "A1.4",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "identify some key components of identity in Canada today, including First Nations, Métis, and Inuit identity"
+  },
+  {
+    "code": "A2.1",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "formulate questions to guide investigations into some of the major challenges facing various groups and communities in Canada from around 1780 to 1850"
+  },
+  {
+    "code": "A2.2",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "gather and organize information on major challenges facing various groups and communities, including at least one First Nation, Métis, or Inuit community, and on measures taken to address these challenges, using a variety of primary and/or secondary sources"
+  },
+  {
+    "code": "A2.3",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "analyse and construct print and digital maps, including thematic maps, as part of their investigations into challenges facing various groups and communities, including at least one First Nation, Métis, or Inuit community, in Canada during this period, and measures taken to address these challenges"
+  },
+  {
+    "code": "A2.4",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "interpret and analyse information relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "A2.5",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "evaluate evidence and draw conclusions about some of the major challenges facing various groups and communities in Canada, including at least one First Nation, Métis, or Inuit community, during this period, and measures taken to overcome these challenges"
+  },
+  {
+    "code": "A2.6",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "communicate the results of their inquiries using appropriate vocabulary"
+  },
+  {
+    "code": "A3.1",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify various First Nations and some Métis communities in Upper and Lower Canada from 1780 to 1850, including those living in traditional territory and those who moved or were forced to relocate to new areas in response to European settlement, and locate the areas where they lived, using print, digital, and/or interactive maps or a mapping program"
+  },
+  {
+    "code": "A3.2",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify various settler communities in Canada during this period"
+  },
+  {
+    "code": "A3.3",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify some of the main factors that helped shape the development of settlements in Canada, including First Nations, Métis, and Inuit communities, during this period"
+  },
+  {
+    "code": "A3.4",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe some of the major challenges facing communities in Canada during this period, including at least one First Nation, Métis, or Inuit community"
+  },
+  {
+    "code": "A3.5",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe the impact of some different kinds of settlements"
+  },
+  {
+    "code": "A3.6",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe some key aspects of life in selected First Nations, Métis, and settler communities in Canada during this period, including the roles of men, women, and children"
+  },
+  {
+    "code": "A3.7",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify a few key treaties relevant to Indigenous people in their region during this period, including wampum belts exchanged"
+  },
+  {
+    "code": "A3.8",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe how some different communities in Canada related to each other during this period, with a focus on whether the relationships were characterized by conflict or cooperation"
+  },
+  {
+    "code": "B1.1",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "describe some major connections between features of the natural environment of a region and the type of land use and/or the type of community that is established in that region"
+  },
+  {
+    "code": "B1.2",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "describe some major connections between features of the natural environment and the type of employment that is available in a region, with reference to two or more municipal regions, including First Nations communities and/or Métis regions, in Ontario"
+  },
+  {
+    "code": "B1.3",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "identify and describe some of the main patterns in population distribution and land use in two or more municipal regions in Ontario, including First Nations communities and/or Métis regions, using mapping and globe skills"
+  },
+  {
+    "code": "B2.1",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "formulate questions to guide investigations into some of the short- and/or long-term effects on the environment of different types of land and/or resource use in two or more municipal regions of Ontario, including First Nations communities and/or Métis regions"
+  },
+  {
+    "code": "B2.2",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "gather and organize a variety of data and information on the environmental effects of different land and/or resource use and measures taken to reduce the negative impact of that use"
+  },
+  {
+    "code": "B2.3",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "analyse and construct print and digital maps, including thematic maps, as part of their investigations into the environmental impact of land and/or resource use in different municipal regions, including First Nations communities and/or Métis regions"
+  },
+  {
+    "code": "B2.4",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "interpret and analyse information and data relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "B2.5",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "evaluate evidence and draw conclusions about some of the short- and long-term effects on the environment of different types of land use in municipal regions of Ontario, including First Nations communities and/or Métis regions, and about key measures to reduce the negative impact of that use"
+  },
+  {
+    "code": "B2.6",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "communicate the results of their inquiries, using appropriate vocabulary"
+  },
+  {
+    "code": "B3.1",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "demonstrate an understanding that Ontario is divided into different municipal or regional entities (i.e., cities, towns, townships, villages, counties, First Nations communities, Métis regions), and that local governments within these entities provide specific services and regulate development according to local needs"
+  },
+  {
+    "code": "B3.2",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "demonstrate an understanding that political maps, both print and digital, use different typographical styles to indicate different types of entities"
+  },
+  {
+    "code": "B3.3",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify the major landform regions in Ontario"
+  },
+  {
+    "code": "B3.4",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify and describe the main types of employment that are available in two or more municipal regions in Ontario, including First Nations communities and/or Métis regions"
+  },
+  {
+    "code": "B3.5",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe major types of land use (e.g., for agriculture, industry, commerce, housing, recreation, transportation, conservation) and how they address human needs and wants (e.g., agricultural lands provide us with a variety of foods for local consumption and export; lakes provide traditional foods like fish and wild rice; the forest offers plant medicines; land use for recreation enables people to enjoy the outdoors and to participate in or watch sports and other activities; residential areas have different types of buildings to meet people’s housing needs; conservation lands protect ecosystems and habitat for organisms so that biodiversity is preserved for future generations; untouched wetlands help ensure clean water and a healthy habitat)"
+  },
+  {
+    "code": "B3.6",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "compare some aspects of land use in two or more municipalities, including First Nations communities and/or Métis regions"
+  },
+  {
+    "code": "B3.7",
+    "grade": 3,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "construct print and/or digital maps that show some different land uses, landform regions, and/or municipalities in Ontario, including First Nations communities and/or Métis regions, using appropriate elements of a map, including standard units of measurement"
+  },
+  {
+    "code": "A1.1",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "compare social organization (e.g., social classes, general political structure, inherited privilege, the status of women) in a few early societies, including at least one First Nation and one Inuit society (e.g., a slave-owning and a feudal society; a matrilineal First Nation and a society in medieval Asia)"
+  },
+  {
+    "code": "A1.2",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "compare aspects of the daily lives of different groups within a few early societies, including at least one First Nation and one Inuit society"
+  },
+  {
+    "code": "A1.3",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "describe some of the ways in which their daily life differs from the lives of young people from different backgrounds"
+  },
+  {
+    "code": "A1.4",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "compare a few early societies, including at least one First Nation and one Inuit society, in terms of their relationship with the environment"
+  },
+  {
+    "code": "A2.1",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "formulate questions to guide investigations into ways of life and relationships with the environment in a few early societies, including at least one First Nation and one Inuit society, with an emphasis on aspects of the interrelationship between the environment and life in those societies"
+  },
+  {
+    "code": "A2.2",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "gather and organize information on ways of life and relationships with the environment in a few early societies, including at least one First Nation and one Inuit society, using a variety of primary and secondary sources in both print and electronic formats"
+  },
+  {
+    "code": "A2.3",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "analyse and construct print and/or digital maps, including thematic maps, as part of their investigations into interrelationships between the environment and life in a few early societies, including at least one First Nation and one Inuit society"
+  },
+  {
+    "code": "A2.4",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "interpret and analyse information relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "A2.5",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "evaluate evidence and draw conclusions about ways of life and relationships with the environment in a few early societies, including at least one First Nation and one Inuit society, with an emphasis on aspects of the interrelationship between the environment and life in those societies"
+  },
+  {
+    "code": "A2.6",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "communicate the results of their inquiries, using appropriate vocabulary"
+  },
+  {
+    "code": "A3.1",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify the location of some early societies, including at least one First Nation and one Inuit society, on a globe or on print, digital, and/or interactive maps, and demonstrate the ability to extract information on early societies’ relationship with the environment from thematic maps"
+  },
+  {
+    "code": "A3.2",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "demonstrate the ability to extract information on daily life in a few early societies, including at least one First Nation and one Inuit society, from visual evidence"
+  },
+  {
+    "code": "A3.3",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe significant aspects of daily life in a few early societies, including at least one First Nation and one Inuit society"
+  },
+  {
+    "code": "A3.4",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe significant physical features and natural processes and events in a few early societies, including at least one First Nation and one Inuit society"
+  },
+  {
+    "code": "A3.5",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe the importance of the environment for a few early societies, including at least one First Nation and one Inuit society, with a particular focus on how the local environment affected the ways in which people met their physical needs"
+  },
+  {
+    "code": "A3.6",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify and describe some of the major scientific and technological developments in the ancient and medieval world, including some from at least one First Nation and one Inuit society"
+  },
+  {
+    "code": "A3.7",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe how a few early societies, including at least one First Nation and one Inuit society, were governed"
+  },
+  {
+    "code": "A3.8",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe the social organization of a few different types of early societies, including at least one First Nation and one Inuit society"
+  },
+  {
+    "code": "A3.9",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe some key reasons why different groups in a few early societies, including at least one First Nation and one Inuit society, cooperated or came into conflict at different times"
+  },
+  {
+    "code": "A3.10",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe some attempts within a few early societies, including at least one First Nation and one Inuit society, to deal with conflict and to establish greater cooperation"
+  },
+  {
+    "code": "B1.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "analyse some of the general ways in which the natural environment of regions in Canada has affected the development of industry"
+  },
+  {
+    "code": "B1.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "assess aspects of the environmental impact of different industries in two or more physical and/or political regions of Canada"
+  },
+  {
+    "code": "B1.3",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "describe some key actions taken by both industries and citizens to address the need for more sustainable use of land and resources"
+  },
+  {
+    "code": "B2.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "formulate questions to guide investigations into some of the issues and challenges associated with balancing human needs/wants and activities with environmental stewardship in one or more of the political and/or physical regions of Canada"
+  },
+  {
+    "code": "B2.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "gather and organize information and data from various sources to investigate issues and challenges associated with balancing human needs/wants and activities with environmental stewardship in one or more of the political and/or physical regions of Canada"
+  },
+  {
+    "code": "B2.3",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "analyse and construct print and/or digital maps, including thematic maps, as part of their investigations into balancing human needs/wants and activities with environmental stewardship in Canada"
+  },
+  {
+    "code": "B2.4",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "interpret and analyse information and data related to their investigations, using a variety of tools"
+  },
+  {
+    "code": "B2.5",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "evaluate evidence and draw conclusions about issues and challenges associated with balancing human needs/wants and activities with environmental stewardship in Canada"
+  },
+  {
+    "code": "B2.6",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "communicate the results of their inquiries using appropriate vocabulary"
+  },
+  {
+    "code": "B3.1",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify various physical regions in Canada"
+  },
+  {
+    "code": "B3.2",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify some of the main human activities, including industrial development and recreational activities, in various physical regions of Canada"
+  },
+  {
+    "code": "B3.3",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe the four main economic sectors (i.e., the primary sector is resource based, the secondary sector is based on manufacturing and processing, the tertiary sector is service based, the quaternary sector is information based), and identify some industries that are commonly associated with each sector"
+  },
+  {
+    "code": "B3.4",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify various types of political regions in Canada"
+  },
+  {
+    "code": "B3.5",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify Canada’s provinces and territories and their capital cities, and describe them with reference to their location and some of the peoples who live in them"
+  },
+  {
+    "code": "B3.6",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe significant opportunities and challenges related to quality of life in some of Canada’s political regions"
+  },
+  {
+    "code": "B3.7",
+    "grade": 4,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "demonstrate an understanding of cardinal and intermediate directions (i.e., NW, SW, NE, and SE), and use these directions as well as number and letter grids to locate selected political and physical regions of Canada on a variety of print and digital/interactive maps"
+  },
+  {
+    "code": "A1.1",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "describe some of the positive and negative consequences of contact between Indigenous peoples and European explorers and settlers in what would eventually become Canada"
+  },
+  {
+    "code": "A1.2",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "analyse aspects of contact between Indigenous peoples and European explorers and settlers in what would eventually become Canada to determine ways in which different parties benefited from each other"
+  },
+  {
+    "code": "A1.3",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "explain some of the ways in which interactions among Indigenous peoples, among European explorers and settlers, and between Indigenous and European people in what would eventually become Canada are connected to issues in present-day Canada"
+  },
+  {
+    "code": "A2.1",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "formulate questions to guide investigations into aspects of the interactions among Indigenous peoples, among Europeans, and between Indigenous and European people in what would eventually become Canada, from the perspectives of various groups involved"
+  },
+  {
+    "code": "A2.2",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "gather and organize information on interactions among Indigenous peoples, among Europeans, and between Indigenous and European people in what would eventually become Canada, using a variety of primary and secondary sources that present various perspectives"
+  },
+  {
+    "code": "A2.3",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "analyse and construct maps as part of their investigations into interactions among Indigenous peoples, among Europeans, and between Indigenous and European people in what would eventually become Canada"
+  },
+  {
+    "code": "A2.4",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "interpret and analyse information and evidence relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "A2.5",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "evaluate evidence and draw conclusions about aspects of the interactions among First Nations, Métis, and Inuit individuals and communities, among Europeans, and between Europeans and First Nations, Métis, and Inuit in what would eventually become Canada during this period, highlighting the perspectives of the different groups involved"
+  },
+  {
+    "code": "A2.6",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "communicate the results of their inquiries, using appropriate vocabulary"
+  },
+  {
+    "code": "A3.1",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify major Indigenous nations that came into contact with European settlers and/or explorers prior to 1713 in what would become Canada"
+  },
+  {
+    "code": "A3.2",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe some significant interactions among First Nations and between First Nations and Inuit before contact with Europeans"
+  },
+  {
+    "code": "A3.3",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe the main motives for Europeans’ exploration of Indigenous lands that were eventually claimed by Canada and for the establishment of permanent European settlements"
+  },
+  {
+    "code": "A3.4",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify significant offices and institutions in New France"
+  },
+  {
+    "code": "A3.5",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe significant aspects of the interactions between Indigenous peoples and European explorers and settlers in what would eventually become Canada"
+  },
+  {
+    "code": "A3.6",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe key factors that led to the ethnogenesis of the Métis people in what would eventually become Canada, with specific attention to the Great Lakes and Mattawa regions"
+  },
+  {
+    "code": "A3.7",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe some significant differences among Indigenous peoples and between selected Indigenous and European communities in what would eventually become Canada"
+  },
+  {
+    "code": "A3.8",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe some significant effects of European conflicts on Indigenous peoples and on what would eventually become Canada"
+  },
+  {
+    "code": "B1.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "assess the effectiveness of actions taken by one or more levels of government, including Indigenous governments, to address an issue of national, provincial/territorial, and/or local significance"
+  },
+  {
+    "code": "B1.2",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "create a plan of action to address a social issue of local, provincial/territorial, and/or national significance"
+  },
+  {
+    "code": "B1.3",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "create a plan of action to address an environmental issue of local, provincial/territorial, and/or national significance"
+  },
+  {
+    "code": "B2.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "formulate questions to guide investigations into social and/or environmental issues in Canada from various perspectives, including the perspective of Indigenous peoples and of the level (or levels) of government responsible for addressing the issues"
+  },
+  {
+    "code": "B2.2",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "gather and organize a variety of information and data that present various perspectives about Canadian social and/or environmental issues, including the perspectives of Indigenous peoples and of the level (or levels) of government responsible for addressing the issues"
+  },
+  {
+    "code": "B2.3",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "analyse and construct maps in various formats, including digital formats, as part of their investigations into social and/or environmental issues"
+  },
+  {
+    "code": "B2.4",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "interpret and analyse information and data relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "B2.5",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "evaluate evidence and draw conclusions about social and/or environmental issues, outlining the strengths and weaknesses of different perspectives on the issues, including the perspectives of Indigenous peoples and of the level (or levels) of government responsible for addressing the issues"
+  },
+  {
+    "code": "B2.6",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "communicate the results of their inquiries, using appropriate vocabulary"
+  },
+  {
+    "code": "B3.1",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe the major rights and responsibilities associated with citizenship in Canada"
+  },
+  {
+    "code": "B3.2",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe the jurisdiction of different levels of government in Canada, as well as of some other elected bodies (i.e., federal, provincial, territorial, and municipal governments; band councils; school boards), and some of the services provided by each"
+  },
+  {
+    "code": "B3.3",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe some First Nations, Métis, and Inuit governance structures that currently exist in Canada"
+  },
+  {
+    "code": "B3.4",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe the shared responsibility of various levels of government for providing some services and for dealing with selected social and environmental issues"
+  },
+  {
+    "code": "B3.5",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe different processes that governments can use to solicit input from the public"
+  },
+  {
+    "code": "B3.6",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "demonstrate a basic understanding of what is meant by the federal and provincial governments’ having a duty to consult and accommodate First Nations, Métis, and Inuit communities, and describe some circumstances in which this constitutional right for Indigenous peoples might apply"
+  },
+  {
+    "code": "B3.7",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe key actions taken by governments, including Indigenous governments, to solve some significant national, provincial/territorial, and/or local issues"
+  },
+  {
+    "code": "B3.8",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "explain why different groups may have different perspectives on specific social and environmental issues"
+  },
+  {
+    "code": "B3.9",
+    "grade": 5,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe some different ways in which citizens can take action to address social and environmental issues"
+  },
+  {
+    "code": "A1.1",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "explain how various features, including built, physical, and social features of communities, can contribute to identities in and images of a territory and/or country"
+  },
+  {
+    "code": "A1.2",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "analyse some of the contributions that various First Nations, Métis, and Inuit communities and individuals have made to Canada"
+  },
+  {
+    "code": "A1.3",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "analyse some of the contributions that various settler/newcomer groups have made to Canadian identities"
+  },
+  {
+    "code": "A1.4",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A1",
+    "desc": "explain how various groups and communities, including First Nations, Métis, and Inuit communities, have contributed to the goal of inclusiveness in Canada"
+  },
+  {
+    "code": "A2.1",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "formulate questions to guide investigations into different perspectives on the historical and/or contemporary experiences of a few distinct communities, including First Nations, Métis, and/or Inuit communities, in Canada"
+  },
+  {
+    "code": "A2.2",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "gather and organize information from a variety of primary and secondary sources"
+  },
+  {
+    "code": "A2.3",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "analyse and construct print and digital maps as part of their investigations into different perspectives on the historical and/or contemporary experience of communities, including First Nations, Métis, and/or Inuit communities, in Canada"
+  },
+  {
+    "code": "A2.4",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "interpret and analyse information and evidence relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "A2.5",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "evaluate evidence and draw conclusions about perspectives on the historical and/or contemporary experience of a few distinct communities, including First Nations, Métis, and/or Inuit communities, in Canada"
+  },
+  {
+    "code": "A2.6",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A2",
+    "desc": "communicate the results of their inquiries, using appropriate vocabulary"
+  },
+  {
+    "code": "A3.1",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify the traditional Indigenous and treaty territory or territories on which their community is located"
+  },
+  {
+    "code": "A3.2",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify the main reasons why different peoples migrated to Canada"
+  },
+  {
+    "code": "A3.3",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe some key economic, political, cultural, and social aspects of life in settler/newcomer communities in Canada"
+  },
+  {
+    "code": "A3.4",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify various types of communities in Canada and some ways in which they have contributed to the development of the country"
+  },
+  {
+    "code": "A3.5",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe significant events or developments in the history of two or more First Nations, Métis, and/or Inuit communities in Canada"
+  },
+  {
+    "code": "A3.6",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe significant events or developments in the history of two or more settler/newcomer communities in Canada"
+  },
+  {
+    "code": "A3.7",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe significant events or developments in the history of Jewish communities in Canada, including some of the ways they have contributed to Canada"
+  },
+  {
+    "code": "A3.8",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe interactions between communities in Canada, including between newcomers and groups that were already in the country"
+  },
+  {
+    "code": "A3.9",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify key differences, including social, cultural, and/or economic differences, between a few historical and/or contemporary communities, including at least one First Nations, Métis, or Inuit community, in Canada"
+  },
+  {
+    "code": "A3.10",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "describe significant changes within their own community in Canada"
+  },
+  {
+    "code": "A3.11",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Heritage and Identity",
+    "overall": "A3",
+    "desc": "identify and describe fundamental elements of Canadian identities"
+  },
+  {
+    "code": "B1.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "explain why Canada participates in specific international accords and organizations"
+  },
+  {
+    "code": "B1.2",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "analyse responses of Canadian governments, non-governmental organizations (NGOs), and individual citizens to an economic, environmental, political, and/or social issue of international significance"
+  },
+  {
+    "code": "B1.3",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B1",
+    "desc": "explain why some environmental issues are of international importance and require the participation of other regions of the world, along with that of Canada, if they are to be effectively addressed"
+  },
+  {
+    "code": "B2.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "formulate questions to guide investigations into global issues of political, social, economic, and/or environmental importance"
+  },
+  {
+    "code": "B2.2",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "gather and organize information on global issues of political, social, economic, and/or environmental importance, including their impact and responses to them, using a variety of resources and various technologies"
+  },
+  {
+    "code": "B2.3",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "analyse and construct different types of maps, both print and digital, as part of their investigations into global issues, their impact, and responses to them"
+  },
+  {
+    "code": "B2.4",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "interpret and analyse information and data relevant to their investigations, using a variety of tools"
+  },
+  {
+    "code": "B2.5",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "evaluate evidence and draw conclusions about global issues of political, social, economic, and/or environmental importance, their impact on the global community, and responses to the issues"
+  },
+  {
+    "code": "B2.6",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B2",
+    "desc": "communicate the results of their inquiries, using appropriate vocabulary"
+  },
+  {
+    "code": "B3.1",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify some of the major ways in which the Canadian government interacts with other nations of the world"
+  },
+  {
+    "code": "B3.2",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe Canada’s participation in different international accords, organizations, and/or programs"
+  },
+  {
+    "code": "B3.3",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe several groups or organizations through which Canada and Canadians are involved in global issues"
+  },
+  {
+    "code": "B3.4",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe the responses of the Canadian government and some NGOs to different disasters and emergencies around the world"
+  },
+  {
+    "code": "B3.5",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe the responses of the Canadian government to human rights violations during the Holocaust"
+  },
+  {
+    "code": "B3.6",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify some significant political, social, and economic interactions between Canada and other regions of the world, and describe some ways in which they affect these regions"
+  },
+  {
+    "code": "B3.7",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify and locate on a map countries and regions with which Canada has a significant interrelationship, and use longitude and latitude to locate cities in these countries/regions"
+  },
+  {
+    "code": "B3.8",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "identify countries/regions with which Canada has a significant economic relationship"
+  },
+  {
+    "code": "B3.9",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe significant economic effects on Canada and Canadians of interactions between Canada and other regions of the world"
+  },
+  {
+    "code": "B3.10",
+    "grade": 6,
+    "strand": "B",
+    "strand_name": "People and Environments",
+    "overall": "B3",
+    "desc": "describe some ways in which Canada’s interactions with other regions of the world have affected the environment"
+  }
+]

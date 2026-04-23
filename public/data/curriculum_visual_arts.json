@@ -1,0 +1,642 @@
+[
+  {
+    "code": "D1.1",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "create two-and three-dimensional works of art that express feelings and ideas inspired by personal experiences"
+  },
+  {
+    "code": "D1.2",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "demonstrate an understanding of composition, using principles of design to create narrative art works or art works on a theme or topic"
+  },
+  {
+    "code": "D1.3",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use elements of design in art works to communicate ideas, messages, and personal understandings"
+  },
+  {
+    "code": "D1.4",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use a variety of materials, tools, and techniques to respond to design challenges"
+  },
+  {
+    "code": "D2.1",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "express their feelings and ideas about art works and art experiences"
+  },
+  {
+    "code": "D2.2",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "explain how elements and principles of design are used to communicate meaning or understanding in their own and others’ art work"
+  },
+  {
+    "code": "D2.3",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "demonstrate an awareness of signs and symbols encountered in their daily lives and in works of art"
+  },
+  {
+    "code": "D2.4",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "identify and document their strengths, their interests, and areas for improvement as creators of art"
+  },
+  {
+    "code": "D3.1",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "identify and describe visual art forms that they see in their home, at school, in their community, and in visual arts experiences"
+  },
+  {
+    "code": "D3.2",
+    "grade": 1,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "demonstrate an awareness of a variety of works of art from diverse communities, times, and places"
+  },
+  {
+    "code": "D1.1",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "create two-and three-dimensional works of art that express feelings and ideas inspired by activities in their community or observations of nature"
+  },
+  {
+    "code": "D1.2",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "demonstrate an understanding of composition, using principles of design to create narrative art works or art works on a theme or topic"
+  },
+  {
+    "code": "D1.3",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use elements of design in art works to communicate ideas, messages, and understandings"
+  },
+  {
+    "code": "D1.4",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use a variety of materials, tools, and techniques to respond to design challenges"
+  },
+  {
+    "code": "D2.1",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "express their feelings and ideas about works of art"
+  },
+  {
+    "code": "D2.2",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "explain how elements and principles of design are used to communicate meaning or understanding in their own and others’ art work"
+  },
+  {
+    "code": "D2.3",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "demonstrate an awareness of signs and symbols encountered in their daily lives and in works of art"
+  },
+  {
+    "code": "D2.4",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "identify and document their strengths, their interests, and areas for improvement as creators of art"
+  },
+  {
+    "code": "D3.1",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "identify and describe a variety of visual art forms they see in their home, at school, in their community, and in visual arts experiences"
+  },
+  {
+    "code": "D3.2",
+    "grade": 2,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "demonstrate an awareness of a variety of works of art and artistic traditions from diverse communities, times, and places"
+  },
+  {
+    "code": "D1.1",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "create two-and three-dimensional works of art that express personal feelings and ideas inspired by the environment or that have the community as their subject"
+  },
+  {
+    "code": "D1.2",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "demonstrate an understanding of composition, using principles of design to create narrative art works or art works on a theme or topic"
+  },
+  {
+    "code": "D1.3",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use elements of design in art works to communicate ideas, messages, and understandings"
+  },
+  {
+    "code": "D1.4",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use a variety of materials, tools, and techniques to respond to design challenges"
+  },
+  {
+    "code": "D2.1",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "express personal feelings and ideas about art experiences and images"
+  },
+  {
+    "code": "D2.2",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "explain how elements and principles of design are used to communicate meaning or understanding in their own and others’ art work"
+  },
+  {
+    "code": "D2.3",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "demonstrate an awareness of the meaning of signs and symbols encountered in their daily lives and in works of art"
+  },
+  {
+    "code": "D2.4",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "identify and document their strengths, their interests, and areas for improvement as creators of art"
+  },
+  {
+    "code": "D3.1",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "identify and describe a variety of visual art forms they see in their home, at school, in the community, and in visual arts experiences"
+  },
+  {
+    "code": "D3.2",
+    "grade": 3,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "demonstrate an awareness of a variety of works of art and artistic traditions from diverse communities, times, and places"
+  },
+  {
+    "code": "D1.1",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "create two-and three-dimensional works of art that express feelings and ideas inspired by their interests and experiences"
+  },
+  {
+    "code": "D1.2",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "demonstrate an understanding of composition, using selected principles of design to create narrative art works or art works on a theme or topic"
+  },
+  {
+    "code": "D1.3",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use elements of design in art works to communicate ideas, messages, and understandings"
+  },
+  {
+    "code": "D1.4",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use a variety of materials, tools, and techniques to determine solutions to design challenges"
+  },
+  {
+    "code": "D2.1",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "interpret a variety of art works, and identify the feelings, issues, themes, and social concerns that they convey"
+  },
+  {
+    "code": "D2.2",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "analyse the use of elements and principles of design in a variety of art works, and explain how they are used to communicate meaning or understanding"
+  },
+  {
+    "code": "D2.3",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "demonstrate awareness of the meaning of signs, symbols, and styles in works of art"
+  },
+  {
+    "code": "D2.4",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "identify and document their strengths, their interests, and areas for improvement as creators and viewers of art"
+  },
+  {
+    "code": "D3.1",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "describe how visual art forms and styles represent various messages and contexts in the past and present"
+  },
+  {
+    "code": "D3.2",
+    "grade": 4,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "demonstrate an awareness of a variety of art forms, styles, and traditions, and describe how they reflect the diverse cultures, times, and places in which they were made"
+  },
+  {
+    "code": "D1.1",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "create two-and three-dimensional art works that express feelings and ideas inspired by their own and others’ points of view"
+  },
+  {
+    "code": "D1.2",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "demonstrate an understanding of composition, using selected principles of design to create narrative art works or art works on a theme or topic"
+  },
+  {
+    "code": "D1.3",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use elements of design in art works to communicate ideas, messages, and understandings"
+  },
+  {
+    "code": "D1.4",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use a variety of materials, tools, and techniques to determine solutions to design challenges"
+  },
+  {
+    "code": "D2.1",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "interpret a variety of art works and identify the feelings, issues, themes, and social concerns that they convey"
+  },
+  {
+    "code": "D2.2",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "explain how the elements and principles of design are used in their own and others’ art work to communicate meaning or understanding"
+  },
+  {
+    "code": "D2.3",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "demonstrate an understanding of how to read and interpret signs, symbols, and style in art works"
+  },
+  {
+    "code": "D2.4",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "identify and explain their strengths, their interests, and areas for improvement as creators, interpreters, and viewers of art"
+  },
+  {
+    "code": "D3.1",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "describe how forms and styles of visual and media arts represent various messages and contexts in the past and present"
+  },
+  {
+    "code": "D3.2",
+    "grade": 5,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "demonstrate an awareness of ways in which visual arts reflect the beliefs and traditions of a variety of peoples and of people in different times and places"
+  },
+  {
+    "code": "D1.1",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "create two-dimensional, three-dimensional, and multimedia art works that explore feelings, ideas, and issues from a variety of points of view"
+  },
+  {
+    "code": "D1.2",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "demonstrate an understanding of composition, using selected principles of design to create narrative art works or art works on a theme or topic"
+  },
+  {
+    "code": "D1.3",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use elements of design in art works to communicate ideas, messages, and understandings"
+  },
+  {
+    "code": "D1.4",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use a variety of materials, tools, techniques, and technologies to determine solutions to design challenges"
+  },
+  {
+    "code": "D2.1",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "interpret a variety of art works and identify the feelings, issues, themes, and social concerns that they convey"
+  },
+  {
+    "code": "D2.2",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "explain how the elements and principles of design are used in their own and others’ art work to communicate meaning or understanding"
+  },
+  {
+    "code": "D2.3",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "demonstrate an understanding of how to read and interpret signs, symbols, and style in art works"
+  },
+  {
+    "code": "D2.4",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "identify and explain their strengths, their interests, and areas for improvement as creators, interpreters, and viewers of art"
+  },
+  {
+    "code": "D3.1",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "identify and describe some of the ways in which art forms and styles reflect the beliefs and traditions of a variety of communities, times, and places"
+  },
+  {
+    "code": "D3.2",
+    "grade": 6,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "demonstrate an understanding of key contributions and functions of visual and media arts in various contexts at both the local and the national levels"
+  },
+  {
+    "code": "D1.1",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "create art works, using a variety of traditional forms and current media technologies, that express feelings, ideas, and issues, including opposing points of view"
+  },
+  {
+    "code": "D1.2",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "demonstrate an understanding of composition, using multiple principles of design and the “rule of thirds” to create narrative art works or art works on a theme or topic"
+  },
+  {
+    "code": "D1.3",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use elements of design in art works to communicate ideas, messages, and understandings for a specific audience and purpose"
+  },
+  {
+    "code": "D1.4",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use a variety of materials, tools, techniques, and technologies to determine solutions to increasingly complex design challenges"
+  },
+  {
+    "code": "D2.1",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "interpret a variety of art works and identify the feelings, issues, themes, and social concerns that they convey"
+  },
+  {
+    "code": "D2.2",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "explain how the elements and principles of design are used in their own and others’ art work to communicate meaning or understanding"
+  },
+  {
+    "code": "D2.3",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "demonstrate an understanding of how to read and interpret signs, symbols, and style in art works"
+  },
+  {
+    "code": "D2.4",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "identify and explain their strengths, their interests, and areas for improvement as creators, interpreters, and viewers of art"
+  },
+  {
+    "code": "D3.1",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "identify and describe some of the ways in which visual art forms and styles reflect the beliefs and traditions of a variety of cultures and civilizations"
+  },
+  {
+    "code": "D3.2",
+    "grade": 7,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "demonstrate an understanding of the function of visual and media arts in various contexts today and in the past, and of their influence on the development of personal and cultural identity"
+  },
+  {
+    "code": "D1.1",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "create art works, using a variety of traditional forms and current media technologies, that express feelings, ideas, and issues and that demonstrate an awareness of multiple points of view"
+  },
+  {
+    "code": "D1.2",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "demonstrate an understanding of composition, using multiple principles of design and other layout considerations such as compositional triangles to create narrative art works or art works on a theme or topic"
+  },
+  {
+    "code": "D1.3",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use elements of design in art works to communicate ideas, messages, and understandings for a specific audience and purpose"
+  },
+  {
+    "code": "D1.4",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Creating and Presenting",
+    "overall": "D1",
+    "desc": "use a variety of materials, tools, techniques, and technologies to determine solutions to increasingly complex design challenges"
+  },
+  {
+    "code": "D2.1",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "interpret a variety of art works and identify the feelings, issues, themes, and social concerns that they convey"
+  },
+  {
+    "code": "D2.2",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "analyse ways in which elements and principles of design are used in a variety of art works to communicate a theme or message, and evaluate the effectiveness of their use on the basis of criteria generated by the class"
+  },
+  {
+    "code": "D2.3",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "demonstrate an understanding of how to read and interpret signs, symbols, and style in art works"
+  },
+  {
+    "code": "D2.4",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "D2",
+    "desc": "identify and explain their strengths, their interests, and areas for improvement as creators, interpreters, and viewers of art"
+  },
+  {
+    "code": "D3.1",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "identify and explain some of the ways in which artistic traditions in a variety of times and places have been maintained, adapted, or appropriated"
+  },
+  {
+    "code": "D3.2",
+    "grade": 8,
+    "strand": "D",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "D3",
+    "desc": "identify and analyse some of the social, political, and economic factors that affect the creation of visual and media arts and the visual and media arts community"
+  }
+]

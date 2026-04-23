@@ -1,0 +1,642 @@
+[
+  {
+    "code": "C1.1",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "sing songs in unison and play simple accompaniments for music from a wide variety of diverse cultures, styles, and historical periods"
+  },
+  {
+    "code": "C1.2",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "apply the elements of music when singing, playing, and moving"
+  },
+  {
+    "code": "C1.3",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "create compositions for a specific purpose and a familiar audience"
+  },
+  {
+    "code": "C1.4",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "use the tools and techniques of musicianship in musical performances"
+  },
+  {
+    "code": "C1.5",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "demonstrate understanding that sounds can be represented by symbols"
+  },
+  {
+    "code": "C2.1",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "express initial reactions and personal responses to musical performances in a variety of ways"
+  },
+  {
+    "code": "C2.2",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "describe ways in which the elements of music are used for different purposes in the music they perform, listen to, and create"
+  },
+  {
+    "code": "C2.3",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify and give examples of their strengths and areas for growth as musical performers, creators, interpreters, and audience members"
+  },
+  {
+    "code": "C3.1",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "identify and describe musical experiences in their own lives"
+  },
+  {
+    "code": "C3.2",
+    "grade": 1,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "identify a variety of musical pieces from different cultures through performing and/or listening to them"
+  },
+  {
+    "code": "C1.1",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "sing unison songs in tune and/or play simple melodies and accompaniments for music from a wide variety of cultures, styles, and historical periods"
+  },
+  {
+    "code": "C1.2",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "apply the elements of music when singing, playing an instrument, and moving"
+  },
+  {
+    "code": "C1.3",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "create simple compositions for a specific purpose and a familiar audience"
+  },
+  {
+    "code": "C1.4",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "use the tools and techniques of musicianship in musical performances"
+  },
+  {
+    "code": "C1.5",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "use symbols to represent sounds and sounds to represent musical symbols"
+  },
+  {
+    "code": "C2.1",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "express personal responses to musical performances in a variety of ways"
+  },
+  {
+    "code": "C2.2",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "describe ways in which the elements of music are used for different purposes in the music they perform, listen to, and create"
+  },
+  {
+    "code": "C2.3",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify and give examples of their strengths and areas for growth as musical performers, creators, interpreters, and audience members"
+  },
+  {
+    "code": "C3.1",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "identify reasons why people make music in their daily lives"
+  },
+  {
+    "code": "C3.2",
+    "grade": 2,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "identify, through performing and/or listening, a variety of musical forms or pieces from different communities, times, and places"
+  },
+  {
+    "code": "C1.1",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "sing, in tune, unison songs, partner songs, and rounds, and/or play accompaniments from a wide variety of cultures, styles, and historical periods"
+  },
+  {
+    "code": "C1.2",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "apply the elements of music when singing, playing an instrument, and moving"
+  },
+  {
+    "code": "C1.3",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "create compositions for a specific purpose and a familiar audience"
+  },
+  {
+    "code": "C1.4",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "use the tools and techniques of musicianship in musical performances"
+  },
+  {
+    "code": "C1.5",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "demonstrate an understanding of standard and non-traditional musical notation"
+  },
+  {
+    "code": "C2.1",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "express personal responses to musical performances in a variety of ways"
+  },
+  {
+    "code": "C2.2",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "describe ways in which the elements of music are used in the music they perform, listen to, and create"
+  },
+  {
+    "code": "C2.3",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify and give examples of their strengths and areas for growth as musical performers, creators, interpreters, and audience members"
+  },
+  {
+    "code": "C3.1",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "identify and describe ways in which music can be used in the community"
+  },
+  {
+    "code": "C3.2",
+    "grade": 3,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "identify, through performing and/or listening, a variety of musical forms or pieces from different communities, times, and places"
+  },
+  {
+    "code": "C1.1",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "sing and/or play, in tune, from musical notation, unison and two-part music with simple accompaniments from a wide variety of cultures, styles, and historical periods"
+  },
+  {
+    "code": "C1.2",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "apply the elements of music when singing and/or playing, composing, and arranging music to create a specific effect"
+  },
+  {
+    "code": "C1.3",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "create musical compositions for specific purposes and audiences"
+  },
+  {
+    "code": "C1.4",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "use the tools and techniques of musicianship in musical performances"
+  },
+  {
+    "code": "C1.5",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "demonstrate an understanding of musical signs and standard notation on the five-line staff, and use devised notation to record the sequence of sounds in a composition of their own"
+  },
+  {
+    "code": "C2.1",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "express detailed personal responses to musical performances in a variety of ways"
+  },
+  {
+    "code": "C2.2",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify the elements used in the music they perform, listen to, and create, and describe how they are used"
+  },
+  {
+    "code": "C2.3",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify and give examples of their strengths and areas for growth as musical performers, creators, interpreters, and audience members"
+  },
+  {
+    "code": "C3.1",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "identify the role of music in a community today and compare it to its role in a community of the past"
+  },
+  {
+    "code": "C3.2",
+    "grade": 4,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "demonstrate an awareness, through listening, of the characteristics of musical forms and traditions of diverse times, places, and communities"
+  },
+  {
+    "code": "C1.1",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "sing and/or play, in tune, from musical notation, unison and two-part music with accompaniments, from a wide variety of cultures, styles, and historical periods"
+  },
+  {
+    "code": "C1.2",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "apply the elements of music when singing and/or playing, composing, and arranging music to create a specific effect"
+  },
+  {
+    "code": "C1.3",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "create musical compositions for specific purposes and audiences"
+  },
+  {
+    "code": "C1.4",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "use the tools and techniques of musicianship in musical performances"
+  },
+  {
+    "code": "C1.5",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "demonstrate an understanding of standard and other types of musical notation through performance and composition"
+  },
+  {
+    "code": "C2.1",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "express detailed personal responses to musical performances in a variety of ways"
+  },
+  {
+    "code": "C2.2",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify the elements of music in the music they perform, listen to, and create, and describe how they are used"
+  },
+  {
+    "code": "C2.3",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify and give examples of their strengths and areas for growth as musical performers, creators, interpreters, and audience members"
+  },
+  {
+    "code": "C3.1",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "identify and describe some of the key influences of music within contemporary culture"
+  },
+  {
+    "code": "C3.2",
+    "grade": 5,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "demonstrate an awareness of the use of music and musical instruments in various traditions, from early times to today"
+  },
+  {
+    "code": "C1.1",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "sing and/or play, in tune, from musical notation, unison music and music in two or more parts from a wide variety of cultures, styles, and historical periods"
+  },
+  {
+    "code": "C1.2",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "apply the elements of music when singing and/or playing, composing, and arranging music to create a specific effect"
+  },
+  {
+    "code": "C1.3",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "create musical compositions for specific purposes and audiences"
+  },
+  {
+    "code": "C1.4",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "use the tools and techniques of musicianship in musical performances"
+  },
+  {
+    "code": "C1.5",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "demonstrate an understanding of standard and other types of musical notation through performance and composition"
+  },
+  {
+    "code": "C2.1",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "express detailed personal responses to musical performances in a variety of ways"
+  },
+  {
+    "code": "C2.2",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify the elements of music in the repertoire they perform, listen to, and create, and describe how they are used"
+  },
+  {
+    "code": "C2.3",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify and give examples of their strengths and areas for improvement as composers, musical performers, interpreters, and audience members"
+  },
+  {
+    "code": "C3.1",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "identify and describe ways in which awareness or appreciation of music is affected by culture and the media"
+  },
+  {
+    "code": "C3.2",
+    "grade": 6,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "compare some aspects of the music of one culture and/or historical period with aspects of the music of another culture and/or historical period"
+  },
+  {
+    "code": "C1.1",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "sing and/or play, in tune, from musical notation, unison music and music in two or more parts from diverse cultures, styles, and historical periods"
+  },
+  {
+    "code": "C1.2",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "apply the elements of music when singing and/or playing, composing, and arranging music, using them for specific effects and clear purposes"
+  },
+  {
+    "code": "C1.3",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "create musical compositions in a variety of forms for specific purposes and audiences"
+  },
+  {
+    "code": "C1.4",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "use the tools and techniques of musicianship in musical performances"
+  },
+  {
+    "code": "C1.5",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "demonstrate an understanding of standard and other musical notation through performance and composition"
+  },
+  {
+    "code": "C2.1",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "express analytical, personal responses to musical performances in a variety of ways"
+  },
+  {
+    "code": "C2.2",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "analyse, using musical terminology, ways in which the elements are used in the music that they perform, listen to, and create"
+  },
+  {
+    "code": "C2.3",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify and give examples of their strengths and areas for improvement as composers, musical performers, interpreters, and audience members"
+  },
+  {
+    "code": "C3.1",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "analyse the influences of music and the media on the development of personal and cultural identity"
+  },
+  {
+    "code": "C3.2",
+    "grade": 7,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "analyse some historical, cultural, and technological influences on style, genre, and innovation in music"
+  },
+  {
+    "code": "C1.1",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "sing and/or play, in tune, music in unison and in two or more parts from a variety of cultures, styles, and historical periods"
+  },
+  {
+    "code": "C1.2",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "apply the elements of music through performing, composing, and arranging music for a specific effect or clear purpose"
+  },
+  {
+    "code": "C1.3",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "create musical compositions in a variety of forms for specific purposes and audiences"
+  },
+  {
+    "code": "C1.4",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "use the tools and techniques of musicianship in musical performances"
+  },
+  {
+    "code": "C1.5",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Creating and Performing",
+    "overall": "C1",
+    "desc": "demonstrate an understanding of standard and other musical notation through performance and composition"
+  },
+  {
+    "code": "C2.1",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "express analytical, personal responses to musical performances in a variety of ways"
+  },
+  {
+    "code": "C2.2",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "analyse, using musical terminology, ways in which the elements of music are used in various styles and genres they perform, listen to, and create"
+  },
+  {
+    "code": "C2.3",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "C2",
+    "desc": "identify and give examples of their strengths and areas for improvement as composers, musical performers, interpreters, and audience members"
+  },
+  {
+    "code": "C3.1",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "analyse some of the social, political, and economic factors that affect the creation of music"
+  },
+  {
+    "code": "C3.2",
+    "grade": 8,
+    "strand": "C",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "C3",
+    "desc": "compare and contrast music from the past and present"
+  }
+]

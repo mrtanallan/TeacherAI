@@ -1,0 +1,578 @@
+[
+  {
+    "code": "A1.1",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use movements that are part of their daily experience in a variety of ways in dance phrases"
+  },
+  {
+    "code": "A1.2",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use dance as a language to express feelings and ideas suggested by songs, stories, and poems, with a focus on the element of body, particularly body shapes"
+  },
+  {
+    "code": "A1.3",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "create dance phrases using a variety of ways to connect movements"
+  },
+  {
+    "code": "A1.4",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use varied and/or contrasting body shapes to communicate different types of messages"
+  },
+  {
+    "code": "A2.1",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "describe differences they observe when various movements from daily life are used as the basis or stimulus for movements in a dance phrase"
+  },
+  {
+    "code": "A2.2",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify and describe how the element of body is used in contrasting ways to communicate ideas in their own and others’ dance phrases, with teacher support"
+  },
+  {
+    "code": "A2.3",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify and give examples of their strengths and areas for growth as dance creators and audience members"
+  },
+  {
+    "code": "A3.1",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "describe, with teacher guidance, a variety of dances from different communities around the world that they have seen in the media, at live performances and social gatherings, or in the classroom"
+  },
+  {
+    "code": "A3.2",
+    "grade": 1,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "identify and describe dance experiences in their own lives and communities"
+  },
+  {
+    "code": "A1.1",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "develop short movement phrases inspired by a variety of activities in their community"
+  },
+  {
+    "code": "A1.2",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use dance as a language to represent the main ideas in poems and stories, with a focus on body and space"
+  },
+  {
+    "code": "A1.3",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "create distinct beginnings and endings for dance phrases in a variety of ways"
+  },
+  {
+    "code": "A1.4",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use a variety of locomotor and non-locomotor movements to depict creatures and objects in the world around them"
+  },
+  {
+    "code": "A2.1",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "describe the similarities between their own dance phrases and those of others"
+  },
+  {
+    "code": "A2.2",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify, using dance vocabulary, the elements of dance in their own dance phrases and those of others, and describe how each element is used to communicate meaning"
+  },
+  {
+    "code": "A2.3",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify and give examples of their strengths and areas for growth as dance creators and audience members"
+  },
+  {
+    "code": "A3.1",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "describe, with teacher guidance, a variety of dances from communities around the world that they have seen in the media, at live performances and social gatherings, or in the classroom"
+  },
+  {
+    "code": "A3.2",
+    "grade": 2,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "identify various reasons why people dance in daily life and various contexts in which they do so"
+  },
+  {
+    "code": "A1.1",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "imitate movements found in their natural environment in a variety of ways and incorporate them into a dance phrase"
+  },
+  {
+    "code": "A1.2",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use dance as a language to represent ideas from diverse literature sources, with a focus on time and energy"
+  },
+  {
+    "code": "A1.3",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "create dance phrases using a variety of pattern forms"
+  },
+  {
+    "code": "A1.4",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "demonstrate how dance elements can be used to create and expand the movement vocabulary within different sections of a larger pattern"
+  },
+  {
+    "code": "A2.1",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "demonstrate an understanding of how the elements of dance can be used in their own and others’ dance phrases to illustrate or explore learning in other subject areas"
+  },
+  {
+    "code": "A2.2",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify, using dance vocabulary, the elements of dance used in their own and others’ dance phrases and explain their purpose"
+  },
+  {
+    "code": "A2.3",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify and give examples of their strengths and areas for growth as dance creators and audience members"
+  },
+  {
+    "code": "A3.1",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "describe, with teacher guidance, a variety of dances from communities in Canada and around the world that they have seen in the media, at live performances and social gatherings, or in the classroom"
+  },
+  {
+    "code": "A3.2",
+    "grade": 3,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "identify and describe the role of dance in the community"
+  },
+  {
+    "code": "A1.1",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "translate into dance a variety of movement sequences observed in nature"
+  },
+  {
+    "code": "A1.2",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use dance as a language to explore and communicate ideas derived from a variety of literature sources"
+  },
+  {
+    "code": "A1.3",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use narrative form to create short dance pieces on a variety of themes"
+  },
+  {
+    "code": "A1.4",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use the elements of energy (e.g., collapse, explode, float) and time (e.g., duration, suddenness) in a dance piece to communicate an idea (e.g., show the journey of a balloon as it floats, explodes suddenly, and then collapses back to the floor)"
+  },
+  {
+    "code": "A2.1",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "demonstrate an understanding of how the language of dance can clarify and highlight ideas, images, and characters from familiar stories"
+  },
+  {
+    "code": "A2.2",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify, using dance vocabulary, the elements of dance used in their own and others’ dance pieces and explain how each helps communicate ideas and feelings"
+  },
+  {
+    "code": "A2.3",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify and give examples of their strengths and areas for growth as dance creators and audience members"
+  },
+  {
+    "code": "A3.1",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "describe, with teacher guidance, how forms and styles of dance reflect people’s different social and political roles in various communities, times, and places"
+  },
+  {
+    "code": "A3.2",
+    "grade": 4,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "identify and describe the different roles of dance in their lives and in communities around the world"
+  },
+  {
+    "code": "A1.1",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "translate into movement sequences a variety of images and ideas from other classroom subjects, including the arts"
+  },
+  {
+    "code": "A1.2",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use dance as a language to explore, interpret, and communicate ideas derived from a variety of literature sources"
+  },
+  {
+    "code": "A1.3",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use movement in the choreographic form call and response in a variety of ways when creating dance pieces"
+  },
+  {
+    "code": "A1.4",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use the element of relationship in short dance pieces to communicate an idea"
+  },
+  {
+    "code": "A2.1",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "relate stories and characters in their own and others’ dance pieces to personal knowledge and experience"
+  },
+  {
+    "code": "A2.2",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify the elements of dance used in their own and others’ dance pieces and explain how they help communicate a message"
+  },
+  {
+    "code": "A2.3",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify and give examples of their strengths and areas for growth as dance creators and audience members"
+  },
+  {
+    "code": "A3.1",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "describe, with teacher guidance, dance forms and styles that reflect the beliefs and traditions of diverse communities, times, and places"
+  },
+  {
+    "code": "A3.2",
+    "grade": 5,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "identify and describe some of the ways in which dance influences popular culture"
+  },
+  {
+    "code": "A1.1",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "incorporate the use of props and materials"
+  },
+  {
+    "code": "A1.2",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use dance as a language to interpret and depict central themes in literature"
+  },
+  {
+    "code": "A1.3",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use guided improvisation in a variety of ways as a starting point for choreography"
+  },
+  {
+    "code": "A1.4",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "combine the elements of dance in different ways to communicate a variety of ideas"
+  },
+  {
+    "code": "A2.1",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "construct personal interpretations of dance pieces that depict stories, issues, and themes, and explain their interpretations, using dance terminology"
+  },
+  {
+    "code": "A2.2",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "analyse, using dance vocabulary, how the elements of dance are used in their own and others’ dance pieces and explain how they help communicate messages and ideas"
+  },
+  {
+    "code": "A2.3",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify and give examples of their strengths and areas for growth as choreographers and audience members"
+  },
+  {
+    "code": "A3.1",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "describe, with teacher guidance, types of dances used among Aboriginal peoples in the past and the present that express aspects of their cultural identity"
+  },
+  {
+    "code": "A3.2",
+    "grade": 6,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "identify and describe ways in which pop culture and the media influence our awareness, understanding, and appreciation of dance"
+  },
+  {
+    "code": "A1.1",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "create dance pieces to represent or respond to specific rhythms and pieces of music"
+  },
+  {
+    "code": "A1.2",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use dance as a language to communicate ideas from their own writing or media works"
+  },
+  {
+    "code": "A1.3",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use theme and variations in a variety of ways when creating dance pieces"
+  },
+  {
+    "code": "A1.4",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use the elements of dance and choreographic forms"
+  },
+  {
+    "code": "A2.1",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "construct personal interpretations of the messages in their own and others’ dance pieces, including messages about issues relevant to their community and/or the world"
+  },
+  {
+    "code": "A2.2",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "analyse, using dance vocabulary, their own and others’ dance pieces to identify the elements of dance and the choreographic forms used in them and explain how they help communicate meaning"
+  },
+  {
+    "code": "A2.3",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify and give examples of their strengths and areas for growth as dance creators, interpreters, and audience members"
+  },
+  {
+    "code": "A3.1",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "describe the evolution of dance and performance as different groups of people have responded to external factors such as migration, a new environment, and/or contact with other groups or cultures"
+  },
+  {
+    "code": "A3.2",
+    "grade": 7,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "identify ways in which dance and its depictions in the media may influence a person’s character development and sense of identity"
+  },
+  {
+    "code": "A1.1",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "create dance pieces to respond to issues that are personally meaningful to them"
+  },
+  {
+    "code": "A1.2",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use dance as a language to communicate messages about themes of social justice and/or environmental health"
+  },
+  {
+    "code": "A1.3",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "determine the appropriate choreographic form and create dance pieces for a specific audience or venue"
+  },
+  {
+    "code": "A1.4",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Creating and Presenting",
+    "overall": "A1",
+    "desc": "use technology, including multimedia, to enhance the message communicated by the choreography in a dance piece"
+  },
+  {
+    "code": "A2.1",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "construct personal and/or group interpretations of the themes in their own and others’ dance pieces"
+  },
+  {
+    "code": "A2.2",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "analyse, using dance vocabulary, their own and others’ dance pieces to identify the elements of dance and the choreographic forms used in them"
+  },
+  {
+    "code": "A2.3",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Reflecting, Responding, and Analysing",
+    "overall": "A2",
+    "desc": "identify and give examples of their strengths and areas for growth as dance creators, interpreters, and audience members"
+  },
+  {
+    "code": "A3.1",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "describe how social, political, and economic factors influenced the emergence and development of a dance form or genre of their choice"
+  },
+  {
+    "code": "A3.2",
+    "grade": 8,
+    "strand": "A",
+    "strand_name": "Exploring Forms and Cultural Contexts",
+    "overall": "A3",
+    "desc": "identify a variety of types of dances and relate them to their different roles in society"
+  }
+]
