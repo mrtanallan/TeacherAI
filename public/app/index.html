@@ -537,7 +537,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <label class="tab" for="tr-units"><span class="tab-full">📋 Units</span><span class="tab-short">📋</span></label>
     <label class="tab" for="tr-plan"><span class="tab-full">✨ Plan</span><span class="tab-short">✨</span></label>
     <label class="tab" for="tr-lessons"><span class="tab-full">📚 My Lessons</span><span class="tab-short">📚</span></label>
-    <label class="tab" for="tr-assess"><span class="tab-full">📊 Progress</span><span class="tab-short">📊</span></label>
+    <label class="tab" for="tr-assess"><span class="tab-full">📊 Mark &amp; Track</span><span class="tab-short">📊</span></label>
     <label class="tab" for="tr-rc"><span class="tab-full">📝 Report Cards</span><span class="tab-short">📝</span></label>
   </div>
   <div class="nav-user">
@@ -596,13 +596,12 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
          rounder corners, subtle gradient, softer shadow. Only this first
          surface is upgraded; downstream cards keep the existing calmer
          paper/cream brand aesthetic. -->
-    <div class="card plan-primary-card" style="background:linear-gradient(180deg, var(--paper) 0%, #FCFAF5 100%);border:1px solid var(--border);border-radius:20px;padding:32px 28px;box-shadow:0 2px 14px rgba(22,18,14,.05), 0 1px 3px rgba(22,18,14,.03);">
+    <div class="card plan-primary-card" style="background:linear-gradient(180deg, var(--paper) 0%, #FCFAF5 100%);border:1px solid var(--border);border-radius:20px;padding:26px 22px;box-shadow:0 2px 14px rgba(22,18,14,.05), 0 1px 3px rgba(22,18,14,.03);">
       <!-- Landing-page voice bridge: teachers arriving from teacherai.ca read
            "Tell us your topic. We'll draft the rest." Echo that promise at the
            top of the app's first-ask form so the experience feels continuous. -->
-      <div style="text-align:center;margin-bottom:26px;padding-bottom:22px;border-bottom:1px solid rgba(224,216,204,.6);">
-        <p style="font-family:'Fraunces',serif;font-size:1.4rem;line-height:1.3;color:var(--ink);margin:0 0 8px;letter-spacing:-.01em;"><em style="color:var(--sage);font-weight:400;">Tell us your topic.</em> <span style="color:var(--ink);">We'll draft the rest.</span></p>
-        <p style="font-family:'DM Sans',sans-serif;font-size:.86rem;color:var(--muted);margin:0;">A full lesson in seconds, tailored to your class.</p>
+      <div style="text-align:center;margin-bottom:20px;">
+        <p style="font-family:'Fraunces',serif;font-size:1.35rem;line-height:1.3;color:var(--ink);margin:0;letter-spacing:-.01em;"><em style="color:var(--sage);font-weight:400;">Tell us your topic.</em> <span style="color:var(--ink);">We'll draft the rest.</span></p>
       </div>
       <!-- Hidden grade selects for JS compatibility -->
       <select id="gA" style="display:none;"><option value="">Select grade...</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option></select>
@@ -632,7 +631,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       <div style="margin-bottom:20px;">
         <textarea id="planInput" rows="2" placeholder="e.g. Grade 3 Social Studies — Indigenous communities in early Canada"
           autocapitalize="sentences"
-          style="width:100%;font-family:'DM Sans',sans-serif;font-size:1.05rem;padding:18px 20px;border:1.5px solid var(--border);border-radius:14px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .18s, box-shadow .18s;resize:vertical;line-height:1.45;box-shadow:0 1px 2px rgba(22,18,14,.02) inset;"
+          style="width:100%;font-family:'DM Sans',sans-serif;font-size:1.02rem;padding:14px 18px;border:1.5px solid var(--border);border-radius:14px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .18s, box-shadow .18s;resize:vertical;line-height:1.4;box-shadow:0 1px 2px rgba(22,18,14,.02) inset;"
           onfocus="this.style.borderColor='var(--sage)';this.style.boxShadow='0 0 0 3px rgba(74,124,89,.12)';"
           onblur="this.style.borderColor='var(--border)';this.style.boxShadow='0 1px 2px rgba(22,18,14,.02) inset';"
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();smartGenerate();}"></textarea>
@@ -647,20 +646,16 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
            the browser — the file never leaves the user's device until they
            click Generate (at which point a text excerpt is sent). Privacy
            story is important in Ontario boards. -->
-      <div id="pdfUploadSection" style="margin-bottom:18px;">
-        <!-- Collapsed state: just a small "add a PDF" button -->
+      <div id="pdfUploadSection" style="margin-bottom:14px;">
+        <!-- Collapsed state: compact link-style action -->
         <div id="pdfUploadCollapsed">
-          <label for="pdfFileInput" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1.5px dashed var(--border);border-radius:10px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--muted);cursor:pointer;transition:border-color .15s, color .15s;"
-            onmouseover="this.style.borderColor='var(--sage)';this.style.color='var(--ink)';"
-            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">
-            <span style="font-size:.95rem;">📎</span>
-            <span>Add a PDF for context</span>
-            <span style="color:var(--muted);font-size:.72rem;font-style:italic;">(optional)</span>
+          <label for="pdfFileInput" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--muted);cursor:pointer;transition:color .15s;padding:4px 0;"
+            onmouseover="this.style.color='var(--sage)';"
+            onmouseout="this.style.color='var(--muted)';">
+            <span style="font-size:.9rem;">📎</span>
+            <span style="text-decoration:underline;text-decoration-color:rgba(122,114,106,.4);text-underline-offset:3px;">Attach a PDF for reference</span>
           </label>
           <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" onchange="handlePdfUpload(event)" style="display:none;">
-          <div style="margin-top:6px;font-size:.72rem;color:var(--muted);line-height:1.5;">
-            Unit outlines, textbook pages, board docs. Stays on your device until you Draft.
-          </div>
         </div>
         <!-- Expanded state: attached file card, shown when a PDF is loaded -->
         <div id="pdfUploadAttached" style="display:none;padding:12px 14px;background:var(--sage-l);border:1px solid rgba(74,124,89,.25);border-radius:12px;">
@@ -679,10 +674,11 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
         </div>
       </div>
 
-      <!-- Class selector — only shown when teacher has multiple classes -->
-      <div class="fi" id="classSelectorRow" style="display:none;margin-bottom:16px;">
-        <label>Class</label>
-        <select id="classSelector" onchange="onClassSelect()"></select>
+      <!-- Class selector — compact inline style. Shown when class data loads;
+           becomes a subtle line rather than a full form field. -->
+      <div id="classSelectorRow" style="display:none;align-items:center;gap:8px;margin-bottom:12px;font-family:'DM Sans',sans-serif;">
+        <span style="font-size:.75rem;color:var(--muted);">Class:</span>
+        <select id="classSelector" onchange="onClassSelect()" style="font-size:.82rem;padding:5px 28px 5px 10px;border-radius:7px;border:1px solid var(--border);background-color:var(--paper);width:auto;min-width:120px;"></select>
       </div>
       <div id="classAutoFillNote" style="display:none;"></div>
 
@@ -792,6 +788,22 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
       <div id="sidebarLinks" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;"></div>
     </div>
     <div id="editBlocks"></div>
+    <!-- BUILD AP: Bridge to Mark & Track. After a teacher has a draft,
+         surface the next-highest-value action. Most chatbots stop at lesson
+         draft; TeacherAI's moat is the whole flow through assessment to
+         report cards. Dismissible, doesn't block anything. -->
+    <div id="planToMarkBridge" style="display:none;margin-top:16px;padding:14px 16px;background:linear-gradient(135deg, var(--sage-l) 0%, #F0EADF 100%);border:1px solid rgba(74,124,89,.25);border-radius:12px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <div style="font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:4px;">Next: mark a student's work ✨</div>
+          <div style="font-size:.82rem;color:var(--muted);line-height:1.5;">Paste any writing sample, short answer, or quiz — get Level 1-4 with Growing Success feedback in 30 seconds. No class roster required.</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button onclick="document.getElementById('tr-assess').click();setTimeout(()=>{if(typeof openPasteAndMark==='function')openPasteAndMark();},80);" style="background:var(--sage);color:white;border:none;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;">Try it →</button>
+          <button onclick="dismissPlanToMarkBridge()" style="background:none;border:none;color:var(--muted);font-size:.78rem;cursor:pointer;padding:8px;" title="Dismiss">✕</button>
+        </div>
+      </div>
+    </div>
     <div class="brow" style="margin-top:4px;">
       <button class="btn b-out" onclick="gs(1)">← Back to Plan</button>
       <button class="btn b-ink" onclick="gs(4)">Assess →</button>
@@ -1025,6 +1037,112 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
      TRACKERS TAB
      ══════════════════════════════════════════════════════════ -->
 <div class="page" id="pg-assess">
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       BUILD AP: Paste & Mark — instant-value front door
+       The existing dashboard below requires student submissions to have
+       any content. For new teachers, that's empty. This panel gives an
+       immediate-gratification path: paste any student work, get Level
+       1-4 with Growing Success-aligned feedback in 30 seconds.
+       
+       This is the anti-Gemini play: Gemini can give generic feedback,
+       but only TeacherAI can produce Ontario-shaped rubric output.
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div id="pasteAndMarkSection" style="margin-bottom:24px;">
+    <!-- Collapsed CTA card -->
+    <div id="pasteMarkCTA" class="card" style="background:linear-gradient(180deg, var(--paper) 0%, #FCFAF5 100%);border-radius:20px;padding:24px 22px;box-shadow:0 2px 14px rgba(22,18,14,.05), 0 1px 3px rgba(22,18,14,.03);">
+      <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:240px;">
+          <div style="font-family:'Fraunces',serif;font-size:1.25rem;line-height:1.3;color:var(--ink);margin-bottom:6px;letter-spacing:-.01em;">
+            <em style="color:var(--sage);font-weight:400;">Mark a student's work</em> in 30 seconds.
+          </div>
+          <div style="font-size:.86rem;color:var(--muted);line-height:1.5;">
+            Paste a writing sample, short answer, or quiz response. Get a Level 1-4 suggestion with Growing Success-aligned feedback — strengths, next steps, the works.
+          </div>
+        </div>
+        <button onclick="openPasteAndMark()"
+          style="background:linear-gradient(135deg,#4A7C59 0%,#3A6A85 100%);color:white;border:none;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;padding:12px 20px;border-radius:12px;cursor:pointer;white-space:nowrap;box-shadow:0 3px 12px rgba(74,124,89,.22);transition:transform .12s, box-shadow .18s;"
+          onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 18px rgba(74,124,89,.32)';"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 12px rgba(74,124,89,.22)';">
+          ✨ Paste &amp; Mark →
+        </button>
+      </div>
+    </div>
+
+    <!-- Expanded form (hidden by default) -->
+    <div id="pasteMarkForm" class="card" style="display:none;background:var(--paper);border-radius:16px;padding:24px 22px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div style="font-family:'Fraunces',serif;font-size:1.2rem;color:var(--ink);">Mark student work</div>
+        <button onclick="closePasteAndMark()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.2rem;padding:4px 8px;border-radius:6px;" title="Cancel">✕</button>
+      </div>
+
+      <!-- Grade + subject row -->
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:140px;">
+          <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Grade</label>
+          <select id="pmGrade" style="width:100%;">
+            <option value="">Select grade...</option>
+            <option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option>
+          </select>
+        </div>
+        <div style="flex:1.3;min-width:160px;">
+          <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Subject</label>
+          <select id="pmSubject" style="width:100%;">
+            <option>Language / Literacy</option>
+            <option>Mathematics</option>
+            <option>Science &amp; Technology</option>
+            <option>Social Studies</option>
+            <option>History and Geography</option>
+            <option>Health &amp; Physical Education</option>
+            <option>Core French</option>
+            <option>French Language Arts</option>
+            <option>Dance</option>
+            <option>Drama</option>
+            <option>Music</option>
+            <option>Visual Arts</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Task description -->
+      <div style="margin-bottom:14px;">
+        <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">What were they asked to do? <span style="color:var(--rust);">✱</span></label>
+        <textarea id="pmTask" rows="2" placeholder='e.g. "Write a persuasive paragraph on whether school uniforms should be required. Include a clear opinion, 2 reasons, and supporting evidence."'
+          style="width:100%;font-family:'DM Sans',sans-serif;font-size:.92rem;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--paper);color:var(--ink);outline:none;resize:vertical;line-height:1.4;"></textarea>
+      </div>
+
+      <!-- Student work -->
+      <div style="margin-bottom:14px;">
+        <label style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Student's work <span style="color:var(--rust);">✱</span></label>
+        <textarea id="pmWork" rows="6" placeholder="Paste the student's writing, short answer, or quiz response here..."
+          style="width:100%;font-family:'DM Sans',sans-serif;font-size:.92rem;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--paper);color:var(--ink);outline:none;resize:vertical;line-height:1.5;"></textarea>
+      </div>
+
+      <!-- Optional rubric -->
+      <details style="margin-bottom:16px;">
+        <summary style="cursor:pointer;font-size:.82rem;color:var(--muted);padding:6px 0;">
+          Optional: paste your own rubric
+        </summary>
+        <textarea id="pmRubric" rows="4" placeholder="Paste criteria (e.g. your own Level 1-4 descriptors). Leave blank and TeacherAI will generate a Growing Success-aligned rubric for this task."
+          style="width:100%;margin-top:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--paper);color:var(--ink);outline:none;resize:vertical;line-height:1.5;"></textarea>
+      </details>
+
+      <!-- Submit button -->
+      <button onclick="submitPasteAndMark()" id="pmSubmitBtn"
+        style="width:100%;background:linear-gradient(135deg,#4A7C59 0%,#3A6A85 100%);color:white;border:none;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;padding:14px;border-radius:12px;cursor:pointer;box-shadow:0 3px 12px rgba(74,124,89,.22);transition:transform .12s, box-shadow .18s, opacity .15s;"
+        onmouseover="this.style.transform='translateY(-1px)';"
+        onmouseout="this.style.transform='translateY(0)';">
+        ✨ Suggest a Level
+      </button>
+
+      <div style="text-align:center;margin-top:10px;font-size:.72rem;color:var(--muted);">
+        🔒 Student work stays on your device while drafting. AI sees the text; we don't store the student's name unless you provide one.
+      </div>
+    </div>
+
+    <!-- Result panel (hidden until first result) -->
+    <div id="pasteMarkResult" style="display:none;margin-top:18px;"></div>
+  </div>
   <!-- Toggle: Grade Tracker vs Expectations Tracker -->
   <div style="display:flex;gap:6px;margin-bottom:20px;">
     <button id="trackerToggleGrade" onclick="switchTrackerView('grade')"
@@ -1088,6 +1206,32 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
      ══════════════════════════════════════════════════════════ -->
 <div class="page" id="pg-rc">
   <div class="ph"><h1>Report <em>Cards</em></h1><p>Ontario-style comments ready to paste into your report card tool.</p></div>
+
+  <!-- BUILD AP: Empty-state explainer. Report Cards requires tracked
+       expectations and assessment data. For a new teacher, this page would
+       otherwise look dead ("Select a class to see students..."). Instead,
+       show the flywheel: teach → mark → auto-draft comments in June.
+       Hidden once the teacher has any report card data in the system. -->
+  <div id="rcEmptyStateBanner" style="margin-bottom:18px;padding:18px 20px;background:linear-gradient(180deg, var(--paper) 0%, #FCFAF5 100%);border:1px solid var(--border);border-radius:16px;">
+    <div style="font-family:'Fraunces',serif;font-size:1.15rem;color:var(--ink);margin-bottom:8px;letter-spacing:-.01em;">
+      <em style="color:var(--sage);font-weight:400;">How report cards work here:</em>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:10px;font-size:.86rem;color:var(--ink);line-height:1.5;">
+      <div style="padding:10px 12px;background:var(--paper);border:1px solid var(--border);border-radius:10px;">
+        <div style="font-weight:600;margin-bottom:3px;color:var(--sage);">1. Teach &amp; mark.</div>
+        <div style="color:var(--muted);font-size:.82rem;">Every lesson you generate carries its expectation codes. Every assessment you mark builds a performance record for each student.</div>
+      </div>
+      <div style="padding:10px 12px;background:var(--paper);border:1px solid var(--border);border-radius:10px;">
+        <div style="font-weight:600;margin-bottom:3px;color:var(--sage);">2. Let it accumulate.</div>
+        <div style="color:var(--muted);font-size:.82rem;">Over the term, your students build a record of strengths, next steps, and Level 1-4 performance.</div>
+      </div>
+      <div style="padding:10px 12px;background:var(--paper);border:1px solid var(--border);border-radius:10px;">
+        <div style="font-weight:600;margin-bottom:3px;color:var(--sage);">3. Draft in an evening.</div>
+        <div style="color:var(--muted);font-size:.82rem;">Pick a class, a subject, and TeacherAI writes personalized comments within your board's character limit.</div>
+      </div>
+    </div>
+    <div style="font-size:.78rem;color:var(--muted);font-style:italic;">No data yet? Start by marking one student's work — the flywheel begins there.</div>
+  </div>
   <div class="card" style="margin-bottom:16px;">
     <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border);">
       <div class="fi" style="flex:2;min-width:150px;">
@@ -2319,6 +2463,22 @@ function gs(n) {
   }
   if (el) el.classList.add('on');
   if (n===4) renderAssGrid();
+  // BUILD AP: show Plan→Mark bridge on Step 2 unless user has dismissed it
+  if (n===2) maybeShowPlanToMarkBridge();
+}
+
+function maybeShowPlanToMarkBridge() {
+  try {
+    if (localStorage.getItem('planToMarkBridgeDismissed') === '1') return;
+  } catch(e) { /* localStorage blocked — show anyway */ }
+  const el = document.getElementById('planToMarkBridge');
+  if (el) el.style.display = 'block';
+}
+
+function dismissPlanToMarkBridge() {
+  const el = document.getElementById('planToMarkBridge');
+  if (el) el.style.display = 'none';
+  try { localStorage.setItem('planToMarkBridgeDismissed', '1'); } catch(e) {}
 }
 function unlock() {
   [2,4].forEach(i => {
@@ -10562,6 +10722,248 @@ function sl(sid, level, btn) {
 function sn(sid) { if(!curSess.marks[sid]) curSess.marks[sid]={}; curSess.marks[sid].notes=document.getElementById('nt-'+sid)?.value||''; }
 
 // ============================================================
+// BUILD AP: PASTE & MARK — instant-gratification standalone marking
+// Teacher pastes any student work (no class/roster/submission required)
+// and gets a Level 1-4 with Growing Success feedback in seconds. This is
+// the moat feature that Gemini cannot replicate: Ontario-shaped rubric
+// output with proper teacher language.
+// ============================================================
+
+function openPasteAndMark() {
+  const cta = document.getElementById('pasteMarkCTA');
+  const form = document.getElementById('pasteMarkForm');
+  const result = document.getElementById('pasteMarkResult');
+  if (cta) cta.style.display = 'none';
+  if (form) form.style.display = 'block';
+  if (result) result.style.display = 'none';
+  // Focus the first empty field
+  setTimeout(() => {
+    const g = document.getElementById('pmGrade');
+    if (g && !g.value) g.focus();
+  }, 50);
+}
+
+function closePasteAndMark() {
+  const cta = document.getElementById('pasteMarkCTA');
+  const form = document.getElementById('pasteMarkForm');
+  if (cta) cta.style.display = 'block';
+  if (form) form.style.display = 'none';
+  // Don't clear the form — teacher may want to come back
+}
+
+async function submitPasteAndMark() {
+  const grade = document.getElementById('pmGrade')?.value?.trim() || '';
+  const subject = document.getElementById('pmSubject')?.value?.trim() || '';
+  const task = document.getElementById('pmTask')?.value?.trim() || '';
+  const work = document.getElementById('pmWork')?.value?.trim() || '';
+  const rubric = document.getElementById('pmRubric')?.value?.trim() || '';
+  const submitBtn = document.getElementById('pmSubmitBtn');
+  const resultDiv = document.getElementById('pasteMarkResult');
+
+  // Validation
+  if (!grade) { alert('Please pick a grade.'); document.getElementById('pmGrade')?.focus(); return; }
+  if (!task || task.length < 10) { alert('Please describe what the student was asked to do (at least a sentence).'); document.getElementById('pmTask')?.focus(); return; }
+  if (!work || work.length < 5) { alert('Please paste the student\'s work.'); document.getElementById('pmWork')?.focus(); return; }
+
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = '.6';
+  submitBtn.textContent = '⏳ Drafting a mark...';
+  if (resultDiv) { resultDiv.style.display = 'none'; resultDiv.innerHTML = ''; }
+
+  // Build the prompt. Mirrors the marking philosophy from autoMarkStudent.
+  const prompt = `You are an experienced Ontario ${grade} ${subject} teacher assessing a piece of student work using the Growing Success framework and the Ontario Achievement Chart.
+
+TASK THE STUDENT WAS ASKED TO DO:
+${task}
+
+${rubric ? 'TEACHER-PROVIDED RUBRIC:\n' + rubric + '\n\n' : ''}STUDENT WORK:
+${work}
+
+══════════════════════════════════════════════════════════════
+MARKING PHILOSOPHY — read this carefully before assigning a level:
+══════════════════════════════════════════════════════════════
+
+1. BE A FAIR, ENCOURAGING TEACHER — NOT A STRICT GRADER.
+   You are assessing whether the student demonstrates understanding and skill, not doing a red-pen line edit. Give credit for understanding, not exact wording.
+
+2. LEVEL 3 IS THE EXPECTED STANDARD — IT IS THE NORM, NOT A CEILING.
+   Ontario defines Level 3 as "achievement at the provincial standard."
+   - Competent understanding with reasonable execution → L3 or L3+
+   - Level 4 is for depth, insight, or going beyond what was asked
+   - Level 2 means "approaching" — use ONLY if work shows genuine gaps
+   - Level 1 means significant gaps — reserve for work that misses the concept
+   - When in doubt between two adjacent bands, lean HIGHER, not lower
+
+3. PARTIAL CREDIT IS GENEROUS. Main idea with missing detail is still mostly correct. Synonyms, paraphrasing, equivalent phrasing all count. If math has right approach with small calculation error, give partial credit.
+
+4. IGNORE THESE unless the task is specifically about them:
+   - Spelling, capitalization, punctuation, minor grammar slips, typos
+   Mark for CONTENT and UNDERSTANDING, not surface conventions.
+
+5. GRADE-APPROPRIATE: Calibrate to "what a competent ${grade} student would produce." Don't expect Grade 7 vocabulary from a Grade 2 student.
+
+6. FEEDBACK TONE — Warm, specific, growth-oriented.
+   - observation_note: 2-3 sentences in Ontario teacher voice. Lead with a specific strength you observed in THIS student's work. End with one concrete "Next time, try..." framed positively.
+   - strengths: 1-2 short bullet points, specific to the work (not generic).
+   - next_steps: 1-2 short bullet points, actionable.
+
+══════════════════════════════════════════════════════════════
+
+Return ONLY valid JSON in this exact shape (no markdown fences):
+{
+  "level": "L1" | "L1+" | "L2-" | "L2" | "L2+" | "L3-" | "L3" | "L3+" | "L4-" | "L4" | "L4+",
+  "level_rationale": "1 sentence explaining why this level fits the Achievement Chart descriptors for ${grade}.",
+  "observation_note": "2-3 sentences addressed to the student. Strength + specific observation + one concrete next step.",
+  "strengths": ["short bullet", "short bullet"],
+  "next_steps": ["actionable bullet", "actionable bullet"]${rubric ? '' : ',\n  "generated_rubric": "If no rubric was provided, draft a short 4-level rubric (Level 1 / 2 / 3 / 4) for this task in 4 short rows. Ontario Growing Success language."'}
+}`;
+
+  try {
+    const res = await authFetch('/api/generate', {
+      method: 'POST',
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 1200,
+        messages: [{ role: 'user', content: prompt }],
+        meta: { type: 'paste_and_mark', grade, subject }
+      })
+    });
+    if (!res.ok) throw new Error('Server error');
+    const data = await res.json();
+    if (typeof logNonStreamingUsage === 'function') {
+      logNonStreamingUsage(data, { model: 'claude-haiku-4-5', meta: { type: 'paste_and_mark', grade, subject } });
+    }
+    if (data.error) throw new Error(data.error.message || 'API error');
+    const raw = (data.content || []).map(i => i.text || '').join('');
+
+    // Parse JSON (reuse the tier approach from autoMarkStudent)
+    let result;
+    const stripped = raw.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim();
+    try {
+      result = JSON.parse(stripped);
+    } catch (e1) {
+      try {
+        const s = stripped.indexOf('{'), e = stripped.lastIndexOf('}');
+        const sliced = (s !== -1 && e !== -1) ? stripped.slice(s, e + 1) : stripped;
+        let repaired = sliced.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').replace(/,(\s*[}\]])/g, '$1');
+        result = JSON.parse(repaired);
+      } catch (e2) {
+        throw new Error('Could not parse assessment. Please try again.');
+      }
+    }
+
+    renderPasteMarkResult(result, { grade, subject, task });
+  } catch (err) {
+    console.error('Paste & Mark error:', err);
+    if (resultDiv) {
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = `<div class="card" style="border-color:var(--rust);background:#FEF2F2;"><div style="color:var(--rust);font-weight:600;margin-bottom:4px;">Couldn't draft a mark.</div><div style="color:var(--muted);font-size:.85rem;">${err.message || 'Please try again.'}</div></div>`;
+    }
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '1';
+    submitBtn.textContent = '✨ Suggest a Level';
+  }
+}
+
+function renderPasteMarkResult(result, ctx) {
+  const resultDiv = document.getElementById('pasteMarkResult');
+  if (!resultDiv) return;
+
+  const level = (result.level || 'L3').toUpperCase();
+  const levelBase = level.replace(/[+\-−]/g, '');
+  const suffix = level.includes('+') ? '+' : (level.includes('-') || level.includes('−')) ? '−' : '';
+  const levelNum = levelBase.replace('L', '');
+  const levelColors = {
+    L1: { bg: '#FEF2F2', border: '#FCA5A5', text: '#B91C1C' },
+    L2: { bg: '#FEF3C7', border: '#FCD34D', text: '#92400E' },
+    L3: { bg: '#DBEAFE', border: '#93C5FD', text: '#1E40AF' },
+    L4: { bg: '#D1FAE5', border: '#6EE7B7', text: '#047857' },
+  };
+  const col = levelColors[levelBase] || levelColors.L3;
+
+  const strengths = Array.isArray(result.strengths) ? result.strengths : [];
+  const nextSteps = Array.isArray(result.next_steps) ? result.next_steps : [];
+
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = `
+    <div class="card" style="border-radius:16px;padding:22px 20px;background:var(--paper);">
+      <!-- Level badge -->
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="background:${col.bg};border:2px solid ${col.border};border-radius:12px;padding:10px 18px;min-width:90px;text-align:center;">
+          <div style="font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:${col.text};opacity:.8;">Suggested</div>
+          <div style="font-family:'Fraunces',serif;font-size:1.8rem;font-weight:600;color:${col.text};line-height:1;">Level ${levelNum}${suffix}</div>
+        </div>
+        <div style="flex:1;min-width:200px;font-size:.88rem;color:var(--muted);line-height:1.5;">
+          ${escapeHtml(result.level_rationale || '')}
+        </div>
+      </div>
+
+      <!-- Observation note -->
+      <div style="margin-bottom:16px;padding:14px 16px;background:var(--sage-l);border-left:3px solid var(--sage);border-radius:0 10px 10px 0;">
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--sage);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span>Observation note</span>
+          <button onclick="copyPasteMarkNote(this, ${JSON.stringify(result.observation_note || '').replace(/"/g, '&quot;')})"
+            style="background:var(--paper);border:1px solid var(--border);color:var(--muted);font-size:.68rem;font-weight:500;padding:3px 9px;border-radius:5px;cursor:pointer;font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0;">📋 Copy</button>
+        </div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:.92rem;color:var(--ink);line-height:1.55;">${escapeHtml(result.observation_note || '')}</div>
+      </div>
+
+      <!-- Strengths + next steps -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px;">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">✓ Strengths</div>
+          <ul style="list-style:none;padding:0;margin:0;">
+            ${strengths.map(s => `<li style="font-size:.88rem;color:var(--ink);line-height:1.5;margin-bottom:4px;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:var(--sage);">•</span>${escapeHtml(s)}</li>`).join('')}
+          </ul>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">→ Next steps</div>
+          <ul style="list-style:none;padding:0;margin:0;">
+            ${nextSteps.map(s => `<li style="font-size:.88rem;color:var(--ink);line-height:1.5;margin-bottom:4px;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:var(--rust);">•</span>${escapeHtml(s)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      ${result.generated_rubric ? `
+      <details style="margin-bottom:10px;">
+        <summary style="cursor:pointer;font-size:.8rem;color:var(--muted);padding:6px 0;">📋 View generated rubric</summary>
+        <div style="margin-top:8px;padding:12px 14px;background:#FCFAF5;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--ink);line-height:1.6;white-space:pre-wrap;">${escapeHtml(result.generated_rubric)}</div>
+      </details>` : ''}
+
+      <!-- Actions -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border);">
+        <button onclick="openPasteAndMark()" style="background:var(--paper);border:1.5px solid var(--border);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;padding:8px 14px;border-radius:8px;cursor:pointer;">Mark another →</button>
+        <button onclick="closePasteAndMark();document.getElementById('pasteMarkResult').style.display='none';" style="background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.82rem;padding:8px 10px;cursor:pointer;">Done</button>
+      </div>
+    </div>
+  `;
+  // Smooth scroll the result into view
+  setTimeout(() => resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+}
+
+function copyPasteMarkNote(btn, text) {
+  if (typeof text !== 'string') return;
+  const decoded = text.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+  navigator.clipboard.writeText(decoded).then(() => {
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied';
+    btn.style.color = 'var(--sage)';
+    setTimeout(() => { btn.textContent = original; btn.style.color = 'var(--muted)'; }, 1500);
+  }).catch(() => {
+    btn.textContent = 'Copy failed';
+  });
+}
+
+// Helper if escapeHtml isn't already defined in this scope
+if (typeof escapeHtml !== 'function') {
+  window.escapeHtml = function(s) {
+    if (s == null) return '';
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  };
+}
+
+// ============================================================
 // AUTO-MARK
 // ============================================================
 async function autoMarkAll() {
@@ -11765,6 +12167,10 @@ async function loadSavedRCPage() {
     if (!classId) return;
     const { data } = await db.from('report_card_comments').select('*').eq('teacher_id',currentUser.id).eq('term',term).eq('subject',subj).order('updated_at',{ascending:false});
     if (!data || !data.length) return;
+    // BUILD AP: hide empty-state flywheel banner once the teacher has saved
+    // report card data. Returning teachers don't need the explainer.
+    const emptyState = document.getElementById('rcEmptyStateBanner');
+    if (emptyState) emptyState.style.display = 'none';
     const sids = data.map(r => r.student_id);
     const { data:stuData } = await db.from('students').select('id,first_name,last_name,grade,class_id').in('id',sids);
     const stuMap = {};
